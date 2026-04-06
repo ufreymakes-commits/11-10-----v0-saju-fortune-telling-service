@@ -85,7 +85,7 @@ function getHourStemIndex(dayStemIndex, hourBranchIndex) {
 
 // 테스트 케이스
 const testCases = [
-  { date: "1996-05-22", time: "14:30", country: "KR", expected: { year: "병자", month: "계사", day: "기미", hour: "임신" } },
+  { date: "1996-05-22", time: "16:30", country: "KR", expected: { year: "병자", month: "계사", day: "기미", hour: "임신" } },
   { date: "1997-04-23", time: "20:15", country: "US-LAX", expected: { year: "정축", month: "갑진", day: "을미", hour: "병술" } },
   { date: "1983-01-22", time: "07:30", country: "US-NYC", expected: { year: "임술", month: "계축", day: "경술", hour: "경진" } },
   { date: "1998-09-03", time: "11:45", country: "MX-CUU", expected: { year: "무인", month: "경신", day: "계축", hour: "무오" } },
