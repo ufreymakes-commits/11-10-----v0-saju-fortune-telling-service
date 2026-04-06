@@ -115,9 +115,22 @@ export function getSolarTime(
 // ================================================================
 
 export function getHourBranchIndex(hour: number): number {
-  // 23:00-00:59 → 자(0), 01:00-02:59 → 축(1), ...
-  if (hour === 23) return 0; // 자시 (야자시)
-  return Math.floor((hour + 1) / 2) % 12;
+  // 시간대 매핑 (홀수시 시작 기준):
+  // 23:00-00:59 → 자(0)
+  // 01:00-02:59 → 축(1)
+  // 03:00-04:59 → 인(2)
+  // 05:00-06:59 → 묘(3)
+  // 07:00-08:59 → 진(4)
+  // 09:00-10:59 → 사(5)
+  // 11:00-12:59 → 오(6)
+  // 13:00-14:59 → 미(7)
+  // 15:00-16:59 → 신(8)
+  // 17:00-18:59 → 유(9)
+  // 19:00-20:59 → 술(10)
+  // 21:00-22:59 → 해(11)
+  
+  if (hour === 23 || hour === 0) return 0; // 자시
+  return Math.floor((hour + 1) / 2);
 }
 
 // ================================================================
@@ -277,8 +290,13 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
   // 일주 계산 (현지 날짜 기준, 야자시 보정 적용)
   const dayPillar = getDayPillar(adjustedYear, adjustedMonth, adjustedDay);
 
-  // 시주 계산 (현지 시간 기준)
-  const hourPillar = hour !== undefined ? getHourPillar(dayPillar.stem, hour) : null;
+  // 시주 계산 (현지 시간 기준 - 진태양시 보정 없이)
+  // 참고: 일부 사주 시스템은 진태양시를 사용하지만, 현재는 표준시 기준으로 계산
+  let hourPillar: Pillar | null = null;
+  if (hour !== undefined) {
+    hourPillar = getHourPillar(dayPillar.stem, hour);
+    console.log('[v0] Hour pillar:', hour, '->', hourPillar?.fullPillar);
+  }
 
   console.log('[v0] Calculated pillars:');
   console.log('[v0]   Year:', yearPillar.fullPillar);

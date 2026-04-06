@@ -145,7 +145,7 @@ export const ELEMENT_HANJA: Record<Element, string> = {
 // 시주 계산용 천간 매핑 (일간 기준)
 export const HOUR_STEM_TABLE: Record<Stem, Stem[]> = {
   "갑": ["갑", "을", "병", "정", "무", "기", "경", "신", "임", "계", "갑", "을"],
-  "기": ["갑", "을", "병", "정", "무", "기", "경", "신", "임", "계", "갑", "을"],
+  "기": ["갑", "을", "병", "��", "무", "기", "경", "신", "임", "계", "갑", "을"],
   "을": ["병", "정", "무", "기", "경", "신", "임", "계", "갑", "을", "병", "정"],
   "경": ["병", "정", "무", "기", "경", "신", "임", "계", "갑", "을", "병", "정"],
   "병": ["무", "기", "경", "신", "임", "계", "갑", "을", "병", "정", "무", "기"],
@@ -196,23 +196,24 @@ export const JANG_SAENG_BRANCH: Record<Stem, Branch> = {
 };
 
 // 국가별 타임존 데이터
+// meridian은 실제 도시/지역의 경도 (진태양시 계산용)
 export const TIMEZONE_OFFSETS: Record<string, { offset: number; meridian: number }> = {
-  // 미국
-  "US-NYC": { offset: -5, meridian: -75 },
-  "US-CHI": { offset: -6, meridian: -90 },
-  "US-DEN": { offset: -7, meridian: -105 },
-  "US-LAX": { offset: -8, meridian: -120 },
-  "US-ANC": { offset: -9, meridian: -135 },
-  "US-HNL": { offset: -10, meridian: -150 },
-  "US-PPG": { offset: -11, meridian: -165 },
-  "US-SJU": { offset: -4, meridian: -60 },
-  "US-GUM": { offset: 10, meridian: 150 },
+  // 미국 (실제 도시 경도)
+  "US-NYC": { offset: -5, meridian: -74 },    // 뉴욕 실제 경도
+  "US-CHI": { offset: -6, meridian: -87.6 },  // 시카고
+  "US-DEN": { offset: -7, meridian: -105 },   // 덴버
+  "US-LAX": { offset: -8, meridian: -118 },   // 로스앤젤레스
+  "US-ANC": { offset: -9, meridian: -150 },   // 앵커리지
+  "US-HNL": { offset: -10, meridian: -158 },  // 호놀룰루
+  "US-PPG": { offset: -11, meridian: -170 },  // 파고파고
+  "US-SJU": { offset: -4, meridian: -66 },    // 산후안
+  "US-GUM": { offset: 10, meridian: 145 },    // 괌
   // 한국
-  "KR": { offset: 9, meridian: 135 },
+  "KR": { offset: 9, meridian: 127 },         // 서울 실제 경도
   // 일본
-  "JP": { offset: 9, meridian: 135 },
+  "JP": { offset: 9, meridian: 140 },         // 도쿄 실제 경도
   // 중국
-  "CN": { offset: 8, meridian: 120 },
+  "CN": { offset: 8, meridian: 116 },         // 베이징 실제 경도
   // 영국
   "GB-LON": { offset: 0, meridian: 0 },
   // 독일
@@ -240,10 +241,10 @@ export const TIMEZONE_OFFSETS: Record<string, { offset: number; meridian: number
   "BR-BSB": { offset: -3, meridian: -45 },
   "BR-MAO": { offset: -4, meridian: -60 },
   "BR-RBR": { offset: -5, meridian: -75 },
-  // 인도
-  "IN-BOM": { offset: 5.5, meridian: 82.5 },
-  "IN-DEL": { offset: 5.5, meridian: 82.5 },
-  "IN-CCU": { offset: 5.5, meridian: 82.5 },
+  // 인도 (실제 도시 경도)
+  "IN-BOM": { offset: 5.5, meridian: 72.8 },  // 뭄바이
+  "IN-DEL": { offset: 5.5, meridian: 77.2 },  // 델리
+  "IN-CCU": { offset: 5.5, meridian: 88.4 },  // 콜카타
   // 러시아
   "RU-MOW": { offset: 3, meridian: 45 },
   "RU-SVX": { offset: 5, meridian: 75 },
@@ -353,7 +354,7 @@ export const TIMEZONE_OFFSETS: Record<string, { offset: number; meridian: number
   "MU": { offset: 4, meridian: 60 },
   "MX-MEX": { offset: -6, meridian: -90 },
   "MX-TIJ": { offset: -8, meridian: -120 },
-  "MX-CUU": { offset: -7, meridian: -105 },  // Chihuahua (MST)
+  "MX-CUU": { offset: -7, meridian: -106 },  // 치와와 실제 경도
   "MX-CUN": { offset: -5, meridian: -75 },
   "MD": { offset: 2, meridian: 30 },
   "MC": { offset: 1, meridian: 15 },
@@ -381,7 +382,7 @@ export const TIMEZONE_OFFSETS: Record<string, { offset: number; meridian: number
   "PG-POM": { offset: 10, meridian: 150 },
   "PY": { offset: -4, meridian: -60 },
   "PE": { offset: -5, meridian: -75 },
-  "PH": { offset: 8, meridian: 120 },
+  "PH": { offset: 8, meridian: 121 },  // 마닐라 실제 경도
   "PL": { offset: 1, meridian: 15 },
   "PT-LIS": { offset: 0, meridian: 0 },
   "QA": { offset: 3, meridian: 45 },
@@ -432,9 +433,9 @@ export const TIMEZONE_OFFSETS: Record<string, { offset: number; meridian: number
   "VU": { offset: 11, meridian: 165 },
   "VA": { offset: 1, meridian: 15 },
   "VE": { offset: -4, meridian: -60 },
-  "VN": { offset: 7, meridian: 105 },
+  "VN": { offset: 7, meridian: 106 },  // 호치민 실제 경도
   // 인도네시아
-  "ID-JKT": { offset: 7, meridian: 105 },  // Jakarta (WIB)
+  "ID-JKT": { offset: 7, meridian: 107 },  // 자카르타 실제 경도
   "ID-UPG": { offset: 8, meridian: 120 },  // Makassar (WITA)
   "ID-DJJ": { offset: 9, meridian: 135 },  // Jayapura (WIT)
   "YE": { offset: 3, meridian: 45 },
