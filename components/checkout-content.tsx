@@ -187,6 +187,21 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
           Back to preview
         </Link>
       </div>
+
+      {/* Dev Mode: Skip Payment */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="mt-8 pt-6 border-t border-dashed border-gray-300">
+          <p className="text-xs text-gray-400 text-center mb-2">Developer Mode</p>
+          <Link href={`/report/${submissionId}`}>
+            <Button
+              variant="outline"
+              className="w-full border-gray-300 text-gray-500 hover:bg-gray-100"
+            >
+              Skip Payment (Dev Only)
+            </Button>
+          </Link>
+        </div>
+      )}
     </div>
   )
 }
