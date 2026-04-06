@@ -15,10 +15,12 @@ interface CheckoutContentProps {
 export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [paypalUrl, setPaypalUrl] = useState<string | null>(null)
 
   const handlePayPalCheckout = async () => {
     setIsLoading(true)
     setError(null)
+    setPaypalUrl(null)
     
     try {
       const response = await fetch('/api/paypal/create-order', {
@@ -35,7 +37,13 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
       
       // Redirect to PayPal
       if (data.approvalUrl) {
+        // Try redirect first
         window.location.href = data.approvalUrl
+        // If redirect is blocked, show the link after a delay
+        setTimeout(() => {
+          setPaypalUrl(data.approvalUrl)
+          setIsLoading(false)
+        }, 2000)
       } else {
         throw new Error('No approval URL received')
       }
@@ -125,6 +133,21 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
       {error && (
         <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 mb-4 text-center">
           <p className="text-destructive text-sm">{error}</p>
+        </div>
+      )}
+
+      {/* PayPal Manual Link (shown if redirect is blocked) */}
+      {paypalUrl && (
+        <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 mb-4 text-center">
+          <p className="text-sm text-foreground mb-2">If the redirect didn&apos;t work, click the button below:</p>
+          <a 
+            href={paypalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block bg-[#0070ba] hover:bg-[#003087] text-white px-6 py-2 rounded-lg font-semibold text-sm"
+          >
+            Open PayPal in New Tab
+          </a>
         </div>
       )}
 
