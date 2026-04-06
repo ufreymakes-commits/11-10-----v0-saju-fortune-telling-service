@@ -174,13 +174,68 @@ export function BirthForm() {
           <FieldLabel htmlFor="birthTime" className="text-gray-800 font-medium">
             Birth Time <span className="text-gray-400 font-normal">(optional)</span>
           </FieldLabel>
-          <Input
-            id="birthTime"
-            type="time"
-            value={formData.birthTime}
-            onChange={(e) => setFormData({ ...formData, birthTime: e.target.value })}
-            className="bg-white border-gray-300 focus:border-primary text-gray-900"
-          />
+          <div className="flex gap-2">
+            <Select
+              value={formData.birthTime ? formData.birthTime.split(':')[0] : ''}
+              onValueChange={(hour) => {
+                const currentMinute = formData.birthTime ? formData.birthTime.split(':')[1]?.split(' ')[0] : '00'
+                const currentPeriod = formData.birthTime?.includes('PM') ? 'PM' : 'AM'
+                setFormData({ ...formData, birthTime: hour ? `${hour}:${currentMinute} ${currentPeriod}` : '' })
+              }}
+            >
+              <SelectTrigger className="w-[100px] bg-white border-gray-300 focus:border-primary text-gray-900 data-[placeholder]:text-purple-300">
+                <SelectValue placeholder="Hour" />
+              </SelectTrigger>
+              <SelectContent className="bg-white">
+                {Array.from({ length: 12 }, (_, i) => {
+                  const hour = (i + 1).toString().padStart(2, '0')
+                  return (
+                    <SelectItem key={hour} value={hour} className="text-gray-900">
+                      {hour}
+                    </SelectItem>
+                  )
+                })}
+              </SelectContent>
+            </Select>
+            <Select
+              value={formData.birthTime ? formData.birthTime.split(':')[1]?.split(' ')[0] : ''}
+              onValueChange={(minute) => {
+                const currentHour = formData.birthTime ? formData.birthTime.split(':')[0] : '12'
+                const currentPeriod = formData.birthTime?.includes('PM') ? 'PM' : 'AM'
+                setFormData({ ...formData, birthTime: `${currentHour}:${minute} ${currentPeriod}` })
+              }}
+            >
+              <SelectTrigger className="w-[100px] bg-white border-gray-300 focus:border-primary text-gray-900 data-[placeholder]:text-purple-300">
+                <SelectValue placeholder="Min" />
+              </SelectTrigger>
+              <SelectContent className="bg-white max-h-[200px]">
+                {Array.from({ length: 60 }, (_, i) => {
+                  const minute = i.toString().padStart(2, '0')
+                  return (
+                    <SelectItem key={minute} value={minute} className="text-gray-900">
+                      {minute}
+                    </SelectItem>
+                  )
+                })}
+              </SelectContent>
+            </Select>
+            <Select
+              value={formData.birthTime?.includes('PM') ? 'PM' : formData.birthTime?.includes('AM') ? 'AM' : ''}
+              onValueChange={(period) => {
+                const currentHour = formData.birthTime ? formData.birthTime.split(':')[0] : '12'
+                const currentMinute = formData.birthTime ? formData.birthTime.split(':')[1]?.split(' ')[0] : '00'
+                setFormData({ ...formData, birthTime: `${currentHour}:${currentMinute} ${period}` })
+              }}
+            >
+              <SelectTrigger className="w-[90px] bg-white border-gray-300 focus:border-primary text-gray-900 data-[placeholder]:text-purple-300">
+                <SelectValue placeholder="AM/PM" />
+              </SelectTrigger>
+              <SelectContent className="bg-white">
+                <SelectItem value="AM" className="text-gray-900">AM</SelectItem>
+                <SelectItem value="PM" className="text-gray-900">PM</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">
             {"If applicable, use standard time (exclude DST; Daylight Saving Time). If you don't know the birth time, just submit as a blank. It's more accurate if you have an exact time though."}
           </p>
