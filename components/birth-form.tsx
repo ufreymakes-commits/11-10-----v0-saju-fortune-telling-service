@@ -47,6 +47,15 @@ export function BirthForm() {
     
     if (!formData.birthDate) {
       newErrors.birthDate = 'Please enter your birth date'
+    } else if (!/^\d{4}-\d{2}-\d{2}$/.test(formData.birthDate)) {
+      newErrors.birthDate = 'Please enter date in YYYY-MM-DD format'
+    } else {
+      // Validate actual date
+      const [year, month, day] = formData.birthDate.split('-').map(Number)
+      const date = new Date(year, month - 1, day)
+      if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+        newErrors.birthDate = 'Please enter a valid date'
+      }
     }
     
     if (!formData.birthCountry) {
@@ -111,13 +120,25 @@ export function BirthForm() {
 
         {/* Birth Date */}
         <Field>
-          <FieldLabel htmlFor="birthDate" className="text-gray-800 font-medium">Birth Date (YYYY-MM-DD)</FieldLabel>
+          <FieldLabel htmlFor="birthDate" className="text-gray-800 font-medium">Birth Date</FieldLabel>
           <Input
             id="birthDate"
-            type="date"
+            type="text"
             placeholder="YYYY-MM-DD"
             value={formData.birthDate}
-            onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
+            onChange={(e) => {
+              let value = e.target.value.replace(/[^0-9-]/g, '')
+              // Auto-format: add dashes after year and month
+              if (value.length === 4 && !value.includes('-')) {
+                value = value + '-'
+              } else if (value.length === 7 && value.charAt(4) === '-' && value.indexOf('-', 5) === -1) {
+                value = value + '-'
+              }
+              // Limit to 10 characters (YYYY-MM-DD)
+              if (value.length <= 10) {
+                setFormData({ ...formData, birthDate: value })
+              }
+            }}
             className="bg-white border-gray-300 focus:border-primary text-gray-900 placeholder:text-purple-300"
             aria-invalid={!!errors.birthDate}
           />
