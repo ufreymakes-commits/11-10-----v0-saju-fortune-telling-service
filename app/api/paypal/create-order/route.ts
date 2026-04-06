@@ -23,6 +23,16 @@ async function getPayPalAccessToken() {
   return data.access_token
 }
 
+function getBaseUrl(): string {
+  let baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+  // Ensure URL has protocol
+  if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+    baseUrl = `https://${baseUrl}`
+  }
+  // Remove trailing slash if present
+  return baseUrl.replace(/\/$/, '')
+}
+
 export async function POST(request: Request) {
   try {
     const { submissionId } = await request.json()
@@ -82,8 +92,8 @@ export async function POST(request: Request) {
           brand_name: 'Sajume',
           landing_page: 'NO_PREFERENCE',
           user_action: 'PAY_NOW',
-          return_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/checkout/${submissionId}/success`,
-          cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/checkout/${submissionId}`
+          return_url: `${getBaseUrl()}/checkout/${submissionId}/success`,
+          cancel_url: `${getBaseUrl()}/checkout/${submissionId}`
         }
       })
     })
