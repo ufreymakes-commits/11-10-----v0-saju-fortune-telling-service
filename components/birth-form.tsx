@@ -103,7 +103,7 @@ export function BirthForm() {
             placeholder="Enter your full name"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="bg-white border-gray-300 focus:border-primary text-gray-900 placeholder:text-gray-400"
+            className="bg-white border-gray-300 focus:border-primary text-gray-900 placeholder:text-purple-300"
             aria-invalid={!!errors.name}
           />
           {errors.name && <FieldError>{errors.name}</FieldError>}
@@ -111,13 +111,14 @@ export function BirthForm() {
 
         {/* Birth Date */}
         <Field>
-          <FieldLabel htmlFor="birthDate" className="text-gray-800 font-medium">Birth Date</FieldLabel>
+          <FieldLabel htmlFor="birthDate" className="text-gray-800 font-medium">Birth Date (YYYY-MM-DD)</FieldLabel>
           <Input
             id="birthDate"
             type="date"
+            placeholder="YYYY-MM-DD"
             value={formData.birthDate}
             onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
-            className="bg-white border-gray-300 focus:border-primary text-gray-900"
+            className="bg-white border-gray-300 focus:border-primary text-gray-900 placeholder:text-purple-300"
             aria-invalid={!!errors.birthDate}
           />
           {errors.birthDate && <FieldError>{errors.birthDate}</FieldError>}
@@ -130,7 +131,7 @@ export function BirthForm() {
             value={formData.birthCountry} 
             onValueChange={(value) => setFormData({ ...formData, birthCountry: value })}
           >
-            <SelectTrigger className="w-full bg-white border-gray-300 focus:border-primary text-gray-900">
+            <SelectTrigger className="w-full bg-white border-gray-300 focus:border-primary text-gray-900 data-[placeholder]:text-purple-300">
               <SelectValue placeholder="Select your birth country" />
             </SelectTrigger>
             <SelectContent className="bg-white max-h-[300px]">
@@ -195,7 +196,7 @@ export function BirthForm() {
             value={formData.referralSource} 
             onValueChange={(value) => setFormData({ ...formData, referralSource: value })}
           >
-            <SelectTrigger className="w-full bg-white border-gray-300 focus:border-primary text-gray-900">
+            <SelectTrigger className="w-full bg-white border-gray-300 focus:border-primary text-gray-900 data-[placeholder]:text-purple-300">
               <SelectValue placeholder="Select an option" />
             </SelectTrigger>
             <SelectContent className="bg-white">
