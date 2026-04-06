@@ -21,6 +21,32 @@ interface PreviewData {
   }
 }
 
+// Day Master (일간) emoji mapping
+const DAY_MASTER_INFO: Record<string, { korean: string, emoji: string, element: string }> = {
+  '甲': { korean: '갑목', emoji: '🌲', element: 'Wood' },
+  '乙': { korean: '을목', emoji: '🌿', element: 'Wood' },
+  '丙': { korean: '병화', emoji: '☀️', element: 'Fire' },
+  '丁': { korean: '정화', emoji: '🕯️', element: 'Fire' },
+  '戊': { korean: '무토', emoji: '⛰️', element: 'Earth' },
+  '己': { korean: '기토', emoji: '🌾', element: 'Earth' },
+  '庚': { korean: '경금', emoji: '⚔️', element: 'Metal' },
+  '辛': { korean: '신금', emoji: '💎', element: 'Metal' },
+  '壬': { korean: '임수', emoji: '🌊', element: 'Water' },
+  '癸': { korean: '계수', emoji: '💧', element: 'Water' },
+}
+
+// Stem pronunciations
+const STEM_PRONUNCIATION: Record<string, string> = {
+  '甲': 'Gap', '乙': 'Eul', '丙': 'Byeong', '丁': 'Jeong', '戊': 'Mu',
+  '己': 'Gi', '庚': 'Gyeong', '辛': 'Sin', '壬': 'Im', '癸': 'Gye'
+}
+
+// Branch pronunciations  
+const BRANCH_PRONUNCIATION: Record<string, string> = {
+  '子': 'Ja', '丑': 'Chuk', '寅': 'In', '卯': 'Myo', '辰': 'Jin', '巳': 'Sa',
+  '午': 'O', '未': 'Mi', '申': 'Sin', '酉': 'Yu', '戌': 'Sul', '亥': 'Hae'
+}
+
 export function PreviewContent({ submissionId }: PreviewContentProps) {
   const [data, setData] = useState<PreviewData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -56,7 +82,7 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="relative w-24 h-24 mx-auto mb-4 animate-float">
+          <div className="relative w-20 h-20 mx-auto mb-4 animate-float">
             <Image
               src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%85%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"
               alt="Sajume mascot"
@@ -64,8 +90,8 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
               className="object-contain"
             />
           </div>
-          <Spinner className="w-6 h-6 mx-auto mb-3" />
-          <p className="text-foreground/70">Reading the stars for you...</p>
+          <Spinner className="w-5 h-5 mx-auto mb-2" />
+          <p className="text-sm text-foreground/70">Reading the stars for you...</p>
         </div>
       </div>
     )
@@ -75,9 +101,9 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
     return (
       <div className="flex items-center justify-center min-h-screen px-4">
         <div className="text-center">
-          <p className="text-destructive mb-4">{error || 'Something went wrong'}</p>
+          <p className="text-sm text-destructive mb-4">{error || 'Something went wrong'}</p>
           <Link href="/start">
-            <Button variant="outline">Try Again</Button>
+            <Button variant="outline" size="sm">Try Again</Button>
           </Link>
         </div>
       </div>
@@ -85,18 +111,28 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
   }
 
   const { freeFacts, teaserFacts, submission } = data
+  const dayMasterChar = submission.sajuData.dayPillar?.stem || '甲'
+  const dayMasterInfo = DAY_MASTER_INFO[dayMasterChar] || DAY_MASTER_INFO['甲']
+
+  // Pillars in order: Year, Month, Day, Hour (displayed right to left traditionally)
+  const pillars = [
+    { label: 'Hour', labelKr: '시주', pillar: submission.sajuData.hourPillar },
+    { label: 'Day', labelKr: '일주', pillar: submission.sajuData.dayPillar },
+    { label: 'Month', labelKr: '월주', pillar: submission.sajuData.monthPillar },
+    { label: 'Year', labelKr: '연주', pillar: submission.sajuData.yearPillar },
+  ]
 
   return (
     <div className="px-4 py-8 max-w-2xl mx-auto">
       {/* Header */}
-      <div className="text-center mb-8">
-        <Link href="/" className="inline-block mb-6">
-          <div className="border border-primary/50 rounded-full px-6 py-2 text-primary text-sm tracking-wider">
+      <div className="text-center mb-6">
+        <Link href="/" className="inline-block mb-4">
+          <div className="border border-primary/50 rounded-full px-5 py-1.5 text-primary text-xs tracking-wider">
             Sajume
           </div>
         </Link>
         
-        <div className="relative w-20 h-20 mx-auto mb-4">
+        <div className="relative w-16 h-16 mx-auto mb-3">
           <Image
             src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%85%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"
             alt="Sajume mascot"
@@ -105,68 +141,67 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
           />
         </div>
         
-        <h1 className="text-2xl md:text-3xl font-bold mb-2">
+        <h1 className="text-lg font-semibold mb-1">
           <span className="text-gradient">{submission.name}</span>, here are your first insights
         </h1>
-        <p className="text-muted-foreground">
-          Based on your Saju birth chart ({submission.sajuData.dayMaster} Day Master)
+        <p className="text-xs text-muted-foreground">
+          Based on your Saju birth chart
         </p>
       </div>
 
-      {/* Saju Summary Card */}
-      <div className="bg-card border border-border rounded-xl p-5 mb-8 shadow-lg shadow-primary/5">
-        <h2 className="text-sm uppercase tracking-wider text-muted-foreground mb-3">Your Four Pillars</h2>
-        <div className="grid grid-cols-4 gap-3 text-center">
-          <div>
-            <p className="text-xs text-muted-foreground mb-1">Year</p>
-            <p className="text-sm font-medium">{submission.sajuData.yearPillar.stem}</p>
-            <p className="text-xs text-foreground/70">{submission.sajuData.yearPillar.branch}</p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground mb-1">Month</p>
-            <p className="text-sm font-medium">{submission.sajuData.monthPillar.stem}</p>
-            <p className="text-xs text-foreground/70">{submission.sajuData.monthPillar.branch}</p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground mb-1">Day</p>
-            <p className="text-sm font-medium">{submission.sajuData.dayPillar.stem}</p>
-            <p className="text-xs text-foreground/70">{submission.sajuData.dayPillar.branch}</p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground mb-1">Hour</p>
-            {submission.sajuData.hourPillar ? (
-              <>
-                <p className="text-sm font-medium">{submission.sajuData.hourPillar.stem}</p>
-                <p className="text-xs text-foreground/70">{submission.sajuData.hourPillar.branch}</p>
-              </>
-            ) : (
-              <p className="text-xs text-foreground/50">Unknown</p>
-            )}
-          </div>
+      {/* Four Pillars Card */}
+      <div className="bg-card border border-border rounded-xl p-4 mb-6 shadow-lg shadow-primary/5">
+        <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-3 text-center">Your Four Pillars</h2>
+        
+        {/* Pillars Grid */}
+        <div className="grid grid-cols-4 gap-2 text-center mb-4">
+          {pillars.reverse().map(({ label, labelKr, pillar }) => (
+            <div key={label} className="bg-background/50 rounded-lg p-2">
+              <p className="text-[10px] text-muted-foreground mb-1">{label}</p>
+              <p className="text-[10px] text-muted-foreground/70">{labelKr}</p>
+              {pillar ? (
+                <div className="mt-2">
+                  <p className="text-lg font-bold text-foreground">{pillar.stem}</p>
+                  <p className="text-[10px] text-muted-foreground">{STEM_PRONUNCIATION[pillar.stem] || ''}</p>
+                  <p className="text-lg font-bold text-foreground mt-1">{pillar.branch}</p>
+                  <p className="text-[10px] text-muted-foreground">{BRANCH_PRONUNCIATION[pillar.branch] || ''}</p>
+                </div>
+              ) : (
+                <p className="text-xs text-foreground/40 mt-2">-</p>
+              )}
+            </div>
+          ))}
         </div>
-        <div className="mt-4 pt-4 border-t border-border/30 flex flex-wrap gap-3 justify-center text-xs">
-          <span className="bg-primary/20 text-primary px-2 py-1 rounded">{submission.sajuData.personalityType}</span>
-          <span className="bg-accent/20 text-accent px-2 py-1 rounded">{submission.sajuData.dominantElement} Dominant</span>
-          <span className="bg-secondary/20 text-secondary-foreground px-2 py-1 rounded">Lucky: {submission.sajuData.luckyElement}</span>
+
+        {/* Day Master Type */}
+        <div className="border-t border-border/30 pt-4 text-center">
+          <p className="text-[10px] text-muted-foreground mb-2">Your Day Master (일간)</p>
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-2xl">{dayMasterInfo.emoji}</span>
+            <div>
+              <p className="text-sm font-semibold text-foreground">{dayMasterChar} {dayMasterInfo.element}</p>
+              <p className="text-xs text-muted-foreground">{dayMasterInfo.korean}</p>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Free Facts */}
-      <div className="mb-8">
-        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+      <div className="mb-6">
+        <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
           <span className="text-gradient">9 Free Insights</span>
-          <span className="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded">FREE</span>
+          <span className="text-[10px] bg-accent/20 text-accent px-2 py-0.5 rounded">FREE</span>
         </h2>
         
-        <div className="space-y-3">
+        <div className="space-y-2">
           {freeFacts.map((fact, index) => (
             <div 
               key={fact.id}
-              className="bg-card border border-border rounded-lg p-4 transition-all hover:border-primary/50 shadow-sm"
+              className="bg-card border border-border rounded-lg p-3 transition-all hover:border-primary/50 shadow-sm"
             >
-              <div className="flex gap-3">
-                <span className="text-primary font-bold text-lg">{index + 1}</span>
-                <p className="text-foreground/90 leading-relaxed">{fact.text}</p>
+              <div className="flex gap-2">
+                <span className="text-primary font-bold text-sm">{index + 1}</span>
+                <p className="text-foreground/90 text-xs leading-relaxed">{fact.text}</p>
               </div>
             </div>
           ))}
@@ -174,26 +209,26 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
       </div>
 
       {/* Teaser Facts (Masked) */}
-      <div className="mb-8">
-        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+      <div className="mb-6">
+        <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
           <span className="text-foreground/50">Hidden Insights</span>
-          <LockIcon className="w-4 h-4 text-muted-foreground" />
+          <LockIcon className="w-3 h-3 text-muted-foreground" />
         </h2>
         
-        <div className="space-y-3">
+        <div className="space-y-2">
           {teaserFacts.map((fact, index) => (
             <div 
               key={fact.id}
-              className="relative bg-muted border border-border rounded-lg p-4 overflow-hidden"
+              className="relative bg-muted border border-border rounded-lg p-3 overflow-hidden"
             >
-              <div className="flex gap-3">
-                <span className="text-muted-foreground font-bold text-lg">{10 + index}</span>
-                <p className="text-foreground/30 leading-relaxed blur-[6px] select-none">
+              <div className="flex gap-2">
+                <span className="text-muted-foreground font-bold text-sm">{10 + index}</span>
+                <p className="text-foreground/30 text-xs leading-relaxed blur-[6px] select-none">
                   {fact.text}
                 </p>
               </div>
               <div className="absolute inset-0 flex items-center justify-center bg-background/20">
-                <LockIcon className="w-5 h-5 text-muted-foreground" />
+                <LockIcon className="w-4 h-4 text-muted-foreground" />
               </div>
             </div>
           ))}
@@ -201,8 +236,8 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-card border border-primary/40 rounded-2xl p-6 text-center shadow-lg shadow-primary/10">
-        <div className="relative w-16 h-16 mx-auto mb-4 animate-float">
+      <div className="bg-card border border-primary/40 rounded-2xl p-5 text-center shadow-lg shadow-primary/10">
+        <div className="relative w-12 h-12 mx-auto mb-3 animate-float">
           <Image
             src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%85%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"
             alt="Sajume mascot"
@@ -211,40 +246,40 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
           />
         </div>
         
-        <h3 className="text-xl font-bold text-gradient mb-2">
+        <h3 className="text-base font-semibold text-gradient mb-1">
           Unlock All 99 Facts
         </h3>
-        <p className="text-foreground/70 mb-4 text-sm">
+        <p className="text-xs text-foreground/70 mb-3">
           Discover deep insights about your personality, career path, love life, and future destiny
         </p>
         
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <span className="text-muted-foreground line-through text-sm">$19.99</span>
-          <span className="text-2xl font-bold text-secondary">$9.99</span>
+        <div className="flex items-center justify-center gap-2 mb-3">
+          <span className="text-muted-foreground line-through text-xs">$19.99</span>
+          <span className="text-xl font-bold text-secondary">$9.99</span>
         </div>
         
         <Link href={`/checkout/${submissionId}`}>
-          <Button className="w-full max-w-xs bg-secondary text-secondary-foreground hover:bg-secondary/90 h-12 text-lg font-semibold rounded-full glow-pink">
+          <Button className="w-full max-w-xs bg-secondary text-secondary-foreground hover:bg-secondary/90 h-10 text-sm font-semibold rounded-full glow-pink">
             Unlock Full Report
           </Button>
         </Link>
         
-        <p className="mt-3 text-xs text-muted-foreground">
+        <p className="mt-2 text-[10px] text-muted-foreground">
           Secure payment via PayPal
         </p>
       </div>
       
       {/* Social Proof */}
-      <div className="mt-8 text-center">
-        <p className="text-sm text-muted-foreground mb-2">Trusted by thousands</p>
-        <div className="flex justify-center gap-1">
+      <div className="mt-6 text-center">
+        <p className="text-xs text-muted-foreground mb-1">Trusted by thousands</p>
+        <div className="flex justify-center gap-0.5">
           {[1, 2, 3, 4, 5].map((star) => (
-            <svg key={star} className="w-5 h-5 text-secondary" fill="currentColor" viewBox="0 0 20 20">
+            <svg key={star} className="w-4 h-4 text-secondary" fill="currentColor" viewBox="0 0 20 20">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
           ))}
         </div>
-        <p className="text-xs text-muted-foreground mt-1">4.9/5 from 2,000+ reviews</p>
+        <p className="text-[10px] text-muted-foreground mt-1">4.9/5 from 2,000+ reviews</p>
       </div>
     </div>
   )
