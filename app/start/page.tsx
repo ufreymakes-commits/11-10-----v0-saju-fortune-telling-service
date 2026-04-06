@@ -32,10 +32,10 @@ export default function StartPage() {
         </div>
         
         {/* Title */}
-        <h1 className="text-3xl md:text-4xl font-bold text-gradient text-center mb-2">
+        <h1 className="text-xl font-semibold text-gradient text-center mb-1">
           Enter Your Birth Info
         </h1>
-        <p className="text-foreground/70 text-center mb-8 max-w-md">
+        <p className="text-sm text-foreground/70 text-center mb-6 max-w-md">
           Share your birth details to unlock the secrets hidden in your Saju chart
         </p>
         
