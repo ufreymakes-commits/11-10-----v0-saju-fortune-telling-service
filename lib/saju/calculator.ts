@@ -6,10 +6,18 @@
 import {
   STEMS, BRANCHES, STEM_TO_ELEMENT, BRANCH_TO_ELEMENT,
   STEM_YIN_YANG, HIDDEN_STEMS, SIXTY_JIAZI,
-  TEN_GODS_TABLE, HOUR_STEM_TABLE, MONTH_STEM_TABLE,
+  TEN_GODS_TABLE, HOUR_STEM_TABLE,
   TIMEZONE_OFFSETS, DEFAULT_TIMEZONE,
   type Stem, type Branch, type Element
 } from './constants';
+import {
+  loadJeolgiData,
+  getJeolgiForYear,
+  getSajuYear,
+  getMonthBranchFromSolarTerm,
+  getMonthStem,
+  findCurrentSolarTerm
+} from './jeolgi';
 
 // ================================================================
 // Types
@@ -73,73 +81,7 @@ export interface BirthInfo {
   longitude?: number;
 }
 
-// ================================================================
-// 절기 데이터 (UTC 기준)
-// ================================================================
-
-const JEOLGI_TABLE: Record<number, { month: number; day: number; hour: number }[]> = {
-  // 24절기 중 12절기만 사용 (월 전환 기준)
-  // 입춘(2월), 경칩(3월), 청명(4월), 입하(5월), 망종(6월), 소서(7월)
-  // 입추(8월), 백로(9월), 한로(10월), 입동(11월), 대설(12월), 소한(1월)
-  2024: [
-    { month: 2, day: 4, hour: 4 },   // 입춘 - 인월 시작
-    { month: 3, day: 5, hour: 10 },  // 경칩 - 묘월 시작
-    { month: 4, day: 4, hour: 15 },  // 청명 - 진월 시작
-    { month: 5, day: 5, hour: 8 },   // 입하 - 사월 시작
-    { month: 6, day: 5, hour: 12 },  // 망종 - 오월 시작
-    { month: 7, day: 6, hour: 22 },  // 소서 - 미월 시작
-    { month: 8, day: 7, hour: 8 },   // 입추 - 신월 시작
-    { month: 9, day: 7, hour: 11 },  // 백로 - 유월 시작
-    { month: 10, day: 8, hour: 3 },  // 한로 - 술월 시작
-    { month: 11, day: 7, hour: 6 },  // 입동 - 해월 시작
-    { month: 12, day: 7, hour: 0 },  // 대설 - 자월 시작
-    { month: 1, day: 6, hour: 4 },   // 소한 - 축월 시작 (다음해)
-  ],
-  2025: [
-    { month: 2, day: 3, hour: 22 },
-    { month: 3, day: 5, hour: 16 },
-    { month: 4, day: 4, hour: 21 },
-    { month: 5, day: 5, hour: 14 },
-    { month: 6, day: 5, hour: 18 },
-    { month: 7, day: 7, hour: 4 },
-    { month: 8, day: 7, hour: 14 },
-    { month: 9, day: 7, hour: 17 },
-    { month: 10, day: 8, hour: 9 },
-    { month: 11, day: 7, hour: 12 },
-    { month: 12, day: 7, hour: 6 },
-    { month: 1, day: 5, hour: 10 },
-  ],
-  2026: [
-    { month: 2, day: 4, hour: 4 },
-    { month: 3, day: 5, hour: 22 },
-    { month: 4, day: 5, hour: 3 },
-    { month: 5, day: 5, hour: 20 },
-    { month: 6, day: 6, hour: 0 },
-    { month: 7, day: 7, hour: 10 },
-    { month: 8, day: 7, hour: 20 },
-    { month: 9, day: 7, hour: 23 },
-    { month: 10, day: 8, hour: 15 },
-    { month: 11, day: 7, hour: 18 },
-    { month: 12, day: 7, hour: 12 },
-    { month: 1, day: 5, hour: 16 },
-  ],
-};
-
-// 기본 절기 (연도 데이터 없을 경우)
-const DEFAULT_JEOLGI = [
-  { month: 2, day: 4, hour: 4 },
-  { month: 3, day: 6, hour: 0 },
-  { month: 4, day: 5, hour: 0 },
-  { month: 5, day: 6, hour: 0 },
-  { month: 6, day: 6, hour: 0 },
-  { month: 7, day: 7, hour: 0 },
-  { month: 8, day: 8, hour: 0 },
-  { month: 9, day: 8, hour: 0 },
-  { month: 10, day: 8, hour: 0 },
-  { month: 11, day: 7, hour: 0 },
-  { month: 12, day: 7, hour: 0 },
-  { month: 1, day: 6, hour: 0 },
-];
+// 절기 데이터는 jeolgi.ts에서 로드됨 (1900-2059)
 
 // ================================================================
 // 진태양시 계산
@@ -179,38 +121,17 @@ export function getHourBranchIndex(hour: number): number {
 }
 
 // ================================================================
-// 월지 계산 (절기 기준)
+// 월지 계산 (절기 기준) - jeolgi.ts의 데이터 사용
 // ================================================================
 
 export function getMonthBranch(year: number, month: number, day: number, hour: number = 0): Branch {
-  const jeolgi = JEOLGI_TABLE[year] || DEFAULT_JEOLGI;
+  // Create a UTC date from the input
+  const utcDate = new Date(Date.UTC(year, month - 1, day, hour, 0, 0));
   
-  // 인(寅)월부터 시작: 인(2), 묘(3), 진(4), 사(5), 오(6), 미(7), 신(8), 유(9), 술(10), 해(11), 자(12), 축(1)
-  const branchOrder: Branch[] = ["인", "묘", "진", "사", "오", "미", "신", "유", "술", "해", "자", "축"];
+  // Get month branch index from solar term data
+  const branchIndex = getMonthBranchFromSolarTerm(utcDate);
   
-  for (let i = 0; i < jeolgi.length; i++) {
-    const j = jeolgi[i];
-    const jMonth = j.month;
-    const jDay = j.day;
-    const jHour = j.hour;
-
-    if (month === jMonth) {
-      if (day < jDay || (day === jDay && hour < jHour)) {
-        // 절기 전
-        return branchOrder[(i - 1 + 12) % 12];
-      }
-    }
-  }
-
-  // 현재 월의 절기를 찾아서 해당 월지 반환
-  for (let i = 0; i < jeolgi.length; i++) {
-    if (jeolgi[i].month === month) {
-      return branchOrder[i];
-    }
-  }
-
-  // 기본값
-  return branchOrder[(month + 10) % 12];
+  return BRANCHES[branchIndex];
 }
 
 // ================================================================
@@ -218,14 +139,19 @@ export function getMonthBranch(year: number, month: number, day: number, hour: n
 // ================================================================
 
 export function getDayPillar(year: number, month: number, day: number): Pillar {
-  // 기준일: 1900년 1월 1일 = 갑진일 (index 40)
-  const baseDate = new Date(1900, 0, 1);
-  const targetDate = new Date(year, month - 1, day);
+  // 기준일: 1996-05-22 = 기미일(己未日, index 55)
+  // 검증된 만세력 기준 데이터 사용
+  const baseDate = new Date(Date.UTC(1996, 4, 22)); // 1996-05-22 = 기미일
+  const baseIndex = 55; // 기미 = 55번 인덱스
+  
+  const targetDate = new Date(Date.UTC(year, month - 1, day));
   const diffDays = Math.floor((targetDate.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24));
   
-  const index = ((diffDays % 60) + 60 + 40) % 60;
+  const index = ((diffDays + baseIndex) % 60 + 60) % 60;
   const pillar = SIXTY_JIAZI[index];
   
+  console.log('[v0] Day pillar calc:', year, month, day, '-> diffDays:', diffDays, '-> index:', index, '-> pillar:', pillar);
+
   return {
     stem: pillar[0] as Stem,
     branch: pillar[1] as Branch,
@@ -238,14 +164,9 @@ export function getDayPillar(year: number, month: number, day: number): Pillar {
 // ================================================================
 
 export function getYearPillar(year: number, month: number, day: number, hour: number = 0): Pillar {
-  // 입춘 기준으로 연도 결정
-  const jeolgi = JEOLGI_TABLE[year] || DEFAULT_JEOLGI;
-  const ipchun = jeolgi[0]; // 입춘
-  
-  let actualYear = year;
-  if (month < ipchun.month || (month === ipchun.month && (day < ipchun.day || (day === ipchun.day && hour < ipchun.hour)))) {
-    actualYear = year - 1;
-  }
+  // 입춘 기준으로 연도 결정 - jeolgi.ts 사용
+  const utcDate = new Date(Date.UTC(year, month - 1, day, hour, 0, 0));
+  const actualYear = getSajuYear(utcDate);
 
   // 1984년 = 갑자년 (index 0)
   const index = ((actualYear - 1984) % 60 + 60) % 60;
@@ -263,9 +184,12 @@ export function getYearPillar(year: number, month: number, day: number, hour: nu
 // ================================================================
 
 export function getMonthPillar(yearStem: Stem, monthBranch: Branch): Pillar {
+  const yearStemIndex = STEMS.indexOf(yearStem);
   const branchIndex = BRANCHES.indexOf(monthBranch);
-  const monthStemTable = MONTH_STEM_TABLE[yearStem];
-  const monthStem = monthStemTable[branchIndex];
+  
+  // jeolgi.ts의 getMonthStem 사용
+  const monthStemIndex = getMonthStem(yearStemIndex, branchIndex);
+  const monthStem = STEMS[monthStemIndex];
 
   return {
     stem: monthStem,

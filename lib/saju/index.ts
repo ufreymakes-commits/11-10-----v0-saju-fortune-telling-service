@@ -6,6 +6,9 @@
 // Constants
 export * from './constants';
 
+// Jeolgi (Solar Terms) Data
+export * from './jeolgi';
+
 // Core Calculator
 export * from './calculator';
 
