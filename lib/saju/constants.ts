@@ -430,6 +430,10 @@ export const TIMEZONE_OFFSETS: Record<string, { offset: number; meridian: number
   "VA": { offset: 1, meridian: 15 },
   "VE": { offset: -4, meridian: -60 },
   "VN": { offset: 7, meridian: 105 },
+  // 인도네시아
+  "ID-JKT": { offset: 7, meridian: 105 },  // Jakarta (WIB)
+  "ID-UPG": { offset: 8, meridian: 120 },  // Makassar (WITA)
+  "ID-DJJ": { offset: 9, meridian: 135 },  // Jayapura (WIT)
   "YE": { offset: 3, meridian: 45 },
   "ZM": { offset: 2, meridian: 30 },
   "ZW": { offset: 2, meridian: 30 }

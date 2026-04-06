@@ -111,11 +111,12 @@ export function loadJeolgiData(): JeolgiEntry[] {
       const columns = line.split('\t')
       if (columns.length < 25) continue
       
-      const year = parseInt(columns[1], 10)
+      // columns[0] = year, columns[1-24] = 24 solar terms
+      const year = parseInt(columns[0], 10)
       if (isNaN(year)) continue
       
       const terms: Date[] = []
-      for (let j = 2; j <= 25; j++) {
+      for (let j = 1; j <= 24; j++) {
         const dt = parseDateTime(columns[j])
         if (dt) {
           terms.push(dt)
@@ -124,6 +125,8 @@ export function loadJeolgiData(): JeolgiEntry[] {
       
       if (terms.length === 24) {
         jeolgiData.push({ year, terms })
+      } else {
+        console.log('[v0] Year', year, 'has', terms.length, 'valid terms instead of 24')
       }
     }
     

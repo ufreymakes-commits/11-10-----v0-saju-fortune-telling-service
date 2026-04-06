@@ -227,40 +227,64 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
 
   // 타임존 정보 가져오기
   const tz = TIMEZONE_OFFSETS[country] || DEFAULT_TIMEZONE;
+  const tzOffset = tz.offset; // 시간 단위 오프셋 (예: +9 for KST, -8 for LA)
   
-  // 진태양시 계산 (시간 정보가 있는 경우)
-  let solarHour = hour ?? -1;
-  if (hour !== undefined && minute !== undefined && birthInfo.longitude) {
-    const solarTime = getSolarTime(hour, minute, birthInfo.longitude, tz.offset);
-    solarHour = solarTime.hour;
-  }
-
-  // 야자시 보정: 23시 이후는 다음날로
+  // 사주 계산 시간 (현지 시간 기준 - 야자시 보정 적용)
+  let localHour = hour ?? 12; // 시간 모를 경우 정오 기준
+  
+  // 야자시 보정: 23시 이후는 다음날로 (일주 계산용)
   let adjustedYear = year;
   let adjustedMonth = month;
   let adjustedDay = day;
   
-  if (solarHour === 23 || (hour !== undefined && hour >= 23)) {
+  if (hour !== undefined && hour >= 23) {
     const nextDate = new Date(year, month - 1, day + 1);
     adjustedYear = nextDate.getFullYear();
     adjustedMonth = nextDate.getMonth() + 1;
     adjustedDay = nextDate.getDate();
   }
+  
+  // UTC 시간 계산 (절기 비교용)
+  // 현지 시간에서 타임존 오프셋을 빼면 UTC
+  const localDate = new Date(year, month - 1, day, localHour, minute ?? 0, 0);
+  const utcTime = localDate.getTime() - (tzOffset * 60 * 60 * 1000);
+  const utcDate = new Date(utcTime);
+  
+  console.log('[v0] Birth info:', year, month, day, hour, ':', minute, country);
+  console.log('[v0] Timezone offset:', tzOffset, 'hours');
+  console.log('[v0] Local date:', localDate.toISOString());
+  console.log('[v0] UTC date:', utcDate.toISOString());
 
-  // 연주 계산
-  const yearPillar = getYearPillar(adjustedYear, adjustedMonth, adjustedDay, solarHour >= 0 ? solarHour : 0);
+  // 연주 계산 (입춘 기준 - UTC로 비교)
+  const yearPillar = getYearPillar(
+    utcDate.getUTCFullYear(), 
+    utcDate.getUTCMonth() + 1, 
+    utcDate.getUTCDate(), 
+    utcDate.getUTCHours()
+  );
 
-  // 월지 계산
-  const monthBranch = getMonthBranch(adjustedYear, adjustedMonth, adjustedDay, solarHour >= 0 ? solarHour : 0);
+  // 월지 계산 (절기 기준 - UTC로 비교)
+  const monthBranch = getMonthBranch(
+    utcDate.getUTCFullYear(), 
+    utcDate.getUTCMonth() + 1, 
+    utcDate.getUTCDate(), 
+    utcDate.getUTCHours()
+  );
 
   // 월주 계산
   const monthPillar = getMonthPillar(yearPillar.stem, monthBranch);
 
-  // 일주 계산
+  // 일주 계산 (현지 날짜 기준, 야자시 보정 적용)
   const dayPillar = getDayPillar(adjustedYear, adjustedMonth, adjustedDay);
 
-  // 시주 계산 (시간 정보가 있는 경우)
-  const hourPillar = solarHour >= 0 ? getHourPillar(dayPillar.stem, solarHour) : null;
+  // 시주 계산 (현지 시간 기준)
+  const hourPillar = hour !== undefined ? getHourPillar(dayPillar.stem, hour) : null;
+
+  console.log('[v0] Calculated pillars:');
+  console.log('[v0]   Year:', yearPillar.fullPillar);
+  console.log('[v0]   Month:', monthPillar.fullPillar);
+  console.log('[v0]   Day:', dayPillar.fullPillar);
+  console.log('[v0]   Hour:', hourPillar?.fullPillar ?? 'none');
 
   return {
     year: yearPillar,
