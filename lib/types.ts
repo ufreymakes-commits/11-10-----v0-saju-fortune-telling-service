@@ -10,7 +10,7 @@ export interface BirthInfo {
 }
 
 export interface SajuData {
-  // Four Pillars (사주팔자)
+  // Four Pillars (사주팔자) - stems and branches in Hanja
   yearPillar: { stem: string; branch: string }
   monthPillar: { stem: string; branch: string }
   dayPillar: { stem: string; branch: string }
@@ -27,9 +27,33 @@ export interface SajuData {
   }
   
   // Additional analysis
-  dayMaster: string
+  dayMaster: string // Hanja character of day stem
   luckyElement: string
   personalityType: string
+  
+  // Extended analysis (from saju module)
+  tenGods?: {
+    present: string[]
+    missing: string[]
+  }
+  spirits?: {
+    doHwa?: boolean
+    yeokMa?: boolean
+    hwaGae?: boolean
+    gwangGwi?: boolean
+    [key: string]: boolean | undefined
+  }
+  daewoon?: Array<{
+    startAge: number
+    endAge: number
+    stem: string
+    branch: string
+  }>
+  yeonwoon?: Array<{
+    year: number
+    stem: string
+    branch: string
+  }>
 }
 
 export interface Submission {

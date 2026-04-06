@@ -121,7 +121,8 @@ export function ReportContent({ submission }: ReportContentProps) {
   const completedSections = sections.filter(s => s.status === 'complete').length
   const progress = (completedSections / sections.length) * 100
 
-  // Pillars in order: Hour, Day, Month, Year (right to left in traditional display, but we show left to right)
+  // Pillars displayed left to right: Hour (leftmost), Day, Month, Year (rightmost)
+  // This matches traditional vertical layout read right-to-left: Year -> Month -> Day -> Hour
   const pillars = [
     { label: 'Hour', labelKr: '시주', pillar: sajuData.hourPillar },
     { label: 'Day', labelKr: '일주', pillar: sajuData.dayPillar },
@@ -160,9 +161,9 @@ export function ReportContent({ submission }: ReportContentProps) {
       <div className="bg-card border border-border rounded-xl p-4 mb-6 shadow-lg shadow-primary/5">
         <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-3 text-center">Your Four Pillars</h2>
         
-        {/* Pillars Grid - Right to Left: Year, Month, Day, Hour */}
+        {/* Pillars Grid - Left to Right: Hour, Day, Month, Year */}
         <div className="grid grid-cols-4 gap-2 text-center mb-4">
-          {pillars.reverse().map(({ label, labelKr, pillar }) => (
+          {pillars.map(({ label, labelKr, pillar }) => (
             <div key={label} className="bg-background/50 rounded-lg p-2">
               <p className="text-[10px] text-muted-foreground mb-1">{label}</p>
               <p className="text-[10px] text-muted-foreground/70">{labelKr}</p>

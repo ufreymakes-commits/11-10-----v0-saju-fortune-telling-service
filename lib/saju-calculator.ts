@@ -1,121 +1,179 @@
 // Saju (Four Pillars) Calculator
-// This is a placeholder implementation - replace with your actual Saju calculation logic
+// Connects to the full saju calculation module
 
 import type { BirthInfo, SajuData } from './types'
+import { runFullAnalysis } from './saju'
 
-// Heavenly Stems (천간)
-const HEAVENLY_STEMS = ['갑', '을', '병', '정', '무', '기', '경', '신', '임', '계']
-const STEMS_ENGLISH = ['Jia', 'Yi', 'Bing', 'Ding', 'Wu', 'Ji', 'Geng', 'Xin', 'Ren', 'Gui']
+// Heavenly Stems in Hanja (천간 한자)
+const STEMS_HANJA = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸']
+const STEMS_KOREAN = ['갑', '을', '병', '정', '무', '기', '경', '신', '임', '계']
+const STEMS_ENGLISH = ['Gap', 'Eul', 'Byeong', 'Jeong', 'Mu', 'Gi', 'Gyeong', 'Sin', 'Im', 'Gye']
+
+// Earthly Branches in Hanja (지지 한자)
+const BRANCHES_HANJA = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥']
+const BRANCHES_KOREAN = ['자', '축', '인', '묘', '진', '사', '오', '미', '신', '유', '술', '해']
+const BRANCHES_ENGLISH = ['Ja', 'Chuk', 'In', 'Myo', 'Jin', 'Sa', 'O', 'Mi', 'Sin', 'Yu', 'Sul', 'Hae']
+
+// Element mapping for stems
 const STEMS_ELEMENTS = ['Wood', 'Wood', 'Fire', 'Fire', 'Earth', 'Earth', 'Metal', 'Metal', 'Water', 'Water']
 
-// Earthly Branches (지지)
-const EARTHLY_BRANCHES = ['자', '축', '인', '묘', '진', '사', '오', '미', '신', '유', '술', '해']
-const BRANCHES_ENGLISH = ['Rat', 'Ox', 'Tiger', 'Rabbit', 'Dragon', 'Snake', 'Horse', 'Goat', 'Monkey', 'Rooster', 'Dog', 'Pig']
-const BRANCHES_ELEMENTS = ['Water', 'Earth', 'Wood', 'Wood', 'Earth', 'Fire', 'Fire', 'Earth', 'Metal', 'Metal', 'Earth', 'Water']
+// Convert Korean to Hanja
+function koreanStemToHanja(korean: string): string {
+  const index = STEMS_KOREAN.indexOf(korean)
+  return index >= 0 ? STEMS_HANJA[index] : korean
+}
 
-// Five Elements
-const ELEMENTS = ['Wood', 'Fire', 'Earth', 'Metal', 'Water']
+function koreanBranchToHanja(korean: string): string {
+  const index = BRANCHES_KOREAN.indexOf(korean)
+  return index >= 0 ? BRANCHES_HANJA[index] : korean
+}
 
-// PLACEHOLDER: Replace this entire function with your actual Saju calculation logic
+// Parse birth time from form format "HH:MM AM/PM" to 24h format
+function parseBirthTime(timeStr: string | undefined): string | undefined {
+  if (!timeStr) return undefined
+  
+  // Handle "HH:MM AM/PM" format
+  const match = timeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i)
+  if (!match) return undefined
+  
+  let hours = parseInt(match[1], 10)
+  const minutes = match[2]
+  const period = match[3]?.toUpperCase()
+  
+  if (period === 'PM' && hours !== 12) {
+    hours += 12
+  } else if (period === 'AM' && hours === 12) {
+    hours = 0
+  }
+  
+  return `${hours.toString().padStart(2, '0')}:${minutes}`
+}
+
 export function calculateSaju(birthInfo: BirthInfo): SajuData {
+  const birthTime = parseBirthTime(birthInfo.birthTime)
   const date = new Date(birthInfo.birthDate)
-  const year = date.getFullYear()
-  const month = date.getMonth() + 1
-  const day = date.getDate()
   
-  // Simplified calculation (PLACEHOLDER - replace with accurate algorithm)
-  // Year pillar
-  const yearStemIndex = (year - 4) % 10
-  const yearBranchIndex = (year - 4) % 12
+  // Parse time
+  let hour: number | undefined
+  let minute: number | undefined
+  if (birthTime) {
+    const [h, m] = birthTime.split(':').map(Number)
+    hour = h
+    minute = m
+  }
   
-  // Month pillar (simplified)
-  const monthStemIndex = ((year % 5) * 2 + month - 1) % 10
-  const monthBranchIndex = (month + 1) % 12
+  // Run the full analysis using our saju module
+  const analysis = runFullAnalysis({
+    year: date.getFullYear(),
+    month: date.getMonth() + 1,
+    day: date.getDate(),
+    hour,
+    minute,
+    gender: birthInfo.gender as 'male' | 'female',
+    country: birthInfo.birthCountry
+  })
   
-  // Day pillar (simplified - in reality this needs a lookup table)
-  const dayNumber = Math.floor(date.getTime() / 86400000)
-  const dayStemIndex = dayNumber % 10
-  const dayBranchIndex = dayNumber % 12
+  // Convert results to SajuData format with Hanja characters
+  // Access fourPillars object structure
+  const fp = analysis.fourPillars
+  const yearStemHanja = koreanStemToHanja(fp.year.stem)
+  const yearBranchHanja = koreanBranchToHanja(fp.year.branch)
+  const monthStemHanja = koreanStemToHanja(fp.month.stem)
+  const monthBranchHanja = koreanBranchToHanja(fp.month.branch)
+  const dayStemHanja = koreanStemToHanja(fp.day.stem)
+  const dayBranchHanja = koreanBranchToHanja(fp.day.branch)
   
-  // Hour pillar (if birth time provided)
   let hourPillar: { stem: string; branch: string } | undefined
-  if (birthInfo.birthTime) {
-    const [hours] = birthInfo.birthTime.split(':').map(Number)
-    const hourBranchIndex = Math.floor((hours + 1) / 2) % 12
-    const hourStemIndex = (dayStemIndex * 2 + Math.floor(hours / 2)) % 10
+  if (fp.hour && fp.hour.stem && fp.hour.branch) {
     hourPillar = {
-      stem: STEMS_ENGLISH[hourStemIndex],
-      branch: BRANCHES_ENGLISH[hourBranchIndex]
+      stem: koreanStemToHanja(fp.hour.stem),
+      branch: koreanBranchToHanja(fp.hour.branch)
     }
   }
   
-  // Calculate element balance
+  // Calculate element balance from analysis (Korean keys: 목, 화, 토, 금, 수)
+  const ec = analysis.elementCount
   const elements = {
-    wood: 0,
-    fire: 0,
-    earth: 0,
-    metal: 0,
-    water: 0
+    wood: ec['목'] || 0,
+    fire: ec['화'] || 0,
+    earth: ec['토'] || 0,
+    metal: ec['금'] || 0,
+    water: ec['수'] || 0
   }
-  
-  // Add stem elements
-  const stemElement = STEMS_ELEMENTS[dayStemIndex].toLowerCase() as keyof typeof elements
-  elements[stemElement] += 2
-  elements[STEMS_ELEMENTS[yearStemIndex].toLowerCase() as keyof typeof elements] += 1
-  elements[STEMS_ELEMENTS[monthStemIndex].toLowerCase() as keyof typeof elements] += 1
-  
-  // Add branch elements
-  elements[BRANCHES_ELEMENTS[dayBranchIndex].toLowerCase() as keyof typeof elements] += 1
-  elements[BRANCHES_ELEMENTS[yearBranchIndex].toLowerCase() as keyof typeof elements] += 1
-  elements[BRANCHES_ELEMENTS[monthBranchIndex].toLowerCase() as keyof typeof elements] += 1
   
   // Determine dominant element
   const dominantElement = Object.entries(elements).reduce((a, b) => 
     elements[a[0] as keyof typeof elements] > elements[b[0] as keyof typeof elements] ? a : b
   )[0]
   
-  // Determine lucky element (克: controlling element is lucky)
+  // Day Master info
+  const dayStemIndex = STEMS_HANJA.indexOf(dayStemHanja)
+  const dayMasterElement = dayStemIndex >= 0 ? STEMS_ELEMENTS[dayStemIndex] : 'Earth'
+  
+  // Lucky element (生: supporting element)
   const luckyElementMap: Record<string, string> = {
-    wood: 'Water',
-    fire: 'Wood',
-    earth: 'Fire',
-    metal: 'Earth',
-    water: 'Metal'
+    Wood: 'Water',
+    Fire: 'Wood',
+    Earth: 'Fire',
+    Metal: 'Earth',
+    Water: 'Metal'
   }
   
-  // Day Master personality types
-  const personalityTypes: Record<number, string> = {
-    0: 'The Pioneer', // 갑
-    1: 'The Diplomat', // 을
-    2: 'The Illuminator', // 병
-    3: 'The Nurturer', // 정
-    4: 'The Foundation', // 무
-    5: 'The Harmonizer', // 기
-    6: 'The Achiever', // 경
-    7: 'The Refiner', // 신
-    8: 'The Philosopher', // 임
-    9: 'The Mystic' // 계
+  // Personality types based on Day Master
+  const personalityTypes: Record<string, string> = {
+    '甲': 'The Pioneer',
+    '乙': 'The Diplomat',
+    '丙': 'The Illuminator',
+    '丁': 'The Nurturer',
+    '戊': 'The Mountain',
+    '己': 'The Garden',
+    '庚': 'The Warrior',
+    '辛': 'The Jewel',
+    '壬': 'The Ocean',
+    '癸': 'The Rain'
   }
   
   return {
     yearPillar: {
-      stem: STEMS_ENGLISH[yearStemIndex],
-      branch: BRANCHES_ENGLISH[yearBranchIndex]
+      stem: yearStemHanja,
+      branch: yearBranchHanja
     },
     monthPillar: {
-      stem: STEMS_ENGLISH[monthStemIndex],
-      branch: BRANCHES_ENGLISH[monthBranchIndex]
+      stem: monthStemHanja,
+      branch: monthBranchHanja
     },
     dayPillar: {
-      stem: STEMS_ENGLISH[dayStemIndex],
-      branch: BRANCHES_ENGLISH[dayBranchIndex]
+      stem: dayStemHanja,
+      branch: dayBranchHanja
     },
     hourPillar,
     dominantElement: dominantElement.charAt(0).toUpperCase() + dominantElement.slice(1),
     elementBalance: elements,
-    dayMaster: STEMS_ENGLISH[dayStemIndex],
-    luckyElement: luckyElementMap[dominantElement.toLowerCase()],
-    personalityType: personalityTypes[dayStemIndex]
+    dayMaster: dayStemHanja,
+    luckyElement: luckyElementMap[dayMasterElement] || 'Water',
+    personalityType: personalityTypes[dayStemHanja] || 'The Seeker',
+    // Include additional analysis data
+    tenGods: {
+      present: analysis.tenGods.present,
+      missing: analysis.tenGods.missing
+    },
+    // Convert spirits array to object format
+    spirits: analysis.spirits.reduce((acc, spirit) => {
+      acc[spirit] = true
+      return acc
+    }, {} as Record<string, boolean>),
+    // Convert daewoon to match SajuData format
+    daewoon: analysis.daewoon.map(d => ({
+      startAge: d.startAge,
+      endAge: d.startAge + 9,
+      stem: d.stem,
+      branch: d.branch
+    })),
+    yeonwoon: analysis.yeonwoon.map(y => ({
+      year: y.year,
+      stem: y.stem,
+      branch: y.branch
+    }))
   }
 }
 

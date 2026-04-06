@@ -114,13 +114,13 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
   const dayMasterChar = submission.sajuData.dayPillar?.stem || '甲'
   const dayMasterInfo = DAY_MASTER_INFO[dayMasterChar] || DAY_MASTER_INFO['甲']
 
-  // Pillars in order: Year, Month, Day, Hour (displayed right to left traditionally)
+  // Pillars displayed right to left: Year (rightmost) -> Month -> Day -> Hour (leftmost)
   const pillars = [
     { label: 'Hour', labelKr: '시주', pillar: submission.sajuData.hourPillar },
     { label: 'Day', labelKr: '일주', pillar: submission.sajuData.dayPillar },
     { label: 'Month', labelKr: '월주', pillar: submission.sajuData.monthPillar },
     { label: 'Year', labelKr: '연주', pillar: submission.sajuData.yearPillar },
-  ]
+  ] // Already in left-to-right display order (Hour, Day, Month, Year)
 
   return (
     <div className="px-4 py-8 max-w-2xl mx-auto">
@@ -153,9 +153,9 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
       <div className="bg-card border border-border rounded-xl p-4 mb-6 shadow-lg shadow-primary/5">
         <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-3 text-center">Your Four Pillars</h2>
         
-        {/* Pillars Grid */}
+        {/* Pillars Grid - displayed left to right: Hour, Day, Month, Year */}
         <div className="grid grid-cols-4 gap-2 text-center mb-4">
-          {pillars.reverse().map(({ label, labelKr, pillar }) => (
+          {pillars.map(({ label, labelKr, pillar }) => (
             <div key={label} className="bg-background/50 rounded-lg p-2">
               <p className="text-[10px] text-muted-foreground mb-1">{label}</p>
               <p className="text-[10px] text-muted-foreground/70">{labelKr}</p>
