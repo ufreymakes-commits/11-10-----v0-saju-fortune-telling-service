@@ -23,13 +23,20 @@ async function getPayPalAccessToken() {
   return data.access_token
 }
 
-function getBaseUrl(): string {
+function getBaseUrl(request: Request): string {
+  // Try to get URL from request headers first (works in any environment)
+  const host = request.headers.get('host')
+  const protocol = request.headers.get('x-forwarded-proto') || 'https'
+  
+  if (host) {
+    return `${protocol}://${host}`
+  }
+  
+  // Fallback to env variable
   let baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
-  // Ensure URL has protocol
   if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
     baseUrl = `https://${baseUrl}`
   }
-  // Remove trailing slash if present
   return baseUrl.replace(/\/$/, '')
 }
 
@@ -92,8 +99,8 @@ export async function POST(request: Request) {
           brand_name: 'Sajume',
           landing_page: 'NO_PREFERENCE',
           user_action: 'PAY_NOW',
-          return_url: `${getBaseUrl()}/checkout/${submissionId}/success`,
-          cancel_url: `${getBaseUrl()}/checkout/${submissionId}`
+          return_url: `${getBaseUrl(request)}/checkout/${submissionId}/success`,
+          cancel_url: `${getBaseUrl(request)}/checkout/${submissionId}`
         }
       })
     })
