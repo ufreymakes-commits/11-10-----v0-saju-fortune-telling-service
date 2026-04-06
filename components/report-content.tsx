@@ -102,7 +102,7 @@ export function ReportContent({ submission }: ReportContentProps) {
       {/* Header */}
       <div className="text-center mb-8">
         <Link href="/" className="inline-block mb-6">
-          <div className="border border-foreground/50 rounded-full px-6 py-2 text-foreground/80 text-sm tracking-wider">
+          <div className="border border-primary/50 rounded-full px-6 py-2 text-primary text-sm tracking-wider">
             Sajume
           </div>
         </Link>
@@ -125,7 +125,7 @@ export function ReportContent({ submission }: ReportContentProps) {
       </div>
 
       {/* Saju Summary Card */}
-      <div className="bg-card/40 backdrop-blur-sm border border-border/30 rounded-xl p-5 mb-8">
+      <div className="bg-card border border-border rounded-xl p-5 mb-8 shadow-lg shadow-primary/5">
         <h2 className="text-sm uppercase tracking-wider text-muted-foreground mb-3">Your Four Pillars</h2>
         <div className="grid grid-cols-4 gap-3 text-center">
           <div>
@@ -176,9 +176,9 @@ export function ReportContent({ submission }: ReportContentProps) {
       {/* Sections */}
       <div className="space-y-8">
         {sections.map((section, sectionIndex) => (
-          <div key={section.key} className="bg-card/30 backdrop-blur-sm border border-border/20 rounded-xl overflow-hidden">
+          <div key={section.key} className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
             {/* Section Header */}
-            <div className="bg-card/50 border-b border-border/20 px-5 py-4 flex items-center gap-3">
+            <div className="bg-muted border-b border-border px-5 py-4 flex items-center gap-3">
               <div className={`p-2 rounded-lg ${section.status === 'complete' ? 'bg-secondary/20 text-secondary' : 'bg-muted/20 text-muted-foreground'}`}>
                 {section.status === 'complete' ? <CheckCircleIcon className="w-5 h-5" /> : section.icon}
               </div>
@@ -235,7 +235,7 @@ export function ReportContent({ submission }: ReportContentProps) {
 
       {/* Completion Message */}
       {completedSections === sections.length && (
-        <div className="mt-8 text-center bg-card/40 backdrop-blur-sm border border-primary/30 rounded-xl p-6 glow-purple">
+        <div className="mt-8 text-center bg-card border border-primary/40 rounded-xl p-6 shadow-lg shadow-primary/10">
           <div className="relative w-16 h-16 mx-auto mb-4">
             <Image
               src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%85%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"

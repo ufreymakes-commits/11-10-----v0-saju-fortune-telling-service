@@ -91,7 +91,7 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
       {/* Header */}
       <div className="text-center mb-8">
         <Link href="/" className="inline-block mb-6">
-          <div className="border border-foreground/50 rounded-full px-6 py-2 text-foreground/80 text-sm tracking-wider">
+          <div className="border border-primary/50 rounded-full px-6 py-2 text-primary text-sm tracking-wider">
             Sajume
           </div>
         </Link>
@@ -114,7 +114,7 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
       </div>
 
       {/* Saju Summary Card */}
-      <div className="bg-card/40 backdrop-blur-sm border border-border/30 rounded-xl p-5 mb-8">
+      <div className="bg-card border border-border rounded-xl p-5 mb-8 shadow-lg shadow-primary/5">
         <h2 className="text-sm uppercase tracking-wider text-muted-foreground mb-3">Your Four Pillars</h2>
         <div className="grid grid-cols-4 gap-3 text-center">
           <div>
@@ -162,7 +162,7 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
           {freeFacts.map((fact, index) => (
             <div 
               key={fact.id}
-              className="bg-card/30 backdrop-blur-sm border border-border/20 rounded-lg p-4 transition-all hover:border-primary/30"
+              className="bg-card border border-border rounded-lg p-4 transition-all hover:border-primary/50 shadow-sm"
             >
               <div className="flex gap-3">
                 <span className="text-primary font-bold text-lg">{index + 1}</span>
@@ -184,7 +184,7 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
           {teaserFacts.map((fact, index) => (
             <div 
               key={fact.id}
-              className="relative bg-card/20 backdrop-blur-sm border border-border/10 rounded-lg p-4 overflow-hidden"
+              className="relative bg-muted border border-border rounded-lg p-4 overflow-hidden"
             >
               <div className="flex gap-3">
                 <span className="text-muted-foreground font-bold text-lg">{10 + index}</span>
@@ -201,7 +201,7 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-card/50 backdrop-blur-sm border border-primary/30 rounded-2xl p-6 text-center glow-purple">
+      <div className="bg-card border border-primary/40 rounded-2xl p-6 text-center shadow-lg shadow-primary/10">
         <div className="relative w-16 h-16 mx-auto mb-4 animate-float">
           <Image
             src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%85%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"

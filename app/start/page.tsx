@@ -16,7 +16,7 @@ export default function StartPage() {
       <div className="relative z-10 flex flex-col items-center px-4 py-8">
         {/* Header */}
         <Link href="/" className="mb-6">
-          <div className="border border-foreground/50 rounded-full px-6 py-2 text-foreground/80 text-sm tracking-wider hover:border-foreground transition-colors">
+          <div className="border border-primary/50 rounded-full px-6 py-2 text-primary text-sm tracking-wider hover:border-primary transition-colors">
             Sajume
           </div>
         </Link>
@@ -40,7 +40,7 @@ export default function StartPage() {
         </p>
         
         {/* Form Card */}
-        <div className="w-full max-w-md bg-card/30 backdrop-blur-sm border border-border/30 rounded-2xl p-6 md:p-8">
+        <div className="w-full max-w-md bg-card border border-border rounded-2xl p-6 md:p-8 shadow-lg shadow-primary/5">
           <BirthForm />
         </div>
         

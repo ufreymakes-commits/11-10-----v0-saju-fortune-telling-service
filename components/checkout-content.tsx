@@ -50,7 +50,7 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
       {/* Header */}
       <div className="text-center mb-8">
         <Link href="/" className="inline-block mb-6">
-          <div className="border border-foreground/50 rounded-full px-6 py-2 text-foreground/80 text-sm tracking-wider">
+          <div className="border border-primary/50 rounded-full px-6 py-2 text-primary text-sm tracking-wider">
             Sajume
           </div>
         </Link>
@@ -73,7 +73,7 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
       </div>
 
       {/* Order Summary */}
-      <div className="bg-card/40 backdrop-blur-sm border border-border/30 rounded-xl p-5 mb-6">
+      <div className="bg-card border border-border rounded-xl p-5 mb-6 shadow-lg shadow-primary/5">
         <h2 className="text-sm uppercase tracking-wider text-muted-foreground mb-4">Order Summary</h2>
         
         <div className="flex items-start gap-4 mb-4">
@@ -102,7 +102,7 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
       </div>
 
       {/* What's Included */}
-      <div className="bg-card/30 backdrop-blur-sm border border-border/20 rounded-xl p-5 mb-6">
+      <div className="bg-muted border border-border rounded-xl p-5 mb-6">
         <h2 className="text-sm uppercase tracking-wider text-muted-foreground mb-3">What&apos;s Included</h2>
         <ul className="space-y-2">
           {[
