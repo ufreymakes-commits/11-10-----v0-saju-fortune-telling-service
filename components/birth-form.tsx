@@ -97,13 +97,13 @@ export function BirthForm() {
       <FieldGroup className="gap-5">
         {/* Name */}
         <Field>
-          <FieldLabel htmlFor="name" className="text-foreground font-medium">Your Name</FieldLabel>
+          <FieldLabel htmlFor="name" className="text-gray-800 font-medium">Your Name</FieldLabel>
           <Input
             id="name"
-            placeholder="Enter your name"
+            placeholder="Enter your full name"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="bg-white border-gray-300 focus:border-primary text-foreground"
+            className="bg-white border-gray-300 focus:border-primary text-gray-900 placeholder:text-gray-400"
             aria-invalid={!!errors.name}
           />
           {errors.name && <FieldError>{errors.name}</FieldError>}
@@ -111,13 +111,13 @@ export function BirthForm() {
 
         {/* Birth Date */}
         <Field>
-          <FieldLabel htmlFor="birthDate" className="text-foreground font-medium">Birth Date</FieldLabel>
+          <FieldLabel htmlFor="birthDate" className="text-gray-800 font-medium">Birth Date</FieldLabel>
           <Input
             id="birthDate"
             type="date"
             value={formData.birthDate}
             onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
-            className="bg-white border-gray-300 focus:border-primary text-foreground"
+            className="bg-white border-gray-300 focus:border-primary text-gray-900"
             aria-invalid={!!errors.birthDate}
           />
           {errors.birthDate && <FieldError>{errors.birthDate}</FieldError>}
@@ -125,28 +125,31 @@ export function BirthForm() {
 
         {/* Birth Country */}
         <Field>
-          <FieldLabel className="text-foreground font-medium">Birth Country</FieldLabel>
+          <FieldLabel className="text-gray-800 font-medium">Birth Country</FieldLabel>
           <Select 
             value={formData.birthCountry} 
             onValueChange={(value) => setFormData({ ...formData, birthCountry: value })}
           >
-            <SelectTrigger className="w-full bg-white border-gray-300 focus:border-primary text-foreground">
+            <SelectTrigger className="w-full bg-white border-gray-300 focus:border-primary text-gray-900">
               <SelectValue placeholder="Select your birth country" />
             </SelectTrigger>
-            <SelectContent className="bg-white">
+            <SelectContent className="bg-white max-h-[300px]">
               {COUNTRIES.map((country) => (
-                <SelectItem key={country.value} value={country.value}>
+                <SelectItem key={country.value} value={country.value} className="text-gray-900">
                   {country.label}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
+          <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">
+            Please select your country of birth, and if your country has multiple time zones, choose the city with the time zone most similar to your birth location.
+          </p>
           {errors.birthCountry && <FieldError>{errors.birthCountry}</FieldError>}
         </Field>
 
         {/* Birth Time (Optional) */}
         <Field>
-          <FieldLabel htmlFor="birthTime" className="text-foreground font-medium">
+          <FieldLabel htmlFor="birthTime" className="text-gray-800 font-medium">
             Birth Time <span className="text-gray-400 font-normal">(optional)</span>
           </FieldLabel>
           <Input
@@ -154,16 +157,16 @@ export function BirthForm() {
             type="time"
             value={formData.birthTime}
             onChange={(e) => setFormData({ ...formData, birthTime: e.target.value })}
-            className="bg-white border-gray-300 focus:border-primary text-foreground"
+            className="bg-white border-gray-300 focus:border-primary text-gray-900"
           />
-          <p className="text-xs text-gray-500">
-            For more accurate readings, enter your birth time if known
+          <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">
+            {"If applicable, use standard time (exclude DST; Daylight Saving Time). If you don't know the birth time, just submit as a blank. It's more accurate if you have an exact time though."}
           </p>
         </Field>
 
         {/* Gender */}
         <Field>
-          <FieldLabel className="text-foreground font-medium">Gender</FieldLabel>
+          <FieldLabel className="text-gray-800 font-medium">Gender</FieldLabel>
           <RadioGroup
             value={formData.gender}
             onValueChange={(value) => setFormData({ ...formData, gender: value })}
@@ -171,15 +174,15 @@ export function BirthForm() {
           >
             <div className="flex items-center gap-2">
               <RadioGroupItem value="female" id="female" />
-              <label htmlFor="female" className="text-sm cursor-pointer text-foreground">Female</label>
+              <label htmlFor="female" className="text-sm cursor-pointer text-gray-800">Female</label>
             </div>
             <div className="flex items-center gap-2">
               <RadioGroupItem value="male" id="male" />
-              <label htmlFor="male" className="text-sm cursor-pointer text-foreground">Male</label>
+              <label htmlFor="male" className="text-sm cursor-pointer text-gray-800">Male</label>
             </div>
             <div className="flex items-center gap-2">
               <RadioGroupItem value="other" id="other" />
-              <label htmlFor="other" className="text-sm cursor-pointer text-foreground">Other</label>
+              <label htmlFor="other" className="text-sm cursor-pointer text-gray-800">Other</label>
             </div>
           </RadioGroup>
           {errors.gender && <FieldError>{errors.gender}</FieldError>}
@@ -187,17 +190,17 @@ export function BirthForm() {
 
         {/* Referral Source */}
         <Field>
-          <FieldLabel className="text-foreground font-medium">How did you find us?</FieldLabel>
+          <FieldLabel className="text-gray-800 font-medium">How did you find us?</FieldLabel>
           <Select 
             value={formData.referralSource} 
             onValueChange={(value) => setFormData({ ...formData, referralSource: value })}
           >
-            <SelectTrigger className="w-full bg-white border-gray-300 focus:border-primary text-foreground">
+            <SelectTrigger className="w-full bg-white border-gray-300 focus:border-primary text-gray-900">
               <SelectValue placeholder="Select an option" />
             </SelectTrigger>
             <SelectContent className="bg-white">
               {REFERRAL_SOURCES.map((source) => (
-                <SelectItem key={source.value} value={source.value}>
+                <SelectItem key={source.value} value={source.value} className="text-gray-900">
                   {source.label}
                 </SelectItem>
               ))}
