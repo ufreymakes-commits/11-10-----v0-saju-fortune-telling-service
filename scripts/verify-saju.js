@@ -71,20 +71,10 @@ function getMonthStemIndex(yearStemIndex, monthBranchIndex) {
   return (baseStemIndex + branchOffset) % 10;
 }
 
-// 시주 계산
-function getHourBranchIndex(hour) {
-  if (hour >= 23 || hour < 1) return 0;
-  if (hour < 3) return 1;
-  if (hour < 5) return 2;
-  if (hour < 7) return 3;
-  if (hour < 9) return 4;
-  if (hour < 11) return 5;
-  if (hour < 13) return 6;
-  if (hour < 15) return 7;
-  if (hour < 17) return 8;
-  if (hour < 19) return 9;
-  if (hour < 21) return 10;
-  return 11;
+// 시주 계산 (원본 공식: totalMin + 30 offset)
+function getHourBranchIndex(hour, minute = 0) {
+  const totalMin = hour * 60 + minute;
+  return Math.floor(((totalMin + 30) % 1440) / 120);
 }
 
 function getHourStemIndex(dayStemIndex, hourBranchIndex) {
@@ -125,7 +115,7 @@ function runTests() {
     const monthStemIndex = getMonthStemIndex(yearStemIndex, monthBranchIndex);
     const monthPillar = STEMS[monthStemIndex] + BRANCHES[monthBranchIndex];
     
-    const hourBranchIndex = getHourBranchIndex(hour);
+    const hourBranchIndex = getHourBranchIndex(hour, minute);
     const dayStemIndex = STEMS.indexOf(dayPillar[0]);
     const hourStemIndex = getHourStemIndex(dayStemIndex, hourBranchIndex);
     const hourPillar = STEMS[hourStemIndex] + BRANCHES[hourBranchIndex];
