@@ -163,9 +163,6 @@ export function BirthForm() {
               ))}
             </SelectContent>
           </Select>
-          <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">
-            Please select your country of birth, and if your country has multiple time zones, choose the city with the time zone most similar to your birth location.
-          </p>
           {errors.birthCountry && <FieldError>{errors.birthCountry}</FieldError>}
         </Field>
 
