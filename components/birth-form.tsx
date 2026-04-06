@@ -237,7 +237,7 @@ export function BirthForm() {
             </Select>
           </div>
           <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">
-            {"If applicable, use standard time (exclude DST; Daylight Saving Time). If you don't know the birth time, just submit as a blank. It's more accurate if you have an exact time though."}
+            <span className="font-bold">If applicable, use standard time (exclude DST; Daylight Saving Time).</span>{" If you don't know the birth time, just submit as a blank. It's more accurate if you have an exact time though."}
           </p>
         </Field>
 
