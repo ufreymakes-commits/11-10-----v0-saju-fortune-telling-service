@@ -139,17 +139,18 @@
   
   .star {
     position: absolute;
-    width: 4px;
-    height: 4px;
-    background: oklch(0.55 0.18 290);
+    width: 2px;
+    height: 2px;
+    background: white;
     border-radius: 50%;
     animation: twinkle 3s infinite;
-    opacity: 0.4;
+    opacity: 0.6;
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
   }
   
   @keyframes twinkle {
-    0%, 100% { opacity: 0.2; }
-    50% { opacity: 0.6; }
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
   }
   
   @keyframes float {
