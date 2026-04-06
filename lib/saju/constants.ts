@@ -235,6 +235,8 @@ export const TIMEZONE_OFFSETS: Record<string, { offset: number; meridian: number
   "CA-YVR": { offset: -8, meridian: -120 },
   // 브라질
   "BR-SAO": { offset: -3, meridian: -45 },
+  "BR-SSA": { offset: -3, meridian: -45 },  // Salvador
+  "BR-POA": { offset: -3, meridian: -45 },  // Porto Alegre
   "BR-BSB": { offset: -3, meridian: -45 },
   "BR-MAO": { offset: -4, meridian: -60 },
   "BR-RBR": { offset: -5, meridian: -75 },
@@ -351,6 +353,7 @@ export const TIMEZONE_OFFSETS: Record<string, { offset: number; meridian: number
   "MU": { offset: 4, meridian: 60 },
   "MX-MEX": { offset: -6, meridian: -90 },
   "MX-TIJ": { offset: -8, meridian: -120 },
+  "MX-CUU": { offset: -7, meridian: -105 },  // Chihuahua (MST)
   "MX-CUN": { offset: -5, meridian: -75 },
   "MD": { offset: 2, meridian: 30 },
   "MC": { offset: 1, meridian: 15 },
