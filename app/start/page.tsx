@@ -40,7 +40,7 @@ export default function StartPage() {
         </p>
         
         {/* Form Card */}
-        <div className="w-full max-w-md bg-card border border-border rounded-2xl p-6 md:p-8 shadow-lg shadow-primary/5">
+        <div className="w-full max-w-md bg-white border border-primary/20 rounded-2xl p-6 md:p-8 shadow-xl">
           <BirthForm />
         </div>
         

@@ -97,13 +97,13 @@ export function BirthForm() {
       <FieldGroup className="gap-5">
         {/* Name */}
         <Field>
-          <FieldLabel htmlFor="name">Your Name</FieldLabel>
+          <FieldLabel htmlFor="name" className="text-foreground font-medium">Your Name</FieldLabel>
           <Input
             id="name"
             placeholder="Enter your name"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="bg-card/50 border-border/50 focus:border-primary"
+            className="bg-white border-gray-300 focus:border-primary text-foreground"
             aria-invalid={!!errors.name}
           />
           {errors.name && <FieldError>{errors.name}</FieldError>}
@@ -111,13 +111,13 @@ export function BirthForm() {
 
         {/* Birth Date */}
         <Field>
-          <FieldLabel htmlFor="birthDate">Birth Date</FieldLabel>
+          <FieldLabel htmlFor="birthDate" className="text-foreground font-medium">Birth Date</FieldLabel>
           <Input
             id="birthDate"
             type="date"
             value={formData.birthDate}
             onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
-            className="bg-card/50 border-border/50 focus:border-primary"
+            className="bg-white border-gray-300 focus:border-primary text-foreground"
             aria-invalid={!!errors.birthDate}
           />
           {errors.birthDate && <FieldError>{errors.birthDate}</FieldError>}
@@ -125,15 +125,15 @@ export function BirthForm() {
 
         {/* Birth Country */}
         <Field>
-          <FieldLabel>Birth Country</FieldLabel>
+          <FieldLabel className="text-foreground font-medium">Birth Country</FieldLabel>
           <Select 
             value={formData.birthCountry} 
             onValueChange={(value) => setFormData({ ...formData, birthCountry: value })}
           >
-            <SelectTrigger className="w-full bg-card/50 border-border/50 focus:border-primary">
+            <SelectTrigger className="w-full bg-white border-gray-300 focus:border-primary text-foreground">
               <SelectValue placeholder="Select your birth country" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               {COUNTRIES.map((country) => (
                 <SelectItem key={country.value} value={country.value}>
                   {country.label}
@@ -146,24 +146,24 @@ export function BirthForm() {
 
         {/* Birth Time (Optional) */}
         <Field>
-          <FieldLabel htmlFor="birthTime">
-            Birth Time <span className="text-muted-foreground font-normal">(optional)</span>
+          <FieldLabel htmlFor="birthTime" className="text-foreground font-medium">
+            Birth Time <span className="text-gray-400 font-normal">(optional)</span>
           </FieldLabel>
           <Input
             id="birthTime"
             type="time"
             value={formData.birthTime}
             onChange={(e) => setFormData({ ...formData, birthTime: e.target.value })}
-            className="bg-card/50 border-border/50 focus:border-primary"
+            className="bg-white border-gray-300 focus:border-primary text-foreground"
           />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-gray-500">
             For more accurate readings, enter your birth time if known
           </p>
         </Field>
 
         {/* Gender */}
         <Field>
-          <FieldLabel>Gender</FieldLabel>
+          <FieldLabel className="text-foreground font-medium">Gender</FieldLabel>
           <RadioGroup
             value={formData.gender}
             onValueChange={(value) => setFormData({ ...formData, gender: value })}
@@ -171,15 +171,15 @@ export function BirthForm() {
           >
             <div className="flex items-center gap-2">
               <RadioGroupItem value="female" id="female" />
-              <label htmlFor="female" className="text-sm cursor-pointer">Female</label>
+              <label htmlFor="female" className="text-sm cursor-pointer text-foreground">Female</label>
             </div>
             <div className="flex items-center gap-2">
               <RadioGroupItem value="male" id="male" />
-              <label htmlFor="male" className="text-sm cursor-pointer">Male</label>
+              <label htmlFor="male" className="text-sm cursor-pointer text-foreground">Male</label>
             </div>
             <div className="flex items-center gap-2">
               <RadioGroupItem value="other" id="other" />
-              <label htmlFor="other" className="text-sm cursor-pointer">Other</label>
+              <label htmlFor="other" className="text-sm cursor-pointer text-foreground">Other</label>
             </div>
           </RadioGroup>
           {errors.gender && <FieldError>{errors.gender}</FieldError>}
@@ -187,15 +187,15 @@ export function BirthForm() {
 
         {/* Referral Source */}
         <Field>
-          <FieldLabel>How did you find us?</FieldLabel>
+          <FieldLabel className="text-foreground font-medium">How did you find us?</FieldLabel>
           <Select 
             value={formData.referralSource} 
             onValueChange={(value) => setFormData({ ...formData, referralSource: value })}
           >
-            <SelectTrigger className="w-full bg-card/50 border-border/50 focus:border-primary">
+            <SelectTrigger className="w-full bg-white border-gray-300 focus:border-primary text-foreground">
               <SelectValue placeholder="Select an option" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               {REFERRAL_SOURCES.map((source) => (
                 <SelectItem key={source.value} value={source.value}>
                   {source.label}
@@ -210,7 +210,7 @@ export function BirthForm() {
         <Button 
           type="submit" 
           disabled={isLoading}
-          className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 h-12 text-lg font-semibold rounded-full glow-pink mt-4"
+          className="w-full bg-primary text-white hover:bg-primary/90 h-12 text-lg font-semibold rounded-full shadow-lg shadow-primary/30 mt-4"
         >
           {isLoading ? (
             <>
