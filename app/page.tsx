@@ -2,13 +2,14 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { StarsBackground } from '@/components/stars-background'
 
-const REVIEWS = [
-  { id: 1, name: "Sarah M.", rating: 5, text: "Incredibly accurate! It described my personality traits perfectly." },
-  { id: 2, name: "James L.", rating: 5, text: "I was skeptical at first, but the reading blew my mind. So detailed!" },
-  { id: 3, name: "Emily K.", rating: 5, text: "Better than any Western astrology reading I've had. Highly recommend!" },
-  { id: 4, name: "Michael R.", rating: 5, text: "The career insights were spot on. Worth every penny." },
-  { id: 5, name: "Jessica T.", rating: 5, text: "Shared with all my friends. We're all amazed at how accurate it is." },
-  { id: 6, name: "David H.", rating: 5, text: "Finally found something that actually resonates with who I am." },
+const REVIEW_IMAGES = [
+  { id: 1, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-06%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%208.35.09-JtTw1gHzOfT77JZFdiZLC8jUgRKBtx.png", alt: "Customer reviews about accuracy and insights" },
+  { id: 2, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-06%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%208.35.17-6DPkdhllKYVj7ZPutcDGvw1qhKwLog.png", alt: "Customer reviews about predictions and resonance" },
+  { id: 3, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-06%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%208.35.24-JCEllKQBFoITmhwmOMa3ZjJIx06DXk.png", alt: "Customer review about sample and full report" },
+  { id: 4, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-06%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%208.34.56-enUCu1k6CGSVUYjl9Ikwg8rZLo4OHG.png", alt: "Customer reviews about validation and meaningful reading" },
+  { id: 5, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-06%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%208.35.35-u4rEj3p7ae6s7tZkUuv3STgqj8iTnx.png", alt: "Customer reviews about clarity and introspection" },
+  { id: 6, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-06%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%208.36.05-qffQqwtmUFeWPKusUZq8q2wazcEFyY.png", alt: "Customer reviews about accuracy and timelines" },
+  { id: 7, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-06%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%208.36.17-l0YlKnZMITqebYLhaki9QJoOd98zio.png", alt: "Customer reviews about premium version" },
 ]
 
 export default function LandingPage() {
@@ -91,19 +92,34 @@ export default function LandingPage() {
       {/* Reviews Section */}
       <section className="relative z-10 py-12 px-4">
         <div className="max-w-4xl mx-auto">
-          <h3 className="text-center text-lg font-semibold text-white/90 mb-6">What Our Users Say</h3>
+          <h3 className="text-center text-lg font-semibold text-white/90 mb-2">What Our Users Say</h3>
+          <div className="flex items-center justify-center gap-1 mb-6">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <svg key={i} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+              </svg>
+            ))}
+            <span className="text-sm text-white/60 ml-2">5.0 from 200+ reviews</span>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {REVIEWS.map((review) => (
-              <div key={review.id} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4">
+            {REVIEW_IMAGES.map((review) => (
+              <div key={review.id} className="bg-white rounded-xl p-3 shadow-lg">
                 <div className="flex items-center gap-1 mb-2">
-                  {Array.from({ length: review.rating }).map((_, i) => (
-                    <svg key={i} className="w-3.5 h-3.5 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <svg key={i} className="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 20 20">
                       <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
                     </svg>
                   ))}
                 </div>
-                <p className="text-xs text-white/70 mb-2 leading-relaxed">{`"${review.text}"`}</p>
-                <p className="text-xs text-white/40">- {review.name}</p>
+                <div className="relative w-full">
+                  <Image
+                    src={review.src}
+                    alt={review.alt}
+                    width={400}
+                    height={200}
+                    className="w-full h-auto rounded-lg"
+                  />
+                </div>
               </div>
             ))}
           </div>
