@@ -1,4 +1,7 @@
-// 72개 전체 테스트 케이스
+const fs = require('fs');
+const path = require('path');
+
+// ========== 상수 ==========
 const STEMS = ["갑", "을", "병", "정", "무", "기", "경", "신", "임", "계"];
 const BRANCHES = ["자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해"];
 const SIXTY_JIAZI = [
@@ -23,7 +26,205 @@ const HOUR_STEM_TABLE = {
   "계": ["임", "계", "갑", "을", "병", "정", "무", "기", "경", "신", "임", "계"]
 };
 
-// 72개 테스트 케이스 (사용자 제공)
+// 절(節) 인덱스 -> 월지 인덱스
+// 소한(0)->축, 입춘(2)->인, 경칩(4)->묘, 청명(6)->진, 입하(8)->사, 망종(10)->오
+// 소서(12)->미, 입추(14)->신, 백로(16)->유, 한로(18)->술, 입동(20)->해, 대설(22)->자
+const JEOL_TO_BRANCH = { 0:1, 2:2, 4:3, 6:4, 8:5, 10:6, 12:7, 14:8, 16:9, 18:10, 20:11, 22:0 };
+const JEOL_INDICES = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22];
+
+// ========== 절기 데이터 로드 ==========
+let jeolgiData = null;
+
+function parseDateTime(str) {
+  if (!str || str.trim() === '') return null;
+  const parts = str.trim().split(' ');
+  if (parts.length !== 2) return null;
+  const [y, m, d] = parts[0].split('-').map(Number);
+  const [h, min, s] = parts[1].split(':').map(Number);
+  return new Date(Date.UTC(y, m - 1, d, h, min, s || 0));
+}
+
+function loadJeolgiData() {
+  if (jeolgiData) return jeolgiData;
+  try {
+    const filePath = path.join(__dirname, 'jeolgi-table.txt');
+    const content = fs.readFileSync(filePath, 'utf-8');
+    const lines = content.split('\n');
+    jeolgiData = [];
+    
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      const cols = line.split('\t');
+      if (cols.length < 25) continue;
+      
+      const year = parseInt(cols[0], 10);
+      if (isNaN(year)) continue;
+      
+      const terms = [];
+      for (let j = 1; j <= 24; j++) {
+        terms.push(parseDateTime(cols[j]));
+      }
+      if (terms.filter(t => t !== null).length === 24) {
+        jeolgiData.push({ year, terms });
+      }
+    }
+    console.log(`절기 데이터: ${jeolgiData.length}년 로드됨 (${jeolgiData[0]?.year}-${jeolgiData[jeolgiData.length-1]?.year})`);
+    return jeolgiData;
+  } catch (e) {
+    console.error('절기 데이터 로드 실패:', e.message);
+    return [];
+  }
+}
+
+// ========== 핵심 계산 함수 ==========
+
+// 현재 절기 찾기 (UTC 기준)
+function findCurrentSolarTerm(utcDate) {
+  const data = loadJeolgiData();
+  const year = utcDate.getUTCFullYear();
+  
+  const currYear = data.find(e => e.year === year);
+  const prevYear = data.find(e => e.year === year - 1);
+  
+  if (!currYear) return null;
+  
+  // 현재 연도 첫 절기 이전이면 전년도 마지막 절기 사용
+  if (utcDate < currYear.terms[0]) {
+    if (prevYear) return { year: year - 1, termIndex: 23 };
+    return null;
+  }
+  
+  // 현재 연도에서 해당 절기 찾기
+  for (let i = 23; i >= 0; i--) {
+    if (currYear.terms[i] && utcDate >= currYear.terms[i]) {
+      return { year, termIndex: i };
+    }
+  }
+  return null;
+}
+
+// 사주 연도 (입춘 기준)
+function getSajuYear(utcDate) {
+  const data = loadJeolgiData();
+  const year = utcDate.getUTCFullYear();
+  const currYear = data.find(e => e.year === year);
+  
+  if (!currYear || !currYear.terms[2]) return year;
+  
+  const ipchun = currYear.terms[2]; // 입춘
+  return utcDate < ipchun ? year - 1 : year;
+}
+
+// 월지 계산 (절기 기준)
+function getMonthBranchIndex(utcDate) {
+  const result = findCurrentSolarTerm(utcDate);
+  if (!result) return (utcDate.getUTCMonth() + 2) % 12;
+  
+  let termIndex = result.termIndex;
+  // 절(節)이 아니면 이전 절로
+  if (!JEOL_INDICES.includes(termIndex)) {
+    termIndex = termIndex - 1;
+    if (termIndex < 0) termIndex = 22;
+  }
+  return JEOL_TO_BRANCH[termIndex];
+}
+
+// 월간 계산
+function getMonthStemIndex(yearStemIndex, monthBranchIndex) {
+  // 갑/기년 인월(1월)은 병인, 을/경년은 무인, 병/신년은 경인, 정/임년은 임인, 무/계년은 갑인
+  const baseStems = [2, 4, 6, 8, 0];
+  const base = baseStems[yearStemIndex % 5];
+  const offset = (monthBranchIndex - 2 + 12) % 12;
+  return (base + offset) % 10;
+}
+
+// 연주 계산
+function getYearPillar(utcDate) {
+  const sajuYear = getSajuYear(utcDate);
+  const index = ((sajuYear - 1984) % 60 + 60) % 60;
+  return SIXTY_JIAZI[index];
+}
+
+// 월주 계산
+function getMonthPillar(yearStem, utcDate) {
+  const yearStemIndex = STEMS.indexOf(yearStem);
+  const monthBranchIndex = getMonthBranchIndex(utcDate);
+  const monthStemIndex = getMonthStemIndex(yearStemIndex, monthBranchIndex);
+  return STEMS[monthStemIndex] + BRANCHES[monthBranchIndex];
+}
+
+// 일주 계산 (현지 날짜 기준)
+function getDayPillar(year, month, day) {
+  const baseDate = new Date(Date.UTC(1996, 4, 22)); // 기미일
+  const targetDate = new Date(Date.UTC(year, month - 1, day));
+  const diffDays = Math.floor((targetDate - baseDate) / (1000 * 60 * 60 * 24));
+  const index = ((diffDays + 55) % 60 + 60) % 60;
+  return SIXTY_JIAZI[index];
+}
+
+// 시주 계산
+function getHourBranchIndex(hour, minute = 0) {
+  const totalMin = hour * 60 + minute;
+  return Math.floor(((totalMin + 30) % 1440) / 120);
+}
+
+function getHourPillar(dayStem, hour, minute = 0) {
+  const branchIndex = getHourBranchIndex(hour, minute);
+  const hourStem = HOUR_STEM_TABLE[dayStem][branchIndex];
+  return hourStem + BRANCHES[branchIndex];
+}
+
+// ========== 타임존 ==========
+const TZ_OFFSETS = {
+  'KR': 9, 'JP': 9, 'CN': 8, 'VN': 7, 'TH': 7, 'ID-JKT': 7,
+  'US-LAX': -8, 'US-NYC': -5, 'US-CHI': -6, 'US-DEN': -7, 'US-ANC': -9,
+  'IN-CCU': 5.5, 'IN-DEL': 5.5, 'IN-BOM': 5.5,
+  'GB': 0, 'UK': 0, 'DE': 1, 'FR': 1, 'IT': 1, 'ES': 1, 'SE': 1,
+  'AU-SYD': 10, 'NZ': 12, 'BR-SAO': -3, 'MX-MEX': -6, 'MX-CUU': -7,
+  'AR': -3, 'CA-TOR': -5, 'RU-MOW': 3, 'HK': 8, 'SG': 8, 'MY': 8,
+  'PH': 8, 'EG': 2, 'ZA': 2, 'NG': 1, 'KE': 3, 'PK': 5, 'BD': 6,
+  'UA': 2, 'GT': -6, 'IQ': 3, 'SA': 3, 'AE': 4, 'TR': 3, 'PL': 1,
+  'NL': 1, 'BE': 1, 'AT': 1, 'CH': 1, 'GR': 2, 'PT': 0, 'CZ': 1,
+  'HU': 1, 'RO': 2, 'IL': 2, 'CL': -3, 'CO': -5, 'PE': -5, 'VE': -4,
+  'NO': 1, 'DK': 1, 'FI': 2, 'IE': 0, 'NP': 5.75, 'IR': 3.5, 'KZ': 6, 'RW': 2
+};
+
+// ========== 메인 계산 ==========
+function calculateSaju(dateStr, timeStr, country) {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  let hour = null, minute = 0;
+  if (timeStr && timeStr.includes(':')) {
+    [hour, minute] = timeStr.split(':').map(Number);
+  }
+  
+  const offset = TZ_OFFSETS[country] || 0;
+  const localHour = hour !== null ? hour : 12;
+  
+  // 현지 시간 -> UTC
+  const localDate = new Date(year, month - 1, day, localHour, minute, 0);
+  const utcTime = localDate.getTime() - (offset * 60 * 60 * 1000);
+  const utcDate = new Date(utcTime);
+  
+  // 야자시 보정
+  let adjYear = year, adjMonth = month, adjDay = day;
+  if (hour !== null && hour >= 23) {
+    const next = new Date(year, month - 1, day + 1);
+    adjYear = next.getFullYear();
+    adjMonth = next.getMonth() + 1;
+    adjDay = next.getDate();
+  }
+  
+  // 계산
+  const yearPillar = getYearPillar(utcDate);
+  const monthPillar = getMonthPillar(yearPillar[0], utcDate);
+  const dayPillar = getDayPillar(adjYear, adjMonth, adjDay);
+  const hourPillar = hour !== null ? getHourPillar(dayPillar[0], hour, minute) : '';
+  
+  return { year: yearPillar, month: monthPillar, day: dayPillar, hour: hourPillar };
+}
+
+// ========== 72개 테스트 케이스 ==========
 const testCases = [
   { date: '1996-05-22', time: '16:30', country: 'KR', expected: { year: '병자', month: '계사', day: '기미', hour: '임신' } },
   { date: '1997-04-23', time: '20:15', country: 'US-LAX', expected: { year: '정축', month: '갑진', day: '을미', hour: '병술' } },
@@ -99,126 +300,46 @@ const testCases = [
   { date: '2021-01-06', time: '14:00', country: 'US-NYC', expected: { year: '경자', month: '무자', day: '무자', hour: '기미' } },
 ];
 
-function getYearPillar(year, month, day) {
-  // 입춘 기준: 대략 2월 4일 전후
-  // 간단히 2월 4일 이전이면 전년도로 계산
-  let actualYear = year;
-  if (month < 2 || (month === 2 && day < 4)) {
-    actualYear = year - 1;
-  }
-  const index = ((actualYear - 1984) % 60 + 60) % 60;
-  return SIXTY_JIAZI[index];
-}
-
-function getMonthBranch(month, day) {
-  // 절기 기준 월지 (간략화)
-  // 입춘(2/4)~경칩(3/6): 인월, 경칩~청명(4/5): 묘월, ...
-  const boundaries = [
-    { m: 2, d: 4, branch: 2 },   // 인
-    { m: 3, d: 6, branch: 3 },   // 묘
-    { m: 4, d: 5, branch: 4 },   // 진
-    { m: 5, d: 6, branch: 5 },   // 사
-    { m: 6, d: 6, branch: 6 },   // 오
-    { m: 7, d: 7, branch: 7 },   // 미
-    { m: 8, d: 8, branch: 8 },   // 신
-    { m: 9, d: 8, branch: 9 },   // 유
-    { m: 10, d: 8, branch: 10 }, // 술
-    { m: 11, d: 7, branch: 11 }, // 해
-    { m: 12, d: 7, branch: 0 },  // 자
-    { m: 1, d: 6, branch: 1 },   // 축
-  ];
-  
-  for (let i = boundaries.length - 1; i >= 0; i--) {
-    const b = boundaries[i];
-    if (month > b.m || (month === b.m && day >= b.d)) {
-      return b.branch;
-    }
-  }
-  return 1; // 축월 (default)
-}
-
-function getMonthStem(yearStemIndex, monthBranchIndex) {
-  const baseStems = [2, 4, 6, 8, 0]; // 갑/기->병, 을/경->무, 병/신->경, 정/임->임, 무/계->갑
-  const base = baseStems[yearStemIndex % 5];
-  const branchOffset = (monthBranchIndex - 2 + 12) % 12;
-  return (base + branchOffset) % 10;
-}
-
-function getDayPillar(year, month, day) {
-  // 기준일: 1996-05-22 = 기미(55)
-  const baseDate = new Date(Date.UTC(1996, 4, 22));
-  const targetDate = new Date(Date.UTC(year, month - 1, day));
-  const diffDays = Math.floor((targetDate - baseDate) / (1000 * 60 * 60 * 24));
-  const index = ((diffDays + 55) % 60 + 60) % 60;
-  return SIXTY_JIAZI[index];
-}
-
-function getHourBranchIndex(hour, minute = 0) {
-  const totalMin = hour * 60 + minute;
-  return Math.floor(((totalMin + 30) % 1440) / 120);
-}
-
-function getHourPillar(dayStem, hour, minute = 0) {
-  const branchIndex = getHourBranchIndex(hour, minute);
-  const hourStem = HOUR_STEM_TABLE[dayStem][branchIndex];
-  return hourStem + BRANCHES[branchIndex];
-}
-
-// 테스트 실행
-let passed = 0;
-let failed = 0;
+// ========== 실행 ==========
+let passed = 0, failed = 0;
 const failures = [];
 
 for (const tc of testCases) {
-  const [year, month, day] = tc.date.split('-').map(Number);
-  let hour = null, minute = 0;
-  if (tc.time) {
-    const parts = tc.time.split(':').map(Number);
-    hour = parts[0];
-    minute = parts[1] || 0;
-  }
+  const r = calculateSaju(tc.date, tc.time, tc.country);
+  const e = tc.expected;
   
-  const yearPillar = getYearPillar(year, month, day);
-  const monthBranchIndex = getMonthBranch(month, day);
-  const yearStemIndex = STEMS.indexOf(yearPillar[0]);
-  const monthStemIndex = getMonthStem(yearStemIndex, monthBranchIndex);
-  const monthPillar = STEMS[monthStemIndex] + BRANCHES[monthBranchIndex];
-  const dayPillar = getDayPillar(year, month, day);
-  const dayStem = dayPillar[0];
-  const hourPillar = hour !== null ? getHourPillar(dayStem, hour, minute) : '';
+  const yOk = r.year === e.year;
+  const mOk = r.month === e.month;
+  const dOk = r.day === e.day;
+  const hOk = r.hour === e.hour;
   
-  const yearOk = yearPillar === tc.expected.year;
-  const monthOk = monthPillar === tc.expected.month;
-  const dayOk = dayPillar === tc.expected.day;
-  const hourOk = tc.expected.hour === '' ? hourPillar === '' : hourPillar === tc.expected.hour;
-  
-  if (yearOk && monthOk && dayOk && hourOk) {
+  if (yOk && mOk && dOk && hOk) {
     passed++;
   } else {
     failed++;
     failures.push({
-      date: tc.date,
-      time: tc.time,
-      country: tc.country,
-      expected: tc.expected,
-      result: { year: yearPillar, month: monthPillar, day: dayPillar, hour: hourPillar },
-      errors: {
-        year: !yearOk,
-        month: !monthOk,
-        day: !dayOk,
-        hour: !hourOk
-      }
+      input: `${tc.date} ${tc.time} (${tc.country})`,
+      expected: `연=${e.year} 월=${e.month} 일=${e.day} 시=${e.hour}`,
+      result: `연=${r.year}${yOk?'✓':'✗'} 월=${r.month}${mOk?'✓':'✗'} 일=${r.day}${dOk?'✓':'✗'} 시=${r.hour}${hOk?'✓':'✗'}`
     });
   }
 }
 
-console.log(`\n=== 전체 테스트 결과: ${passed}/${testCases.length} 통과 ===\n`);
+console.log(`\n=== 테스트 결과: ${passed}/${testCases.length} 통과 ===\n`);
 
-if (failures.length > 0) {
+if (failures.length > 0 && failures.length <= 20) {
   console.log('실패한 케이스:');
   for (const f of failures) {
-    console.log(`\n${f.date} ${f.time} (${f.country})`);
-    console.log(`  기대: 연=${f.expected.year} 월=${f.expected.month} 일=${f.expected.day} 시=${f.expected.hour}`);
-    console.log(`  결과: 연=${f.result.year}${f.errors.year ? '✗' : '✓'} 월=${f.result.month}${f.errors.month ? '✗' : '✓'} 일=${f.result.day}${f.errors.day ? '✗' : '✓'} 시=${f.result.hour}${f.errors.hour ? '✗' : '✓'}`);
+    console.log(`\n${f.input}`);
+    console.log(`  기대: ${f.expected}`);
+    console.log(`  결과: ${f.result}`);
+  }
+} else if (failures.length > 20) {
+  console.log(`실패 케이스가 ${failures.length}개로 너무 많아 처음 10개만 출력:`);
+  for (let i = 0; i < 10; i++) {
+    const f = failures[i];
+    console.log(`\n${f.input}`);
+    console.log(`  기대: ${f.expected}`);
+    console.log(`  결과: ${f.result}`);
   }
 }
