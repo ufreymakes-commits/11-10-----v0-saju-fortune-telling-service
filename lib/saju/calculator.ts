@@ -157,19 +157,63 @@ export function getMonthBranch(year: number, month: number, day: number, hour: n
 }
 
 // ================================================================
-// 일주 계산 (60갑자)
+// 진태양시 계산 (경도 기반 시간 보정)
+// ================================================================
+
+export interface SolarTimeResult {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+  correctionMinutes: number;
+}
+
+/**
+ * 진태양시 계산
+ * @param year 연도
+ * @param month 월
+ * @param day 일
+ * @param hour 시
+ * @param minute 분
+ * @param actualLongitude 실제 경도 (도시의 경도)
+ * @param standardMeridian 표준 자오선 경도 (타임존 * 15)
+ */
+export function getSolarTime(
+  year: number, month: number, day: number, 
+  hour: number, minute: number,
+  actualLongitude: number, standardMeridian: number
+): SolarTimeResult {
+  // 경도 차이에 따른 시간 보정 (1도 = 4분)
+  const correctionMinutes = Math.round((actualLongitude - standardMeridian) * 4);
+  
+  // Date 객체로 시간 계산
+  const localDate = new Date(year, month - 1, day, hour, minute, 0);
+  localDate.setMinutes(localDate.getMinutes() + correctionMinutes);
+  
+  return {
+    year: localDate.getFullYear(),
+    month: localDate.getMonth() + 1,
+    day: localDate.getDate(),
+    hour: localDate.getHours(),
+    minute: localDate.getMinutes(),
+    correctionMinutes
+  };
+}
+
+// ================================================================
+// 일주 계산 (60갑자) - 원본: 1984-01-31 기준일 (갑자일)
 // ================================================================
 
 export function getDayPillar(year: number, month: number, day: number): Pillar {
-  // 기준일: 1996-05-22 = 기미일(己未日, index 55)
-  // 검증된 만세력 기준 데이터 사용
-  const baseDate = new Date(Date.UTC(1996, 4, 22)); // 1996-05-22 = 기미일
-  const baseIndex = 55; // 기미 = 55번 인덱스
+  // 기준일: 1984-01-31 = 갑자일(甲子日, index 0) - 원본 free.gs 기준
+  const baseDate = new Date(Date.UTC(1984, 0, 31)); // 1984-01-31 = 갑자일
+  const baseIndex = 0; // 갑자 = 0번 인덱스
   
   const targetDate = new Date(Date.UTC(year, month - 1, day));
-  const diffDays = Math.floor((targetDate.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24));
+  const diffDays = Math.round((targetDate.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24));
   
-  const index = ((diffDays + baseIndex) % 60 + 60) % 60;
+  const index = ((diffDays % 60) + 60) % 60;
   const pillar = SIXTY_JIAZI[index];
   
   console.log('[v0] Day pillar calc:', year, month, day, '-> diffDays:', diffDays, '-> index:', index, '-> pillar:', pillar);
@@ -291,18 +335,6 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
     isDST = converted.isDST;
   }
   
-  // 야자시 보정: 23시 이후는 다음날로 (일주 계산용)
-  let adjustedYear = stdYear;
-  let adjustedMonth = stdMonth;
-  let adjustedDay = stdDay;
-  
-  if (hour !== undefined && stdHour >= 23) {
-    const nextDate = new Date(stdYear, stdMonth - 1, stdDay + 1);
-    adjustedYear = nextDate.getFullYear();
-    adjustedMonth = nextDate.getMonth() + 1;
-    adjustedDay = nextDate.getDate();
-  }
-  
   // UTC 시간 (절기 비교용)
   const utcDate = new Date(Date.UTC(utcYear, utcMonth - 1, utcDay, utcHour, utcMinute));
   
@@ -330,16 +362,40 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
   // 월주 계산
   const monthPillar = getMonthPillar(yearPillar.stem, monthBranch);
 
-  // 일주 계산 (현지 날짜 기준, 야자시 보정 적용)
-  const dayPillar = getDayPillar(adjustedYear, adjustedMonth, adjustedDay);
+  // 진태양시 계산 (경도 기반 시간 보정)
+  // 원본 free.gs: 진태양시를 계산한 후 그 날짜/시간으로 일주와 시주를 계산
+  const standardMeridian = tz.offset * 15; // 표준 자오선 경도
+  const actualLongitude = tz.meridian; // 실제 도시 경도
+  
+  const solarTime = getSolarTime(
+    stdYear, stdMonth, stdDay, stdHour, stdMinute,
+    actualLongitude, standardMeridian
+  );
+  
+  console.log('[v0] Solar time correction:', solarTime.correctionMinutes, 'min');
+  console.log('[v0] Solar time:', solarTime.year, solarTime.month, solarTime.day, solarTime.hour, ':', solarTime.minute);
+  
+  // 야자시 보정: 23시 이후는 다음날로 (일주 계산용) - 진태양시 기준
+  let dayCalcYear = solarTime.year;
+  let dayCalcMonth = solarTime.month;
+  let dayCalcDay = solarTime.day;
+  
+  if (solarTime.hour >= 23) {
+    const nextDate = new Date(solarTime.year, solarTime.month - 1, solarTime.day + 1);
+    dayCalcYear = nextDate.getFullYear();
+    dayCalcMonth = nextDate.getMonth() + 1;
+    dayCalcDay = nextDate.getDate();
+  }
 
-  // 시주 계산 (표준시 기준 + 분 단위 적용)
+  // 일주 계산 (진태양시 날짜 기준, 야자시 보정 적용)
+  const dayPillar = getDayPillar(dayCalcYear, dayCalcMonth, dayCalcDay);
+
+  // 시주 계산 (진태양시 기준 + 분 단위 적용)
   // 원본 공식: totalMin + 30분 offset -> 시간대 경계를 23:30, 01:30, 03:30... 으로 조정
-  // 섬머타임이 적용된 경우 자동으로 표준시로 변환되어 계산됨
   let hourPillar: Pillar | null = null;
   if (hour !== undefined) {
-    hourPillar = getHourPillar(dayPillar.stem, stdHour, stdMinute);
-    console.log('[v0] Hour pillar (std time):', stdHour, ':', stdMinute, '->', hourPillar?.fullPillar);
+    hourPillar = getHourPillar(dayPillar.stem, solarTime.hour, solarTime.minute);
+    console.log('[v0] Hour pillar (solar time):', solarTime.hour, ':', solarTime.minute, '->', hourPillar?.fullPillar);
   }
 
   console.log('[v0] Calculated pillars:');
