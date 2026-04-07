@@ -14,7 +14,7 @@ export * from './timezone-iana';
 export * from './timezone-utils';
 
 // Core Calculator
-export * from './calculator';
+export * from './core-calculator';
 
 // Advanced Analysis
 export * from './advanced';

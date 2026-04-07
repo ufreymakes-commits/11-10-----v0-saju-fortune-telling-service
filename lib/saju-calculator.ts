@@ -2,7 +2,7 @@
 // Connects to the full saju calculation module
 
 import type { BirthInfo, SajuData } from './types'
-import { runFullAnalysis } from './saju'
+import { runFullAnalysis } from './saju/core-calculator'
 
 // Heavenly Stems in Hanja (천간 한자)
 const STEMS_HANJA = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸']
