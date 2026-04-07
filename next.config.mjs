@@ -6,9 +6,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // Force rebuild - cache bust
+  // Force rebuild - cache bust v2
   generateBuildId: async () => {
-    return `build-${Date.now()}`
+    return `build-v2-${Date.now()}`
   },
 }
 
