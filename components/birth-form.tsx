@@ -171,7 +171,7 @@ export function BirthForm() {
           <FieldLabel htmlFor="birthTime" className="text-gray-800 font-medium">
             Birth Time <span className="text-gray-400 font-normal">(optional)</span>
           </FieldLabel>
-          <div className="flex gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <Select
               value={formData.birthTime ? formData.birthTime.split(':')[0] : ''}
               onValueChange={(hour) => {
@@ -180,7 +180,7 @@ export function BirthForm() {
                 setFormData({ ...formData, birthTime: hour ? `${hour}:${currentMinute} ${currentPeriod}` : '' })
               }}
             >
-              <SelectTrigger className="w-[100px] bg-white border-gray-300 focus:border-primary text-gray-900 data-[placeholder]:text-purple-300">
+              <SelectTrigger className="w-full bg-white border-gray-300 focus:border-primary text-gray-900 data-[placeholder]:text-purple-300">
                 <SelectValue placeholder="Hour" />
               </SelectTrigger>
               <SelectContent className="bg-white">
@@ -202,7 +202,7 @@ export function BirthForm() {
                 setFormData({ ...formData, birthTime: `${currentHour}:${minute} ${currentPeriod}` })
               }}
             >
-              <SelectTrigger className="w-[100px] bg-white border-gray-300 focus:border-primary text-gray-900 data-[placeholder]:text-purple-300">
+              <SelectTrigger className="w-full bg-white border-gray-300 focus:border-primary text-gray-900 data-[placeholder]:text-purple-300">
                 <SelectValue placeholder="Min" />
               </SelectTrigger>
               <SelectContent className="bg-white max-h-[200px]">
@@ -224,7 +224,7 @@ export function BirthForm() {
                 setFormData({ ...formData, birthTime: `${currentHour}:${currentMinute} ${period}` })
               }}
             >
-              <SelectTrigger className="w-[90px] bg-white border-gray-300 focus:border-primary text-gray-900 data-[placeholder]:text-purple-300">
+              <SelectTrigger className="w-full bg-white border-gray-300 focus:border-primary text-gray-900 data-[placeholder]:text-purple-300">
                 <SelectValue placeholder="AM/PM" />
               </SelectTrigger>
               <SelectContent className="bg-white">
@@ -234,7 +234,7 @@ export function BirthForm() {
             </Select>
           </div>
           <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">
-            <span className="font-bold">If applicable, use standard time (exclude DST; Daylight Saving Time).</span>{" If you don't know the birth time, just submit as a blank. It's more accurate if you have an exact time though."}
+            <span className="font-bold">Sajume automatically calculates Daylight Saving Time.</span>{" And if you don't know the birth time, just submit as a blank. It's more accurate if you have an exact time though."}
           </p>
         </Field>
 

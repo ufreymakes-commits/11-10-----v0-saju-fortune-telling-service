@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { StarsBackground } from '@/components/stars-background'
+import { Marquee } from '@/components/marquee'
 
 const REVIEW_IMAGES = [
   { id: 1, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-06%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%208.35.09-JtTw1gHzOfT77JZFdiZLC8jUgRKBtx.png", alt: "Customer reviews about accuracy and insights" },
@@ -10,11 +11,20 @@ const REVIEW_IMAGES = [
   { id: 5, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-06%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%208.35.35-u4rEj3p7ae6s7tZkUuv3STgqj8iTnx.png", alt: "Customer reviews about clarity and introspection" },
   { id: 6, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-06%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%208.36.05-qffQqwtmUFeWPKusUZq8q2wazcEFyY.png", alt: "Customer reviews about accuracy and timelines" },
   { id: 7, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-06%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%208.36.17-l0YlKnZMITqebYLhaki9QJoOd98zio.png", alt: "Customer reviews about premium version" },
+  { id: 8, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Frame%20174-rqCFcaSzIHcNyuCtdc8u12FwmEGwoG.png", alt: "Singapore customer review - heavily inspired and insightful" },
+  { id: 9, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Frame%20175-ArYV48RqRbQ6YpjOHOPp8BiJ3mbOfi.png", alt: "Malaysia customer review - trait and challenge accuracy" },
+  { id: 10, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Frame%20172-z0VI9v4lXbRog6PKODQoVrw3Kqz8d2.png", alt: "USA customer review - highly recommend Sajume" },
+  { id: 11, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Frame%20171-5zLupj2JFt4WLbwk4hYZjoGVfXzagB.png", alt: "India customer review - excellent reading 10/10" },
+  { id: 12, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Frame%20167-vLJaABHQEwfTKVDOAz9zJgCn9NjHgK.png", alt: "Korea customer review - extremely helpful and insightful" },
+  { id: 13, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Frame%20173-VHOAs9Y47KImjmRtXKBRESApgWUEO9.png", alt: "USA customer review - very accurate reading" },
 ]
 
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-[#0a0a14] relative overflow-x-hidden">
+      {/* Marquee Banner */}
+      <Marquee />
+      
       <StarsBackground />
       
       {/* Header Logo */}
@@ -47,10 +57,10 @@ export default function LandingPage() {
         
         {/* Main content */}
         <div className="text-center max-w-md mx-auto mt-12">
-          <h1 className="text-3xl md:text-4xl font-bold mb-1">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-1">
             <span className="bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">99 Facts</span>
           </h1>
-          <h2 className="text-base md:text-lg text-white/80 mb-4">
+          <h2 className="text-base md:text-xl lg:text-2xl text-white/80 mb-4">
             of your birth chart
           </h2>
           
@@ -92,8 +102,8 @@ export default function LandingPage() {
       {/* Reviews Section */}
       <section className="relative z-10 py-12 px-4">
         <div className="max-w-4xl mx-auto">
-          <h3 className="text-center text-lg font-semibold text-white/90 mb-2">What Our Users Say</h3>
-          <div className="flex items-center justify-center gap-1 mb-6">
+          <h3 className="text-center text-lg md:text-xl font-semibold text-white/90 mb-2">100% Genuine Reviews</h3>
+          <div className="flex items-center justify-center gap-1 mb-2">
             {Array.from({ length: 5 }).map((_, i) => (
               <svg key={i} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
                 <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
@@ -101,6 +111,9 @@ export default function LandingPage() {
             ))}
             <span className="text-sm text-white/60 ml-2">5.0 from 200+ reviews</span>
           </div>
+          <p className="text-center text-xs text-white/40 mb-6">
+            If these reviews are found to be manipulated or fake, we will stop selling this service.
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {REVIEW_IMAGES.map((review) => (
               <div key={review.id} className="bg-white rounded-xl p-3 shadow-lg">

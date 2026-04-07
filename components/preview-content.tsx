@@ -246,9 +246,12 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
           />
         </div>
         
-        <h3 className="text-base font-semibold text-gradient mb-1">
+        <h3 className="text-lg font-semibold text-gradient mb-0">
           Unlock All 99 Facts
         </h3>
+        <p className="text-sm font-medium text-foreground/80 mb-2">
+          Full Report
+        </p>
         <p className="text-xs text-foreground/70 mb-3">
           Discover deep insights about your personality, career path, love life, and future destiny
         </p>
@@ -259,13 +262,17 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
         </div>
         
         <Link href={`/checkout/${submissionId}`}>
-          <Button className="w-full max-w-xs bg-secondary text-secondary-foreground hover:bg-secondary/90 h-10 text-sm font-semibold rounded-full glow-pink">
-            Unlock Full Report
+          <Button className="w-full max-w-xs bg-[#0070ba] text-white hover:bg-[#005ea6] h-11 text-sm font-semibold rounded-md shadow-lg">
+            <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 3.72a.773.773 0 0 1 .763-.642h6.153c2.042 0 3.474.405 4.256 1.208.784.8 1.035 1.934.748 3.37l-.022.112h.02a3.606 3.606 0 0 1-.004.133l-.015.12-.025.127c-.002.01-.003.02-.006.03l-.012.05-.01.043-.014.054c-.34 1.47-1.162 2.472-2.386 2.98-.006.002-.012.005-.018.008l-.014.006c-.07.03-.143.058-.217.085l-.086.03c-.068.023-.138.044-.209.064l-.078.022c-.082.022-.166.042-.252.06l-.056.012c-.109.023-.222.044-.337.063l-.038.006a6.933 6.933 0 0 1-.467.057l-.052.004c-.103.009-.209.016-.316.021l-.073.003a7.93 7.93 0 0 1-.288.008h-.08l-.152.001h-2.06l-.048.32-1.026 6.499-.035.215H7.076v.001z"/>
+            </svg>
+            Pay with PayPal
           </Button>
         </Link>
         
-        <p className="mt-2 text-[10px] text-muted-foreground">
-          Secure payment via PayPal
+        <p className="mt-3 text-[11px] text-foreground/60 leading-relaxed">
+          If you have no PayPal, Credit card payment is also available.<br />
+          No PayPal account needed — select &quot;Pay with a Card&quot; in the PayPal window.
         </p>
       </div>
       
