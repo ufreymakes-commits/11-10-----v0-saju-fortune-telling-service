@@ -96,8 +96,16 @@ export interface BirthInfo {
 // ================================================================
 
 export function getHourBranchIndex(hour: number, minute: number = 0): number {
+  // 진태양시 보정이 이미 경도 기반으로 적용되므로 +30분 offset 불필요
+  // 정시 기준: 자시(23:00-01:00), 축시(01:00-03:00), ...
   const totalMin = hour * 60 + minute;
-  return Math.floor(((totalMin + 30) % 1440) / 120);
+  
+  // 23:00 이후는 자시(0)
+  if (totalMin >= 1380) return 0; // 23:00~23:59
+  if (totalMin < 60) return 0;    // 00:00~00:59
+  
+  // 01:00부터 2시간 단위
+  return Math.floor((totalMin - 60) / 120) + 1;
 }
 
 // ================================================================
