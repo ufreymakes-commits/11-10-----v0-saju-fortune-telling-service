@@ -91,33 +91,6 @@ export interface BirthInfo {
 // 절기 데이터는 jeolgi.ts에서 로드됨 (1900-2059)
 
 // ================================================================
-// 진태양시 계산
-// ================================================================
-
-export function getSolarTime(
-  hour: number,
-  minute: number,
-  longitude: number,
-  timezoneOffset: number
-): { hour: number; minute: number } {
-  // 경도 보정: 표준 자오선과의 차이를 분으로 변환
-  const meridian = timezoneOffset * 15; // 표준 자오선
-  const longitudeDiff = longitude - meridian;
-  const timeCorrectionMinutes = longitudeDiff * 4; // 1도당 4분
-
-  let totalMinutes = hour * 60 + minute + timeCorrectionMinutes;
-  
-  // 24시간 범위로 정규화
-  while (totalMinutes < 0) totalMinutes += 1440;
-  while (totalMinutes >= 1440) totalMinutes -= 1440;
-
-  return {
-    hour: Math.floor(totalMinutes / 60),
-    minute: Math.floor(totalMinutes % 60)
-  };
-}
-
-// ================================================================
 // 시간을 지지 인덱스로 변환
 // ================================================================
 
