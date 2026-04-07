@@ -80,6 +80,12 @@ export interface BirthInfo {
   gender: 'male' | 'female';
   country: string;
   longitude?: number;
+  /**
+   * 섬머타임(DST) 자동 보정 건너뛰기
+   * - true: 입력된 시간이 이미 표준시로 변환된 경우 (기존 Sajume 사용자 데이터)
+   * - false/undefined: 사용자가 기억하는 현지 시간 그대로 입력 (새 서비스, 기본값)
+   */
+  skipDSTCorrection?: boolean;
 }
 
 // 절기 데이터는 jeolgi.ts에서 로드됨 (1900-2059)
@@ -239,24 +245,51 @@ export function getHourPillar(dayStem: Stem, hour: number, minute: number = 0): 
 // ================================================================
 
 export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
-  const { year, month, day, hour, minute, country } = birthInfo;
+  const { year, month, day, hour, minute, country, skipDSTCorrection } = birthInfo;
 
   // 타임존 정보 가져오기
   const tz = TIMEZONE_OFFSETS[country] || DEFAULT_TIMEZONE;
   
-  // 섬머타임 자동 보정 적용
-  // 사용자가 입력한 현지 시간을 표준시로 변환
-  const localHour = hour ?? 12; // 시간 모를 경우 정오 기준
+  // 시간 모를 경우 정오 기준
+  const localHour = hour ?? 12;
   const localMinute = minute ?? 0;
   
-  const converted = convertToStandardTime(year, month, day, localHour, localMinute, country);
+  let stdYear: number, stdMonth: number, stdDay: number, stdHour: number, stdMinute: number;
+  let utcYear: number, utcMonth: number, utcDay: number, utcHour: number, utcMinute: number;
+  let isDST = false;
   
-  // 표준시 기준 값 사용 (섬머타임 보정 완료)
-  const stdYear = converted.standardYear;
-  const stdMonth = converted.standardMonth;
-  const stdDay = converted.standardDay;
-  const stdHour = converted.standardHour;
-  const stdMinute = converted.standardMinute;
+  if (skipDSTCorrection) {
+    // 섬머타임 보정 건너뛰기: 입력된 시간이 이미 표준시인 경우 (기존 Sajume 데이터)
+    stdYear = year;
+    stdMonth = month;
+    stdDay = day;
+    stdHour = localHour;
+    stdMinute = localMinute;
+    
+    // 표준시에서 UTC로 변환 (고정 오프셋 사용)
+    const stdDate = new Date(year, month - 1, day, localHour, localMinute, 0);
+    const utcTime = stdDate.getTime() - (tz.offset * 60 * 60 * 1000);
+    const utcDateObj = new Date(utcTime);
+    utcYear = utcDateObj.getUTCFullYear();
+    utcMonth = utcDateObj.getUTCMonth() + 1;
+    utcDay = utcDateObj.getUTCDate();
+    utcHour = utcDateObj.getUTCHours();
+    utcMinute = utcDateObj.getUTCMinutes();
+  } else {
+    // 섬머타임 자동 보정: 사용자가 입력한 현지 시간을 표준시로 변환 (새 서비스)
+    const converted = convertToStandardTime(year, month, day, localHour, localMinute, country);
+    stdYear = converted.standardYear;
+    stdMonth = converted.standardMonth;
+    stdDay = converted.standardDay;
+    stdHour = converted.standardHour;
+    stdMinute = converted.standardMinute;
+    utcYear = converted.utcYear;
+    utcMonth = converted.utcMonth;
+    utcDay = converted.utcDay;
+    utcHour = converted.utcHour;
+    utcMinute = converted.utcMinute;
+    isDST = converted.isDST;
+  }
   
   // 야자시 보정: 23시 이후는 다음날로 (일주 계산용)
   let adjustedYear = stdYear;
@@ -271,16 +304,10 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
   }
   
   // UTC 시간 (절기 비교용)
-  const utcDate = new Date(Date.UTC(
-    converted.utcYear, 
-    converted.utcMonth - 1, 
-    converted.utcDay, 
-    converted.utcHour, 
-    converted.utcMinute
-  ));
+  const utcDate = new Date(Date.UTC(utcYear, utcMonth - 1, utcDay, utcHour, utcMinute));
   
-  console.log('[v0] Birth info:', year, month, day, hour, ':', minute, country);
-  console.log('[v0] DST applied:', converted.isDST, 'offset:', converted.dstOffsetMinutes, 'min');
+  console.log('[v0] Birth info:', year, month, day, hour, ':', minute, country, 'skipDST:', skipDSTCorrection);
+  console.log('[v0] DST applied:', isDST);
   console.log('[v0] Standard time:', stdYear, stdMonth, stdDay, stdHour, ':', stdMinute);
   console.log('[v0] UTC date:', utcDate.toISOString());
 

@@ -69,10 +69,12 @@ export async function POST(request: Request) {
       }
       
       try {
+        // 테스트 데이터는 이미 표준시로 입력되어 있으므로 섬머타임 보정 건너뛰기
         const pillars = calculateFourPillars({
           year, month, day, hour, minute,
           country: tc.countryCode || 'KR',
-          gender: tc.gender.includes('female') ? 'female' : 'male'
+          gender: tc.gender.includes('female') ? 'female' : 'male',
+          skipDSTCorrection: true  // 테스트용: 기존 Sajume 사용자 데이터는 이미 표준시
         });
         
         const actual = {
