@@ -1,6 +1,7 @@
 // ================================================================
 // Saju Calculator - 사주 계산 핵심 로직
 // Converted from free.gs + premium.gs
+// Last updated: 2026-04-07 - DST + Solar Time support
 // ================================================================
 
 import {
