@@ -85,7 +85,10 @@ export async function POST(request: Request) {
         const yearOk = actual.year === tc.expected.year;
         const monthOk = actual.month === tc.expected.month;
         const dayOk = actual.day === tc.expected.day;
-        const hourOk = actual.hour === tc.expected.hour || tc.expected.hour === '시간 모른';
+        // "시간", "시간 모름", "시간 모른" 등 시간 없음 케이스 동일 처리
+        const noHourExpected = tc.expected.hour === '시간' || tc.expected.hour === '시간 모름' || tc.expected.hour === '시간 모른' || !tc.time;
+        const noHourActual = actual.hour === '시간 모름' || !pillars.hour;
+        const hourOk = actual.hour === tc.expected.hour || (noHourExpected && noHourActual);
         
         const allOk = yearOk && monthOk && dayOk && hourOk;
         
