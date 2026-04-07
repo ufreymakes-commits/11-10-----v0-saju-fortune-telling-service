@@ -1,7 +1,7 @@
 // Test script for Saju calculation verification
 // Run with: npx ts-node scripts/test-saju.ts
 
-import { runFullAnalysis } from '../lib/saju/calculator';
+import { runFullAnalysis } from '../lib/saju/core-calculator';
 
 interface TestCase {
   date: string;

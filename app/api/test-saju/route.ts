@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { calculateFourPillars } from '@/lib/saju/calculator';
+import { calculateFourPillars } from '@/lib/saju/core-calculator';
 import { COUNTRIES } from '@/lib/types';
 
 // 국가 라벨 -> 코드 매핑

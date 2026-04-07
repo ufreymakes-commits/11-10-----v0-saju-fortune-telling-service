@@ -9,7 +9,7 @@ import {
   TWELVE_STARS, JANG_SAENG_BRANCH,
   type Stem, type Branch, type Element, type TwelveStar
 } from './constants';
-import type { FourPillars } from './calculator';
+import type { FourPillars } from './core-calculator';
 
 // ================================================================
 // 12운성 계산
