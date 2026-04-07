@@ -18,6 +18,7 @@ import {
   getMonthStem,
   findCurrentSolarTerm
 } from './jeolgi';
+import { convertToStandardTime } from './timezone-utils';
 
 // ================================================================
 // Types
@@ -242,32 +243,45 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
 
   // 타임존 정보 가져오기
   const tz = TIMEZONE_OFFSETS[country] || DEFAULT_TIMEZONE;
-  const tzOffset = tz.offset; // 시간 단위 오프셋 (예: +9 for KST, -8 for LA)
   
-  // 사주 계산 시간 (현지 시간 기준 - 야자시 보정 적용)
-  let localHour = hour ?? 12; // 시간 모를 경우 정오 기준
+  // 섬머타임 자동 보정 적용
+  // 사용자가 입력한 현지 시간을 표준시로 변환
+  const localHour = hour ?? 12; // 시간 모를 경우 정오 기준
+  const localMinute = minute ?? 0;
+  
+  const converted = convertToStandardTime(year, month, day, localHour, localMinute, country);
+  
+  // 표준시 기준 값 사용 (섬머타임 보정 완료)
+  const stdYear = converted.standardYear;
+  const stdMonth = converted.standardMonth;
+  const stdDay = converted.standardDay;
+  const stdHour = converted.standardHour;
+  const stdMinute = converted.standardMinute;
   
   // 야자시 보정: 23시 이후는 다음날로 (일주 계산용)
-  let adjustedYear = year;
-  let adjustedMonth = month;
-  let adjustedDay = day;
+  let adjustedYear = stdYear;
+  let adjustedMonth = stdMonth;
+  let adjustedDay = stdDay;
   
-  if (hour !== undefined && hour >= 23) {
-    const nextDate = new Date(year, month - 1, day + 1);
+  if (hour !== undefined && stdHour >= 23) {
+    const nextDate = new Date(stdYear, stdMonth - 1, stdDay + 1);
     adjustedYear = nextDate.getFullYear();
     adjustedMonth = nextDate.getMonth() + 1;
     adjustedDay = nextDate.getDate();
   }
   
-  // UTC 시간 계산 (절기 비교용)
-  // 현지 시간에서 타임존 오프셋을 빼면 UTC
-  const localDate = new Date(year, month - 1, day, localHour, minute ?? 0, 0);
-  const utcTime = localDate.getTime() - (tzOffset * 60 * 60 * 1000);
-  const utcDate = new Date(utcTime);
+  // UTC 시간 (절기 비교용)
+  const utcDate = new Date(Date.UTC(
+    converted.utcYear, 
+    converted.utcMonth - 1, 
+    converted.utcDay, 
+    converted.utcHour, 
+    converted.utcMinute
+  ));
   
   console.log('[v0] Birth info:', year, month, day, hour, ':', minute, country);
-  console.log('[v0] Timezone offset:', tzOffset, 'hours');
-  console.log('[v0] Local date:', localDate.toISOString());
+  console.log('[v0] DST applied:', converted.isDST, 'offset:', converted.dstOffsetMinutes, 'min');
+  console.log('[v0] Standard time:', stdYear, stdMonth, stdDay, stdHour, ':', stdMinute);
   console.log('[v0] UTC date:', utcDate.toISOString());
 
   // 연주 계산 (입춘 기준 - UTC로 비교)
@@ -292,13 +306,13 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
   // 일주 계산 (현지 날짜 기준, 야자시 보정 적용)
   const dayPillar = getDayPillar(adjustedYear, adjustedMonth, adjustedDay);
 
-  // 시주 계산 (현지 시간 기준 + 분 단위 적용)
+  // 시주 계산 (표준시 기준 + 분 단위 적용)
   // 원본 공식: totalMin + 30분 offset -> 시간대 경계를 23:30, 01:30, 03:30... 으로 조정
+  // 섬머타임이 적용된 경우 자동으로 표준시로 변환되어 계산됨
   let hourPillar: Pillar | null = null;
   if (hour !== undefined) {
-    const min = minute ?? 0;
-    hourPillar = getHourPillar(dayPillar.stem, hour, min);
-    console.log('[v0] Hour pillar:', hour, ':', min, '->', hourPillar?.fullPillar);
+    hourPillar = getHourPillar(dayPillar.stem, stdHour, stdMinute);
+    console.log('[v0] Hour pillar (std time):', stdHour, ':', stdMinute, '->', hourPillar?.fullPillar);
   }
 
   console.log('[v0] Calculated pillars:');
