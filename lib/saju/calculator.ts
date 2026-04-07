@@ -130,7 +130,7 @@ export function getMonthBranch(year: number, month: number, day: number, hour: n
 }
 
 // ================================================================
-// 진태양시 계산 (경도 기반 시간 보정)
+// 진태양시 계산 (경도 기반 시간 보정) - Local Solar Time
 // ================================================================
 
 export interface SolarTimeResult {
