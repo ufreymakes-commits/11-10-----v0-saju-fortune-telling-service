@@ -282,7 +282,7 @@ function getFallbackFacts(analysis: CompleteAnalysis): Fact[] {
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { name, gender, birthCountry, birthDate, sajuData } = body
+    const { submissionId } = body
 
     // IP 추출
     const headersList = await headers()
@@ -301,37 +301,72 @@ export async function POST(req: Request) {
       )
     }
 
+    // DB에서 submission 데이터 조회
+    const { data: submission, error: dbError } = await supabase
+      .from('submissions')
+      .select('*')
+      .eq('id', submissionId)
+      .single()
+
+    if (dbError || !submission) {
+      console.error('[v0] DB fetch error:', dbError)
+      return NextResponse.json(
+        { error: '제출 데이터를 찾을 수 없습니다.' },
+        { status: 404 }
+      )
+    }
+
+    const { name, gender, birth_country, birth_date, saju_data } = submission
+
+    console.log('[v0] Submission data:', { name, gender, birth_country, birth_date })
+    console.log('[v0] Saju data:', JSON.stringify(saju_data, null, 2))
+
     // 완전한 분석 데이터 생성
     const analysis = buildCompleteAnalysis(
       name,
       gender,
-      birthCountry,
-      new Date(birthDate),
-      sajuData
+      birth_country,
+      new Date(birth_date),
+      saju_data
     )
 
     // 캐시 키 생성
-    const sajuKey = `${sajuData.yearPillar?.fullName}_${sajuData.monthPillar?.fullName}_${sajuData.dayPillar?.fullName}_${sajuData.hourPillar?.fullName || 'none'}`
+    const sajuKey = `${saju_data.yearPillar?.fullName}_${saju_data.monthPillar?.fullName}_${saju_data.dayPillar?.fullName}_${saju_data.hourPillar?.fullName || 'none'}`
 
     // 캐시 확인
     const cachedFacts = await getCachedFacts(supabase, sajuKey)
-    let facts: Fact[]
+    let factsRaw: Fact[]
 
     if (cachedFacts) {
-      facts = cachedFacts
+      factsRaw = cachedFacts
     } else {
       // AI로 새로운 팩트 생성
-      facts = await generateFactsFromAI(analysis)
+      factsRaw = await generateFactsFromAI(analysis)
       
       // 캐시에 저장
-      await cacheFacts(supabase, sajuKey, facts)
+      await cacheFacts(supabase, sajuKey, factsRaw)
     }
+
+    // Fact 형식을 preview-content가 기대하는 형식으로 변환
+    const freeFacts = factsRaw.map(f => ({
+      id: f.id,
+      text: f.content // content → text로 변환
+    }))
+
+    // 티저 팩트 (현재는 더미 데이터, 결제 후 실제 생성 예정)
+    const teaserFacts = Array.from({ length: 5 }, (_, i) => ({
+      id: String(10 + i),
+      text: 'This insight is locked. Purchase the full report to unlock all 99 facts about your destiny.'
+    }))
 
     return NextResponse.json(
       {
-        facts,
-        remaining,
-        analysis
+        freeFacts,
+        teaserFacts,
+        submission: {
+          name,
+          sajuData: saju_data
+        }
       },
       {
         headers: {
