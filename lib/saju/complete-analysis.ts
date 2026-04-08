@@ -375,8 +375,8 @@ export function buildCompleteAnalysis(
   const pa = calcPa(
     yearBranch,
     monthBranch,
-    fourPillars.dayBranch,
-    fourPillars.hourBranch || null
+    dayBranch,
+    hourBranch || null
   )
 
   const hae = calcHae(
@@ -405,45 +405,46 @@ export function buildCompleteAnalysis(
   )
 
   const sinGangSinYakResult = calcSinGangSinYak(
-    fourPillars.yearStem,
-    fourPillars.monthStem,
-    fourPillars.dayMaster as string,
-    fourPillars.hourStem || null,
-    fourPillars.yearBranch,
-    fourPillars.monthBranch,
-    fourPillars.dayBranch,
-    fourPillars.hourBranch || null
+    dayMaster,
+    monthBranch,
+    yearStem,
+    monthStem,
+    dayStem,
+    hourStem || null,
+    yearBranch,
+    dayBranch,
+    hourBranch || null
   )
 
   const eokbuYongsin = getEokbuYongsin(
-    fourPillars.dayMaster as string,
-    sinGangSinYakResult.grade
+    dayMaster,
+    sinGangSinYakResult.ratio >= 50
   )
 
   const johuYongsin = calcJohuYongsin(
-    fourPillars.dayMaster as string,
-    fourPillars.monthBranch
+    dayMaster,
+    monthBranch
   )
 
   const gyeokguk = calculateGyeokguk(
-    fourPillars.dayMaster as string,
-    fourPillars.monthBranch,
-    [fourPillars.yearStem, fourPillars.monthStem, fourPillars.dayMaster as string, fourPillars.hourStem || ''].filter(Boolean)
+    dayMaster,
+    monthBranch,
+    [yearStem, monthStem, dayStem, hourStem || ''].filter(Boolean)
   )
 
   const sinsalsa = calculateSinsalsa(
-    fourPillars.yearStem,
-    fourPillars.monthStem,
-    fourPillars.dayMaster as string,
-    fourPillars.dayBranch,
-    fourPillars.yearBranch,
-    fourPillars.monthBranch,
-    fourPillars.hourBranch || null
+    yearStem,
+    monthStem,
+    dayStem,
+    dayBranch,
+    yearBranch,
+    monthBranch,
+    hourBranch || null
   )
 
   const daeyun = calculateDaeyun(
-    fourPillars.dayMaster as string,
-    fourPillars.yearStem,
+    dayMaster,
+    yearStem,
     gender,
     birthDate
   )
