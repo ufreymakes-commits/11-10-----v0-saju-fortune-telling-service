@@ -10,50 +10,67 @@ export interface BirthInfo {
 }
 
 export interface SajuData {
-  // Four Pillars (사주팔자) - stems and branches in Hanja
-  yearPillar: { stem: string; branch: string }
-  monthPillar: { stem: string; branch: string }
-  dayPillar: { stem: string; branch: string }
-  hourPillar?: { stem: string; branch: string }
+  // 4주 (한자)
+  yearPillar: { stem: string; branch: string; fullName?: string; fullNameKorean?: string }
+  monthPillar: { stem: string; branch: string; fullName?: string; fullNameKorean?: string }
+  dayPillar: { stem: string; branch: string; fullName?: string; fullNameKorean?: string }
+  hourPillar?: { stem: string; branch: string; fullName?: string; fullNameKorean?: string }
   
-  // Five Elements
+  // 일간
+  dayMaster: string
+  dayMasterKorean?: string
+  
+  // 오행
+  elementBalance: { wood: number; fire: number; earth: number; metal: number; water: number }
+  elementBalanceKorean?: { 목: number; 화: number; 토: number; 금: number; 수: number }
   dominantElement: string
-  elementBalance: {
-    wood: number
-    fire: number
-    earth: number
-    metal: number
-    water: number
-  }
   
-  // Additional analysis
-  dayMaster: string // Hanja character of day stem
-  luckyElement: string
-  personalityType: string
+  // 12운성
+  twelveStars?: Array<{ position: string; branch: string; star: string }>
   
-  // Extended analysis (from saju module)
-  tenGods?: {
-    present: string[]
-    missing: string[]
-  }
-  spirits?: {
-    doHwa?: boolean
-    yeokMa?: boolean
-    hwaGae?: boolean
-    gwangGwi?: boolean
-    [key: string]: boolean | undefined
-  }
-  daewoon?: Array<{
-    startAge: number
-    endAge: number
-    stem: string
-    branch: string
-  }>
-  yeonwoon?: Array<{
-    year: number
-    stem: string
-    branch: string
-  }>
+  // 십신
+  tenGods?: { present: string[]; missing: string[] }
+  
+  // 관계식
+  cheongganHap?: string[]
+  jijiYughap?: string[]
+  jijiSamhap?: string[]
+  jijiBanghap?: string[]
+  cheongganChung?: string[]
+  jijiChung?: string[]
+  hyeong?: string[]
+  pa?: string[]
+  hae?: string[]
+  wonjin?: string[]
+  
+  // 길성
+  gilseong?: { cheonul: string[]; taegeuk: string[] }
+  
+  // 공망
+  gongmang?: string[]
+  
+  // 신강/신약
+  sinGangSinYak?: { grade: string; ratio: number }
+  
+  // 용신
+  eokbuYongsin?: string
+  johuYongsin?: string
+  
+  // 격국
+  gyeokguk?: string
+  
+  // 신살
+  spirits?: string[]
+  
+  // 대운
+  daewoon?: Array<{ startAge: number; endAge: number; stem: string; branch: string; fullName?: string }>
+  
+  // 연운
+  yeonwoon?: Array<{ year: number; stem: string; branch: string; fullName?: string }>
+  
+  // Deprecated (이전 호환성)
+  luckyElement?: string
+  personalityType?: string
 }
 
 export interface Submission {
