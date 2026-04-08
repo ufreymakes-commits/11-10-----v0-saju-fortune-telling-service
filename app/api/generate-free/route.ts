@@ -6,10 +6,13 @@ import type { CompleteAnalysis } from '@/lib/saju/complete-analysis'
 import { buildCompleteAnalysis } from '@/lib/saju/complete-analysis'
 import { headers } from 'next/headers'
 
-// Rate Limit 체크 (IP당 하루 3회)
-async function checkRateLimit(supabase: Awaited<ReturnType<typeof createClient>>, ip: string): Promise<{ allowed: boolean; remaining: number }> {
+// Rate Limit 체크 (IP당 하루 N회, 기본값 3)
+async function checkRateLimit(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  ip: string,
+  maxRequests: number = 3
+): Promise<{ allowed: boolean; remaining: number }> {
   const today = new Date().toISOString().split('T')[0]
-  const MAX_REQUESTS = 3
   
   const { data: rateLimit } = await supabase
     .from('rate_limits')
@@ -24,12 +27,21 @@ async function checkRateLimit(supabase: Awaited<ReturnType<typeof createClient>>
       request_date: today,
       request_count: 1
     })
-    return { allowed: true, remaining: MAX_REQUESTS - 1 }
+    return { allowed: true, remaining: maxRequests - 1 }
   }
   
-  if (rateLimit.request_count >= MAX_REQUESTS) {
+  if (rateLimit.request_count >= maxRequests) {
     return { allowed: false, remaining: 0 }
   }
+  
+  await supabase
+    .from('rate_limits')
+    .update({ request_count: rateLimit.request_count + 1 })
+    .eq('ip_address', ip)
+    .eq('request_date', today)
+  
+  return { allowed: true, remaining: maxRequests - rateLimit.request_count - 1 }
+}
   
   await supabase
     .from('rate_limits')
@@ -292,11 +304,11 @@ export async function POST(req: Request) {
 
     const supabase = await createClient()
 
-    // Rate Limit 체크
-    const { allowed, remaining } = await checkRateLimit(supabase, ip)
+    // Rate Limit 체크 (임시로 10회로 증가)
+    const { allowed, remaining } = await checkRateLimit(supabase, ip, 10)
     if (!allowed) {
       return NextResponse.json(
-        { error: '하루 3회 제한입니다. 내일 다시 시도해주세요.' },
+        { error: '하루 10회 제한입니다. 내일 다시 시도해주세요.' },
         { status: 429 }
       )
     }
