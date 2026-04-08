@@ -2,20 +2,15 @@ import { NextResponse } from 'next/server'
 import { generateText } from 'ai'
 import { createClient } from '@/lib/supabase/server'
 import type { SajuData, Fact } from '@/lib/types'
+import type { CompleteAnalysis } from '@/lib/saju/complete-analysis'
+import { buildCompleteAnalysis } from '@/lib/saju/complete-analysis'
 import { headers } from 'next/headers'
-
-// 사주 키 생성 (캐싱용)
-function generateSajuKey(sajuData: SajuData): string {
-  const { yearPillar, monthPillar, dayPillar, hourPillar } = sajuData
-  return `${yearPillar?.fullName || 'unknown'}_${monthPillar?.fullName || 'unknown'}_${dayPillar?.fullName || 'unknown'}_${hourPillar?.fullName || 'unknown'}`
-}
 
 // Rate Limit 체크 (IP당 하루 3회)
 async function checkRateLimit(supabase: Awaited<ReturnType<typeof createClient>>, ip: string): Promise<{ allowed: boolean; remaining: number }> {
   const today = new Date().toISOString().split('T')[0]
   const MAX_REQUESTS = 3
   
-  // 현재 요청 횟수 조회
   const { data: rateLimit } = await supabase
     .from('rate_limits')
     .select('request_count')
@@ -24,7 +19,6 @@ async function checkRateLimit(supabase: Awaited<ReturnType<typeof createClient>>
     .single()
   
   if (!rateLimit) {
-    // 첫 요청 - 새 레코드 생성
     await supabase.from('rate_limits').insert({
       ip_address: ip,
       request_date: today,
@@ -37,7 +31,6 @@ async function checkRateLimit(supabase: Awaited<ReturnType<typeof createClient>>
     return { allowed: false, remaining: 0 }
   }
   
-  // 요청 횟수 증가
   await supabase
     .from('rate_limits')
     .update({ 
@@ -59,7 +52,6 @@ async function getCachedFacts(supabase: Awaited<ReturnType<typeof createClient>>
     .single()
   
   if (cache) {
-    // 캐시 히트 카운트 증가
     await supabase
       .from('saju_cache')
       .update({ 
@@ -83,243 +75,274 @@ async function cacheFacts(supabase: Awaited<ReturnType<typeof createClient>>, sa
   }, { onConflict: 'saju_key' })
 }
 
-// AI 프롬프트 생성
-function buildPrompt(sajuData: SajuData, name: string, gender: string): string {
+// AI 프롬프트 생성 (완전 분석 데이터 포함)
+function buildPrompt(analysis: CompleteAnalysis): string {
   const { 
-    yearPillar, monthPillar, dayPillar, hourPillar,
-    dayMaster, dominantElement, personalityType, 
-    luckyElement, elementBalance,
-    tenGods, hiddenStems, twelveStages
-  } = sajuData
+    name, gender, birthCountry, age,
+    fourPillars, twelveStars, tenGods, cheongganHap, jijiYughap, jijiSamhap, jijiBanghap,
+    cheongganChung, jijiChung, gongmang, hyeong, pa, hae, wonjin, gilseong,
+    sinGangSinYak, eokbuYongsin, johuYongsin, gyeokguk, sinsalsa, daeyun, annual2026
+  } = analysis
 
-  return `You are a master of Saju (Korean Four Pillars of Destiny / 사주팔자), with 30+ years of experience providing accurate, personalized readings that leave people amazed at how precisely you understand them.
+  const twelveStarsStr = twelveStars
+    .map(ts => `${ts.position}${ts.branch}:${ts.star}`)
+    .join(' / ')
 
-## Client Information
-- Name: ${name}
-- Gender: ${gender}
-- Four Pillars (사주): 
-  - Year: ${yearPillar?.fullName || 'Unknown'} (${yearPillar?.heavenlyStem?.korean || ''}${yearPillar?.earthlyBranch?.korean || ''})
-  - Month: ${monthPillar?.fullName || 'Unknown'} (${monthPillar?.heavenlyStem?.korean || ''}${monthPillar?.earthlyBranch?.korean || ''})
-  - Day: ${dayPillar?.fullName || 'Unknown'} (${dayPillar?.heavenlyStem?.korean || ''}${dayPillar?.earthlyBranch?.korean || ''})
-  - Hour: ${hourPillar?.fullName || 'Unknown'} (${hourPillar?.heavenlyStem?.korean || ''}${hourPillar?.earthlyBranch?.korean || ''})
-- Day Master (일간): ${dayMaster}
-- Dominant Element: ${dominantElement}
-- Personality Type: ${personalityType}
-- Lucky Element (용신): ${luckyElement}
-- Element Balance: ${JSON.stringify(elementBalance)}
-${tenGods ? `- Ten Gods (십신): ${JSON.stringify(tenGods)}` : ''}
-${hiddenStems ? `- Hidden Stems (지장간): ${JSON.stringify(hiddenStems)}` : ''}
-${twelveStages ? `- Twelve Stages (12운성): ${JSON.stringify(twelveStages)}` : ''}
+  const gilseongStr = [
+    ...gilseong.cheonul.map(g => `천을귀인:${g}`),
+    ...gilseong.taegeuk.map(g => `태극귀인:${g}`)
+  ].join(' / ')
 
-## Your Task
-Generate exactly 9 personalized facts about this person based on their Saju chart. Each fact should:
-1. Be specific to THEIR chart, not generic horoscope-style statements
-2. Feel eerily accurate - like you know them personally
-3. Reference specific elements, pillars, or interactions in their chart
-4. Be written in a warm, conversational tone
-5. Mix different life aspects: personality traits, hidden tendencies, relationship patterns, career inclinations, life challenges
+  const daeyunStr = daeyun
+    .slice(0, 3)
+    .map(d => `${d.period}세: ${d.saju}`)
+    .join(' / ')
 
-## Output Format
-Return ONLY a JSON array with exactly 9 objects, each with:
-- "id": number (1-9)
-- "category": one of "personality", "career", "love", "future"
-- "text": the fact (2-3 sentences, address them by name at least once)
+  return `당신은 30년 이상의 경력을 가진 사주 명리학 석사입니다. 당신의 해석은 정확하고 세밀하며, 사람들이 "정말 내 인생을 읽은 것 같다"고 놀라워합니다.
 
-Example format:
-[
-  {"id": 1, "category": "personality", "text": "${name}, your..."},
-  ...
-]
+## 클라이언트 정보
+- 이름: ${name}
+- 성별: ${gender}
+- 출생국: ${birthCountry}
+- 2026년 기준 나이: ${age}세
 
-IMPORTANT: 
-- Do NOT include markdown code blocks or any text before/after the JSON
-- Make each fact feel like a revelation, not a fortune cookie
-- Be specific about their chart's unique combinations
-- Write as if you've known them for years`
+## 사주 8글자
+- 년주: ${fourPillars.yearPillar?.fullName || 'N/A'}
+- 월주: ${fourPillars.monthPillar?.fullName || 'N/A'}
+- 일주: ${fourPillars.dayPillar?.fullName || 'N/A'}
+- 시주: ${fourPillars.hourPillar?.fullName || 'N/A'}
+
+## 핵심 분석 데이터
+
+### 기본 요소
+- 일간 (Day Master): ${fourPillars.dayMaster}
+- 12운성: ${twelveStarsStr}
+- 신강/신약: ${sinGangSinYak.grade} (${sinGangSinYak.ratio}%)
+- 격국: ${gyeokguk}
+
+### 십신 (十神)
+- 보유 십신: ${tenGods.present.join(', ')}
+- 부재 십신: ${tenGods.absent.join(', ')}
+
+### 관계식 (關係式)
+- 천간합: ${cheongganHap.length > 0 ? cheongganHap.join(' / ') : '없음'}
+- 지지육합: ${jijiYughap.length > 0 ? jijiYughap.join(' / ') : '없음'}
+- 지지삼합: ${jijiSamhap.length > 0 ? jijiSamhap.join(' / ') : '없음'}
+- 지지방합: ${jijiBanghap.length > 0 ? jijiBanghap.join(' / ') : '없음'}
+- 천간충: ${cheongganChung.length > 0 ? cheongganChung.join(' / ') : '없음'}
+- 지지충: ${jijiChung.length > 0 ? jijiChung.join(' / ') : '없음'}
+- 형: ${hyeong.length > 0 ? hyeong.join(' / ') : '없음'}
+- 파: ${pa.length > 0 ? pa.join(' / ') : '없음'}
+- 해: ${hae.length > 0 ? hae.join(' / ') : '없음'}
+- 원진: ${wonjin.length > 0 ? wonjin.join(' / ') : '없음'}
+
+### 길성 (吉星)
+${gilseongStr.length > 0 ? gilseongStr : '해당 없음'}
+
+### 신살 (神殺)
+${sinsalsa.length > 0 ? sinsalsa.join(' / ') : '해당 없음'}
+
+### 공망 (空亡)
+${gongmang.join('·')}
+
+### 용신 (用神)
+- 억부용신: ${eokbuYongsin}
+- 조후용신: ${johuYongsin}
+
+### 대운 (大運)
+${daeyunStr}
+
+### 2026년 운세
+- 기간: ${annual2026.startDate} ~ ${annual2026.endDate}
+- 간지: ${annual2026.saju}
+- Day Master: ${annual2026.dayMaster}
+
+## 작업 지시사항
+
+위의 사주 정보를 종합적으로 분석하여 **정확히 9개의 놀라운 사실**을 생성해주세요. 각 팩트는:
+1. 그 사람의 실제 특성을 반영하고
+2. 깊이있고 정확해 보여야 하며
+3. "와, 이거 정말 내 얘기다!"라고 느끼게 만들어야 합니다.
+
+**팩트 카테고리:**
+1-3: 성격 & 본질 (일간의 특성, 십신 보유/부재, 신강약)
+4-6: 직업 & 재능 (십신, 격국, 용신)
+7-8: 연애 & 관계 (십신, 길성, 신살)
+9: 2026년 운세 (연도 간지 영향)
+
+**출력 형식 (JSON):**
+\`\`\`json
+{
+  "facts": [
+    {
+      "category": "성격",
+      "title": "당신의 핵심 특성",
+      "content": "구체적이고 깊이 있는 설명..."
+    },
+    ...
+  ]
+}
+\`\`\`
+
+모든 분석은 한국 사주 명리학 전통에 기반하며, 이 사람의 구체적인 데이터를 반영해야 합니다.`
 }
 
-// AI로 사실 생성
-async function generateFactsWithAI(sajuData: SajuData, name: string, gender: string): Promise<Fact[]> {
-  const prompt = buildPrompt(sajuData, name, gender)
-  
+// AI를 통한 9개 팩트 생성
+async function generateFactsFromAI(analysis: CompleteAnalysis): Promise<Fact[]> {
+  const prompt = buildPrompt(analysis)
+
+  const result = await generateText({
+    model: 'openai/gpt-4o-mini',
+    prompt,
+    temperature: 0.7,
+    maxOutputTokens: 2000,
+  })
+
   try {
-    const { text } = await generateText({
-      model: 'openai/gpt-4o-mini', // 저렴하고 빠른 모델, 사주 해석에 더 유연함
-      prompt,
-      maxOutputTokens: 2000,
-      temperature: 0.7,
-    })
-    
-    // JSON 파싱
-    const jsonMatch = text.match(/\[[\s\S]*\]/)
-    if (!jsonMatch) {
-      console.error('[v0] Failed to parse AI response:', text)
-      throw new Error('Invalid AI response format')
-    }
-    
-    const facts = JSON.parse(jsonMatch[0]) as Fact[]
-    return facts.slice(0, 9) // 정확히 9개만 반환
+    const jsonMatch = result.text.match(/```json\n([\s\S]*?)\n```/)
+    if (!jsonMatch) throw new Error('JSON 형식을 찾을 수 없음')
+
+    const parsed = JSON.parse(jsonMatch[1])
+    const facts: Fact[] = parsed.facts.map((f: any, idx: number) => ({
+      id: String(idx + 1),
+      category: f.category || 'unknown',
+      title: f.title || '제목 없음',
+      content: f.content || '내용 없음'
+    }))
+
+    return facts
   } catch (error) {
-    console.error('[v0] AI generation error:', error)
-    // 폴백: 기본 템플릿 사용
-    return generateFallbackFacts(sajuData, name)
+    console.error('[v0] AI parsing error:', error)
+    return getFallbackFacts(analysis)
   }
 }
 
-// 폴백 팩트 생성 (AI 실패 시)
-function generateFallbackFacts(sajuData: SajuData, name: string): Fact[] {
-  const { dayMaster, dominantElement, personalityType, luckyElement, elementBalance } = sajuData
-  
-  return [
-    { id: 1, category: 'personality', text: `${name}, your Day Master is ${dayMaster}, which means you possess a unique inner strength that others often admire from afar.` },
-    { id: 2, category: 'personality', text: `As "${personalityType}", you have an innate ability to see possibilities where others see obstacles.` },
-    { id: 3, category: 'personality', text: `Your dominant element is ${dominantElement}. This shapes how you interact with the world and process emotions.` },
-    { id: 4, category: 'career', text: `People with your chart often find success in careers that allow for creative expression and leadership.` },
-    { id: 5, category: 'career', text: `Your ${luckyElement} element is what brings you fortune. Surrounding yourself with ${luckyElement.toLowerCase()}-associated environments can enhance your luck.` },
-    { id: 6, category: 'love', text: `In relationships, you tend to be deeply loyal and seek meaningful connections over superficial ones.` },
-    { id: 7, category: 'future', text: `Your element balance shows ${Object.entries(elementBalance).sort((a, b) => b[1] - a[1])[0][0]} is strongest. This influences your life path significantly.` },
-    { id: 8, category: 'future', text: `The cosmos suggests that your greatest personal growth will come through embracing challenges.` },
-    { id: 9, category: 'personality', text: `${name}, your birth chart reveals a soul that has been on a long journey. This lifetime holds special significance for you.` }
-  ]
-}
-
-// 티저 팩트 생성 (결제 유도용)
-function generateTeaserFacts(sajuData: SajuData): Fact[] {
-  const { dominantElement, dayMaster } = sajuData
+// 폴백: 템플릿 기반 팩트 생성
+function getFallbackFacts(analysis: CompleteAnalysis): Fact[] {
+  const { name, fourPillars, sinGangSinYak, tenGods } = analysis
   
   return [
     {
-      id: 10,
-      text: `Your ideal romantic partner has a specific element that complements your ${dominantElement} nature perfectly...`,
-      category: 'love',
-      isMasked: true
+      id: '1',
+      category: '성격',
+      title: `${name}, 당신은 ${fourPillars.dayMaster} 일간입니다`,
+      content: `당신의 본질은 ${sinGangSinYak.grade}(${sinGangSinYak.ratio}%)로, 독립적이고 주체적인 성향을 가지고 있습니다.`
     },
     {
-      id: 11,
-      text: `There is a specific year in your near future that will be transformative for your career...`,
-      category: 'career',
-      isMasked: true
+      id: '2',
+      category: '성격',
+      title: '보유한 십신으로 본 당신의 강점',
+      content: `당신은 ${tenGods.present.join(', ')}의 십신을 가지고 있어, 이들 특성에 뛰어나 있습니다.`
     },
     {
-      id: 12,
-      text: `Your hidden talent that most people never discover about themselves is connected to your ${dayMaster} energy...`,
-      category: 'personality',
-      isMasked: true
+      id: '3',
+      category: '직업',
+      title: '적성 직업',
+      content: '당신의 십신과 격국을 고려할 때, 창의적이고 리더십이 필요한 직무에 적합합니다.'
+    },
+    {
+      id: '4',
+      category: '직업',
+      title: '경력 발전 시기',
+      content: '30~40대에 당신의 운이 가장 좋아질 가능성이 높으며, 이 시기에 중요한 결정을 하는 것이 좋습니다.'
+    },
+    {
+      id: '5',
+      category: '연애',
+      title: '연애 성향',
+      content: '당신은 깊은 감정을 가진 사람으로, 진정한 이해와 감정 교감을 중요시합니다.'
+    },
+    {
+      id: '6',
+      category: '연애',
+      title: '이상적인 파트너',
+      content: '당신과 오행이 조화를 이루는 사람, 특히 당신을 충분히 이해하고 지지해주는 사람과 좋은 관계를 만들 수 있습니다.'
+    },
+    {
+      id: '7',
+      category: '인간관계',
+      title: '대인관계 스타일',
+      content: '당신은 신중하고 분석적인 성향으로, 신뢰할 수 있는 소수의 깊은 관계를 선호합니다.'
+    },
+    {
+      id: '8',
+      category: '인생',
+      title: '인생의 중요한 전환점',
+      content: '당신의 대운에서 중요한 변화가 일어날 시기들이 있으며, 이들 시기에 준비된 결정이 인생을 바꿀 수 있습니다.'
+    },
+    {
+      id: '9',
+      category: '2026년 운세',
+      title: '2026년 당신의 운세',
+      content: '2026년 병오년은 창의성과 주도성이 강조되는 해입니다. 이 시기에 시작한 일들은 좋은 결과를 얻을 가능성이 높습니다.'
     }
   ]
 }
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
   try {
-    const { submissionId } = await request.json()
-    
-    if (!submissionId) {
-      return NextResponse.json(
-        { error: 'Missing submission ID' },
-        { status: 400 }
-      )
-    }
-    
-    const supabase = await createClient()
-    
-    // IP 주소 가져오기
+    const body = await req.json()
+    const { name, gender, birthCountry, birthDate, sajuData } = body
+
+    // IP 추출
     const headersList = await headers()
-    const ip = headersList.get('x-forwarded-for')?.split(',')[0] || 
+    const ip = headersList.get('x-forwarded-for')?.split(',')[0].trim() || 
                headersList.get('x-real-ip') || 
                'unknown'
-    
+
+    const supabase = await createClient()
+
     // Rate Limit 체크
     const { allowed, remaining } = await checkRateLimit(supabase, ip)
     if (!allowed) {
       return NextResponse.json(
-        { error: 'Daily limit reached. Please try again tomorrow.', remaining: 0 },
+        { error: '하루 3회 제한입니다. 내일 다시 시도해주세요.' },
         { status: 429 }
       )
     }
-    
-    // Get submission data
-    const { data: submission, error: fetchError } = await supabase
-      .from('submissions')
-      .select('*')
-      .eq('id', submissionId)
-      .single()
-    
-    if (fetchError || !submission) {
-      return NextResponse.json(
-        { error: 'Submission not found' },
-        { status: 404 }
-      )
-    }
-    
-    const sajuData = submission.saju_data as SajuData
-    const sajuKey = generateSajuKey(sajuData)
-    
-    // 이미 이 submission에 대한 리포트가 있는지 확인
-    const { data: existingReport } = await supabase
-      .from('reports')
-      .select('*')
-      .eq('submission_id', submissionId)
-      .eq('section_key', 'free_preview')
-      .single()
-    
-    if (existingReport) {
-      return NextResponse.json({
-        freeFacts: existingReport.facts.filter((f: Fact) => !f.isMasked),
-        teaserFacts: existingReport.facts.filter((f: Fact) => f.isMasked),
-        submission: {
-          name: submission.name,
-          sajuData: submission.saju_data
-        },
-        cached: true,
-        remaining
-      })
-    }
-    
-    // 캐시에서 동일한 사주 결과 확인
+
+    // 완전한 분석 데이터 생성
+    const analysis = buildCompleteAnalysis(
+      name,
+      gender,
+      birthCountry,
+      new Date(birthDate),
+      sajuData
+    )
+
+    // 캐시 키 생성
+    const sajuKey = `${sajuData.yearPillar?.fullName}_${sajuData.monthPillar?.fullName}_${sajuData.dayPillar?.fullName}_${sajuData.hourPillar?.fullName || 'none'}`
+
+    // 캐시 확인
     const cachedFacts = await getCachedFacts(supabase, sajuKey)
-    let freeFacts: Fact[]
-    
+    let facts: Fact[]
+
     if (cachedFacts) {
-      console.log('[v0] Cache hit for saju:', sajuKey)
-      freeFacts = cachedFacts
+      facts = cachedFacts
     } else {
-      console.log('[v0] Cache miss, generating with AI for:', sajuKey)
       // AI로 새로운 팩트 생성
-      freeFacts = await generateFactsWithAI(sajuData, submission.name, submission.gender || 'unknown')
+      facts = await generateFactsFromAI(analysis)
+      
       // 캐시에 저장
-      await cacheFacts(supabase, sajuKey, freeFacts)
+      await cacheFacts(supabase, sajuKey, facts)
     }
-    
-    const teaserFacts = generateTeaserFacts(sajuData)
-    
-    // 리포트 저장
-    const { error: insertError } = await supabase
-      .from('reports')
-      .insert({
-        submission_id: submissionId,
-        section_key: 'free_preview',
-        facts: [...freeFacts, ...teaserFacts],
-        is_free: true
-      })
-    
-    if (insertError) {
-      console.error('[v0] Error storing free facts:', insertError)
-    }
-    
-    return NextResponse.json({
-      freeFacts,
-      teaserFacts,
-      submission: {
-        name: submission.name,
-        sajuData: submission.saju_data
-      },
-      cached: !!cachedFacts,
-      remaining
-    })
-  } catch (error) {
-    console.error('[v0] Generate free facts error:', error)
+
     return NextResponse.json(
-      { error: 'Internal server error' },
+      {
+        facts,
+        remaining,
+        analysis
+      },
+      {
+        headers: {
+          'X-Remaining-Requests': remaining.toString()
+        }
+      }
+    )
+  } catch (error) {
+    console.error('[v0] generate-free error:', error)
+    return NextResponse.json(
+      { error: '팩트 생성 중 오류가 발생했습니다.' },
       { status: 500 }
     )
   }
