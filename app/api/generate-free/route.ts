@@ -42,18 +42,6 @@ async function checkRateLimit(
   
   return { allowed: true, remaining: maxRequests - rateLimit.request_count - 1 }
 }
-  
-  await supabase
-    .from('rate_limits')
-    .update({ 
-      request_count: rateLimit.request_count + 1,
-      updated_at: new Date().toISOString()
-    })
-    .eq('ip_address', ip)
-    .eq('request_date', today)
-  
-  return { allowed: true, remaining: MAX_REQUESTS - rateLimit.request_count - 1 }
-}
 
 // 캐시에서 결과 조회
 async function getCachedFacts(supabase: Awaited<ReturnType<typeof createClient>>, sajuKey: string): Promise<Fact[] | null> {
@@ -171,7 +159,7 @@ ${daeyunStr}
 
 ## 작업 지시사항
 
-위의 사주 정보를 종합적으로 분석하여 **정확히 9개의 놀라운 사실**을 생성해주세요. 각 팩트는:
+위의 사주 정보를 종합적으로 분석하여 **정확히 9개의 놀라운 사���**을 생성해주세요. 각 팩트는:
 1. 그 사람의 실제 특성을 반영하고
 2. 깊이있고 정확해 보여야 하며
 3. "와, 이거 정말 내 얘기다!"라고 느끼게 만들어야 합니다.
