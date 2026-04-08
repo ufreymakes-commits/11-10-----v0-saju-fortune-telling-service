@@ -155,12 +155,33 @@ export function BirthForm() {
             <SelectTrigger className="w-full bg-white border-gray-300 focus:border-primary text-gray-900 data-[placeholder]:text-purple-300">
               <SelectValue placeholder="Select your birth country" />
             </SelectTrigger>
-            <SelectContent className="bg-white max-h-[300px]">
-              {COUNTRIES.map((country) => (
-                <SelectItem key={country.value} value={country.value} className="text-gray-900">
-                  {country.label}
-                </SelectItem>
-              ))}
+            <SelectContent 
+              className="bg-white max-h-[40vh] overflow-y-auto"
+              position="popper"
+              sideOffset={4}
+              onPointerDownOutside={(e) => {
+                // Prevent closing when touching the scrollbar or during scroll
+                const target = e.target as HTMLElement
+                if (target.closest('[data-radix-select-viewport]')) {
+                  e.preventDefault()
+                }
+              }}
+              onOpenAutoFocus={(e) => {
+                // Prevent auto-focus which can cause issues on mobile
+                e.preventDefault()
+              }}
+            >
+              <div className="py-1">
+                {COUNTRIES.map((country) => (
+                  <SelectItem 
+                    key={country.value} 
+                    value={country.value} 
+                    className="text-gray-900 py-3 cursor-pointer touch-manipulation"
+                  >
+                    {country.label}
+                  </SelectItem>
+                ))}
+              </div>
             </SelectContent>
           </Select>
           {errors.birthCountry && <FieldError>{errors.birthCountry}</FieldError>}
@@ -205,15 +226,28 @@ export function BirthForm() {
               <SelectTrigger className="w-full bg-white border-gray-300 focus:border-primary text-gray-900 data-[placeholder]:text-purple-300">
                 <SelectValue placeholder="Min" />
               </SelectTrigger>
-              <SelectContent className="bg-white max-h-[200px]">
-                {Array.from({ length: 60 }, (_, i) => {
-                  const minute = i.toString().padStart(2, '0')
-                  return (
-                    <SelectItem key={minute} value={minute} className="text-gray-900">
-                      {minute}
-                    </SelectItem>
-                  )
-                })}
+              <SelectContent 
+                className="bg-white max-h-[40vh] overflow-y-auto"
+                position="popper"
+                sideOffset={4}
+                onPointerDownOutside={(e) => {
+                  const target = e.target as HTMLElement
+                  if (target.closest('[data-radix-select-viewport]')) {
+                    e.preventDefault()
+                  }
+                }}
+                onOpenAutoFocus={(e) => e.preventDefault()}
+              >
+                <div className="py-1">
+                  {Array.from({ length: 60 }, (_, i) => {
+                    const minute = i.toString().padStart(2, '0')
+                    return (
+                      <SelectItem key={minute} value={minute} className="text-gray-900 py-2.5 touch-manipulation">
+                        {minute}
+                      </SelectItem>
+                    )
+                  })}
+                </div>
               </SelectContent>
             </Select>
             <Select
