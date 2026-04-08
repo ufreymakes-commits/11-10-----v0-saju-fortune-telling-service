@@ -144,7 +144,7 @@ async function generateFactsWithAI(sajuData: SajuData, name: string, gender: str
   
   try {
     const { text } = await generateText({
-      model: 'anthropic/claude-3-haiku-20240307', // 저렴하고 빠른 모델
+      model: 'openai/gpt-4o-mini', // 저렴하고 빠른 모델, 사주 해석에 더 유연함
       prompt,
       maxOutputTokens: 2000,
       temperature: 0.7,
