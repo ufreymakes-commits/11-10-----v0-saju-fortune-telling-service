@@ -7,8 +7,16 @@ import {
 } from './advanced'
 
 // ================================================================
-// 격국(Format) 계산
+// 헬퍼 함수
 // ================================================================
+
+// dayMaster 추출 헬퍼 함수
+function extractDayMaster(fourPillars: any): string | null {
+  if (fourPillars.dayMaster) return fourPillars.dayMaster
+  if (fourPillars.dayPillar?.stem) return fourPillars.dayPillar.stem
+  if (fourPillars.dayStem) return fourPillars.dayStem
+  return null
+}
 
 export function calculateGyeokguk(
   dayMaster: string,
@@ -264,18 +272,43 @@ export function buildCompleteAnalysis(
   gender: string,
   birthCountry: string,
   birthDate: Date,
-  fourPillars: FourPillars
+  fourPillars: any  // API로부터 받는 사주 데이터
 ): CompleteAnalysis {
   const currentYear = 2026
   const age = currentYear - birthDate.getFullYear()
 
+  // fourPillars 안전성 검증
+  if (!fourPillars) {
+    throw new Error('사주 데이터가 없습니다')
+  }
+
+  // dayMaster 추출 (yearStem + dayBranch의 조합 또는 직접 계산)
+  const dayMaster = fourPillars.dayMaster || 
+                    (fourPillars.dayPillar?.stem) ||
+                    extractDayMaster(fourPillars)
+
+  if (!dayMaster) {
+    console.error('[v0] fourPillars 구조:', JSON.stringify(fourPillars, null, 2))
+    throw new Error('일간(Day Master)을 계산할 수 없습니다')
+  }
+
+  // 분기별 천간/지지 추출
+  const yearStem = fourPillars.yearStem || fourPillars.yearPillar?.stem || 'unknown'
+  const yearBranch = fourPillars.yearBranch || fourPillars.yearPillar?.branch || 'unknown'
+  const monthStem = fourPillars.monthStem || fourPillars.monthPillar?.stem || 'unknown'
+  const monthBranch = fourPillars.monthBranch || fourPillars.monthPillar?.branch || 'unknown'
+  const dayStem = fourPillars.dayStem || fourPillars.dayPillar?.stem || dayMaster
+  const dayBranch = fourPillars.dayBranch || fourPillars.dayPillar?.branch || 'unknown'
+  const hourStem = fourPillars.hourStem || fourPillars.hourPillar?.stem || null
+  const hourBranch = fourPillars.hourBranch || fourPillars.hourPillar?.branch || null
+
   // 12운성
   const twelveStars = calcTwelveStars(
-    fourPillars.dayMaster as string,
-    fourPillars.yearBranch,
-    fourPillars.monthBranch,
-    fourPillars.dayBranch,
-    fourPillars.hourBranch || null
+    dayMaster,
+    yearBranch,
+    monthBranch,
+    dayBranch,
+    hourBranch || null
   )
 
   // 십신 (보유/부재) - 나중에 구현 필요
@@ -286,89 +319,89 @@ export function buildCompleteAnalysis(
 
   // 관계식들
   const cheongganHap = calcCheongganHap(
-    fourPillars.yearStem,
-    fourPillars.monthStem,
-    fourPillars.dayMaster as string,
-    fourPillars.hourStem || null
+    yearStem,
+    monthStem,
+    dayStem,
+    hourStem || null
   )
 
   const jijiYughap = calcJijiYughap(
-    fourPillars.yearBranch,
-    fourPillars.monthBranch,
-    fourPillars.dayBranch,
-    fourPillars.hourBranch || null
+    yearBranch,
+    monthBranch,
+    dayBranch,
+    hourBranch || null
   )
 
   const jijiSamhap = calcJijiSamhap(
-    fourPillars.yearBranch,
-    fourPillars.monthBranch,
-    fourPillars.dayBranch,
-    fourPillars.hourBranch || null
+    yearBranch,
+    monthBranch,
+    dayBranch,
+    hourBranch || null
   )
 
   const jijiBanghap = calcJijiBanghap(
-    fourPillars.yearBranch,
-    fourPillars.monthBranch,
-    fourPillars.dayBranch,
-    fourPillars.hourBranch || null
+    yearBranch,
+    monthBranch,
+    dayBranch,
+    hourBranch || null
   )
 
   const cheongganChung = calcCheongganChung(
-    fourPillars.yearStem,
-    fourPillars.monthStem,
-    fourPillars.dayMaster as string,
-    fourPillars.hourStem || null
+    yearStem,
+    monthStem,
+    dayStem,
+    hourStem || null
   )
 
   const jijiChung = calcJijiChung(
-    fourPillars.yearBranch,
-    fourPillars.monthBranch,
-    fourPillars.dayBranch,
-    fourPillars.hourBranch || null
+    yearBranch,
+    monthBranch,
+    dayBranch,
+    hourBranch || null
   )
 
   const gongmang = calcGongmang(
-    fourPillars.dayMaster as string,
-    fourPillars.dayBranch
+    dayMaster,
+    dayBranch
   )
 
   const hyeong = calcHyeong(
-    fourPillars.yearBranch,
-    fourPillars.monthBranch,
-    fourPillars.dayBranch,
-    fourPillars.hourBranch || null
+    yearBranch,
+    monthBranch,
+    dayBranch,
+    hourBranch || null
   )
 
   const pa = calcPa(
-    fourPillars.yearBranch,
-    fourPillars.monthBranch,
+    yearBranch,
+    monthBranch,
     fourPillars.dayBranch,
     fourPillars.hourBranch || null
   )
 
   const hae = calcHae(
-    fourPillars.yearBranch,
-    fourPillars.monthBranch,
-    fourPillars.dayBranch,
-    fourPillars.hourBranch || null
+    yearBranch,
+    monthBranch,
+    dayBranch,
+    hourBranch || null
   )
 
   const wonjin = calcWonjin(
-    fourPillars.yearBranch,
-    fourPillars.monthBranch,
-    fourPillars.dayBranch,
-    fourPillars.hourBranch || null
+    yearBranch,
+    monthBranch,
+    dayBranch,
+    hourBranch || null
   )
 
   const gilseong = calcGilseong(
-    fourPillars.dayMaster as string,
-    fourPillars.yearStem,
-    fourPillars.monthStem,
-    fourPillars.hourStem || null,
-    fourPillars.yearBranch,
-    fourPillars.monthBranch,
-    fourPillars.dayBranch,
-    fourPillars.hourBranch || null
+    dayMaster,
+    yearStem,
+    monthStem,
+    hourStem || null,
+    yearBranch,
+    monthBranch,
+    dayBranch,
+    hourBranch || null
   )
 
   const sinGangSinYakResult = calcSinGangSinYak(
