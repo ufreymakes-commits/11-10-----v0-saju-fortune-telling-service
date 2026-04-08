@@ -19,7 +19,8 @@ import {
   calcGilseong,
   calcSinGangSinYak,
   getEokbuYongsin,
-  calcJohuYongsin
+  calcJohuYongsin,
+  calcAllSinsal
 } from './saju/advanced'
 import { STEMS, BRANCHES, STEM_TO_ELEMENT } from './saju/constants'
 
@@ -96,21 +97,6 @@ function calcGyeokguk(dayMaster: string, monthBranch: string, allStems: string[]
   return gyeok ? (isTuchul ? gyeok : `${gyeok}(본기)`) : '미정격'
 }
 
-// 추가 신살 계산
-function calcWonjinSal(dayBranch: string, allBranches: string[]): boolean {
-  const wonjinMap: Record<string, string> = {
-    '자': '미', '축': '오', '인': '사', '묘': '진', '진': '묘', '사': '인',
-    '오': '축', '미': '자', '신': '해', '유': '술', '술': '유', '해': '신'
-  }
-  const target = wonjinMap[dayBranch]
-  return target ? allBranches.includes(target) : false
-}
-
-function calcHyunchimSal(allBranches: string[]): boolean {
-  // 현침살: 인신사해가 모두 있는 경우
-  return ['인', '신', '사', '해'].every(b => allBranches.includes(b))
-}
-
 export function calculateSaju(birthInfo: BirthInfo): SajuData {
   const birthTime = parseBirthTime(birthInfo.birthTime)
   const date = new Date(birthInfo.birthDate)
@@ -176,7 +162,7 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     hourBranch as any
   )
   
-  // === 관계식 계산 ===
+  // === ���계식 계산 ===
   const cheongganHap = calcCheongganHap(
     yearStem as any, monthStem as any, dayStem as any, hourStem as any
   )
@@ -230,14 +216,14 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
   // === 격국 ===
   const gyeokguk = calcGyeokguk(dayStem, monthBranch, allStems)
   
-  // === 신살 (확장) ===
-  const spirits: string[] = [...analysis.spirits]
-  if (calcWonjinSal(dayBranch, allBranches) && !spirits.includes('원진살')) {
-    spirits.push('원진살')
-  }
-  if (calcHyunchimSal(allBranches) && !spirits.includes('현침살')) {
-    spirits.push('현침살')
-  }
+  // === 신살 (advanced.ts의 정확한 로직 사용) ===
+  const spirits = calcAllSinsal(
+    yearBranch as string,
+    monthBranch as string,
+    dayBranch as string,
+    hourBranch as string | null,
+    dayStem as string
+  )
   
   // === 오행 밸런스 (정확한 계산) ===
   const elementBalance = {
