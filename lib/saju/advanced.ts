@@ -600,6 +600,96 @@ function checkHyeonChimSal(dayBranch: string): boolean {
   return ["해", "묘", "미"].includes(dayBranch)
 }
 
+// 망신살: 일지/연지 기준 (도화살과 정반대 위치)
+function checkMangsinSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
+  const mangsinMap: Record<string, string> = {
+    "인": "신", "오": "신", "술": "신",
+    "신": "인", "자": "인", "진": "인",
+    "사": "해", "유": "해", "축": "해",
+    "해": "사", "묘": "사", "미": "사"
+  }
+  const target = mangsinMap[dayBranch] || mangsinMap[yearBranch]
+  if (!target) return false
+  return [yearBranch, monthBranch, dayBranch, hourBranch].includes(target)
+}
+
+function getMangsinSalPositions(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
+  const positions: string[] = []
+  const mangsinMap: Record<string, string> = {
+    "인": "신", "오": "신", "술": "신",
+    "신": "인", "자": "인", "진": "인",
+    "사": "해", "유": "해", "축": "해",
+    "해": "사", "묘": "사", "미": "사"
+  }
+  const target = mangsinMap[dayBranch]
+  if (target) {
+    if (yearBranch === target) positions.push("연지")
+    if (monthBranch === target) positions.push("월지")
+    if (dayBranch === target) positions.push("일지")
+    if (hourBranch === target) positions.push("시지")
+  }
+  return positions
+}
+
+// 장성살: 일지 기준
+function checkJangseongSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
+  const jangseongMap: Record<string, string> = {
+    "인": "해", "오": "해", "술": "해",
+    "신": "사", "자": "사", "진": "사",
+    "사": "인", "유": "인", "축": "인",
+    "해": "신", "묘": "신", "미": "신"
+  }
+  const target = jangseongMap[dayBranch]
+  if (!target) return false
+  return [yearBranch, monthBranch, dayBranch, hourBranch].includes(target)
+}
+
+function getJangseongSalPositions(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
+  const positions: string[] = []
+  const jangseongMap: Record<string, string> = {
+    "인": "해", "오": "해", "술": "해",
+    "신": "사", "자": "사", "진": "사",
+    "사": "인", "유": "인", "축": "인",
+    "해": "신", "묘": "신", "미": "신"
+  }
+  const target = jangseongMap[dayBranch]
+  if (target) {
+    if (yearBranch === target) positions.push("연지")
+    if (monthBranch === target) positions.push("월지")
+    if (dayBranch === target) positions.push("일지")
+    if (hourBranch === target) positions.push("시지")
+  }
+  return positions
+}
+
+// 홍염살: 일간 기준 (연애/매력 관련)
+function checkHongyeomSal(dayStem: string, branches: string[]): boolean {
+  const hongyeomMap: Record<string, string> = {
+    "갑": "오", "을": "신", "병": "인", "정": "미",
+    "무": "진", "기": "진", "경": "술", "신": "유",
+    "임": "자", "계": "신"
+  }
+  const target = hongyeomMap[dayStem]
+  return target ? branches.filter(Boolean).includes(target) : false
+}
+
+function getHongyeomSalPositions(dayStem: string, yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
+  const positions: string[] = []
+  const hongyeomMap: Record<string, string> = {
+    "갑": "오", "을": "신", "병": "인", "정": "미",
+    "무": "진", "기": "진", "경": "술", "신": "유",
+    "임": "자", "계": "신"
+  }
+  const target = hongyeomMap[dayStem]
+  if (target) {
+    if (yearBranch === target) positions.push("연지")
+    if (monthBranch === target) positions.push("월지")
+    if (dayBranch === target) positions.push("일지")
+    if (hourBranch === target) positions.push("시지")
+  }
+  return positions
+}
+
 // 문창살: 일간 기준으로 특정 지지가 있으면 해당
 function checkMunChangSal(dayStem: string, branches: string[]): string[] {
   const munchangMap: Record<string, string[]> = {
@@ -697,7 +787,10 @@ const SINSAL_USAGE_GUIDE: Record<string, string> = {
   "화개살": "예술, 종교, 철학, 학문 등 정신적 깊이를 요하는 분야에서 재능이 발휘됩니다",
   "원진살": "관계의 갈등을 인식하고 소통과 이해의 노력을 기울이면 성장의 기회가 됩니다",
   "현침살": "전문 기술, 의료, 법률 등 날카로운 전문성이 필요한 분야에서 두각을 나타냅니다",
-  "문창살": "학문, 글쓰기, 교육, 연구 등 지적 활동에서 뛰어난 성취를 이룰 수 있습니다"
+  "문창살": "학문, 글쓰기, 교육, 연구 등 지적 활동에서 뛰어난 성취를 이룰 수 있습니다",
+  "망신살": "명예와 체면에 관한 시험을 통해 진정한 자아를 찾고 겸손을 배우게 됩니다",
+  "장성살": "리더십과 권위를 발휘하며 높은 지위나 명예를 얻을 수 있는 기운이 있습니다",
+  "홍염살": "강렬한 매력과 정열로 예술, 연예, 패션 분야에서 두각을 나타낼 수 있습니다"
 }
 
 export interface SinsalDetail {
@@ -731,10 +824,13 @@ export function calcAllSinsal(
   if (checkHwagaeSal(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("화개살")
   if (checkWonJinSal(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("원진살")
   if (checkHyeonChimSal(dayBranch)) sinsalList.push("현침살")
+  if (checkMangsinSal(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("망신살")
+  if (checkJangseongSal(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("장성살")
   
-  // 문창살 추가
+  // 문창살, 홍염살 추가
   const branches = [yearBranch, monthBranch, dayBranch, hourBranch].filter(Boolean) as string[]
   if (checkMunChangSal(dayStem, branches).length > 0) sinsalList.push("문창살")
+  if (checkHongyeomSal(dayStem, branches)) sinsalList.push("홍염살")
   
   return sinsalList
 }
@@ -755,6 +851,8 @@ export function calcDetailedSinsal(
     { name: "도화살", check: checkDohwaSal, getPositions: getDohwaSalPositions },
     { name: "역마살", check: checkYeokMaSal, getPositions: getYeokMaSalPositions },
     { name: "화개살", check: checkHwagaeSal, getPositions: getHwagaeSalPositions },
+    { name: "망신살", check: checkMangsinSal, getPositions: getMangsinSalPositions },
+    { name: "장성살", check: checkJangseongSal, getPositions: getJangseongSalPositions },
   ]
   
   for (const { name, check, getPositions } of sinsalChecks) {
@@ -835,6 +933,29 @@ export function calcDetailedSinsal(
     })
     
     if (hasStrongPosition) strongSinsals.push("문창살")
+  }
+  
+  // 홍염살
+  const hongyeomPositions = getHongyeomSalPositions(dayStem, yearBranch, monthBranch, dayBranch, hourBranch)
+  if (hongyeomPositions.length > 0) {
+    const hasStrongPosition = hongyeomPositions.includes("월지") || hongyeomPositions.includes("일지")
+    let intensity = hongyeomPositions.length
+    if (hasStrongPosition) {
+      intensity = parseFloat((hongyeomPositions.length * 1.5).toFixed(1))
+    }
+    
+    details.push({
+      name: "홍염살",
+      positions: hongyeomPositions,
+      count: hongyeomPositions.length,
+      totalPillars,
+      percentage: Math.round((hongyeomPositions.length / totalPillars) * 100),
+      intensity,
+      isStrong: hasStrongPosition,
+      usageGuide: SINSAL_USAGE_GUIDE["홍염살"]
+    })
+    
+    if (hasStrongPosition) strongSinsals.push("홍염살")
   }
   
   // 요약 텍스트 생성

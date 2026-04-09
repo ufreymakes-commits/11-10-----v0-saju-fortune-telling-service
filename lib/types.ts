@@ -20,7 +20,10 @@ export interface SajuData {
   dayMaster: string
   dayMasterKorean?: string
   
-  // 오행 (기본 점수)
+  // 오행 개수 (지장간 포함 - 비율 표시용)
+  elementCount?: { 목: number; 화: number; 토: number; 금: number; 수: number }
+  
+  // 오행 (기본 점수 - 수치론 120점)
   elementBalance: { wood: number; fire: number; earth: number; metal: number; water: number }
   elementBalanceKorean?: { 목: number; 화: number; 토: number; 금: number; 수: number }
   dominantElement: string

@@ -327,6 +327,37 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
 }
 
 // ================================================================
+// 오행 개수 계산 (지장간 포함) - 비율 표시용
+// 천간 4개 + 지지 4개 + 지장간(지지마다 1~3개)
+// ================================================================
+
+export function countElementsWithHiddenStems(fourPillars: FourPillars): ElementCount {
+  const count: ElementCount = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+  
+  const pillars = [fourPillars.year, fourPillars.month, fourPillars.day];
+  if (fourPillars.hour) pillars.push(fourPillars.hour);
+  
+  for (const pillar of pillars) {
+    // 천간 카운트
+    const stemElement = STEM_TO_ELEMENT[pillar.stem];
+    count[stemElement]++;
+    
+    // 지지 카운트
+    const branchElement = BRANCH_TO_ELEMENT[pillar.branch];
+    count[branchElement]++;
+    
+    // 지장간 카운트 (숨겨진 천간)
+    const hiddenStems = HIDDEN_STEMS[pillar.branch];
+    for (const hs of hiddenStems) {
+      const hsElement = STEM_TO_ELEMENT[hs];
+      count[hsElement]++;
+    }
+  }
+  
+  return count;
+}
+
+// ================================================================
 // 오행 점수 계산 (수치론 점수 방식)
 // 천간: 각 10점, 지지: 연지 10점, 월지 30점, 일지 20점, 시지 20점
 // 지장간(숨겨진 천간)은 사용 안함, 총 120점

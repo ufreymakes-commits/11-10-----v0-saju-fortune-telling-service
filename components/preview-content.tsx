@@ -209,7 +209,16 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
           </div>
 
           <div className="border-t border-green-500/20 pt-2 mt-2">
-            <span className="text-yellow-400">오행 (기본 점수 - 합충 미반영):</span>
+            <span className="text-yellow-400">오행 개수 (지장간 포함 - 비율):</span>
+            <div className="ml-2 text-cyan-300">
+              {submission.sajuData.elementCount ? (
+                <div>목{submission.sajuData.elementCount.목}개 / 화{submission.sajuData.elementCount.화}개 / 토{submission.sajuData.elementCount.토}개 / 금{submission.sajuData.elementCount.금}개 / 수{submission.sajuData.elementCount.수}개</div>
+              ) : <span className="text-red-400">미계산</span>}
+            </div>
+          </div>
+
+          <div className="border-t border-green-500/20 pt-2 mt-2">
+            <span className="text-yellow-400">오행 점수 (수치론 120점 - 합충 미반영):</span>
             <div className="ml-2">
               {submission.sajuData.elementBalanceKorean ? (
                 <div>목{submission.sajuData.elementBalanceKorean.목}점 / 화{submission.sajuData.elementBalanceKorean.화}점 / 토{submission.sajuData.elementBalanceKorean.토}점 / 금{submission.sajuData.elementBalanceKorean.금}점 / 수{submission.sajuData.elementBalanceKorean.수}점</div>
@@ -276,7 +285,7 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
             <span className="text-yellow-400">길성:</span>
             <div className="ml-2">
               <div>천을귀인: {submission.sajuData.gilseong?.cheonul?.join(', ') || '없음'}</div>
-              <div>태극귀인: {submission.sajuData.gilseong?.taegeuk?.join(', ') || '없음'}</div>
+              <div>태��귀인: {submission.sajuData.gilseong?.taegeuk?.join(', ') || '없음'}</div>
             </div>
           </div>
 

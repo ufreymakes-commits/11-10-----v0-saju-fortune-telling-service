@@ -2,7 +2,7 @@
 // Complete analysis including all advanced calculations
 
 import type { BirthInfo, SajuData } from './types'
-import { runFullAnalysis, calculateElementScores, calculateElementScoresWithHapChung } from './saju/core-calculator'
+import { runFullAnalysis, calculateElementScores, calculateElementScoresWithHapChung, countElementsWithHiddenStems } from './saju/core-calculator'
 import {
   calcTwelveStars,
   calcCheongganHap,
@@ -236,6 +236,9 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     dayStem as string
   )
   
+  // === 오행 개수 계산 (지장간 포함) - 비율 표시용 ===
+  const elementCounts = countElementsWithHiddenStems(fp)
+  
   // === 오행 점수 계산 (수치론 점수 방식: 총 120점) ===
   // 천간: 각 10점, 지지: 연지 10점, 월지 30점, 일지 20점, 시지 20점
   const elementScores = calculateElementScores(fp)
@@ -313,7 +316,16 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     dayMaster: dayStemHanja,
     dayMasterKorean: dayStem,
     
-    // 오행 (기본 점수)
+    // 오행 개수 (지장간 포함 - 비율 표시용)
+    elementCount: {
+      목: elementCounts['목'] || 0,
+      화: elementCounts['화'] || 0,
+      토: elementCounts['토'] || 0,
+      금: elementCounts['금'] || 0,
+      수: elementCounts['수'] || 0
+    },
+    
+    // 오행 (기본 점수 - 수치론 120점)
     elementBalance,
     elementBalanceKorean,
     dominantElement: Object.entries(elementBalance).reduce((a, b) => 
