@@ -301,7 +301,26 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
           </div>
 
           <div className="border-t border-green-500/20 pt-2 mt-2">
-            <span className="text-yellow-400">신살:</span> {submission.sajuData.spirits?.length ? submission.sajuData.spirits.join(', ') : <span className="text-red-400">미계산</span>}
+            <span className="text-yellow-400">신살 (상세 분석):</span>
+            <div className="ml-2 text-[10px]">
+              {submission.sajuData.sinsalDetails?.length ? (
+                <>
+                  {submission.sajuData.sinsalDetails.map((sinsal, i) => (
+                    <div key={i} className={sinsal.isStrong ? "text-lime-400" : "text-green-400"}>
+                      {sinsal.isStrong && "✅ "}{sinsal.name}: {sinsal.count}/{sinsal.totalPillars} ({sinsal.percentage}%) 
+                      [강도: {sinsal.intensity}] - {sinsal.positions.join(", ")}
+                    </div>
+                  ))}
+                  <div className="mt-1 text-cyan-300 border-t border-green-500/10 pt-1">
+                    활용 가이드: {submission.sajuData.sinsalCombinedGuide}
+                  </div>
+                </>
+              ) : submission.sajuData.spirits?.length ? (
+                <span>{submission.sajuData.spirits.join(', ')}</span>
+              ) : (
+                <span className="text-red-400">미계산</span>
+              )}
+            </div>
           </div>
 
           <div className="border-t border-green-500/20 pt-2 mt-2">

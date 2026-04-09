@@ -21,6 +21,7 @@ import {
   getEokbuYongsin,
   calcJohuYongsin,
   calcAllSinsal,
+  calcDetailedSinsal,
   calcDaeyun
 } from './saju/advanced'
 import { STEMS, BRANCHES, STEM_TO_ELEMENT } from './saju/constants'
@@ -226,6 +227,15 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     dayStem as string
   )
   
+  // === 상세 신살 분석 (위치, 강도, 활용 가이드 포함) ===
+  const detailedSinsal = calcDetailedSinsal(
+    yearBranch as string,
+    monthBranch as string,
+    dayBranch as string,
+    hourBranch as string | null,
+    dayStem as string
+  )
+  
   // === 오행 점수 계산 (수치론 점수 방식: 총 120점) ===
   // 천간: 각 10점, 지지: 연지 10점, 월지 30점, 일지 20점, 시지 20점
   const elementScores = calculateElementScores(fp)
@@ -360,8 +370,13 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     // 격국
     gyeokguk,
     
-    // 신살
+    // 신살 (기본)
     spirits,
+    
+    // 신살 (상세 분석 - 위치, 강도, 활용 가이드)
+    sinsalDetails: detailedSinsal.details,
+    sinsalSummary: detailedSinsal.summary,
+    sinsalCombinedGuide: detailedSinsal.combinedGuide,
     
     // 대운 (정확한 계산)
     daewoon: calcDaeyun(

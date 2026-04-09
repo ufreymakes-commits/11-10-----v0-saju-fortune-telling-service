@@ -65,8 +65,22 @@ export interface SajuData {
   // 격국
   gyeokguk?: string
   
-  // 신살
+  // 신살 (기본 목록)
   spirits?: string[]
+  
+  // 신살 (상세 분석)
+  sinsalDetails?: Array<{
+    name: string
+    positions: string[]
+    count: number
+    totalPillars: number
+    percentage: number
+    intensity: number
+    isStrong: boolean
+    usageGuide: string
+  }>
+  sinsalSummary?: string
+  sinsalCombinedGuide?: string
   
   // 대운
   daewoon?: Array<{ startAge: number; endAge: number; stem: string; branch: string; fullName?: string }>

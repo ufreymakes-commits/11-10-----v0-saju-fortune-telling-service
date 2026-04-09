@@ -600,6 +600,123 @@ function checkHyeonChimSal(dayBranch: string): boolean {
   return ["해", "묘", "미"].includes(dayBranch)
 }
 
+// 문창살: 일간 기준으로 특정 지지가 있으면 해당
+function checkMunChangSal(dayStem: string, branches: string[]): string[] {
+  const munchangMap: Record<string, string[]> = {
+    "갑": ["사"],   // 갑일간 -> 사
+    "을": ["오"],   // 을일간 -> 오
+    "병": ["신"],   // 병일간 -> 신
+    "정": ["유"],   // 정일간 -> 유
+    "무": ["신"],   // 무일간 -> 신
+    "기": ["유"],   // 기일간 -> 유
+    "경": ["해"],   // 경일간 -> 해
+    "신": ["자"],   // 신일간 -> 자
+    "임": ["인"],   // 임일간 -> 인
+    "계": ["묘"]    // 계일간 -> 묘
+  }
+  
+  const targetBranches = munchangMap[dayStem] || []
+  return branches.filter(b => b && targetBranches.includes(b))
+}
+
+// 각 신살이 해당하는 위치들을 반환
+function getDohwaSalPositions(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
+  const positions: string[] = []
+  const dohwaMap: Record<string, string> = {
+    "인": "묘", "오": "묘", "술": "묘",
+    "신": "유", "자": "유", "진": "유",
+    "사": "오", "유": "오", "축": "오",
+    "해": "자", "묘": "자", "미": "자"
+  }
+  const target = dohwaMap[dayBranch]
+  if (target) {
+    if (yearBranch === target) positions.push("연지")
+    if (monthBranch === target) positions.push("월지")
+    if (dayBranch === target) positions.push("일지")
+    if (hourBranch === target) positions.push("시지")
+  }
+  return positions
+}
+
+function getYeokMaSalPositions(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
+  const positions: string[] = []
+  const yeokmaMap: Record<string, string> = {
+    "인": "신", "오": "신", "술": "신",
+    "신": "인", "자": "인", "진": "인",
+    "사": "해", "유": "해", "축": "해",
+    "해": "사", "묘": "사", "미": "사"
+  }
+  const target = yeokmaMap[dayBranch]
+  if (target) {
+    if (yearBranch === target) positions.push("연지")
+    if (monthBranch === target) positions.push("월지")
+    if (dayBranch === target) positions.push("일지")
+    if (hourBranch === target) positions.push("시지")
+  }
+  return positions
+}
+
+function getHwagaeSalPositions(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
+  const positions: string[] = []
+  const hwagaeMap: Record<string, string> = {
+    "인": "술", "오": "술", "술": "술",
+    "신": "진", "자": "진", "진": "진",
+    "사": "축", "유": "축", "축": "축",
+    "해": "미", "묘": "미", "미": "미"
+  }
+  const target = hwagaeMap[dayBranch]
+  if (target) {
+    if (yearBranch === target) positions.push("연지")
+    if (monthBranch === target) positions.push("월지")
+    if (dayBranch === target) positions.push("일지")
+    if (hourBranch === target) positions.push("시지")
+  }
+  return positions
+}
+
+function getMunChangSalPositions(dayStem: string, yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
+  const positions: string[] = []
+  const munchangMap: Record<string, string> = {
+    "갑": "사", "을": "오", "병": "신", "정": "유", "무": "신",
+    "기": "유", "경": "해", "신": "자", "임": "인", "계": "묘"
+  }
+  const target = munchangMap[dayStem]
+  if (target) {
+    if (yearBranch === target) positions.push("연지")
+    if (monthBranch === target) positions.push("월지")
+    if (dayBranch === target) positions.push("일지")
+    if (hourBranch === target) positions.push("시지")
+  }
+  return positions
+}
+
+// 신살별 활용 가이드
+const SINSAL_USAGE_GUIDE: Record<string, string> = {
+  "도화살": "대인관계와 매력을 활용하는 직업(연예, 영업, 서비스업)에서 빛을 발합니다",
+  "역마살": "이동과 변화가 많은 환경(해외, 무역, 영업, 출장)에서 에너지가 활성화됩니다",
+  "화개살": "예술, 종교, 철학, 학문 등 정신적 깊이를 요하는 분야에서 재능이 발휘됩니다",
+  "원진살": "관계의 갈등을 인식하고 소통과 이해의 노력을 기울이면 성장의 기회가 됩니다",
+  "현침살": "전문 기술, 의료, 법률 등 날카로운 전문성이 필요한 분야에서 두각을 나타냅니다",
+  "문창살": "학문, 글쓰기, 교육, 연구 등 지적 활동에서 뛰어난 성취를 이룰 수 있습니다"
+}
+
+export interface SinsalDetail {
+  name: string
+  positions: string[]      // 해당 위치들 (연지, 월지, 일지, 시지)
+  count: number            // 해당 개수
+  totalPillars: number     // 전체 주 개수 (보통 4 또는 8)
+  percentage: number       // 비율
+  intensity: number        // 에너지 강도 (월지/일지 가중치 적용)
+  isStrong: boolean        // 강한 신살 여부 (월지/일지 포함)
+  usageGuide: string       // 활용 가이드
+}
+
+export interface SinsalAnalysis {
+  details: SinsalDetail[]
+  summary: string
+  combinedGuide: string    // 종합 활용 가이드
+}
+
 export function calcAllSinsal(
   yearBranch: string,
   monthBranch: string,
@@ -615,7 +732,145 @@ export function calcAllSinsal(
   if (checkWonJinSal(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("원진살")
   if (checkHyeonChimSal(dayBranch)) sinsalList.push("현침살")
   
+  // 문창살 추가
+  const branches = [yearBranch, monthBranch, dayBranch, hourBranch].filter(Boolean) as string[]
+  if (checkMunChangSal(dayStem, branches).length > 0) sinsalList.push("문창살")
+  
   return sinsalList
+}
+
+export function calcDetailedSinsal(
+  yearBranch: string,
+  monthBranch: string,
+  dayBranch: string,
+  hourBranch: string | null,
+  dayStem: string
+): SinsalAnalysis {
+  const details: SinsalDetail[] = []
+  const totalPillars = hourBranch ? 4 : 3
+  const strongSinsals: string[] = []
+  
+  // 각 신살별로 상세 분석
+  const sinsalChecks = [
+    { name: "도화살", check: checkDohwaSal, getPositions: getDohwaSalPositions },
+    { name: "역마살", check: checkYeokMaSal, getPositions: getYeokMaSalPositions },
+    { name: "화개살", check: checkHwagaeSal, getPositions: getHwagaeSalPositions },
+  ]
+  
+  for (const { name, check, getPositions } of sinsalChecks) {
+    if (check(yearBranch, monthBranch, dayBranch, hourBranch)) {
+      const positions = getPositions(yearBranch, monthBranch, dayBranch, hourBranch)
+      const count = positions.length
+      const percentage = Math.round((count / totalPillars) * 100)
+      
+      // 월지/일지 가중치 (1.5배)
+      let intensity = count
+      const hasStrongPosition = positions.includes("월지") || positions.includes("일지")
+      if (hasStrongPosition) {
+        intensity = parseFloat((count * 1.5).toFixed(1))
+      }
+      
+      details.push({
+        name,
+        positions,
+        count,
+        totalPillars,
+        percentage,
+        intensity,
+        isStrong: hasStrongPosition,
+        usageGuide: SINSAL_USAGE_GUIDE[name]
+      })
+      
+      if (hasStrongPosition) strongSinsals.push(name)
+    }
+  }
+  
+  // 원진살 (특수 처리 - 쌍으로 존재)
+  if (checkWonJinSal(yearBranch, monthBranch, dayBranch, hourBranch)) {
+    details.push({
+      name: "원진살",
+      positions: ["원진 관계"],
+      count: 2,
+      totalPillars,
+      percentage: Math.round((2 / totalPillars) * 100),
+      intensity: 2,
+      isStrong: false,
+      usageGuide: SINSAL_USAGE_GUIDE["원진살"]
+    })
+  }
+  
+  // 현침살 (일지 기준)
+  if (checkHyeonChimSal(dayBranch)) {
+    details.push({
+      name: "현침살",
+      positions: ["일지"],
+      count: 1,
+      totalPillars,
+      percentage: Math.round((1 / totalPillars) * 100),
+      intensity: 1.5, // 일지라서 1.5배
+      isStrong: true,
+      usageGuide: SINSAL_USAGE_GUIDE["현침살"]
+    })
+    strongSinsals.push("현침살")
+  }
+  
+  // 문창살
+  const munchangPositions = getMunChangSalPositions(dayStem, yearBranch, monthBranch, dayBranch, hourBranch)
+  if (munchangPositions.length > 0) {
+    const hasStrongPosition = munchangPositions.includes("월지") || munchangPositions.includes("일지")
+    let intensity = munchangPositions.length
+    if (hasStrongPosition) {
+      intensity = parseFloat((munchangPositions.length * 1.5).toFixed(1))
+    }
+    
+    details.push({
+      name: "문창살",
+      positions: munchangPositions,
+      count: munchangPositions.length,
+      totalPillars,
+      percentage: Math.round((munchangPositions.length / totalPillars) * 100),
+      intensity,
+      isStrong: hasStrongPosition,
+      usageGuide: SINSAL_USAGE_GUIDE["문창살"]
+    })
+    
+    if (hasStrongPosition) strongSinsals.push("문창살")
+  }
+  
+  // 요약 텍스트 생성
+  const summaryLines = details.map(d => {
+    const strongMark = d.isStrong ? " ✅" : ""
+    return `${d.name}: ${d.count}/${d.totalPillars} (${d.percentage}%) [강도: ${d.intensity}]${strongMark} - ${d.positions.join(", ")}`
+  })
+  
+  // 종합 활용 가이드 생성
+  let combinedGuide = ""
+  if (strongSinsals.length > 0) {
+    const guides = strongSinsals.map(name => {
+      const detail = details.find(d => d.name === name)
+      return detail ? `${name}의 에너지가 강합니다` : ""
+    }).filter(Boolean)
+    
+    if (strongSinsals.includes("현침살") && strongSinsals.includes("역마살")) {
+      combinedGuide = "현침살과 역마살이 강하니, 전문적인 지식이나 기술을 가지고 널리 움직이며 활동하는 것이 신살 에너지를 가장 잘 활용하는 방법입니다."
+    } else if (strongSinsals.includes("문창살") && strongSinsals.includes("화개살")) {
+      combinedGuide = "문창살과 화개살이 강하니, 학문과 예술을 결합한 창의적 연구나 교육 분야에서 큰 성취를 이룰 수 있습니다."
+    } else if (strongSinsals.includes("도화살") && strongSinsals.includes("역마살")) {
+      combinedGuide = "도화살과 역마살이 강하니, 대인관계와 이동이 많은 환경(해외영업, 연예, 무역)에서 매력이 극대화됩니다."
+    } else {
+      combinedGuide = strongSinsals.map(name => SINSAL_USAGE_GUIDE[name]).join(" 또한, ")
+    }
+  } else if (details.length > 0) {
+    combinedGuide = "신살의 에너지가 고르게 분포되어 있어 다양한 분야에서 균형 잡힌 발전이 가능합니다."
+  } else {
+    combinedGuide = "특별히 강조되는 신살이 없어 안정적인 삶의 흐름을 유지할 수 있습니다."
+  }
+  
+  return {
+    details,
+    summary: summaryLines.join("\n"),
+    combinedGuide
+  }
 }
 
 // ================================================================
