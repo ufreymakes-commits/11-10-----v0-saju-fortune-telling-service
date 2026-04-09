@@ -334,8 +334,8 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
       date,
       birthInfo.gender === '여' ? 'female' : 'male',
       yearStem,
-      monthBranch,
-      dayBranch
+      monthStem,
+      monthBranch
     ),
     
     // 연운
