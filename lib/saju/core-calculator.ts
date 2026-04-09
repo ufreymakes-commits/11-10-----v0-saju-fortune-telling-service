@@ -327,7 +327,48 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
 }
 
 // ================================================================
-// 오행 개수 계산
+// 오행 점수 계산 (수치론 점수 방식)
+// 천간: 각 10점, 지지: 연지 10점, 월지 30점, 일지 20점, 시지 20점
+// 지장간(숨겨진 천간)은 사용 안함, 총 120점
+// ================================================================
+
+export function calculateElementScores(fourPillars: FourPillars): ElementCount {
+  const scores: ElementCount = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+
+  // 천간 점수 (각 10점)
+  const yearStemElement = STEM_TO_ELEMENT[fourPillars.year.stem];
+  scores[yearStemElement] += 10;
+
+  const monthStemElement = STEM_TO_ELEMENT[fourPillars.month.stem];
+  scores[monthStemElement] += 10;
+
+  const dayStemElement = STEM_TO_ELEMENT[fourPillars.day.stem];
+  scores[dayStemElement] += 10;
+
+  if (fourPillars.hour) {
+    const hourStemElement = STEM_TO_ELEMENT[fourPillars.hour.stem];
+    scores[hourStemElement] += 10;
+  }
+
+  // 지지 점수 (연지 10점, 월지 30점, 일지 20점, 시지 20점)
+  const yearBranchElement = BRANCH_TO_ELEMENT[fourPillars.year.branch];
+  scores[yearBranchElement] += 10;
+
+  const monthBranchElement = BRANCH_TO_ELEMENT[fourPillars.month.branch];
+  scores[monthBranchElement] += 30;
+
+  const dayBranchElement = BRANCH_TO_ELEMENT[fourPillars.day.branch];
+  scores[dayBranchElement] += 20;
+
+  if (fourPillars.hour) {
+    const hourBranchElement = BRANCH_TO_ELEMENT[fourPillars.hour.branch];
+    scores[hourBranchElement] += 20;
+  }
+
+  return scores;
+}
+
+// 오행 개수 계산 (구 방식 - 호환성용, deprecated)
 // ================================================================
 
 export function countElements(fourPillars: FourPillars, includeHiddenStems: boolean = true): ElementCount {

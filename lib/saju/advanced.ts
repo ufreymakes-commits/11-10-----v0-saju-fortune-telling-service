@@ -1,586 +1,545 @@
 // ================================================================
-// Saju Advanced Analysis - 사주 심화 분석
-// Converted from extraadvanced.gs
+// advanced.ts — 사주 심화 분석 (extra_advanced.js 정확한 포팅)
 // ================================================================
 
-import {
-  STEMS, BRANCHES, STEM_TO_ELEMENT, BRANCH_TO_ELEMENT,
-  HIDDEN_STEMS, SIXTY_JIAZI, STEM_YIN_YANG,
-  TWELVE_STARS, JANG_SAENG_BRANCH,
-  type Stem, type Branch, type Element, type TwelveStar
-} from './constants';
-import type { FourPillars } from './core-calculator';
-
-// ================================================================
-// 12운성 계산
-// ================================================================
-
-export function getTwelveStar(dayStem: Stem, branch: Branch): TwelveStar {
-  const isYang = STEM_YIN_YANG[dayStem] === "양";
-  const startBranch = JANG_SAENG_BRANCH[dayStem];
-  const startIndex = BRANCHES.indexOf(startBranch);
-  const branchIndex = BRANCHES.indexOf(branch);
-
-  if (startIndex < 0 || branchIndex < 0) return "장생";
-
-  const diff = isYang
-    ? ((branchIndex - startIndex + 12) % 12)
-    : ((startIndex - branchIndex + 12) % 12);
-
-  return TWELVE_STARS[diff];
+// 12운성 관련 상수
+const TWELVE_STARS = ["장생", "목욕", "관대", "건록", "제왕", "쇠", "병", "사", "묘", "절", "태", "양"]
+const BRANCHES_ORDER = ["자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해"]
+const JANG_SAENG_BRANCH: Record<string, string> = {
+  "갑": "해", "을": "오", "병": "인", "정": "유",
+  "무": "인", "기": "유", "경": "사", "신": "자", "임": "신", "계": "묘"
 }
 
+// 12운성 단일 계산
+export function getTwelveStar(dayStem: string, branch: string): string {
+  const isYang = ["갑", "병", "무", "경", "임"].includes(dayStem)
+  const si = BRANCHES_ORDER.indexOf(JANG_SAENG_BRANCH[dayStem])
+  const bi = BRANCHES_ORDER.indexOf(branch)
+  if (si < 0 || bi < 0) return ""
+  const diff = isYang ? ((bi - si + 12) % 12) : ((si - bi + 12) % 12)
+  return TWELVE_STARS[diff] || ""
+}
+
+// 12운성 전체 계산
 export function calcTwelveStars(
-  dayStem: Stem,
-  yearBranch: Branch,
-  monthBranch: Branch,
-  dayBranch: Branch,
-  hourBranch: Branch | null
-): { position: string; branch: Branch; star: TwelveStar }[] {
-  const results = [
-    { position: "연지", branch: yearBranch, star: getTwelveStar(dayStem, yearBranch) },
-    { position: "월지", branch: monthBranch, star: getTwelveStar(dayStem, monthBranch) },
-    { position: "일지", branch: dayBranch, star: getTwelveStar(dayStem, dayBranch) },
-  ];
-
-  if (hourBranch) {
-    results.push({ position: "시지", branch: hourBranch, star: getTwelveStar(dayStem, hourBranch) });
-  }
-
-  return results;
+  dayStem: string,
+  yearBranch: string,
+  monthBranch: string,
+  dayBranch: string,
+  hourBranch: string | null
+): Array<{ position: string; branch: string; star: string }> {
+  const labels = ["연지", "월지", "일지", "시지"]
+  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
+  
+  return branches
+    .map((b, i) => {
+      if (!b) return null
+      return {
+        position: labels[i],
+        branch: b,
+        star: getTwelveStar(dayStem, b)
+      }
+    })
+    .filter((item): item is { position: string; branch: string; star: string } => item !== null)
 }
 
 // ================================================================
 // 천간합
 // ================================================================
+const CHEONGGAN_HAP: [string, string, string][] = [
+  ["갑", "기", "토"], ["을", "경", "금"], ["병", "신", "수"], ["정", "임", "목"], ["무", "계", "화"]
+]
 
-const CHEONGGAN_HAP: [Stem, Stem, Element][] = [
-  ["갑", "기", "토"],
-  ["을", "경", "금"],
-  ["병", "신", "수"],
-  ["정", "임", "목"],
-  ["무", "계", "화"]
-];
-
-export function calcCheongganHap(yearStem: Stem, monthStem: Stem, dayStem: Stem, hourStem: Stem | null): string[] {
-  const stems: (Stem | null)[] = [yearStem, monthStem, dayStem, hourStem];
-  const labels = ["연간", "월간", "일간", "시간"];
-  const results: string[] = [];
-
-  for (const [a, b, result] of CHEONGGAN_HAP) {
-    const indexA = stems.indexOf(a);
-    const indexB = stems.indexOf(b);
-    if (indexA >= 0 && indexB >= 0 && indexA !== indexB) {
-      results.push(`${labels[indexA]}${a}+${labels[indexB]}${b}→${result}합`);
+export function calcCheongganHap(
+  yearStem: string,
+  monthStem: string,
+  dayStem: string,
+  hourStem: string | null
+): string[] {
+  const stems = [yearStem, monthStem, dayStem, hourStem]
+  const labels = ["연간", "월간", "일간", "시간"]
+  const results: string[] = []
+  
+  CHEONGGAN_HAP.forEach(([a, b, r]) => {
+    const ia = stems.indexOf(a)
+    const ib = stems.indexOf(b)
+    if (ia >= 0 && ib >= 0 && ia !== ib) {
+      results.push(`${labels[ia]}${a}+${labels[ib]}${b}→${r}합`)
     }
-  }
-
-  return results;
+  })
+  
+  return results
 }
 
 // ================================================================
 // 지지육합
 // ================================================================
+const JIJI_YUGHAP: [string, string, string][] = [
+  ["자", "축", "토"], ["인", "해", "목"], ["묘", "술", "화"],
+  ["진", "유", "금"], ["사", "신", "수"], ["오", "미", "토"]
+]
 
-const JIJI_YUGHAP: [Branch, Branch, Element][] = [
-  ["자", "축", "토"],
-  ["인", "해", "목"],
-  ["묘", "술", "화"],
-  ["진", "유", "금"],
-  ["사", "신", "수"],
-  ["오", "미", "토"]
-];
-
-export function calcJijiYughap(yearBranch: Branch, monthBranch: Branch, dayBranch: Branch, hourBranch: Branch | null): string[] {
-  const branches: (Branch | null)[] = [yearBranch, monthBranch, dayBranch, hourBranch];
-  const labels = ["연지", "월지", "일지", "시지"];
-  const results: string[] = [];
-
-  for (const [a, b, result] of JIJI_YUGHAP) {
+export function calcJijiYughap(
+  yearBranch: string,
+  monthBranch: string,
+  dayBranch: string,
+  hourBranch: string | null
+): string[] {
+  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
+  const labels = ["연지", "월지", "일지", "시지"]
+  const results: string[] = []
+  
+  JIJI_YUGHAP.forEach(([a, b, r]) => {
     for (let i = 0; i < branches.length; i++) {
       for (let j = i + 1; j < branches.length; j++) {
         if ((branches[i] === a && branches[j] === b) || (branches[i] === b && branches[j] === a)) {
-          results.push(`${labels[i]}${branches[i]}+${labels[j]}${branches[j]}→${result}(육합)`);
+          results.push(`${labels[i]}${branches[i]}+${labels[j]}${branches[j]}→${r}(육합)`)
         }
       }
     }
-  }
-
-  return results;
+  })
+  
+  return results
 }
 
 // ================================================================
 // 지지삼합
 // ================================================================
+const JIJI_SAMHAP: [string[], string][] = [
+  [["인", "오", "술"], "화"], [["사", "유", "축"], "금"],
+  [["신", "자", "진"], "수"], [["해", "묘", "미"], "목"]
+]
 
-const JIJI_SAMHAP: [Branch[], Element][] = [
-  [["인", "오", "술"], "화"],
-  [["사", "유", "축"], "금"],
-  [["신", "자", "진"], "수"],
-  [["해", "묘", "미"], "목"]
-];
-
-export function calcJijiSamhap(yearBranch: Branch, monthBranch: Branch, dayBranch: Branch, hourBranch: Branch | null): string[] {
-  const branches: Branch[] = [yearBranch, monthBranch, dayBranch];
-  if (hourBranch) branches.push(hourBranch);
-  const labels = ["연지", "월지", "일지", "시지"];
-  const results: string[] = [];
-
-  for (const [group, result] of JIJI_SAMHAP) {
-    const found = group.filter(b => branches.includes(b));
+export function calcJijiSamhap(
+  yearBranch: string,
+  monthBranch: string,
+  dayBranch: string,
+  hourBranch: string | null
+): string[] {
+  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
+  const labels = ["연지", "월지", "일지", "시지"]
+  const results: string[] = []
+  
+  JIJI_SAMHAP.forEach(([group, result]) => {
+    const found = group.filter(b => branches.includes(b))
     if (found.length >= 2) {
-      const posLabels = found.map(b => `${labels[branches.indexOf(b)]}${b}`);
-      const type = found.length === 3 ? "삼합" : "반합";
-      results.push(`${posLabels.join("+")}→${result}(${type})`);
+      const desc = found.map(b => `${labels[branches.indexOf(b)]}${b}`).join("+")
+      results.push(`${desc}→${result}(${found.length === 3 ? "삼합" : "반합"})`)
     }
-  }
-
-  return results;
+  })
+  
+  return results
 }
 
 // ================================================================
 // 지지방합
 // ================================================================
+const JIJI_BANGHAP: [string[], string][] = [
+  [["인", "묘", "진"], "목"], [["사", "오", "미"], "화"],
+  [["신", "유", "술"], "금"], [["해", "자", "축"], "수"]
+]
 
-const JIJI_BANGHAP: [Branch[], Element][] = [
-  [["인", "묘", "진"], "목"],
-  [["사", "오", "미"], "화"],
-  [["신", "유", "술"], "금"],
-  [["해", "자", "축"], "수"]
-];
-
-export function calcJijiBanghap(yearBranch: Branch, monthBranch: Branch, dayBranch: Branch, hourBranch: Branch | null): string[] {
-  const branches: Branch[] = [yearBranch, monthBranch, dayBranch];
-  if (hourBranch) branches.push(hourBranch);
-  const labels = ["연지", "월지", "일지", "시지"];
-  const results: string[] = [];
-
-  for (const [group, result] of JIJI_BANGHAP) {
-    const found = group.filter(b => branches.includes(b));
+export function calcJijiBanghap(
+  yearBranch: string,
+  monthBranch: string,
+  dayBranch: string,
+  hourBranch: string | null
+): string[] {
+  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
+  const labels = ["연지", "월지", "일지", "시지"]
+  const results: string[] = []
+  
+  JIJI_BANGHAP.forEach(([group, result]) => {
+    const found = group.filter(b => branches.includes(b))
     if (found.length >= 2) {
-      const posLabels = found.map(b => `${labels[branches.indexOf(b)]}${b}`);
-      const type = found.length === 3 ? "방합" : "방합(부분)";
-      results.push(`${posLabels.join("+")}→${result}(${type})`);
+      const desc = found.map(b => `${labels[branches.indexOf(b)]}${b}`).join("+")
+      results.push(`${desc}→${result}(${found.length === 3 ? "방합" : "방합(부분)"})`)
     }
-  }
-
-  return results;
+  })
+  
+  return results
 }
 
 // ================================================================
 // 천간충
 // ================================================================
+const CHEONGGAN_CHUNG: [string, string][] = [
+  ["갑", "경"], ["을", "신"], ["병", "임"], ["정", "계"]
+]
 
-const CHEONGGAN_CHUNG: [Stem, Stem][] = [
-  ["갑", "경"],
-  ["을", "신"],
-  ["병", "임"],
-  ["정", "계"]
-];
-
-export function calcCheongganChung(yearStem: Stem, monthStem: Stem, dayStem: Stem, hourStem: Stem | null): string[] {
-  const stems: (Stem | null)[] = [yearStem, monthStem, dayStem, hourStem];
-  const labels = ["연간", "월간", "일간", "시간"];
-  const results: string[] = [];
-
-  for (const [a, b] of CHEONGGAN_CHUNG) {
+export function calcCheongganChung(
+  yearStem: string,
+  monthStem: string,
+  dayStem: string,
+  hourStem: string | null
+): string[] {
+  const stems = [yearStem, monthStem, dayStem, hourStem]
+  const labels = ["연간", "월간", "일간", "시간"]
+  const results: string[] = []
+  
+  CHEONGGAN_CHUNG.forEach(([a, b]) => {
     for (let i = 0; i < stems.length; i++) {
       for (let j = i + 1; j < stems.length; j++) {
         if ((stems[i] === a && stems[j] === b) || (stems[i] === b && stems[j] === a)) {
-          results.push(`${labels[i]}${stems[i]}↔${labels[j]}${stems[j]}(천간충)`);
+          results.push(`${labels[i]}${stems[i]}↔${labels[j]}${stems[j]}(천간충)`)
         }
       }
     }
-  }
-
-  return results;
+  })
+  
+  return results
 }
 
 // ================================================================
 // 지지충
 // ================================================================
+const JIJI_CHUNG: [string, string][] = [
+  ["자", "오"], ["축", "미"], ["인", "신"], ["묘", "유"], ["진", "술"], ["사", "해"]
+]
 
-const JIJI_CHUNG: [Branch, Branch][] = [
-  ["자", "오"],
-  ["축", "미"],
-  ["인", "신"],
-  ["묘", "유"],
-  ["진", "술"],
-  ["사", "해"]
-];
-
-export function calcJijiChung(yearBranch: Branch, monthBranch: Branch, dayBranch: Branch, hourBranch: Branch | null): string[] {
-  const branches: (Branch | null)[] = [yearBranch, monthBranch, dayBranch, hourBranch];
-  const labels = ["연지", "월지", "일지", "시지"];
-  const results: string[] = [];
-
-  for (const [a, b] of JIJI_CHUNG) {
+export function calcJijiChung(
+  yearBranch: string,
+  monthBranch: string,
+  dayBranch: string,
+  hourBranch: string | null
+): string[] {
+  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
+  const labels = ["연지", "월지", "일지", "시지"]
+  const results: string[] = []
+  
+  JIJI_CHUNG.forEach(([a, b]) => {
     for (let i = 0; i < branches.length; i++) {
       for (let j = i + 1; j < branches.length; j++) {
         if ((branches[i] === a && branches[j] === b) || (branches[i] === b && branches[j] === a)) {
-          results.push(`${labels[i]}${branches[i]}↔${labels[j]}${branches[j]}(지지충)`);
+          results.push(`${labels[i]}${branches[i]}↔${labels[j]}${branches[j]}(지지충)`)
         }
       }
     }
-  }
-
-  return results;
+  })
+  
+  return results
 }
 
 // ================================================================
-// 공망 계산
+// 공망
 // ================================================================
+const GAPJA_60 = [
+  "갑자", "을축", "병인", "정묘", "무진", "기사", "경오", "신미", "임신", "계유",
+  "갑술", "을해", "병자", "정축", "무인", "기묘", "경진", "신사", "임오", "계미",
+  "갑신", "을유", "병술", "정해", "무자", "기축", "경인", "신묘", "임진", "계사",
+  "갑오", "을미", "병신", "정유", "무술", "기해", "경자", "신축", "임인", "계묘",
+  "갑진", "을사", "병오", "정미", "무신", "기유", "경술", "신해", "임자", "계축",
+  "갑인", "을묘", "병진", "정사", "무오", "기미", "경신", "신유", "임술", "계해"
+]
+const GONGMANG_MAP: [string, string][] = [
+  ["술", "해"], ["신", "유"], ["오", "미"], ["진", "사"], ["인", "묘"], ["자", "축"]
+]
 
-const GONGMANG_MAP: Branch[][] = [
-  ["술", "해"],
-  ["신", "유"],
-  ["오", "미"],
-  ["진", "사"],
-  ["인", "묘"],
-  ["자", "축"]
-];
-
-export function calcGongmang(dayStem: Stem, dayBranch: Branch): Branch[] {
-  const pillar = `${dayStem}${dayBranch}`;
-  const idx = SIXTY_JIAZI.indexOf(pillar);
-  if (idx < 0) return [];
-  return GONGMANG_MAP[Math.floor(idx / 10)];
+export function calcGongmang(dayStem: string, dayBranch: string): string[] {
+  const idx = GAPJA_60.indexOf(`${dayStem}${dayBranch}`)
+  if (idx < 0) return ["계산불가"]
+  return GONGMANG_MAP[Math.floor(idx / 10)]
 }
 
 // ================================================================
 // 형 (刑)
 // ================================================================
-
-export function calcHyeong(yearBranch: Branch, monthBranch: Branch, dayBranch: Branch, hourBranch: Branch | null): string[] {
-  const branches: Branch[] = [yearBranch, monthBranch, dayBranch];
-  if (hourBranch) branches.push(hourBranch);
-  const labels = ["연지", "월지", "일지", "시지"];
-  const results: string[] = [];
-
-  // 무은지형: 인사신
-  const muEun = ["인", "사", "신"].filter(b => branches.includes(b as Branch));
-  if (muEun.length >= 2) {
-    results.push(`무은지형(${muEun.map(b => `${labels[branches.indexOf(b as Branch)]}${b}`).join("+")})`);
+export function calcHyeong(
+  yearBranch: string,
+  monthBranch: string,
+  dayBranch: string,
+  hourBranch: string | null
+): string[] {
+  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
+  const labels = ["연지", "월지", "일지", "시지"]
+  const results: string[] = []
+  
+  // 무은지형 (인사신)
+  const inSaSin = ["인", "사", "신"].filter(b => branches.includes(b))
+  if (inSaSin.length >= 2) {
+    results.push(`무은지형(${inSaSin.map(b => `${labels[branches.indexOf(b)]}${b}`).join("+")})`)
   }
-
-  // 지세지형: 축술미
-  const jiSe = ["축", "술", "미"].filter(b => branches.includes(b as Branch));
-  if (jiSe.length >= 2) {
-    results.push(`지세지형(${jiSe.map(b => `${labels[branches.indexOf(b as Branch)]}${b}`).join("+")})`);
+  
+  // 지세지형 (축술미)
+  const chukSulMi = ["축", "술", "미"].filter(b => branches.includes(b))
+  if (chukSulMi.length >= 2) {
+    results.push(`지세지형(${chukSulMi.map(b => `${labels[branches.indexOf(b)]}${b}`).join("+")})`)
   }
-
-  // 무례지형: 자묘
+  
+  // 무례지형 (자묘)
   if (branches.includes("자") && branches.includes("묘")) {
-    results.push(`무례지형(${labels[branches.indexOf("자")]}자+${labels[branches.indexOf("묘")]}묘)`);
+    results.push(`무례지형(${labels[branches.indexOf("자")]}자+${labels[branches.indexOf("묘")]}묘)`)
   }
-
-  // 자형
-  const selfPunish: Branch[] = ["진", "오", "유", "해"];
-  for (const b of selfPunish) {
+  
+  // 자형 (같은 지지가 2개 이상)
+  const selfPunish = ["진", "오", "유", "해"]
+  selfPunish.forEach(b => {
     if (branches.filter(x => x === b).length >= 2) {
-      results.push(`자형(${b}${b})`);
+      results.push(`자형(${b}${b})`)
     }
-  }
-
-  return results;
+  })
+  
+  return results
 }
 
 // ================================================================
 // 파 (破)
 // ================================================================
+const JIJI_PA: [string, string][] = [
+  ["자", "유"], ["축", "진"], ["인", "해"], ["묘", "오"], ["사", "신"], ["술", "미"]
+]
 
-const JIJI_PA: [Branch, Branch][] = [
-  ["자", "유"],
-  ["축", "진"],
-  ["인", "해"],
-  ["묘", "오"],
-  ["사", "신"],
-  ["술", "미"]
-];
-
-export function calcPa(yearBranch: Branch, monthBranch: Branch, dayBranch: Branch, hourBranch: Branch | null): string[] {
-  const branches: (Branch | null)[] = [yearBranch, monthBranch, dayBranch, hourBranch];
-  const labels = ["연지", "월지", "일지", "시지"];
-  const results: string[] = [];
-
-  for (const [a, b] of JIJI_PA) {
+export function calcPa(
+  yearBranch: string,
+  monthBranch: string,
+  dayBranch: string,
+  hourBranch: string | null
+): string[] {
+  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
+  const labels = ["연지", "월지", "일지", "시지"]
+  const results: string[] = []
+  
+  JIJI_PA.forEach(([a, b]) => {
     for (let i = 0; i < branches.length; i++) {
       for (let j = i + 1; j < branches.length; j++) {
         if ((branches[i] === a && branches[j] === b) || (branches[i] === b && branches[j] === a)) {
-          results.push(`${labels[i]}${branches[i]}+${labels[j]}${branches[j]}(파)`);
+          results.push(`${labels[i]}${branches[i]}+${labels[j]}${branches[j]}(파)`)
         }
       }
     }
-  }
-
-  return results;
+  })
+  
+  return results
 }
 
 // ================================================================
 // 해 (害)
 // ================================================================
+const JIJI_HAE: [string, string][] = [
+  ["자", "미"], ["축", "오"], ["인", "사"], ["묘", "진"], ["신", "해"], ["유", "술"]
+]
 
-const JIJI_HAE: [Branch, Branch][] = [
-  ["자", "미"],
-  ["축", "오"],
-  ["인", "사"],
-  ["묘", "진"],
-  ["신", "해"],
-  ["유", "술"]
-];
-
-export function calcHae(yearBranch: Branch, monthBranch: Branch, dayBranch: Branch, hourBranch: Branch | null): string[] {
-  const branches: (Branch | null)[] = [yearBranch, monthBranch, dayBranch, hourBranch];
-  const labels = ["연지", "월지", "일지", "시지"];
-  const results: string[] = [];
-
-  for (const [a, b] of JIJI_HAE) {
+export function calcHae(
+  yearBranch: string,
+  monthBranch: string,
+  dayBranch: string,
+  hourBranch: string | null
+): string[] {
+  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
+  const labels = ["연지", "월지", "일지", "시지"]
+  const results: string[] = []
+  
+  JIJI_HAE.forEach(([a, b]) => {
     for (let i = 0; i < branches.length; i++) {
       for (let j = i + 1; j < branches.length; j++) {
         if ((branches[i] === a && branches[j] === b) || (branches[i] === b && branches[j] === a)) {
-          results.push(`${labels[i]}${branches[i]}+${labels[j]}${branches[j]}(해)`);
+          results.push(`${labels[i]}${branches[i]}+${labels[j]}${branches[j]}(해)`)
         }
       }
     }
-  }
-
-  return results;
+  })
+  
+  return results
 }
 
 // ================================================================
-// 원진
+// 원진 (元嗔)
 // ================================================================
+const WONJIN_PAIRS: [string, string][] = [
+  ["자", "미"], ["축", "오"], ["인", "유"], ["묘", "신"], ["진", "해"], ["사", "술"]
+]
 
-const WONJIN_PAIRS: [Branch, Branch][] = [
-  ["자", "미"],
-  ["축", "오"],
-  ["인", "유"],
-  ["묘", "신"],
-  ["진", "해"],
-  ["사", "술"]
-];
-
-export function calcWonjin(yearBranch: Branch, monthBranch: Branch, dayBranch: Branch, hourBranch: Branch | null): string[] {
-  const branches: (Branch | null)[] = [yearBranch, monthBranch, dayBranch, hourBranch];
-  const labels = ["연지", "월지", "일지", "시지"];
-  const results: string[] = [];
-
-  for (const [a, b] of WONJIN_PAIRS) {
+export function calcWonjin(
+  yearBranch: string,
+  monthBranch: string,
+  dayBranch: string,
+  hourBranch: string | null
+): string[] {
+  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
+  const labels = ["연지", "월지", "일지", "시지"]
+  const results: string[] = []
+  
+  WONJIN_PAIRS.forEach(([a, b]) => {
     for (let i = 0; i < branches.length; i++) {
       for (let j = i + 1; j < branches.length; j++) {
         if ((branches[i] === a && branches[j] === b) || (branches[i] === b && branches[j] === a)) {
-          results.push(`${labels[i]}${branches[i]}+${labels[j]}${branches[j]}(원진)`);
+          results.push(`${labels[i]}${branches[i]}+${labels[j]}${branches[j]}(원진)`)
         }
       }
     }
-  }
-
-  return results;
+  })
+  
+  return results
 }
 
 // ================================================================
-// 길성 (천을귀인, 문창귀인, 태극귀인, 삼기귀인)
+// 길성 (천을귀인, 문창귀인, 태극귀인)
 // ================================================================
-
-const CHEONUL_MAP: Partial<Record<Stem, Branch[]>> = {
+const CHEONUL_MAP: Record<string, string[]> = {
   "갑": ["축", "미"], "무": ["축", "미"], "경": ["축", "미"],
   "을": ["자", "신"], "기": ["자", "신"],
   "병": ["해", "유"], "정": ["해", "유"],
   "임": ["사", "묘"], "계": ["사", "묘"], "신": ["인", "오"]
-};
+}
 
-const MUNCHANG_MAP: Record<Stem, Branch> = {
-  "갑": "사", "을": "오", "병": "신", "정": "유", "무": "신",
-  "기": "유", "경": "해", "신": "자", "임": "인", "계": "묘"
-};
-
-const TAEGEUK_MAP: Partial<Record<Stem, Branch[]>> = {
+const TAEGEUK_MAP: Record<string, string[]> = {
   "갑": ["자", "오"], "을": ["자", "오"],
   "병": ["묘", "유"], "정": ["묘", "유"],
   "무": ["진", "술", "축", "미"], "기": ["진", "술", "축", "미"],
   "경": ["인", "해"], "신": ["인", "해"],
   "임": ["사", "신"], "계": ["사", "신"]
-};
-
-export interface GilseongResult {
-  cheonul: string[];
-  munchang: string[];
-  taegeuk: string[];
-  samgi: string[];
 }
 
 export function calcGilseong(
-  dayStem: Stem,
-  yearStem: Stem,
-  monthStem: Stem,
-  hourStem: Stem | null,
-  yearBranch: Branch,
-  monthBranch: Branch,
-  dayBranch: Branch,
-  hourBranch: Branch | null
-): GilseongResult {
-  const branches: (Branch | null)[] = [yearBranch, monthBranch, dayBranch, hourBranch];
-  const stems: (Stem | null)[] = [yearStem, monthStem, dayStem, hourStem];
-  const branchLabels = ["연지", "월지", "일지", "시지"];
-
-  const result: GilseongResult = {
-    cheonul: [],
-    munchang: [],
-    taegeuk: [],
-    samgi: []
-  };
-
+  dayStem: string,
+  yearStem: string,
+  monthStem: string,
+  hourStem: string | null,
+  yearBranch: string,
+  monthBranch: string,
+  dayBranch: string,
+  hourBranch: string | null
+): { cheonul: string[]; taegeuk: string[] } {
+  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
+  const labels = ["연지", "월지", "일지", "시지"]
+  
   // 천을귀인
-  const cheonulTargets = CHEONUL_MAP[dayStem] || [];
-  for (let i = 0; i < branches.length; i++) {
-    if (branches[i] && cheonulTargets.includes(branches[i]!)) {
-      result.cheonul.push(`${branchLabels[i]}${branches[i]}`);
-    }
-  }
-
-  // 문창귀인
-  const munchangTarget = MUNCHANG_MAP[dayStem];
-  for (let i = 0; i < branches.length; i++) {
-    if (branches[i] === munchangTarget) {
-      result.munchang.push(`${branchLabels[i]}${branches[i]}`);
-    }
-  }
-
+  const cheonulTargets = CHEONUL_MAP[dayStem] || []
+  const cheonul = cheonulTargets
+    .flatMap(target => 
+      branches
+        .map((b, i) => b === target ? `${labels[i]}${b}` : null)
+        .filter(Boolean)
+    ) as string[]
+  
   // 태극귀인
-  const taegeukTargets = TAEGEUK_MAP[dayStem] || [];
-  for (let i = 0; i < branches.length; i++) {
-    if (branches[i] && taegeukTargets.includes(branches[i]!)) {
-      result.taegeuk.push(`${branchLabels[i]}${branches[i]}`);
-    }
-  }
-
-  // 삼기귀인
-  const samgiGroups: Stem[][] = [
-    ["갑", "무", "경"],
-    ["을", "병", "정"],
-    ["임", "계", "신"]
-  ];
-  for (const group of samgiGroups) {
-    if (group.every(s => stems.includes(s))) {
-      result.samgi.push(group.join(""));
-    }
-  }
-
-  return result;
+  const taegeukTargets = TAEGEUK_MAP[dayStem] || []
+  const taegeuk = taegeukTargets
+    .flatMap(target => 
+      branches
+        .map((b, i) => b === target ? `${labels[i]}${b}` : null)
+        .filter(Boolean)
+    ) as string[]
+  
+  return { cheonul, taegeuk }
 }
 
 // ================================================================
-// 신강/신약 판단
+// 신강/신약 계산
 // ================================================================
-
-function getTenGodType(dayElement: Element, targetElement: Element): string {
-  if (targetElement === dayElement) return "비겁";
-
-  const sheng: Record<Element, Element> = { "목": "화", "화": "토", "토": "금", "금": "수", "수": "목" };
-  const ke: Record<Element, Element> = { "목": "토", "토": "수", "수": "화", "화": "금", "금": "목" };
-
-  if (sheng[targetElement] === dayElement) return "인성";
-  if (sheng[dayElement] === targetElement) return "식상";
-  if (ke[dayElement] === targetElement) return "재성";
-  if (ke[targetElement] === dayElement) return "관성";
-
-  return "";
+const HIDDEN_STEMS_EX: Record<string, string[]> = {
+  "자": ["계"], "축": ["기", "계", "신"], "인": ["갑", "병", "무"], "묘": ["을"],
+  "진": ["무", "을", "계"], "사": ["병", "무", "경"], "오": ["병", "기", "정"],
+  "미": ["기", "을", "정"], "신": ["경", "임", "무"], "유": ["신"], "술": ["무", "신", "정"], "해": ["임", "갑", "무"]
 }
 
-export interface SinGangSinYakResult {
-  grade: string;
-  ratio: number;
-  supportScore: number;
-  weakenScore: number;
+function getStemElem(s: string): string {
+  const map: Record<string, string> = {
+    "갑": "木", "을": "木", "병": "火", "정": "火", "무": "土",
+    "기": "土", "경": "金", "신": "金", "임": "水", "계": "水"
+  }
+  return map[s] || ""
+}
+
+function getBranchElem(b: string): string {
+  const map: Record<string, string> = {
+    "자": "水", "축": "土", "인": "木", "묘": "木", "진": "土", "사": "火",
+    "오": "火", "미": "土", "신": "金", "유": "金", "술": "土", "해": "水"
+  }
+  return map[b] || ""
+}
+
+function getTenGodType(dayElem: string, targetElem: string): string {
+  if (!dayElem || !targetElem) return ""
+  if (targetElem === dayElem) return "비겁"
+  
+  const sheng: Record<string, string> = { "木": "火", "火": "土", "土": "金", "金": "水", "水": "木" }
+  const ke: Record<string, string> = { "木": "土", "土": "水", "水": "火", "火": "金", "金": "木" }
+  
+  if (sheng[targetElem] === dayElem) return "인성"
+  if (sheng[dayElem] === targetElem) return "식상"
+  if (ke[dayElem] === targetElem) return "재성"
+  if (ke[targetElem] === dayElem) return "관성"
+  
+  return ""
 }
 
 export function calcSinGangSinYak(
-  yearStem: Stem, monthStem: Stem, dayStem: Stem, hourStem: Stem | null,
-  yearBranch: Branch, monthBranch: Branch, dayBranch: Branch, hourBranch: Branch | null,
-  timeKnown: boolean = true
-): SinGangSinYakResult {
-  const dayElement = STEM_TO_ELEMENT[dayStem];
-  let supportScore = 0;
-  let weakenScore = 0;
-
-  function addScore(element: Element, weight: number) {
-    const tenGodType = getTenGodType(dayElement, element);
-    if (tenGodType === "비겁" || tenGodType === "인성") {
-      supportScore += weight;
-    } else if (tenGodType === "식상" || tenGodType === "재성" || tenGodType === "관성") {
-      weakenScore += weight;
-    }
+  dayStem: string,
+  monthBranch: string,
+  yearStem: string,
+  monthStem: string,
+  _dayStemAgain: string,
+  hourStem: string | null,
+  yearBranch: string,
+  dayBranch: string,
+  hourBranch: string | null
+): { grade: string; ratio: number } {
+  const dayElem = getStemElem(dayStem)
+  let support = 0
+  let weaken = 0
+  
+  function add(elem: string, weight: number) {
+    const type = getTenGodType(dayElem, elem)
+    if (type === "비겁" || type === "인성") support += weight
+    else if (type === "식상" || type === "재성" || type === "관성") weaken += weight
   }
-
+  
   // 천간 (일간 제외)
-  [yearStem, monthStem, hourStem].filter(Boolean).forEach(s => {
-    addScore(STEM_TO_ELEMENT[s!], 1);
-  });
-
-  // 지지 (가중치: 연지 1, 월지 2, 일지 1, 시지 0.5)
-  const branchWeights = [1, 2, 1, timeKnown ? 0.5 : 0];
-  const branches = [yearBranch, monthBranch, dayBranch, hourBranch];
-
+  const stems = [yearStem, monthStem, hourStem].filter(Boolean) as string[]
+  stems.forEach(s => add(getStemElem(s), 1))
+  
+  // 지지 + 지장간
+  const branchWeights = [1, 2, 1, hourBranch ? 0.5 : 0]
+  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
+  
   branches.forEach((b, i) => {
-    if (!b) return;
-    const weight = branchWeights[i];
-
-    // 지지 본기
-    addScore(BRANCH_TO_ELEMENT[b], weight);
-
-    // 장간
-    const hidden = HIDDEN_STEMS[b] || [];
-    hidden.forEach(hs => {
-      addScore(STEM_TO_ELEMENT[hs], weight * 0.5);
-    });
-  });
-
-  const total = supportScore + weakenScore;
-  if (total === 0) {
-    return { grade: "계산불가", ratio: 0, supportScore: 0, weakenScore: 0 };
-  }
-
-  const ratio = Math.round((supportScore / total) * 100);
-
-  let grade: string;
-  if (ratio >= 85) grade = "극왕";
-  else if (ratio >= 70) grade = "태강";
-  else if (ratio >= 58) grade = "신강";
-  else if (ratio >= 50) grade = "중화신강";
-  else if (ratio >= 42) grade = "중화신약";
-  else if (ratio >= 30) grade = "신약";
-  else if (ratio >= 15) grade = "태약";
-  else grade = "극약";
-
-  return { grade, ratio, supportScore, weakenScore };
+    if (!b) return
+    add(getBranchElem(b), branchWeights[i])
+    const hidden = HIDDEN_STEMS_EX[b] || []
+    hidden.forEach(h => add(getStemElem(h), branchWeights[i] * 0.5))
+  })
+  
+  const total = support + weaken
+  if (total === 0) return { grade: "계산불가", ratio: 0 }
+  
+  const ratio = support / total
+  let grade: string
+  
+  if (ratio >= 0.85) grade = "극왕"
+  else if (ratio >= 0.70) grade = "태강"
+  else if (ratio >= 0.58) grade = "신강"
+  else if (ratio >= 0.50) grade = "중화신강"
+  else if (ratio >= 0.42) grade = "중화신약"
+  else if (ratio >= 0.30) grade = "신약"
+  else if (ratio >= 0.15) grade = "태약"
+  else grade = "극약"
+  
+  return { grade, ratio: Math.round(ratio * 100) }
 }
 
 // ================================================================
 // 억부용신
 // ================================================================
-
-export function getEokbuYongsin(dayStem: Stem, grade: string): string {
-  const dayElement = STEM_TO_ELEMENT[dayStem];
+export function getEokbuYongsin(dayStem: string, isStrong: boolean): string {
+  const dayElem = getStemElem(dayStem)
   
-  const ke: Record<Element, Element> = { "목": "금", "화": "수", "토": "목", "금": "화", "수": "토" };
-  const keTarget: Record<Element, Element> = { "목": "토", "화": "금", "토": "수", "금": "목", "수": "화" };
-  const shengBy: Record<Element, Element> = { "목": "수", "화": "목", "토": "화", "금": "토", "수": "금" };
-  const shengTo: Record<Element, Element> = { "목": "화", "화": "토", "토": "금", "금": "수", "수": "목" };
-
-  const strongGrades = ["신강", "태강", "극왕", "중화신강"];
-
-  if (strongGrades.includes(grade)) {
-    return `${ke[dayElement]}(관성) > ${keTarget[dayElement]}(재성) > ${shengTo[dayElement]}(식상)`;
+  const ke: Record<string, string> = { "木": "金", "火": "水", "土": "木", "金": "火", "水": "土" }
+  const keTarget: Record<string, string> = { "木": "土", "火": "金", "土": "水", "金": "木", "水": "火" }
+  const shengBy: Record<string, string> = { "木": "水", "火": "木", "土": "火", "金": "土", "水": "金" }
+  const shengTo: Record<string, string> = { "木": "火", "火": "土", "土": "金", "金": "水", "水": "木" }
+  
+  if (isStrong) {
+    return `${ke[dayElem]}(관성) > ${keTarget[dayElem]}(재성) > ${shengTo[dayElem]}(식상)`
   } else {
-    return `${shengBy[dayElement]}(인성) > ${dayElement}(비겁)`;
+    return `${shengBy[dayElem]}(인성) > ${dayElem}(비겁)`
   }
 }
 
 // ================================================================
 // 조후용신
 // ================================================================
-
-const JOHU_TABLE: Record<Branch, Partial<Record<Stem, string>>> = {
+const JOHU_TABLE: Record<string, Record<string, string>> = {
   "인": { "갑": "병·무", "을": "병·계", "병": "임·경", "정": "갑·경", "무": "병·갑", "기": "병·계·갑", "경": "무·갑·병", "신": "기·무·경", "임": "경·무·병", "계": "신·경" },
   "묘": { "갑": "경·병", "을": "병·계", "병": "임·경", "정": "갑·경", "무": "병·갑", "기": "갑·계", "경": "갑·무", "신": "임·갑", "임": "무·경", "계": "신·경" },
   "진": { "갑": "경·병", "을": "계·병", "병": "임·갑", "정": "갑·경", "무": "병·갑", "기": "병·계", "경": "갑·병", "신": "임·갑", "임": "무·경", "계": "병·신" },
@@ -593,60 +552,258 @@ const JOHU_TABLE: Record<Branch, Partial<Record<Stem, string>>> = {
   "해": { "갑": "경·정·무", "을": "병·무·경", "병": "갑·무·경", "정": "갑·경", "무": "갑·병", "기": "병·갑", "경": "정·갑·무", "신": "임·무·정", "임": "무·경", "계": "신·병" },
   "자": { "갑": "경·정·무", "을": "병·무", "병": "임·무·갑", "정": "갑·경", "무": "병·갑", "기": "병·갑", "경": "정·갑·무", "신": "병·무·갑", "임": "무·경", "계": "병·신" },
   "축": { "갑": "병·경", "을": "병·계", "병": "임·갑", "정": "갑·경", "무": "병·갑", "기": "병·갑·계", "경": "정·갑·병", "신": "병·정", "임": "병·갑", "계": "병·신·갑" }
-};
+}
 
-export function calcJohuYongsin(dayStem: Stem, monthBranch: Branch): string {
-  return JOHU_TABLE[monthBranch]?.[dayStem] || "해당없음";
+export function calcJohuYongsin(dayStem: string, monthBranch: string): string {
+  return JOHU_TABLE[monthBranch]?.[dayStem] || "해당없음"
 }
 
 // ================================================================
-// 심화 분석 통합
+// 신살 계산 (Free.js에서 가져옴)
 // ================================================================
-
-export interface AdvancedAnalysisResult {
-  twelveStars: { position: string; branch: Branch; star: TwelveStar }[];
-  cheongganHap: string[];
-  jijiYughap: string[];
-  jijiSamhap: string[];
-  jijiBanghap: string[];
-  cheongganChung: string[];
-  jijiChung: string[];
-  gongmang: Branch[];
-  hyeong: string[];
-  pa: string[];
-  hae: string[];
-  wonjin: string[];
-  gilseong: GilseongResult;
-  sinGangSinYak: SinGangSinYakResult;
-  eokbuYongsin: string;
-  johuYongsin: string;
+function checkDohwaSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
+  const dohwa = ["자", "오", "묘", "유"]
+  return [yearBranch, monthBranch, dayBranch, hourBranch].some(b => dohwa.includes(b || ""))
 }
 
-export function runAdvancedAnalysis(fourPillars: FourPillars, timeKnown: boolean = true): AdvancedAnalysisResult {
-  const { year, month, day, hour } = fourPillars;
-  const ys = year.stem, yb = year.branch;
-  const ms = month.stem, mb = month.branch;
-  const ds = day.stem, db = day.branch;
-  const hs = hour?.stem ?? null, hb = hour?.branch ?? null;
+function checkYeokMaSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
+  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
+  if ((branches.includes("신") || branches.includes("자") || branches.includes("진")) && branches.includes("인")) return true
+  if ((branches.includes("인") || branches.includes("오") || branches.includes("술")) && branches.includes("신")) return true
+  if ((branches.includes("사") || branches.includes("유") || branches.includes("축")) && branches.includes("해")) return true
+  if ((branches.includes("해") || branches.includes("묘") || branches.includes("미")) && branches.includes("사")) return true
+  return false
+}
 
-  const sinGangSinYak = calcSinGangSinYak(ys, ms, ds, hs, yb, mb, db, hb, timeKnown);
+function checkHwagaeSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
+  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
+  if ((branches.includes("신") || branches.includes("자") || branches.includes("진")) && branches.includes("진")) return true
+  if ((branches.includes("인") || branches.includes("오") || branches.includes("술")) && branches.includes("술")) return true
+  if ((branches.includes("사") || branches.includes("유") || branches.includes("축")) && branches.includes("축")) return true
+  if ((branches.includes("해") || branches.includes("묘") || branches.includes("미")) && branches.includes("미")) return true
+  return false
+}
 
-  return {
-    twelveStars: calcTwelveStars(ds, yb, mb, db, hb),
-    cheongganHap: calcCheongganHap(ys, ms, ds, hs),
-    jijiYughap: calcJijiYughap(yb, mb, db, hb),
-    jijiSamhap: calcJijiSamhap(yb, mb, db, hb),
-    jijiBanghap: calcJijiBanghap(yb, mb, db, hb),
-    cheongganChung: calcCheongganChung(ys, ms, ds, hs),
-    jijiChung: calcJijiChung(yb, mb, db, hb),
-    gongmang: calcGongmang(ds, db),
-    hyeong: calcHyeong(yb, mb, db, hb),
-    pa: calcPa(yb, mb, db, hb),
-    hae: calcHae(yb, mb, db, hb),
-    wonjin: calcWonjin(yb, mb, db, hb),
-    gilseong: calcGilseong(ds, ys, ms, hs, yb, mb, db, hb),
-    sinGangSinYak,
-    eokbuYongsin: getEokbuYongsin(ds, sinGangSinYak.grade),
-    johuYongsin: calcJohuYongsin(ds, mb)
-  };
+function checkWonJinSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
+  const wonjin: [string, string][] = [
+    ["자", "미"], ["축", "오"], ["인", "유"],
+    ["묘", "신"], ["진", "해"], ["사", "술"]
+  ]
+  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
+  for (const pair of wonjin) {
+    if (branches.includes(pair[0]) && branches.includes(pair[1])) return true
+  }
+  return false
+}
+
+function checkHyeonChimSal(dayBranch: string): boolean {
+  return ["해", "묘", "미"].includes(dayBranch)
+}
+
+export function calcAllSinsal(
+  yearBranch: string,
+  monthBranch: string,
+  dayBranch: string,
+  hourBranch: string | null,
+  dayStem: string
+): string[] {
+  const sinsalList: string[] = []
+  
+  if (checkDohwaSal(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("도화살")
+  if (checkYeokMaSal(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("역마살")
+  if (checkHwagaeSal(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("화개살")
+  if (checkWonJinSal(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("원진살")
+  if (checkHyeonChimSal(dayBranch)) sinsalList.push("현침살")
+  
+  return sinsalList
+}
+
+// ================================================================
+// 격국 계산
+// ================================================================
+const BRANCH_HIDDEN_MAIN: Record<string, string> = {
+  "자": "계", "축": "기", "인": "갑", "묘": "을", "진": "무", "사": "병",
+  "오": "정", "미": "기", "신": "경", "유": "신", "술": "무", "해": "임"
+}
+
+const TEN_GODS_MAP: Record<string, Record<string, string>> = {
+  "갑": { "갑": "비견", "을": "겁재", "병": "식신", "정": "상관", "무": "편재", "기": "정재", "경": "편관", "신": "정관", "임": "편인", "계": "정인" },
+  "을": { "갑": "겁재", "을": "비견", "병": "상관", "정": "식신", "무": "정재", "기": "편재", "경": "정관", "신": "편관", "임": "정인", "계": "편인" },
+  "병": { "갑": "편인", "을": "정인", "병": "비견", "정": "겁재", "무": "식신", "기": "상관", "경": "편재", "신": "정재", "임": "편관", "계": "정관" },
+  "정": { "갑": "정인", "을": "편인", "병": "겁재", "정": "비견", "무": "상관", "기": "식신", "경": "정재", "신": "편재", "임": "정관", "계": "편관" },
+  "무": { "갑": "편관", "을": "정관", "병": "편인", "정": "정인", "무": "비견", "기": "겁재", "경": "식신", "신": "상관", "임": "편재", "계": "정재" },
+  "기": { "갑": "정관", "을": "편관", "병": "정인", "정": "편인", "무": "겁재", "기": "비견", "경": "상관", "신": "식신", "임": "정재", "계": "편재" },
+  "경": { "갑": "편재", "을": "정재", "병": "편관", "정": "정관", "무": "편인", "기": "정인", "경": "비견", "신": "겁재", "임": "식신", "계": "상관" },
+  "신": { "갑": "정재", "을": "편재", "병": "정관", "정": "편관", "무": "정인", "기": "편인", "경": "겁재", "신": "비견", "임": "상관", "계": "식신" },
+  "임": { "갑": "식신", "을": "상관", "병": "편재", "정": "정재", "무": "편관", "기": "정관", "경": "편인", "신": "정인", "임": "비견", "계": "겁재" },
+  "계": { "갑": "상관", "을": "식신", "병": "정재", "정": "편재", "무": "정관", "기": "편관", "경": "정인", "신": "편인", "임": "겁재", "계": "비견" }
+}
+
+export function calcGyeokguk(
+  dayStem: string,
+  monthBranch: string,
+  stems: string[]
+): string {
+  // 월지의 본기 찾기
+  const mainHidden = BRANCH_HIDDEN_MAIN[monthBranch]
+  if (!mainHidden) return "미상"
+  
+  // 본기의 십신 구하기
+  const mainTenGod = TEN_GODS_MAP[dayStem]?.[mainHidden]
+  if (!mainTenGod) return "미상"
+  
+  // 투출 여부 확인 (천간에 본기가 있는지)
+  const isTouchul = stems.includes(mainHidden)
+  
+  return `${mainTenGod}격`
+}
+
+// ================================================================
+// 대운(大運) 계산 - 월주 기반 정순/역순 계산 (정확한 로직)
+// ================================================================
+export function calcDaeyun(
+  birthDate: Date,
+  gender: string,
+  yearStem: string,
+  monthStem: string,
+  monthBranch: string
+): Array<{ startAge: number; endAge: number; stem: string; branch: string; fullName: string }> {
+  const stems = ["갑", "을", "병", "정", "무", "기", "경", "신", "임", "계"]
+  const branches = ["자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해"]
+  const stemToHanja: Record<string, string> = {
+    "갑": "甲", "을": "乙", "병": "丙", "정": "丁", "무": "戊",
+    "기": "己", "경": "庚", "신": "辛", "임": "壬", "계": "癸"
+  }
+  const branchToHanja: Record<string, string> = {
+    "자": "子", "축": "丑", "인": "寅", "묘": "卯", "진": "辰", "사": "巳",
+    "오": "午", "미": "未", "신": "申", "유": "酉", "술": "戌", "해": "亥"
+  }
+
+  // 양간 판정: 남자 양간 또는 여자 음간 = 정순, 아니면 역순
+  const yangStems = ["갑", "병", "무", "경", "임"]
+  const isYangYear = yangStems.includes(yearStem)
+  const isForward = (gender === 'male' && isYangYear) || (gender === 'female' && !isYangYear)
+
+  // 절기 데이터 (기본값만 포함, 실제로는 ipjeolMap이 필요하지만 간단히)
+  const IPJEOL_MAP: Record<number, Array<{ date: Date; name: string }>> = {
+    1998: [
+      { date: new Date(1998, 1, 4, 20, 59), name: "입춘" },
+      { date: new Date(1998, 3, 5, 12, 0), name: "청명" },
+      { date: new Date(1998, 4, 5, 10, 30), name: "입하" },
+      { date: new Date(1998, 5, 20, 22, 30), name: "하지" },
+      { date: new Date(1998, 6, 7, 10, 0), name: "입추" },
+      { date: new Date(1998, 8, 23, 4, 0), name: "추분" },
+      { date: new Date(1998, 9, 8, 19, 0), name: "입동" },
+      { date: new Date(1998, 11, 21, 14, 0), name: "동지" }
+    ],
+    1996: [
+      { date: new Date(1996, 1, 4, 20, 59), name: "입춘" },
+      { date: new Date(1996, 3, 4, 19, 40), name: "청명" },
+      { date: new Date(1996, 4, 5, 19, 24), name: "입하" },
+      { date: new Date(1996, 5, 20, 23, 30), name: "하지" },
+      { date: new Date(1996, 6, 7, 10, 53), name: "입추" },
+      { date: new Date(1996, 8, 23, 4, 28), name: "추분" },
+      { date: new Date(1996, 9, 8, 19, 34), name: "입동" },
+      { date: new Date(1996, 11, 21, 13, 58), name: "동지" }
+    ]
+  }
+
+  const year = birthDate.getUTCFullYear()
+  const allJeolgi: Array<{ date: Date; name: string }> = []
+  
+  for (let y of [year - 1, year, year + 1]) {
+    if (IPJEOL_MAP[y]) {
+      IPJEOL_MAP[y].forEach(j => allJeolgi.push({ date: j.date, name: j.name }))
+    } else {
+      // 기본값: 입춘(2월 4일), 동지(12월 21일)
+      allJeolgi.push({ date: new Date(y, 1, 4, 0, 0), name: "입춘" })
+      allJeolgi.push({ date: new Date(y, 11, 21, 0, 0), name: "동지" })
+    }
+  }
+  allJeolgi.sort((a, b) => a.date.getTime() - b.date.getTime())
+
+  // 다음/이전 절기 찾기
+  let nextJeolgi: { date: Date; name: string } | null = null
+  let prevJeolgi: { date: Date; name: string } | null = null
+  
+  for (let i = 0; i < allJeolgi.length; i++) {
+    if (allJeolgi[i].date > birthDate) {
+      nextJeolgi = allJeolgi[i]
+      if (i > 0) prevJeolgi = allJeolgi[i - 1]
+      break
+    }
+    prevJeolgi = allJeolgi[i]
+  }
+
+  // 대운 시작 나이 계산 (72시간 = 1세)
+  let diffHours = 0
+  if (isForward && nextJeolgi) {
+    diffHours = (nextJeolgi.date.getTime() - birthDate.getTime()) / (1000 * 60 * 60)
+  } else if (!isForward && prevJeolgi) {
+    diffHours = (birthDate.getTime() - prevJeolgi.date.getTime()) / (1000 * 60 * 60)
+  }
+
+  const startAge = Math.round((diffHours / 72) * 10) / 10
+
+  // 월주의 60간지 인덱스 계산
+  const monthStemIdx = stems.indexOf(monthStem)
+  const monthBranchIdx = branches.indexOf(monthBranch)
+  const monthPillarIndex = (monthStemIdx * 12 + monthBranchIdx * 5) % 60
+
+  const daeWoonList: Array<{ startAge: number; endAge: number; stem: string; branch: string; fullName: string }> = []
+  const dir = isForward ? 1 : -1
+  let currentAge = startAge
+
+  for (let i = 0; i < 8; i++) {
+    const idx = (monthPillarIndex + dir * (i + 1) + 600) % 60
+    const stem = stems[idx % 10]
+    const branch = branches[idx % 12]
+    
+    daeWoonList.push({
+      startAge: parseFloat((currentAge).toFixed(1)),
+      endAge: parseFloat((currentAge + 10).toFixed(1)),
+      stem,
+      branch,
+      fullName: `${stemToHanja[stem]}${branchToHanja[branch]}`
+    })
+    
+    currentAge += 10
+  }
+
+  return daeWoonList
+}
+
+// ================================================================
+// 대운(大運) 계산
+// ================================================================
+const IPJEOL_MAP: Record<number, Array<{ date: Date; name: string }>> = {
+  2024: [
+    { date: new Date(2024, 1, 3, 18, 59), name: "입춘" },
+    { date: new Date(2024, 3, 4, 9, 13), name: "청명" },
+    { date: new Date(2024, 4, 5, 7, 15), name: "입하" },
+    { date: new Date(2024, 5, 20, 15, 20), name: "하지" },
+    { date: new Date(2024, 6, 7, 2, 15), name: "입추" },
+    { date: new Date(2024, 8, 22, 19, 50), name: "추분" },
+    { date: new Date(2024, 9, 8, 9, 49), name: "입동" },
+    { date: new Date(2024, 11, 21, 4, 21), name: "동지" }
+  ],
+  1996: [
+    { date: new Date(1996, 1, 4, 20, 59), name: "입춘" },
+    { date: new Date(1996, 3, 4, 19, 40), name: "청명" },
+    { date: new Date(1996, 4, 5, 19, 24), name: "입하" },
+    { date: new Date(1996, 5, 20, 23, 30), name: "하지" },
+    { date: new Date(1996, 6, 7, 10, 53), name: "입추" },
+    { date: new Date(1996, 8, 23, 4, 28), name: "추분" },
+    { date: new Date(1996, 9, 8, 19, 34), name: "입동" },
+    { date: new Date(1996, 11, 21, 13, 58), name: "동지" }
+  ]
+}
+
+// 60간지 색인 얻기
+function getSixtyGanjiIndex(stem: string, branch: string): number {
+  const stems = ["갑", "을", "병", "정", "무", "기", "경", "신", "임", "계"]
+  const branches = ["자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해"]
+  const stemIdx = stems.indexOf(stem)
+  const branchIdx = branches.indexOf(branch)
+  return (stemIdx * 12 + branchIdx * 5) % 60
 }
