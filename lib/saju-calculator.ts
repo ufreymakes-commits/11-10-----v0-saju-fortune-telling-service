@@ -20,7 +20,8 @@ import {
   calcSinGangSinYak,
   getEokbuYongsin,
   calcJohuYongsin,
-  calcAllSinsal
+  calcAllSinsal,
+  calcDaeyun
 } from './saju/advanced'
 import { STEMS, BRANCHES, STEM_TO_ELEMENT } from './saju/constants'
 
@@ -328,14 +329,14 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     // 신살
     spirits,
     
-    // 대운
-    daewoon: analysis.daewoon.map(d => ({
-      startAge: d.startAge,
-      endAge: d.startAge + 10,
-      stem: d.stem,
-      branch: d.branch,
-      fullName: `${koreanStemToHanja(d.stem)}${koreanBranchToHanja(d.branch)}`
-    })),
+    // 대운 (정확한 계산)
+    daewoon: calcDaeyun(
+      date,
+      birthInfo.gender === '여' ? 'female' : 'male',
+      yearStem,
+      monthBranch,
+      dayBranch
+    ),
     
     // 연운
     yeonwoon: analysis.yeonwoon.map(y => ({
