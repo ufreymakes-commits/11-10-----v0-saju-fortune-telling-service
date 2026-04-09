@@ -62,7 +62,11 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
         })
         
         if (!response.ok) {
-          throw new Error('Failed to generate preview')
+          const errorText = await response.text()
+          const errorMsg = response.status === 429 
+            ? 'Daily limit reached. Please try again tomorrow.' 
+            : `Error: ${response.status} - ${errorText}`
+          throw new Error(errorMsg)
         }
         
         const result = await response.json()

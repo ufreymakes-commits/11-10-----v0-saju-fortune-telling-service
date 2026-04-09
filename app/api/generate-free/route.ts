@@ -259,7 +259,7 @@ export async function POST(req: Request) {
     const supabase = await createClient()
 
     // Rate Limit 체크
-    const { allowed, remaining } = await checkRateLimit(supabase, ip, 10)
+    const { allowed, remaining } = await checkRateLimit(supabase, ip, 100)
     if (!allowed) {
       return NextResponse.json({ error: '하루 10회 제한입니다.' }, { status: 429 })
     }
