@@ -659,6 +659,78 @@ export function calcGyeokguk(
 }
 
 // ================================================================
+// 대운(大運) 계산 - 월지 기반 정순/역순
+// ================================================================
+export function calcDaeyun(
+  birthDate: Date,
+  gender: string,
+  yearStem: string,
+  monthBranch: string,
+  dayBranch: string
+): Array<{ startAge: number; endAge: number; stem: string; branch: string; fullName: string }> {
+  const stems = ["갑", "을", "병", "정", "무", "기", "경", "신", "임", "계"]
+  const branches = ["자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해"]
+  const stemToHanja: Record<string, string> = {
+    "갑": "甲", "을": "乙", "병": "丙", "정": "丁", "무": "戊",
+    "기": "己", "경": "庚", "신": "辛", "임": "壬", "계": "癸"
+  }
+  const branchToHanja: Record<string, string> = {
+    "자": "子", "축": "丑", "인": "寅", "묘": "卯", "진": "辰", "사": "巳",
+    "오": "午", "미": "未", "신": "申", "유": "酉", "술": "戌", "해": "亥"
+  }
+
+  // 양간 판정: 남자 양간 또는 여자 음간 = 정순, 아니면 역순
+  const yangStems = ["갑", "병", "무", "경", "임"]
+  const isYangYear = yangStems.includes(yearStem)
+  const isForward = (gender === 'male' && isYangYear) || (gender === 'female' && !isYangYear)
+
+  // 월지 기반 시작 간지 찾기
+  const monthBranchIdx = branches.indexOf(monthBranch)
+  if (monthBranchIdx < 0) return []
+
+  // 월지의 천간을 기준으로 60간지 계산
+  // 월지와 그 다음 간지들의 관계를 구하기 위해 천간 인덱스 계산
+  const startStemIdx = monthBranchIdx % 10 // 간단한 근사값
+  
+  const daeWoonList: Array<{ startAge: number; endAge: number; stem: string; branch: string; fullName: string }> = []
+  
+  let currentAge = 0.4 // 모든 사주는 0.4세부터 시작
+  
+  for (let i = 0; i < 8; i++) {
+    // 정순/역순에 따라 다음 간지 계산
+    let stemIdx: number
+    let branchIdx: number
+    
+    if (isForward) {
+      // 정순: 월지 다음부터 시작
+      const totalIdx = (monthBranchIdx + i + 1) % 60
+      stemIdx = Math.floor(totalIdx / 12) % 10
+      branchIdx = totalIdx % 12
+    } else {
+      // 역순: 월지 이전으로 거슬러 올라감
+      const totalIdx = (monthBranchIdx - i - 1 + 600) % 60
+      stemIdx = Math.floor(totalIdx / 12) % 10
+      branchIdx = totalIdx % 12
+    }
+    
+    const stem = stems[stemIdx]
+    const branch = branches[branchIdx]
+    
+    daeWoonList.push({
+      startAge: parseFloat((currentAge).toFixed(1)),
+      endAge: parseFloat((currentAge + 10).toFixed(1)),
+      stem,
+      branch,
+      fullName: `${stemToHanja[stem]}${branchToHanja[branch]}`
+    })
+    
+    currentAge += 10
+  }
+
+  return daeWoonList
+}
+
+// ================================================================
 // 대운(大運) 계산
 // ================================================================
 const IPJEOL_MAP: Record<number, Array<{ date: Date; name: string }>> = {
