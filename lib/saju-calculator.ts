@@ -1,37 +1,21 @@
 // Saju (Four Pillars) Calculator
-// Complete analysis including all advanced calculations
+// Connects to the full saju calculation module
 
 import type { BirthInfo, SajuData } from './types'
 import { runFullAnalysis } from './saju/core-calculator'
-import {
-  calcTwelveStars,
-  calcCheongganHap,
-  calcJijiYughap,
-  calcJijiSamhap,
-  calcJijiBanghap,
-  calcCheongganChung,
-  calcJijiChung,
-  calcGongmang,
-  calcHyeong,
-  calcPa,
-  calcHae,
-  calcWonjin,
-  calcGilseong,
-  calcSinGangSinYak,
-  getEokbuYongsin,
-  calcJohuYongsin,
-  calcAllSinsal,
-  calcDaeyun
-} from './saju/advanced'
-import { STEMS, BRANCHES, STEM_TO_ELEMENT } from './saju/constants'
 
 // Heavenly Stems in Hanja (천간 한자)
 const STEMS_HANJA = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸']
 const STEMS_KOREAN = ['갑', '을', '병', '정', '무', '기', '경', '신', '임', '계']
+const STEMS_ENGLISH = ['Gap', 'Eul', 'Byeong', 'Jeong', 'Mu', 'Gi', 'Gyeong', 'Sin', 'Im', 'Gye']
 
 // Earthly Branches in Hanja (지지 한자)
 const BRANCHES_HANJA = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥']
 const BRANCHES_KOREAN = ['자', '축', '인', '묘', '진', '사', '오', '미', '신', '유', '술', '해']
+const BRANCHES_ENGLISH = ['Ja', 'Chuk', 'In', 'Myo', 'Jin', 'Sa', 'O', 'Mi', 'Sin', 'Yu', 'Sul', 'Hae']
+
+// Element mapping for stems
+const STEMS_ELEMENTS = ['Wood', 'Wood', 'Fire', 'Fire', 'Earth', 'Earth', 'Metal', 'Metal', 'Water', 'Water']
 
 // Convert Korean to Hanja
 function koreanStemToHanja(korean: string): string {
@@ -48,6 +32,7 @@ function koreanBranchToHanja(korean: string): string {
 function parseBirthTime(timeStr: string | undefined): string | undefined {
   if (!timeStr) return undefined
   
+  // Handle "HH:MM AM/PM" format
   const match = timeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i)
   if (!match) return undefined
   
@@ -64,44 +49,11 @@ function parseBirthTime(timeStr: string | undefined): string | undefined {
   return `${hours.toString().padStart(2, '0')}:${minutes}`
 }
 
-// 격국 계산
-function calcGyeokguk(dayMaster: string, monthBranch: string, allStems: string[]): string {
-  // 월지 지장간의 본기로 격국 결정
-  const JIJANGGAN_BONGI: Record<string, string> = {
-    '자': '계', '축': '기', '인': '갑', '묘': '을', '진': '무', '사': '병',
-    '오': '정', '미': '기', '신': '경', '유': '신', '술': '무', '해': '임'
-  }
-  
-  const TEN_GODS_FOR_GYEOK: Record<string, Record<string, string>> = {
-    '갑': { '갑': '비견격', '을': '겁재격', '병': '식신격', '정': '상관격', '무': '편재격', '기': '정재격', '경': '편관격', '신': '정관격', '임': '편인격', '계': '정인격' },
-    '을': { '을': '비견격', '갑': '겁재격', '정': '식신격', '병': '상관격', '기': '편재격', '무': '정재격', '신': '편관격', '경': '정관격', '계': '편인격', '임': '정인격' },
-    '병': { '병': '비견격', '정': '겁재격', '무': '식신격', '기': '상관격', '경': '편재격', '신': '정재격', '임': '편관격', '계': '정관격', '갑': '편인격', '을': '정인격' },
-    '정': { '정': '비견격', '병': '겁재격', '기': '식신격', '무': '상관격', '신': '편재격', '경': '정재격', '계': '편관격', '임': '정관격', '을': '편인격', '갑': '정인격' },
-    '무': { '무': '비견격', '기': '겁재격', '경': '식신격', '신': '상관격', '임': '편재격', '계': '정재격', '갑': '편관격', '을': '정관격', '병': '편인격', '정': '정인격' },
-    '기': { '기': '비견격', '무': '겁재격', '신': '식신격', '경': '상관격', '계': '편재격', '임': '정재격', '을': '편관격', '갑': '정관격', '정': '편인격', '병': '정인격' },
-    '경': { '경': '비견격', '신': '겁재격', '임': '식신격', '계': '상관격', '갑': '편재격', '을': '정재격', '병': '편관격', '정': '정관격', '무': '편인격', '기': '정인격' },
-    '신': { '신': '비견격', '경': '겁재격', '계': '식신격', '임': '상관격', '을': '편재격', '갑': '정재격', '정': '편관격', '병': '정관격', '기': '편인격', '무': '정인격' },
-    '임': { '임': '비견격', '계': '겁재격', '갑': '식신격', '을': '상관격', '병': '편재격', '정': '정재격', '무': '편관격', '기': '정관격', '경': '편인격', '신': '정인격' },
-    '계': { '계': '비견격', '임': '겁재격', '을': '식신격', '갑': '상관격', '정': '편재격', '병': '정재격', '기': '편관격', '무': '정관격', '신': '편인격', '경': '정인격' }
-  }
-
-  const bongi = JIJANGGAN_BONGI[monthBranch]
-  if (!bongi) return '미정격'
-  
-  // 투출 확인 (천간에 본기가 있는지)
-  const isTuchul = allStems.includes(bongi)
-  
-  const gyeokTable = TEN_GODS_FOR_GYEOK[dayMaster]
-  if (!gyeokTable) return '미정격'
-  
-  const gyeok = gyeokTable[bongi]
-  return gyeok ? (isTuchul ? gyeok : `${gyeok}(본기)`) : '미정격'
-}
-
 export function calculateSaju(birthInfo: BirthInfo): SajuData {
   const birthTime = parseBirthTime(birthInfo.birthTime)
   const date = new Date(birthInfo.birthDate)
   
+  // Parse time
   let hour: number | undefined
   let minute: number | undefined
   if (birthTime) {
@@ -110,7 +62,7 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     minute = m
   }
   
-  // 기본 분석 실행
+  // Run the full analysis using our saju module
   const analysis = runFullAnalysis({
     year: date.getFullYear(),
     month: date.getMonth() + 1,
@@ -121,9 +73,9 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     country: birthInfo.birthCountry
   })
   
+  // Convert results to SajuData format with Hanja characters
+  // Access fourPillars object structure
   const fp = analysis.fourPillars
-  
-  // 한자 변환
   const yearStemHanja = koreanStemToHanja(fp.year.stem)
   const yearBranchHanja = koreanBranchToHanja(fp.year.branch)
   const monthStemHanja = koreanStemToHanja(fp.month.stem)
@@ -131,219 +83,96 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
   const dayStemHanja = koreanStemToHanja(fp.day.stem)
   const dayBranchHanja = koreanBranchToHanja(fp.day.branch)
   
-  let hourStemHanja: string | null = null
-  let hourBranchHanja: string | null = null
+  let hourPillar: { stem: string; branch: string } | undefined
   if (fp.hour && fp.hour.stem && fp.hour.branch) {
-    hourStemHanja = koreanStemToHanja(fp.hour.stem)
-    hourBranchHanja = koreanBranchToHanja(fp.hour.branch)
+    hourPillar = {
+      stem: koreanStemToHanja(fp.hour.stem),
+      branch: koreanBranchToHanja(fp.hour.branch)
+    }
   }
   
-  // 한글 천간/지지 (advanced.ts 함수들에 전달용)
-  const yearStem = fp.year.stem
-  const yearBranch = fp.year.branch
-  const monthStem = fp.month.stem
-  const monthBranch = fp.month.branch
-  const dayStem = fp.day.stem
-  const dayBranch = fp.day.branch
-  const hourStem = fp.hour?.stem || null
-  const hourBranch = fp.hour?.branch || null
-  
-  const allBranches = [yearBranch, monthBranch, dayBranch]
-  if (hourBranch) allBranches.push(hourBranch)
-  
-  const allStems = [yearStem, monthStem, dayStem]
-  if (hourStem) allStems.push(hourStem)
-  
-  // === 12운성 ===
-  const twelveStars = calcTwelveStars(
-    dayStem as any,
-    yearBranch as any,
-    monthBranch as any,
-    dayBranch as any,
-    hourBranch as any
-  )
-  
-  // === ���계식 계산 ===
-  const cheongganHap = calcCheongganHap(
-    yearStem as any, monthStem as any, dayStem as any, hourStem as any
-  )
-  const jijiYughap = calcJijiYughap(
-    yearBranch as any, monthBranch as any, dayBranch as any, hourBranch as any
-  )
-  const jijiSamhap = calcJijiSamhap(
-    yearBranch as any, monthBranch as any, dayBranch as any, hourBranch as any
-  )
-  const jijiBanghap = calcJijiBanghap(
-    yearBranch as any, monthBranch as any, dayBranch as any, hourBranch as any
-  )
-  const cheongganChung = calcCheongganChung(
-    yearStem as any, monthStem as any, dayStem as any, hourStem as any
-  )
-  const jijiChung = calcJijiChung(
-    yearBranch as any, monthBranch as any, dayBranch as any, hourBranch as any
-  )
-  const gongmang = calcGongmang(dayStem as any, dayBranch as any)
-  const hyeong = calcHyeong(
-    yearBranch as any, monthBranch as any, dayBranch as any, hourBranch as any
-  )
-  const pa = calcPa(
-    yearBranch as any, monthBranch as any, dayBranch as any, hourBranch as any
-  )
-  const hae = calcHae(
-    yearBranch as any, monthBranch as any, dayBranch as any, hourBranch as any
-  )
-  const wonjin = calcWonjin(
-    yearBranch as any, monthBranch as any, dayBranch as any, hourBranch as any
-  )
-  
-  // === 길성 ===
-  const gilseong = calcGilseong(
-    dayStem as any,
-    yearStem as any, monthStem as any, hourStem as any,
-    yearBranch as any, monthBranch as any, dayBranch as any, hourBranch as any
-  )
-  
-  // === 신강/신약 ===
-  const sinGangSinYak = calcSinGangSinYak(
-    dayStem as any, monthBranch as any,
-    yearStem as any, monthStem as any, dayStem as any, hourStem as any,
-    yearBranch as any, dayBranch as any, hourBranch as any
-  )
-  
-  // === 용신 ===
-  const eokbuYongsin = getEokbuYongsin(dayStem as any, sinGangSinYak.ratio >= 50)
-  const johuYongsin = calcJohuYongsin(dayStem as any, monthBranch as any)
-  
-  // === 격국 ===
-  const gyeokguk = calcGyeokguk(dayStem, monthBranch, allStems)
-  
-  // === 신살 (advanced.ts의 정확한 로직 사용) ===
-  const spirits = calcAllSinsal(
-    yearBranch as string,
-    monthBranch as string,
-    dayBranch as string,
-    hourBranch as string | null,
-    dayStem as string
-  )
-  
-  // === 오행 밸런스 (정확한 계산) ===
-  const elementBalance = {
-    wood: analysis.elementCount['목'] || 0,
-    fire: analysis.elementCount['화'] || 0,
-    earth: analysis.elementCount['토'] || 0,
-    metal: analysis.elementCount['금'] || 0,
-    water: analysis.elementCount['수'] || 0
+  // Calculate element balance from analysis (Korean keys: 목, 화, 토, 금, 수)
+  const ec = analysis.elementCount
+  const elements = {
+    wood: ec['목'] || 0,
+    fire: ec['화'] || 0,
+    earth: ec['토'] || 0,
+    metal: ec['금'] || 0,
+    water: ec['수'] || 0
   }
   
-  // 오행 한글 키
-  const elementBalanceKorean = {
-    목: analysis.elementCount['목'] || 0,
-    화: analysis.elementCount['화'] || 0,
-    토: analysis.elementCount['토'] || 0,
-    금: analysis.elementCount['금'] || 0,
-    수: analysis.elementCount['수'] || 0
+  // Determine dominant element
+  const dominantElement = Object.entries(elements).reduce((a, b) => 
+    elements[a[0] as keyof typeof elements] > elements[b[0] as keyof typeof elements] ? a : b
+  )[0]
+  
+  // Day Master info
+  const dayStemIndex = STEMS_HANJA.indexOf(dayStemHanja)
+  const dayMasterElement = dayStemIndex >= 0 ? STEMS_ELEMENTS[dayStemIndex] : 'Earth'
+  
+  // Lucky element (生: supporting element)
+  const luckyElementMap: Record<string, string> = {
+    Wood: 'Water',
+    Fire: 'Wood',
+    Earth: 'Fire',
+    Metal: 'Earth',
+    Water: 'Metal'
+  }
+  
+  // Personality types based on Day Master
+  const personalityTypes: Record<string, string> = {
+    '甲': 'The Pioneer',
+    '乙': 'The Diplomat',
+    '丙': 'The Illuminator',
+    '丁': 'The Nurturer',
+    '戊': 'The Mountain',
+    '己': 'The Garden',
+    '庚': 'The Warrior',
+    '辛': 'The Jewel',
+    '壬': 'The Ocean',
+    '癸': 'The Rain'
   }
   
   return {
-    // 4주 (한자)
     yearPillar: {
       stem: yearStemHanja,
-      branch: yearBranchHanja,
-      fullName: `${yearStemHanja}${yearBranchHanja}`,
-      fullNameKorean: `${yearStem}${yearBranch}`
+      branch: yearBranchHanja
     },
     monthPillar: {
       stem: monthStemHanja,
-      branch: monthBranchHanja,
-      fullName: `${monthStemHanja}${monthBranchHanja}`,
-      fullNameKorean: `${monthStem}${monthBranch}`
+      branch: monthBranchHanja
     },
     dayPillar: {
       stem: dayStemHanja,
-      branch: dayBranchHanja,
-      fullName: `${dayStemHanja}${dayBranchHanja}`,
-      fullNameKorean: `${dayStem}${dayBranch}`
+      branch: dayBranchHanja
     },
-    hourPillar: hourStemHanja && hourBranchHanja ? {
-      stem: hourStemHanja,
-      branch: hourBranchHanja,
-      fullName: `${hourStemHanja}${hourBranchHanja}`,
-      fullNameKorean: `${hourStem}${hourBranch}`
-    } : undefined,
-    
-    // 일간
+    hourPillar,
+    dominantElement: dominantElement.charAt(0).toUpperCase() + dominantElement.slice(1),
+    elementBalance: elements,
     dayMaster: dayStemHanja,
-    dayMasterKorean: dayStem,
-    
-    // 오행
-    elementBalance,
-    elementBalanceKorean,
-    dominantElement: Object.entries(elementBalance).reduce((a, b) => 
-      a[1] > b[1] ? a : b
-    )[0],
-    
-    // 12운성
-    twelveStars: twelveStars.map(ts => ({
-      position: ts.position,
-      branch: ts.branch,
-      star: ts.star
-    })),
-    
-    // 십신
+    luckyElement: luckyElementMap[dayMasterElement] || 'Water',
+    personalityType: personalityTypes[dayStemHanja] || 'The Seeker',
+    // Include additional analysis data
     tenGods: {
       present: analysis.tenGods.present,
       missing: analysis.tenGods.missing
     },
-    
-    // 관계식
-    cheongganHap,
-    jijiYughap,
-    jijiSamhap,
-    jijiBanghap,
-    cheongganChung,
-    jijiChung,
-    hyeong,
-    pa,
-    hae,
-    wonjin,
-    
-    // 길성
-    gilseong,
-    
-    // 공망
-    gongmang,
-    
-    // 신강/신약
-    sinGangSinYak: {
-      grade: sinGangSinYak.grade,
-      ratio: sinGangSinYak.ratio
-    },
-    
-    // 용신
-    eokbuYongsin,
-    johuYongsin,
-    
-    // 격국
-    gyeokguk,
-    
-    // 신살
-    spirits,
-    
-    // 대운 (정확한 계산)
-    daewoon: calcDaeyun(
-      date,
-      birthInfo.gender === '여' ? 'female' : 'male',
-      yearStem,
-      monthStem,
-      monthBranch
-    ),
-    
-    // 연운
+    // Convert spirits array to object format
+    spirits: analysis.spirits.reduce((acc, spirit) => {
+      acc[spirit] = true
+      return acc
+    }, {} as Record<string, boolean>),
+    // Convert daewoon to match SajuData format
+    daewoon: analysis.daewoon.map(d => ({
+      startAge: d.startAge,
+      endAge: d.startAge + 9,
+      stem: d.stem,
+      branch: d.branch
+    })),
     yeonwoon: analysis.yeonwoon.map(y => ({
       year: y.year,
       stem: y.stem,
-      branch: y.branch,
-      fullName: `${koreanStemToHanja(y.stem)}${koreanBranchToHanja(y.branch)}`
+      branch: y.branch
     }))
   }
 }
@@ -358,4 +187,17 @@ export function getElementDescription(element: string): string {
     Water: 'Wisdom, adaptability, intuition, and depth'
   }
   return descriptions[element] || ''
+}
+
+// Helper function to format Saju data for display
+export function formatSajuForDisplay(saju: SajuData) {
+  return {
+    fourPillars: [
+      { name: 'Year Pillar', stem: saju.yearPillar.stem, branch: saju.yearPillar.branch },
+      { name: 'Month Pillar', stem: saju.monthPillar.stem, branch: saju.monthPillar.branch },
+      { name: 'Day Pillar', stem: saju.dayPillar.stem, branch: saju.dayPillar.branch },
+      ...(saju.hourPillar ? [{ name: 'Hour Pillar', stem: saju.hourPillar.stem, branch: saju.hourPillar.branch }] : [])
+    ],
+    summary: `Your Day Master is ${saju.dayMaster}, making you "${saju.personalityType}". Your dominant element is ${saju.dominantElement}, and your lucky element is ${saju.luckyElement}.`
+  }
 }

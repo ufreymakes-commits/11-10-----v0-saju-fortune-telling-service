@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { calculateSaju } from '@/lib/saju-calculator'
-import { runSajuTests } from '@/lib/saju-test'
 import type { BirthInfo } from '@/lib/types'
 
 export async function POST(request: Request) {
@@ -29,9 +28,6 @@ export async function POST(request: Request) {
     }
     
     const sajuData = calculateSaju(birthInfo)
-    
-    // Run test suite once per deployment (only logs to console, no side effects)
-    runSajuTests()
     
     // Store in database
     const supabase = await createClient()
