@@ -2,7 +2,7 @@
 // Complete analysis including all advanced calculations
 
 import type { BirthInfo, SajuData } from './types'
-import { runFullAnalysis, calculateElementScores } from './saju/core-calculator'
+import { runFullAnalysis, calculateElementScores, calculateElementScoresWithHapChung } from './saju/core-calculator'
 import {
   calcTwelveStars,
   calcCheongganHap,
@@ -230,6 +230,14 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
   // 천간: 각 10점, 지지: 연지 10점, 월지 30점, 일지 20점, 시지 20점
   const elementScores = calculateElementScores(fp)
   
+  // === 합충 반영 오행 점수 계산 ===
+  const hapChungAnalysis = calculateElementScoresWithHapChung(
+    fp,
+    allStems,
+    allBranches
+  )
+  
+  // 기본 점수 (합충 미반영)
   const elementBalance = {
     wood: elementScores['목'] || 0,
     fire: elementScores['화'] || 0,
@@ -238,13 +246,30 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     water: elementScores['수'] || 0
   }
   
-  // 오행 한글 키
+  // 오행 한글 키 (기본)
   const elementBalanceKorean = {
     목: elementScores['목'] || 0,
     화: elementScores['화'] || 0,
     토: elementScores['토'] || 0,
     금: elementScores['금'] || 0,
     수: elementScores['수'] || 0
+  }
+  
+  // 합충 반영 점수
+  const elementBalanceAdjusted = {
+    wood: hapChungAnalysis.adjustedScores['목'] || 0,
+    fire: hapChungAnalysis.adjustedScores['화'] || 0,
+    earth: hapChungAnalysis.adjustedScores['토'] || 0,
+    metal: hapChungAnalysis.adjustedScores['금'] || 0,
+    water: hapChungAnalysis.adjustedScores['수'] || 0
+  }
+  
+  const elementBalanceAdjustedKorean = {
+    목: hapChungAnalysis.adjustedScores['목'] || 0,
+    화: hapChungAnalysis.adjustedScores['화'] || 0,
+    토: hapChungAnalysis.adjustedScores['토'] || 0,
+    금: hapChungAnalysis.adjustedScores['금'] || 0,
+    수: hapChungAnalysis.adjustedScores['수'] || 0
   }
   
   return {
@@ -278,12 +303,18 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     dayMaster: dayStemHanja,
     dayMasterKorean: dayStem,
     
-    // 오행
+    // 오행 (기본 점수)
     elementBalance,
     elementBalanceKorean,
     dominantElement: Object.entries(elementBalance).reduce((a, b) => 
       a[1] > b[1] ? a : b
     )[0],
+    
+    // 오행 (합충 반영 점수)
+    elementBalanceAdjusted,
+    elementBalanceAdjustedKorean,
+    hapChungAdjustments: hapChungAnalysis.adjustments,
+    hapChungSummary: hapChungAnalysis.summary,
     
     // 12운성
     twelveStars: twelveStars.map(ts => ({

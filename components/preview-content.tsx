@@ -209,13 +209,33 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
           </div>
 
           <div className="border-t border-green-500/20 pt-2 mt-2">
-            <span className="text-yellow-400">오행:</span>
+            <span className="text-yellow-400">오행 (기본 점수 - 합충 미반영):</span>
             <div className="ml-2">
               {submission.sajuData.elementBalanceKorean ? (
-                <div>목{submission.sajuData.elementBalanceKorean.목} / 화{submission.sajuData.elementBalanceKorean.화} / 토{submission.sajuData.elementBalanceKorean.토} / 금{submission.sajuData.elementBalanceKorean.금} / 수{submission.sajuData.elementBalanceKorean.수}</div>
+                <div>목{submission.sajuData.elementBalanceKorean.목}점 / 화{submission.sajuData.elementBalanceKorean.화}점 / 토{submission.sajuData.elementBalanceKorean.토}점 / 금{submission.sajuData.elementBalanceKorean.금}점 / 수{submission.sajuData.elementBalanceKorean.수}점</div>
               ) : (
                 <div>Wood:{submission.sajuData.elementBalance?.wood} / Fire:{submission.sajuData.elementBalance?.fire} / Earth:{submission.sajuData.elementBalance?.earth} / Metal:{submission.sajuData.elementBalance?.metal} / Water:{submission.sajuData.elementBalance?.water}</div>
               )}
+            </div>
+          </div>
+
+          <div className="border-t border-green-500/20 pt-2 mt-2">
+            <span className="text-yellow-400">오행 (합충 반영 점수):</span>
+            <div className="ml-2">
+              {submission.sajuData.elementBalanceAdjustedKorean ? (
+                <div className="text-lime-400">목{submission.sajuData.elementBalanceAdjustedKorean.목}점 / 화{submission.sajuData.elementBalanceAdjustedKorean.화}점 / 토{submission.sajuData.elementBalanceAdjustedKorean.토}점 / 금{submission.sajuData.elementBalanceAdjustedKorean.금}점 / 수{submission.sajuData.elementBalanceAdjustedKorean.수}점</div>
+              ) : <span className="text-red-400">미계산</span>}
+            </div>
+          </div>
+
+          <div className="border-t border-green-500/20 pt-2 mt-2">
+            <span className="text-yellow-400">합충 조정 내역:</span>
+            <div className="ml-2 text-[10px] text-orange-300">
+              {submission.sajuData.hapChungAdjustments?.length ? (
+                submission.sajuData.hapChungAdjustments.map((adj, i) => (
+                  <div key={i}>{adj}</div>
+                ))
+              ) : <span className="text-gray-500">합충 조정 없음</span>}
             </div>
           </div>
 
