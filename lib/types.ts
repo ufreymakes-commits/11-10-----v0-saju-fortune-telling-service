@@ -133,8 +133,9 @@ export interface Fact {
   id: number
   text: string
   category: string
+  title?: string
   isMasked?: boolean
-}
+  }
 
 export interface ReportSection {
   key: string
