@@ -1041,7 +1041,7 @@ function checkUicheouibSal(dayStem: string, dayBranch: string): boolean {
 
 // 신병살: 특정 일주
 function checkSinbyeongSal(dayStem: string, dayBranch: string): boolean {
-  const sinbyeongList = ["갑신","을유","병자","정해","무자","기해","경인","신묘","임오","계사"]
+  const sinbyeongList = ["갑신","을��","병자","정해","무자","기해","경인","신묘","임오","계사"]
   return sinbyeongList.includes(dayStem + dayBranch)
 }
 
@@ -1172,6 +1172,56 @@ function getEuminPositions(dayStem: string, yb: string, mob: string, db: string,
   return _getBranchPositions(map[dayStem], yb, mob, db, hb)
 }
 
+// 진신: 일지 기준 삼합국의 장생지 (전진하는 기운)
+function checkJinsin(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
+  const jinsinMap: Record<string, string> = {
+    "인": "해", "오": "인", "술": "인",
+    "신": "사", "자": "신", "진": "신",
+    "사": "인", "유": "사", "축": "사",
+    "해": "신", "묘": "해", "미": "해"
+  }
+  const target = jinsinMap[dayBranch]
+  if (!target) return false
+  return [yearBranch, monthBranch, hourBranch].includes(target)
+}
+function getJinsinPositions(yb: string, mob: string, db: string, hb: string | null): string[] {
+  const map: Record<string, string> = { "인": "해","오": "인","술": "인","신": "사","자": "신","진": "신","사": "인","유": "사","축": "사","해": "신","묘": "해","미": "해" }
+  const target = map[db]
+  if (!target) return []
+  return _getBranchPositions(target, yb, mob, db, hb).filter(p => p !== "일지")
+}
+
+// 퇴신: 일지 기준 삼합국의 묘지 (물러나는 기운)
+function checkToesin(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
+  const toesinMap: Record<string, string> = {
+    "인": "미", "오": "술", "술": "술",
+    "신": "축", "자": "진", "진": "진",
+    "사": "술", "유": "축", "축": "축",
+    "해": "진", "묘": "미", "미": "미"
+  }
+  const target = toesinMap[dayBranch]
+  if (!target || target === dayBranch) return false
+  return [yearBranch, monthBranch, hourBranch].includes(target)
+}
+function getToesinPositions(yb: string, mob: string, db: string, hb: string | null): string[] {
+  const map: Record<string, string> = { "인": "미","오": "술","술": "술","신": "축","자": "진","진": "진","사": "술","유": "축","축": "축","해": "진","묘": "미","미": "미" }
+  const target = map[db]
+  if (!target || target === db) return []
+  return _getBranchPositions(target, yb, mob, db, hb).filter(p => p !== "일지")
+}
+
+// 단장관: 일주 기준 특정 조합 (외모/치장에 관심이 많은 조합)
+function checkDanjangGwan(dayStem: string, dayBranch: string): boolean {
+  const danjangList = ["갑오","을사","병신","정유","무자","기해","경인","신묘","임오","계사"]
+  return danjangList.includes(dayStem + dayBranch)
+}
+
+// 괴강: 일주 기준 (갑진, 경술, 경진, 임술 - 강인한 기운)
+function checkGoegang(dayStem: string, dayBranch: string): boolean {
+  const goegangList = ["갑진","경술","경진","임술"]
+  return goegangList.includes(dayStem + dayBranch)
+}
+
 // 내부 헬퍼: 특정 지지의 위치 반환
 function _getBranchPositions(target: string | undefined, yb: string, mob: string, db: string, hb: string | null): string[] {
   if (!target) return []
@@ -1228,7 +1278,11 @@ const SINSAL_USAGE_GUIDE: Record<string, string> = {
   "뇌공타뇌관": "천둥처럼 강렬한 에너지로 순간적인 판단력과 돌파력이 뛰어납니다",
   "칠살": "충돌과 경쟁의 기운이 있어 승부욕이 강하고 경쟁적인 환경에서 두각을 나타냅니다",
   "구추방해": "재물이나 건강에 방해가 될 수 있으니 평소 건강 관리와 재정 관리에 신경 쓰세요",
-  "음인": "음의 귀인으로, 은밀하게 도와주는 사람이 있으며 직관과 감각이 뛰어납니다"
+  "음인": "음의 귀인으로, 은밀하게 도와주는 사람이 있으며 직관과 감각이 뛰어납니다",
+  "진신": "전진하는 기운으로 새로운 시작과 도전에 유리하며 적극적인 행동력이 있습니다",
+  "퇴신": "물러나는 기운으로 정리와 마무리에 능하며 신중한 판단력이 장점입니다",
+  "단장관": "외모와 치장에 관심이 많고 미적 감각이 뛰어나 패션/뷰티 분야에서 두각을 나타냅니다",
+  "괴강": "강인하고 결단력 있는 성격으로 리더십이 뛰어나지만 고집이 셀 수 있습니다"
 }
 
 export interface SinsalDetail {
@@ -1302,6 +1356,10 @@ export function calcAllSinsal(
 
   // 지지 기준 추가
   if (checkChilSal(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("칠살")
+  if (checkJinsin(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("진신")
+  if (checkToesin(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("퇴신")
+  if (checkDanjangGwan(dayStem, dayBranch)) sinsalList.push("단장관")
+  if (checkGoegang(dayStem, dayBranch)) sinsalList.push("괴강")
 
   // 일간 기준 신살/귀인
   if (checkMunChangSal(dayStem, branches).length > 0) sinsalList.push("문창살")
@@ -1344,6 +1402,8 @@ export function calcDetailedSinsal(
     { name: "천라지망", check: checkCheollaJimang, getPositions: getCheollaJimangPositions },
     { name: "비인살", check: checkBiinSal,     getPositions: getBiinPositions },
     { name: "칠살",   check: checkChilSal,     getPositions: getChilSalPositions },
+    { name: "진신",   check: checkJinsin,      getPositions: getJinsinPositions },
+    { name: "퇴신",   check: checkToesin,      getPositions: getToesinPositions },
   ]
   
   for (const { name, check, getPositions } of sinsalChecks) {
@@ -1394,6 +1454,8 @@ export function calcDetailedSinsal(
     { name: "교신성",    check: checkGyosinseong(dayStem, dayBranch),     positions: ["일주"] },
     { name: "뇌공타뇌관",check: checkNoegongTanoegwan(dayStem, dayBranch),positions: ["일주"] },
     { name: "구추방해",  check: checkGuchuBanghae(dayStem, dayBranch),    positions: ["일주"] },
+    { name: "단장관",    check: checkDanjangGwan(dayStem, dayBranch),     positions: ["일주"] },
+    { name: "괴강",      check: checkGoegang(dayStem, dayBranch),         positions: ["일주"] },
   ]
 
   for (const { name, check, positions } of iljooBased) {
@@ -1523,7 +1585,7 @@ const BRANCH_HIDDEN_MAIN: Record<string, string> = {
 const TEN_GODS_MAP: Record<string, Record<string, string>> = {
   "갑": { "갑": "비견", "을": "겁재", "병": "식신", "정": "상관", "무": "편재", "기": "정재", "경": "편관", "신": "정관", "임": "편인", "계": "정인" },
   "을": { "갑": "겁재", "을": "비견", "병": "상관", "정": "식신", "무": "정재", "기": "편재", "경": "정관", "신": "편관", "임": "정인", "계": "편인" },
-  "병": { "갑": "편인", "을": "정인", "병": "비견", "정": "겁재", "무": "식신", "기": "상관", "경": "편재", "신": "정재", "임": "편관", "계": "정관" },
+  "병": { "갑": "편인", "을": "정���", "병": "비견", "정": "겁재", "무": "식신", "기": "상관", "경": "편재", "신": "정재", "임": "편관", "계": "정관" },
   "정": { "갑": "정인", "을": "편인", "병": "겁재", "정": "비견", "무": "상관", "기": "식신", "경": "정재", "신": "편재", "임": "정관", "계": "편관" },
   "무": { "갑": "편관", "을": "정관", "병": "편인", "정": "정인", "무": "비견", "기": "겁재", "경": "식신", "신": "상관", "임": "편재", "계": "정재" },
   "기": { "갑": "정관", "을": "편관", "병": "정인", "정": "편인", "무": "겁재", "기": "비견", "경": "상관", "신": "식신", "임": "정재", "계": "편재" },
