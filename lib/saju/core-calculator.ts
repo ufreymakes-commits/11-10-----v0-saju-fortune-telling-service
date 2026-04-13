@@ -95,16 +95,32 @@ export interface BirthInfo {
 // 시간을 지지 인덱스로 변환
 // ================================================================
 
-export function getHourBranchIndex(hour: number, minute: number = 0): number {
-  // 진태양시 보정이 이미 경도 기반으로 적용되므로 +30분 offset 불필요
-  // 정시 기준: 자시(23:00-01:00), 축시(01:00-03:00), ...
+export function getHourBranchIndex(hour: number, minute: number = 0, countryCode: string = 'KR'): number {
+  // 한국은 30분 보정 적용 (KST가 실제 태양시보다 30분 빠름)
+  // 자시: 23:30~01:30, 축시: 01:30~03:30, ...
   const totalMin = hour * 60 + minute;
   
-  // 23:00 이후는 자시(0)
+  // 한국 등 30분 보정 국가
+  const offset30Countries = ['KR'];
+  const useOffset = offset30Countries.includes(countryCode);
+  
+  if (useOffset) {
+    // 한국식 30분 보정: 23:30~01:30 = 자시, 01:30~03:30 = 축시, ...
+    // 30분 빼서 계산 (23:30 -> 23:00 기준으로 맞춤)
+    const adjustedMin = totalMin - 30;
+    
+    // 23:00 이후 (adjustedMin 기준)는 자시(0)
+    if (adjustedMin >= 1380 || adjustedMin < 0) return 0; // 23:30~00:29 -> 자시
+    if (adjustedMin < 60) return 0;    // 00:30~01:29 -> 자시
+    
+    // 01:00부터 2시간 단위 (adjustedMin 기준)
+    return Math.floor((adjustedMin - 60) / 120) + 1;
+  }
+  
+  // 기본 (30분 보정 없음): 23:00~01:00 = 자시, 01:00~03:00 = 축시, ...
   if (totalMin >= 1380) return 0; // 23:00~23:59
   if (totalMin < 60) return 0;    // 00:00~00:59
   
-  // 01:00부터 2시간 단위
   return Math.floor((totalMin - 60) / 120) + 1;
 }
 
@@ -209,10 +225,10 @@ export function getMonthPillar(yearStem: Stem, monthBranch: Branch): Pillar {
 // 시주 계산
 // ================================================================
 
-export function getHourPillar(dayStem: Stem, hour: number, minute: number = 0): Pillar | null {
+export function getHourPillar(dayStem: Stem, hour: number, minute: number = 0, countryCode: string = 'KR'): Pillar | null {
   if (hour < 0 || hour > 23) return null;
   
-  const branchIndex = getHourBranchIndex(hour, minute);
+  const branchIndex = getHourBranchIndex(hour, minute, countryCode);
   const branch = BRANCHES[branchIndex];
   const hourStemTable = HOUR_STEM_TABLE[dayStem];
   const stem = hourStemTable[branchIndex];
@@ -312,10 +328,10 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
   // 일주
   const dayPillar = getDayPillar(dayCalcYear, dayCalcMonth, dayCalcDay);
 
-  // 시주
+  // 시주 (한국은 30분 보정 적용)
   let hourPillar: Pillar | null = null;
   if (hour !== undefined) {
-    hourPillar = getHourPillar(dayPillar.stem, solarTime.hour, solarTime.minute);
+    hourPillar = getHourPillar(dayPillar.stem, solarTime.hour, solarTime.minute, country);
   }
 
   return {
@@ -422,7 +438,7 @@ const ELEMENT_CONTROLS: Record<string, string> = {
   '목': '토', '화': '금', '토': '수', '금': '목', '수': '화'
 }
 
-// 천간->오행 매핑
+// 천간->오행 매��
 const STEM_ELEMENT_MAP: Record<string, string> = {
   '갑': '목', '을': '목', '병': '화', '정': '화', '무': '토',
   '기': '토', '경': '금', '신': '금', '임': '수', '계': '수'
