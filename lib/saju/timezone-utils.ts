@@ -47,6 +47,9 @@ export interface ConvertedTime {
  * @param countryCode 국가 코드 (예: "US-LAX", "KR")
  * @returns 변환된 시간 정보
  */
+// DST가 없는 국가/지역 목록 (1988년 이후 한국 등)
+const NO_DST_COUNTRIES = ['KR', 'JP', 'CN', 'SG', 'HK', 'TW', 'TH', 'VN', 'PH', 'MY', 'ID-JKT', 'ID-UPG', 'ID-DJJ'];
+
 export function convertToStandardTime(
   year: number,
   month: number,
@@ -57,6 +60,11 @@ export function convertToStandardTime(
 ): ConvertedTime {
   const ianaZone = getIanaTimezone(countryCode);
   const tzData = TIMEZONE_OFFSETS[countryCode] || DEFAULT_TIMEZONE;
+  
+  // DST가 없는 국가는 바로 폴백 (섬머타임 보정 없이 그대로)
+  if (NO_DST_COUNTRIES.includes(countryCode)) {
+    return fallbackConversion(year, month, day, hour, minute, tzData);
+  }
   
   // IANA 타임존이 있으면 Luxon으로 정확한 변환
   if (ianaZone) {
