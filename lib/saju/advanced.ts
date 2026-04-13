@@ -1222,6 +1222,63 @@ function checkGoegang(dayStem: string, dayBranch: string): boolean {
   return goegangList.includes(dayStem + dayBranch)
 }
 
+// 월덕귀인: 월지 기준 (해당 월에 덕을 주는 천간)
+function checkWoldeokGuiin(monthBranch: string, stems: string[]): boolean {
+  const woldeokMap: Record<string, string> = {
+    "인": "병", "묘": "갑", "진": "임", "사": "경",
+    "오": "병", "미": "갑", "신": "임", "유": "경",
+    "술": "병", "해": "갑", "자": "임", "축": "경"
+  }
+  const target = woldeokMap[monthBranch]
+  return target ? stems.includes(target) : false
+}
+function getWoldeokPositions(monthBranch: string, ys: string, ms: string, ds: string, hs: string | null): string[] {
+  const map: Record<string, string> = { "인": "병","묘": "갑","진": "임","사": "경","오": "병","미": "갑","신": "임","유": "경","술": "병","해": "갑","자": "임","축": "경" }
+  const target = map[monthBranch]
+  if (!target) return []
+  const positions: string[] = []
+  if (ys === target) positions.push("연간")
+  if (ms === target) positions.push("월간")
+  if (ds === target) positions.push("일간")
+  if (hs === target) positions.push("시간")
+  return positions
+}
+
+// 천덕귀인: 월지 기준 (하늘의 덕을 주는 천간)
+function checkCheondeokGuiin(monthBranch: string, stems: string[]): boolean {
+  const cheondeokMap: Record<string, string> = {
+    "인": "정", "묘": "신", "진": "임", "사": "신",
+    "오": "갑", "미": "계", "신": "임", "유": "병",
+    "술": "을", "해": "경", "자": "계", "축": "경"
+  }
+  const target = cheondeokMap[monthBranch]
+  return target ? stems.includes(target) : false
+}
+function getCheondeokPositions(monthBranch: string, ys: string, ms: string, ds: string, hs: string | null): string[] {
+  const map: Record<string, string> = { "인": "정","묘": "신","진": "임","사": "신","오": "갑","미": "계","신": "임","유": "병","술": "을","해": "경","자": "계","축": "경" }
+  const target = map[monthBranch]
+  if (!target) return []
+  const positions: string[] = []
+  if (ys === target) positions.push("연간")
+  if (ms === target) positions.push("월간")
+  if (ds === target) positions.push("일간")
+  if (hs === target) positions.push("시간")
+  return positions
+}
+
+// 양인살: 일간 기준 (날카로운 칼의 기운, 강한 자아)
+function checkYanginSal(dayStem: string, branches: string[]): boolean {
+  const yanginMap: Record<string, string> = {
+    "갑": "묘", "병": "오", "무": "오", "경": "유", "임": "자"
+  }
+  const target = yanginMap[dayStem]
+  return target ? branches.includes(target) : false
+}
+function getYanginPositions(dayStem: string, yb: string, mob: string, db: string, hb: string | null): string[] {
+  const map: Record<string, string> = { "갑": "묘","병": "오","무": "오","경": "유","임": "자" }
+  return _getBranchPositions(map[dayStem], yb, mob, db, hb)
+}
+
 // 내부 헬퍼: 특정 지지의 위치 반환
 function _getBranchPositions(target: string | undefined, yb: string, mob: string, db: string, hb: string | null): string[] {
   if (!target) return []
@@ -1282,7 +1339,10 @@ const SINSAL_USAGE_GUIDE: Record<string, string> = {
   "진신": "전진하는 기운으로 새로운 시작과 도전에 유리하며 적극적인 행동력이 있습니다",
   "퇴신": "물러나는 기운으로 정리와 마무리에 능하며 신중한 판단력이 장점입니다",
   "단장관": "외모와 치장에 관심이 많고 미적 감각이 뛰어나 패션/뷰티 분야에서 두각을 나타냅니다",
-  "괴강": "강인하고 결단력 있는 성격으로 리더십이 뛰어나지만 고집이 셀 수 있습니다"
+  "괴강": "강인하고 결단력 있는 성격으로 리더십이 뛰어나지만 고집이 셀 수 있습니다",
+  "월덕귀인": "해당 월의 덕을 받아 주변 사람들의 도움과 협조를 쉽게 얻을 수 있습니다",
+  "천덕귀인": "하늘의 덕을 받아 위기 상황에서도 귀인의 도움으로 무사히 넘길 수 있습니다",
+  "양인살": "날카로운 칼의 기운으로 강한 추진력과 결단력이 있으나, 날카로운 언행에 주의가 필요합니다"
 }
 
 export interface SinsalDetail {
@@ -1308,11 +1368,19 @@ export function calcAllSinsal(
   dayBranch: string,
   hourBranch: string | null,
   dayStem: string,
-  gender: string = 'male'
+  gender: string = 'male',
+  yearStem: string = '',
+  monthStem: string = '',
+  hourStem: string | null = null
 ): string[] {
   const sinsalList: string[] = []
   
   const branches = [yearBranch, monthBranch, dayBranch, hourBranch].filter(Boolean) as string[]
+  const stems = [yearStem, monthStem, dayStem, hourStem].filter(Boolean) as string[]
+
+  // 월덕귀인, 천덕귀인 (월지+천간 기준)
+  if (checkWoldeokGuiin(monthBranch, stems)) sinsalList.push("월덕귀인")
+  if (checkCheondeokGuiin(monthBranch, stems)) sinsalList.push("천덕귀인")
 
   // 여연살/남연살 (성별 기반)
   if (checkYeoyeonSal(dayBranch, gender)) {
@@ -1372,6 +1440,7 @@ export function calcAllSinsal(
   if (checkJanggunJeon(dayStem, branches)) sinsalList.push("장군전")
   if (checkBoksin(dayStem, branches)) sinsalList.push("복신")
   if (checkEumin(dayStem, branches)) sinsalList.push("음인")
+  if (checkYanginSal(dayStem, branches)) sinsalList.push("양인살")
 
   return sinsalList
 }
@@ -1381,11 +1450,44 @@ export function calcDetailedSinsal(
   monthBranch: string,
   dayBranch: string,
   hourBranch: string | null,
-  dayStem: string
+  dayStem: string,
+  yearStem: string = '',
+  monthStem: string = '',
+  hourStem: string | null = null
 ): SinsalAnalysis {
   const details: SinsalDetail[] = []
   const totalPillars = hourBranch ? 4 : 3
   const strongSinsals: string[] = []
+  
+  // 월덕귀인, 천덕귀인 (월지+천간 기준)
+  const woldeokPos = getWoldeokPositions(monthBranch, yearStem, monthStem, dayStem, hourStem)
+  if (woldeokPos.length > 0) {
+    details.push({
+      name: "월덕귀인",
+      positions: woldeokPos,
+      count: woldeokPos.length,
+      totalPillars,
+      percentage: Math.round((woldeokPos.length / totalPillars) * 100),
+      intensity: woldeokPos.includes("월간") ? 1.5 : 1,
+      isStrong: woldeokPos.includes("월간"),
+      usageGuide: SINSAL_USAGE_GUIDE["월덕귀인"] || ""
+    })
+    if (woldeokPos.includes("월간")) strongSinsals.push("월덕귀인")
+  }
+  const cheondeokPos = getCheondeokPositions(monthBranch, yearStem, monthStem, dayStem, hourStem)
+  if (cheondeokPos.length > 0) {
+    details.push({
+      name: "천덕귀인",
+      positions: cheondeokPos,
+      count: cheondeokPos.length,
+      totalPillars,
+      percentage: Math.round((cheondeokPos.length / totalPillars) * 100),
+      intensity: cheondeokPos.includes("월간") ? 1.5 : 1,
+      isStrong: cheondeokPos.includes("월간"),
+      usageGuide: SINSAL_USAGE_GUIDE["천덕귀인"] || ""
+    })
+    if (cheondeokPos.includes("월간")) strongSinsals.push("천덕귀인")
+  }
   
   // 각 신살별로 상세 분석 (지지 기준)
   const sinsalChecks = [
@@ -1497,6 +1599,8 @@ export function calcDetailedSinsal(
   if (boksinPos.length > 0) dayStemBased.push({ name: "복신", positions: boksinPos })
   const euminPos = getEuminPositions(dayStem, yearBranch, monthBranch, dayBranch, hourBranch)
   if (euminPos.length > 0) dayStemBased.push({ name: "음인", positions: euminPos })
+  const yanginPos = getYanginPositions(dayStem, yearBranch, monthBranch, dayBranch, hourBranch)
+  if (yanginPos.length > 0) dayStemBased.push({ name: "양인살", positions: yanginPos })
 
   for (const { name, positions } of dayStemBased) {
     const hasStrongPosition = positions.includes("월지") || positions.includes("일지")
@@ -1557,7 +1661,7 @@ export function calcDetailedSinsal(
     } else if (strongSinsals.includes("홍염살") && strongSinsals.includes("도화살")) {
       combinedGuide = "홍염살과 도화살이 강하니, 강렬한 매력과 대인 친화력으로 연예·예술·뷰티 분야에서 빛을 발합니다."
     } else if (strongSinsals.includes("백호살") && strongSinsals.includes("역마살")) {
-      combinedGuide = "백호살과 역마살이 강하니, 강렬한 에너지와 이동력으로 군경·소방·응급의료 등 현장직에서 능력이 발휘됩니다."
+      combinedGuide = "백호살과 역마살��� 강하니, 강렬한 에너지와 이동력으로 군경·소방·응급의료 등 현장직에서 능력이 발휘됩니다."
     } else {
       combinedGuide = strongSinsals.map(name => SINSAL_USAGE_GUIDE[name]).join(" 또한, ")
     }

@@ -225,7 +225,10 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     dayBranch as string,
     hourBranch as string | null,
     dayStem as string,
-    birthInfo.gender
+    birthInfo.gender,
+    yearStem as string,
+    monthStem as string,
+    hourStem as string | null
   )
   
   // === 상세 신살 분석 (위치, 강도, 활용 가이드 포함) ===
@@ -234,7 +237,10 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     monthBranch as string,
     dayBranch as string,
     hourBranch as string | null,
-    dayStem as string
+    dayStem as string,
+    yearStem as string,
+    monthStem as string,
+    hourStem as string | null
   )
   
   // === 오행 개수 계산 (지장간 포함) - 비율 표시용 ===
