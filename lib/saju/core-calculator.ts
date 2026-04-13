@@ -108,13 +108,15 @@ export function getHourBranchIndex(hour: number, minute: number = 0, countryCode
     // 한국식 30분 보정: 23:30~01:30 = 자시, 01:30~03:30 = 축시, ...
     // 30분 빼서 계산 (23:30 -> 23:00 기준으로 맞춤)
     const adjustedMin = totalMin - 30;
+    const branchIndex = Math.floor((adjustedMin - 60) / 120) + 1;
+    console.log("[v0] getHourBranchIndex KR - totalMin:", totalMin, "adjustedMin:", adjustedMin, "branchIndex:", branchIndex);
     
     // 23:00 이후 (adjustedMin 기준)는 자시(0)
     if (adjustedMin >= 1380 || adjustedMin < 0) return 0; // 23:30~00:29 -> 자시
     if (adjustedMin < 60) return 0;    // 00:30~01:29 -> 자시
     
     // 01:00부터 2시간 단위 (adjustedMin 기준)
-    return Math.floor((adjustedMin - 60) / 120) + 1;
+    return branchIndex;
   }
   
   // 기본 (30분 보정 없음): 23:00~01:00 = 자시, 01:00~03:00 = 축시, ...
@@ -333,9 +335,11 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
   // 다른 나라는 진태양시(solarTime) 기준
   let hourPillar: Pillar | null = null;
   if (hour !== undefined) {
+    console.log("[v0] 시주 계산 - country:", country, "localHour:", localHour, "localMinute:", localMinute, "solarTime:", solarTime.hour, solarTime.minute);
     if (country === 'KR') {
-      // 한국: 입력 시간 - 30분으로 시주 계산 (KST가 실제 태양시보다 30분 빠름)
+      // 한국: 입력 시간으로 시주 계산 (30분 보정은 getHourBranchIndex에서 적용)
       hourPillar = getHourPillar(dayPillar.stem, localHour, localMinute, country);
+      console.log("[v0] 한국 시주 결과:", hourPillar?.stem, hourPillar?.branch);
     } else {
       // 다른 나라: 진태양시 기준
       hourPillar = getHourPillar(dayPillar.stem, solarTime.hour, solarTime.minute, country);
