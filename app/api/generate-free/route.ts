@@ -270,10 +270,10 @@ STEP 1. [FRAME] 월지 지장간 기반 '사회적 직분' 확정**
 ****
 - **3. 심층 심리 및 결핍 분석 가이드
 [과다 에너지: 50점 이상]**
-• **비겁 과다:** 고집이 세고 독단적일 수 있�� $\rightarrow$ 타인의 의견을 수렴하는 협업 장치 필요.
+• **비겁 과다:** 고집이 세고 독단적일 수 있��� $\rightarrow$ 타인의 의견을 수렴하는 협업 장치 필요.
 • **식상 과다:** 감정 기복이 심하고 마무리가 약함 $\rightarrow$ 인내심과 현실적인 목표 설정 필요.
 • **재성 과다:** 재물에 대한 집착으로 건강이나 인맥 손실 우려 $\rightarrow$ 문서 관리(인성)와 휴식 필요.
-• **관성 과다:** 지나친 책임감과 완벽��의로 번아웃 $\rightarrow$ 유연한 사고와 명상 필요.
+• **관성 과다:** 지나친 책임감과 완����의로 번아웃 $\rightarrow$ 유연한 사고와 명상 필요.
 • **인성 과다:** 생각만 많고 행동력이 떨어짐 $\rightarrow$ '일단 실행'하는 환경(식상) 필요.
 **[부재 에너지: 0점]**
 • **비겁 부재:** 독립심 부족 $\rightarrow$ 자신의 목소리를 내는 연습 필요.
@@ -441,8 +441,6 @@ export async function POST(req: Request) {
       freeFacts,
       teaserFacts,
       submission: { name, sajuData: saju_data }
-    }, {
-      headers: { 'X-Remaining-Requests': remaining.toString() }
     })
 
   } catch (error) {
