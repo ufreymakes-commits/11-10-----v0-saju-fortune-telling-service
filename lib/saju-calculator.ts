@@ -224,7 +224,8 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     monthBranch as string,
     dayBranch as string,
     hourBranch as string | null,
-    dayStem as string
+    dayStem as string,
+    birthInfo.gender
   )
   
   // === 상세 신살 분석 (위치, 강도, 활용 가이드 포함) ===

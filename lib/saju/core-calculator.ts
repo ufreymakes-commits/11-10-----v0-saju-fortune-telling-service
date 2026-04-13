@@ -109,7 +109,6 @@ export function getHourBranchIndex(hour: number, minute: number = 0, countryCode
     // 30분 빼서 계산 (23:30 -> 23:00 기준으로 맞춤)
     const adjustedMin = totalMin - 30;
     const branchIndex = Math.floor((adjustedMin - 60) / 120) + 1;
-    console.log("[v0] getHourBranchIndex KR - totalMin:", totalMin, "adjustedMin:", adjustedMin, "branchIndex:", branchIndex);
     
     // 23:00 이후 (adjustedMin 기준)는 자시(0)
     if (adjustedMin >= 1380 || adjustedMin < 0) return 0; // 23:30~00:29 -> 자시
@@ -335,11 +334,9 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
   // 다른 나라는 진태양시(solarTime) 기준
   let hourPillar: Pillar | null = null;
   if (hour !== undefined) {
-    console.log("[v0] 시주 계산 - country:", country, "localHour:", localHour, "localMinute:", localMinute, "solarTime:", solarTime.hour, solarTime.minute);
     if (country === 'KR') {
       // 한국: 입력 시간으로 시주 계산 (30분 보정은 getHourBranchIndex에서 적용)
       hourPillar = getHourPillar(dayPillar.stem, localHour, localMinute, country);
-      console.log("[v0] 한국 시주 결과:", hourPillar?.stem, hourPillar?.branch);
     } else {
       // 다른 나라: 진태양시 기준
       hourPillar = getHourPillar(dayPillar.stem, solarTime.hour, solarTime.minute, country);
@@ -479,7 +476,7 @@ const JIJI_YUGHAP_RESULT: Record<string, string> = {
 
 // 지지삼합 결과 오행
 const JIJI_SAMHAP_RESULT: Record<string, string> = {
-  '인오술': '화', '사유축': '금', '신자진': '수', '해묘미': '목'
+  '인오술': '��', '사유축': '금', '신자진': '수', '해묘미': '목'
 }
 
 export function calculateElementScoresWithHapChung(
