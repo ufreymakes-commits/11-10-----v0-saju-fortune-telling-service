@@ -1133,6 +1133,45 @@ function checkNoegongTanoegwan(dayStem: string, dayBranch: string): boolean {
   return noegongList.includes(dayStem + dayBranch)
 }
 
+// 칠살: 일지 기준 삼합국의 7번째 지지 (겁살과 같은 위치이나 다른 해석)
+function checkChilSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
+  const chilMap: Record<string, string> = {
+    "인": "신", "오": "자", "술": "진",
+    "신": "인", "자": "오", "진": "술",
+    "사": "해", "유": "묘", "축": "미",
+    "해": "사", "묘": "유", "미": "축"
+  }
+  const target = chilMap[dayBranch]
+  if (!target) return false
+  return [yearBranch, monthBranch, hourBranch].includes(target)
+}
+function getChilSalPositions(yb: string, mob: string, db: string, hb: string | null): string[] {
+  const map: Record<string, string> = { "인": "신","오": "자","술": "진","신": "인","자": "오","진": "술","사": "해","유": "묘","축": "미","해": "사","묘": "유","미": "축" }
+  const target = map[db]
+  if (!target) return []
+  return _getBranchPositions(target, yb, mob, db, hb).filter(p => p !== "일지")
+}
+
+// 구추방해: 일주 기준 특정 조합 (재물/건강에 방해가 되는 조합)
+function checkGuchuBanghae(dayStem: string, dayBranch: string): boolean {
+  const guchuList = ["갑인","을묘","병오","정사","무진","기축","경신","신유","임해","계자"]
+  return guchuList.includes(dayStem + dayBranch)
+}
+
+// 음인(일인): 일간 기준 음의 귀인 (천을귀인의 음 버전)
+function checkEumin(dayStem: string, branches: string[]): boolean {
+  const euminMap: Record<string, string[]> = {
+    "갑": ["미"], "을": ["신"], "병": ["유"], "정": ["해"], "무": ["미"],
+    "기": ["신"], "경": ["축"], "신": ["인"], "임": ["묘"], "계": ["사"]
+  }
+  const targets = euminMap[dayStem]
+  return targets ? targets.some(t => branches.includes(t)) : false
+}
+function getEuminPositions(dayStem: string, yb: string, mob: string, db: string, hb: string | null): string[] {
+  const map: Record<string, string> = { "갑": "미","을": "신","병": "유","정": "해","무": "미","기": "신","경": "축","신": "인","임": "묘","계": "사" }
+  return _getBranchPositions(map[dayStem], yb, mob, db, hb)
+}
+
 // 내부 헬퍼: 특정 지지의 위치 반환
 function _getBranchPositions(target: string | undefined, yb: string, mob: string, db: string, hb: string | null): string[] {
   if (!target) return []
@@ -1186,7 +1225,10 @@ const SINSAL_USAGE_GUIDE: Record<string, string> = {
   "복신": "하늘이 내린 복을 받아 어려운 일에서도 귀인의 도움으로 풀려나갑니다",
   "일귀": "일간의 귀인으로, 중요한 순간에 도움을 주는 사람이 나타납니다",
   "교신성": "언변과 소통 능력이 뛰어나 외교·협상·교육 분야에서 두각을 나타냅니다",
-  "뇌공타뇌관": "천둥처럼 강렬한 에너지로 순간적인 판단력과 돌파력이 뛰어납니다"
+  "뇌공타뇌관": "천둥처럼 강렬한 에너지로 순간적인 판단력과 돌파력이 뛰어납니다",
+  "칠살": "충돌과 경쟁의 기운이 있어 승부욕이 강하고 경쟁적인 환경에서 두각을 나타냅니다",
+  "구추방해": "재물이나 건강에 방해가 될 수 있으니 평소 건강 관리와 재정 관리에 신경 쓰세요",
+  "음인": "음의 귀인으로, 은밀하게 도와주는 사람이 있으며 직관과 감각이 뛰어납니다"
 }
 
 export interface SinsalDetail {
@@ -1256,6 +1298,10 @@ export function calcAllSinsal(
   if (checkIlgui(dayStem, dayBranch)) sinsalList.push("일귀")
   if (checkGyosinseong(dayStem, dayBranch)) sinsalList.push("교신성")
   if (checkNoegongTanoegwan(dayStem, dayBranch)) sinsalList.push("뇌공타뇌관")
+  if (checkGuchuBanghae(dayStem, dayBranch)) sinsalList.push("구추방해")
+
+  // 지지 기준 추가
+  if (checkChilSal(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("칠살")
 
   // 일간 기준 신살/귀인
   if (checkMunChangSal(dayStem, branches).length > 0) sinsalList.push("문창살")
@@ -1267,6 +1313,7 @@ export function calcAllSinsal(
   if (checkYuksu(dayStem, branches)) sinsalList.push("육수")
   if (checkJanggunJeon(dayStem, branches)) sinsalList.push("장군전")
   if (checkBoksin(dayStem, branches)) sinsalList.push("복신")
+  if (checkEumin(dayStem, branches)) sinsalList.push("음인")
 
   return sinsalList
 }
@@ -1296,6 +1343,7 @@ export function calcDetailedSinsal(
     { name: "귀문관살", check: checkGwimunssal, getPositions: getGwimunPositions },
     { name: "천라지망", check: checkCheollaJimang, getPositions: getCheollaJimangPositions },
     { name: "비인살", check: checkBiinSal,     getPositions: getBiinPositions },
+    { name: "칠살",   check: checkChilSal,     getPositions: getChilSalPositions },
   ]
   
   for (const { name, check, getPositions } of sinsalChecks) {
@@ -1345,6 +1393,7 @@ export function calcDetailedSinsal(
     { name: "일귀",      check: checkIlgui(dayStem, dayBranch),           positions: ["일주"] },
     { name: "교신성",    check: checkGyosinseong(dayStem, dayBranch),     positions: ["일주"] },
     { name: "뇌공타뇌관",check: checkNoegongTanoegwan(dayStem, dayBranch),positions: ["일주"] },
+    { name: "구추방해",  check: checkGuchuBanghae(dayStem, dayBranch),    positions: ["일주"] },
   ]
 
   for (const { name, check, positions } of iljooBased) {
@@ -1384,6 +1433,8 @@ export function calcDetailedSinsal(
   if (janggunPos.length > 0) dayStemBased.push({ name: "장군전", positions: janggunPos })
   const boksinPos = getBoksinPositions(dayStem, yearBranch, monthBranch, dayBranch, hourBranch)
   if (boksinPos.length > 0) dayStemBased.push({ name: "복신", positions: boksinPos })
+  const euminPos = getEuminPositions(dayStem, yearBranch, monthBranch, dayBranch, hourBranch)
+  if (euminPos.length > 0) dayStemBased.push({ name: "음인", positions: euminPos })
 
   for (const { name, positions } of dayStemBased) {
     const hasStrongPosition = positions.includes("월지") || positions.includes("일지")
@@ -1436,7 +1487,7 @@ export function calcDetailedSinsal(
     } else if (strongSinsals.includes("도화살") && strongSinsals.includes("역마살")) {
       combinedGuide = "도화살과 역마살이 강하니, 대인관계와 이동이 많은 환경(해외영업, 연예, 무역)에서 매력이 극대화됩니다."
     } else if (strongSinsals.includes("학당귀인") && strongSinsals.includes("문창살")) {
-      combinedGuide = "학당귀인과 문창살이 강하니, 전문 학문이나 자격증 취득 후 교육·컨설팅 분야에서 탁월한 성취를 이룰 수 있습니다."
+      combinedGuide = "학당귀인�� 문창살이 강하니, 전문 학문이나 자격증 취득 후 교육·컨설팅 분야에서 탁월한 성취를 이룰 수 있습니다."
     } else if (strongSinsals.includes("귀문관살") && strongSinsals.includes("화개살")) {
       combinedGuide = "귀문관살과 화개살이 강하니, 심리상담·철학·예술·영적 치유 분야에서 독보적인 능력을 발휘할 수 있습니다."
     } else if (strongSinsals.includes("겁살") && strongSinsals.includes("장성살")) {
