@@ -3,6 +3,7 @@ import { generateText } from 'ai'
 import { createClient } from '@/lib/supabase/server'
 import type { SajuData, Fact } from '@/lib/types'
 import { headers } from 'next/headers'
+import { getAllInterpretationsForSaju, formatInterpretationsForPrompt } from '@/lib/saju/interpretation-service'
 
 // Rate Limit 체크 (IP당 하루 N회)
 async function checkRateLimit(
@@ -69,15 +70,24 @@ async function cacheFacts(supabase: Awaited<ReturnType<typeof createClient>>, sa
 }
 
 // GPT 프롬프트 생성 - 9문장 구조 (01~09)
-function buildPromptFromSajuData(
+async function buildPromptFromSajuData(
   name: string,
   gender: string,
   birthCountry: string,
   birthDate: string,
   sajuData: SajuData
-): string {
+): Promise<string> {
   const birthYear = new Date(birthDate).getFullYear()
   const age = 2026 - birthYear
+
+  // DB에서 해설 데이터 가져오기
+  const dayStem = sajuData.dayPillar?.stem || ''
+  const sipsung = sajuData.tenGods?.present || []
+  const unseong12 = sajuData.twelveStars?.map(ts => ts.star) || []
+  const sinsal = sajuData.spirits || []
+  
+  const interpretations = await getAllInterpretationsForSaju(dayStem, sipsung, unseong12, sinsal)
+  const dbInterpretationStr = formatInterpretationsForPrompt(interpretations)
 
   // 12운성
   const twelveStarsStr = sajuData.twelveStars
@@ -261,7 +271,7 @@ ${daeyunStr}
 |----------|-------------------------|-------------------------|-------------------------|
 | 비견 | 독립적, 대등한 파트너, 간섭 싫어함 | 형제/친구 > 본인 > 배우자 | 본인 > 자매/친구 > 배우자 |
 | 겁재 | 열정적, 자극적, 경쟁심 강함 | 형제/친구 > 본인 > 배우자(경쟁자 인식) | 자매/친구 > 본인 > 배우자(주도권 싸움) |
-| 식신 | 낙천적, 온화, 따뜻한 배려 | 자녀 > 배우자 > 본인 여유 | 자녀 > 가정 > 본인 만족/취미 |
+| 식신 | 낙천적, 온화, 따뜻한 배려 | 자녀 > 배우자 > 본인 여�� | 자녀 > 가정 > 본인 만족/취미 |
 | 상관 | 독창적, 매력적, 자유 분방함 | 자녀(자유롭게) > 본인 개성 > 배우자 | 자녀 > 본인 개성 > 본인 만족(대외활동) |
 | 편재 | 외향적, 대인관계 좋음, 활동적 | 배우자(애정) > 사회적 성공 > 외부 활동 | 사회적 관계 > 경제적 안정 > 배우자 |
 | 정재 | 안정적, 헌신적, 실용적, 책임감 | 배우자(가장 책임) > 경제 안정 > 부모 | 가정 생활 > 배우자 > 부모 |
@@ -269,6 +279,11 @@ ${daeyunStr}
 | 정관 | 성실, 규범 준수, 신뢰 우선 | 자녀(모범적 가장) > 배우자 > 사회적 신뢰 | 배우자 > 가정 > 자녀(양육/교육) |
 | 편인 | 독창적, 개성 강함, 독립적 태도 | 어머니(거리감) > 본인 내면 > 배우자(의존) | 본인(내면 세계) > 자녀 > 배우자 |
 | 정인 | 지혜롭고 배려심 많음, 안정감 | 어머니(유대 강함) > 자녀 > 배우자 | 자녀(모성애) > 부모 > 배우자(가족 우선) |
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## 이 사주에 해당하는 DB 해설 (반드시 참조)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${dbInterpretationStr || '(해당 데이터 없음)'}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ## 9문장 작성 지침
@@ -394,7 +409,7 @@ async function generateFactsFromAI(
   birthDate: string,
   sajuData: SajuData
 ): Promise<Fact[]> {
-  const prompt = buildPromptFromSajuData(name, gender, birthCountry, birthDate, sajuData)
+  const prompt = await buildPromptFromSajuData(name, gender, birthCountry, birthDate, sajuData)
 
   console.log('[v0] GPT 프롬프트 생성 완료, API 호출 시작...')
 
