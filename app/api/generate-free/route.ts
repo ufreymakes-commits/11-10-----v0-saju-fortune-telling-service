@@ -11,14 +11,14 @@ async function checkRateLimit(
   maxRequests: number = 10
 ): Promise<{ allowed: boolean; remaining: number }> {
   const today = new Date().toISOString().split('T')[0]
-  
+
   const { data: rateLimit } = await supabase
     .from('rate_limits')
     .select('request_count')
     .eq('ip_address', ip)
     .eq('request_date', today)
     .single()
-  
+
   if (!rateLimit) {
     await supabase.from('rate_limits').insert({
       ip_address: ip,
@@ -27,17 +27,17 @@ async function checkRateLimit(
     })
     return { allowed: true, remaining: maxRequests - 1 }
   }
-  
+
   if (rateLimit.request_count >= maxRequests) {
     return { allowed: false, remaining: 0 }
   }
-  
+
   await supabase
     .from('rate_limits')
     .update({ request_count: rateLimit.request_count + 1 })
     .eq('ip_address', ip)
     .eq('request_date', today)
-  
+
   return { allowed: true, remaining: maxRequests - rateLimit.request_count - 1 }
 }
 
@@ -48,7 +48,7 @@ async function getCachedFacts(supabase: Awaited<ReturnType<typeof createClient>>
     .select('free_facts, hit_count')
     .eq('saju_key', sajuKey)
     .single()
-  
+
   if (cache?.free_facts) {
     await supabase
       .from('saju_cache')
@@ -87,9 +87,9 @@ function buildPromptFromSajuData(
   // 길성
   const gilseongStr = sajuData.gilseong
     ? [
-        ...sajuData.gilseong.cheonul.map(g => `천을귀인: ${g}`),
-        ...sajuData.gilseong.taegeuk.map(g => `태극귀인: ${g}`)
-      ].join(' / ') || '해당 없음'
+      ...sajuData.gilseong.cheonul.map(g => `천을귀인: ${g}`),
+      ...sajuData.gilseong.taegeuk.map(g => `태극귀인: ${g}`)
+    ].join(' / ') || '해당 없음'
     : '해당 없음'
 
   // 현재 대운 (나이 기준)
@@ -127,8 +127,8 @@ function buildPromptFromSajuData(
   // 신살 상세
   const sinsalStr = sajuData.sinsalDetails?.length
     ? sajuData.sinsalDetails.map(s =>
-        `${s.name}: ${s.count}/${s.totalPillars} (${s.percentage}%)${s.isStrong ? ' ✅강함' : ''} - ${s.positions.join(', ')}`
-      ).join(' / ')
+      `${s.name}: ${s.count}/${s.totalPillars} (${s.percentage}%)${s.isStrong ? ' ✅강함' : ''} - ${s.positions.join(', ')}`
+    ).join(' / ')
     : (sajuData.spirits?.join(', ') || '해당 없음')
 
   // 사주 8글자
@@ -141,7 +141,7 @@ function buildPromptFromSajuData(
 
   return `당신은 고전 명리학의 격국론(Gyeok-guk)과 현대적 수치론(Energy Scoring)을 결합한 사주 전략가입니다.
 내담자의 사주 데이터를 바탕으로 아래 9개 문장을 한국어로 작성해주세요.
-각 문장은 정확히 지정된 분석 지침을 따르되, 전문 용어를 최소화하고 내담자가 "와, 이거 진짜 내 얘기다!" 라고 느낄 수 있게 생생하고 구체적으로 작성합니다.
+최우선 지침 : 각 문장은 정확히 지정된 분석 지침을 따르되, 전문 용어를 최소화하고 내담자가 "와, 이거 진짜 내 얘기다!" 라고 느낄 수 있게 생생하고 구체적으로 작성합니다. 문장은 매우 구체적인 상황을 묘사해야 하며, 마치 내 일상이나 일기장을 누군가 들여다본 것 처럼 느낄 수 있도록 '소름끼치도록' 맞는게 핵심입니다. 작성하려는 문장이 너무 일반적이거나, 누구에게나 해당될 것 같은 문장이라면 지우고 다시 생성하세요. 또한 대부분 영어권 국가의 고객들이 많습니다. 이 고객들의 문화적 배경을 이해하면서 문장을 작성하는게 좋습니다. 명리학적 용어가 너무 많이 나오지 않도록, 초등학생이나 외국인이 사주를 처음 접해도 이해할 수 있도록 문장을 작성하는게 그 어떤 지침보다 가장 중요합니다. 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ## 클라이언트 정보
@@ -233,14 +233,70 @@ ${daeyunStr}
   STEP 2. 합충 반영 후 50점 이상 오행/십성이 있으면 → 해당 오행의 산업에서 해당 십성의 방식으로 수행
   STEP 3. 0점 십성 → 커리어 리스크 예측 및 조언
   STEP 4. 강한 신살(✅)로 업무 환경의 구체적 디테일 추가
+
+  자세한 정보 : 
+  - **1. 분석 엔진: 4단계 핵심 로직 (The Core Logic)
+STEP 1. [FRAME] 월지 지장간 기반 '사회적 직분' 확정**
+• **원칙:** 월지는 내담자가 태어난 계절의 기운이자 사회적 면허증이다.
+• **작업:** 월지의 지장간(Hidden Stems)을 추출하여 일간 대비 **십성(Ten Gods)**으로 변환한다.
+• **우선순위:** 본기(Primary stem)를 70% 비중으로 두어 **기본 커리어 DNA(격국)**를 결정한다. 초기(Secondary)와 중기(Tertiary)는 부가적인 성향으로 참고한다.
+• **결과:** "이 사람은 사회에서 어떤 그릇(형태)으로 쓰이도록 설계되었는가?"를 정의한다.
+
+- **STEP 2. [ENERGY] 점수 기반 '수행 방식' 조정**
+• **원칙:** 타고난 틀(격국)이 있더라도, 특정 에너지(50점 이상)가 과다하면 그 에너지가 직업적 수단이 된다.
+• **작업:** 합충이 반영된 오행/십성 점수를 확인한다.
+• **변환 공식:** 50점 이상의 오행/십성이 있다면, STEP 1에서 정한 직분을 해당 오행의 업종에서 해당 십성의 방식으로 수행한다고 해석한다.
+    ◦ *예: 정인격(교육자)인데 수(水) 재성(財)이 90점 → 학문적 지식(정인)을 유통/플랫폼(수)을 통해 수익화하는 사업가(재성).*
+
+- **STEP 3. [CONFLICT] 부재(0점) 십성 분석 및 리스크 관리**
+• **원칙:** 0점인 십성은 해당 능력의 결핍이거나, 역설적으로 갈구하는 대상이다.
+• **작업:** 점수가 0인 십성을 찾아 커리어 수행 중 발생할 '실패 요인'을 예측하고 위로와 조언을 작성한다.
+
+- **STEP 4. [DETAIL] 신살(Shinsal)을 통한 현대적 디테일 완성**
+• **원칙:** 신살은 직업의 구체적인 '행동 양식'과 '환경'을 결정하는 디테일한 수정자다.
+• **작업:** 역마, 도화, 현침 등의 비중을 확인하여 업무의 동적인 성격(해외, 정밀, 대중 노출 등)을 확정한다.
+
+- **2. 매칭 데이터 테이블 (Knowledge Base)
+[TABLE A] 십성별 커리어 DNA (Frame & Mechanism)십성기본 커리어 DNA (월지 기반)돈을 버는 메커니즘 (수행 방식)비견/겁재**독립적 전문가, 1인 기업, 스타트업자기 주도적 결정, 경쟁을 통한 쟁취, 팀워크 리더십**식신/상관**생산자, 크리에이터, 기술자, 기획자창의적 표현, 기술력 발휘, 서비스 제공, 콘텐츠 발행**편재/정재**비즈니스맨, 자산 관리자, 유통업자자금 흐름 파악, 실질적 성과 도출, 시장 데이터 분석**편관/정관**조직 관리자, 공직자, 리더, 시스템 설계자규칙 준수, 책임 완수, 직위와 명예를 통한 영향력**편인/정인**연구원, 교육자, 전략가, 상담가, 학자전문 지식 습득, 라이선스 활용, 깊이 있는 분석과 코칭
+
+- **[TABLE B] 오행별 현대적 산업 분야 (Industry)오행주요 산업 분야 (Industry)현대적 직업 예시목(木)**교육, 기획, 성장, 디자인, 예술, 스타트업에듀테크, 브랜딩 디자이너, 스타트업 창업자, 조경**화(火)**미디어, IT, 에너지, 화려함, 심리, 인플루언서유튜버, 마케팅 디렉터, 영상 편집, 심리 상담, 전기/전자**토(土)**시스템, 플랫폼, 부동산, 안정, 행정, 농축산부동산 컨설팅, 플랫폼 운영, 시스템 관리, 건축, 피부미용**금(金)**금융, 법률, 기술, 의료, 분석, 군/경데이터 분석가, 세무/회계, 의료 기기, 정밀 제조, 보안**수(水)**유통, 물류, 콘텐츠, 생명공학, 정보, 밤의 문화글로벌 무역, 물류 네트워크, 바이오 벤처, 작가, IT 네트워킹
+
+- **[TABLE C] 신살 디테일 수정자 (Modifiers)**
+• **역마(驛馬):** 이동성, 글로벌, 해외 업무, 프리랜서, 통신 및 물류.
+• **도화(桃花):** 대중 노출, 브랜딩, SNS, 연예인 성향, 팬덤 비즈니스.
+• **현침(懸針):** 정밀 기술, IT 코딩, 의학, 침구, 날카로운 비평, 섬세한 디자인.
+• **화개(華蓋):** 정신적 깊이, 인문학, 전통, 예술, 철학, 연구실 중심의 고립된 환경.
+• **귀인(貴人):** 조력자의 도움, 상류층 타겟 비즈니스, 안정적인 후원 환경.
+****
+- **3. 심층 심리 및 결핍 분석 가이드
+[과다 에너지: 50점 이상]**
+• **비겁 과다:** 고집이 세고 독단적일 수 있�� $\rightarrow$ 타인의 의견을 수렴하는 협업 장치 필요.
+• **식상 과다:** 감정 기복이 심하고 마무리가 약함 $\rightarrow$ 인내심과 현실적인 목표 설정 필요.
+• **재성 과다:** 재물에 대한 집착으로 건강이나 인맥 손실 우려 $\rightarrow$ 문서 관리(인성)와 휴식 필요.
+• **관성 과다:** 지나친 책임감과 완벽��의로 번아웃 $\rightarrow$ 유연한 사고와 명상 필요.
+• **인성 과다:** 생각만 많고 행동력이 떨어짐 $\rightarrow$ '일단 실행'하는 환경(식상) 필요.
+**[부재 에너지: 0점]**
+• **비겁 부재:** 독립심 부족 $\rightarrow$ 자신의 목소리를 내는 연습 필요.
+• **식상 부재:** 표현력 결핍 $\rightarrow$ 출력 활동(글쓰기, 발표) 연습 필요.
+• **재성 부재:** 재정 감각 부족 $\rightarrow$ 배우자나 전문가에게 자산 관리 위탁 필요.
+• **관성 부재:** 통제력 부족, 조직 부적응 $\rightarrow$ 자기만의 규칙(루틴) 수립 필요.
+• **인성 부재:** 깊이 있는 사고와 수용성 부족 $\rightarrow$ 독서와 학습을 통한 자기 계발 필요.
+****
+- **4. 최종 출력 규칙 (Output Guidelines)
+1) 통합형 통찰 (The Master Sentence)**
+STEP 1부터 STEP 6까지의 모든 요소를 버무려 **단 하나의 자연스러운 문장**으로 완성하세요.
+• **조건:** 전문 용어(정인격, 식상 등)를 배제하고 **현대적인 직업 언어**만 사용할 것.
+• **포함 요소:** 산업 분야 + 역할 + 업무 형태(고용/프리랜서/사업).
+• **느낌:** "혹시 특히 이런 (산업분야) 에서 (이런 역할)과 이런 (업무 형태) 로 관심있지 않으세요? 하면서 직업이나 적성 등 관심 가질법한 카테고리 알려주기”
+
   출력: "혹시 특히 [산업분야]에서 [역할]로 [고용/프리랜서/사업] 형태에 관심 있지 않으세요?"
 - 세 문장을 각각 분리하여 작성할 것.
 
 ### 문장 08~09: 현재 대운 + 인생 테마
 - 현재 나이가 속한 대운과 일지/월지 12운성을 결합하여 "지금이 어떤 시기"인지 설명한다.
   예: "인생의 가장 화려한 시기인 제왕과 관대의 에너지를 품고 30대 경진 대운을 지나고 있습니다..."
-- 마지막으로 이 사람의 인생 테마를 하나의 감동적인 문장으로 완성한다.
-  형식: "${name} 님, 당신의 삶은 [일간이 오행 환경에 처한 모습 + 일지/월지 12운성의 긍정적 힘을 담은 비유적 표현]입니다."
+- 마지막으로 이 사람의 인생 테마를 하나의 심금이 울리는 감동적인 문장으로 완성한다.
+  형식: "${name} 님, 당신의 삶은 [일간이 오행 환경에 처한 모습 + 일지/월지 12운성의 긍정적 힘을 담은 비유적 표현]입니다." (예시 : (Full name) 님, 당신의 삶은 거친 파도를 막아내며 결국 가장 비옥한 땅을 일궈내는 고귀한 여정입니다. )
 - 두 문장을 각각 분리하여 작성할 것.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -327,16 +383,16 @@ export async function POST(req: Request) {
     const { submissionId } = body
 
     const headersList = await headers()
-    const ip = headersList.get('x-forwarded-for')?.split(',')[0].trim() || 
-               headersList.get('x-real-ip') || 'unknown'
+    const ip = headersList.get('x-forwarded-for')?.split(',')[0].trim() ||
+      headersList.get('x-real-ip') || 'unknown'
 
     const supabase = await createClient()
 
-    // Rate Limit 체크
-    const { allowed, remaining } = await checkRateLimit(supabase, ip, 100)
-    if (!allowed) {
-      return NextResponse.json({ error: '하루 10회 제한입니다.' }, { status: 429 })
-    }
+    // Rate Limit 체크 - 개발 중 비활성화 (배포 시 아래 주석 해제)
+    // const { allowed, remaining } = await checkRateLimit(supabase, ip, 100)
+    // if (!allowed) {
+    //   return NextResponse.json({ error: '하루 10회 제한입니다.' }, { status: 429 })
+    // }
 
     // DB에서 submission 조회
     const { data: submission, error: dbError } = await supabase
