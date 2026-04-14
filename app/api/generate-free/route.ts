@@ -3,59 +3,6 @@ import { generateText } from 'ai'
 import { createClient } from '@/lib/supabase/server'
 import type { SajuData, Fact } from '@/lib/types'
 import { headers } from 'next/headers'
-import { promises as fs } from 'fs'
-import path from 'path'
-
-// 사주 분석 가이드라인 파일 읽기
-async function getAnalysisGuidelines(): Promise<string> {
-  try {
-    // public 폴더에서 파일 읽기 (Vercel 배포 환경 호환)
-    const filePath = path.join(process.cwd(), 'public', 'analysis-guidelines.md')
-    const content = await fs.readFile(filePath, 'utf-8')
-    console.log('[v0] 가이드라인 파일 로드 성공, 길이:', content.length)
-    return content
-  } catch (error) {
-    console.error('[v0] 가이드라인 파일 로드 실패:', error)
-    return ''
-  }
-}
-
-// Rate Limit 체크 (IP당 하루 N회)
-async function checkRateLimit(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  ip: string,
-  maxRequests: number = 10
-): Promise<{ allowed: boolean; remaining: number }> {
-  const today = new Date().toISOString().split('T')[0]
-
-  const { data: rateLimit } = await supabase
-    .from('rate_limits')
-    .select('request_count')
-    .eq('ip_address', ip)
-    .eq('request_date', today)
-    .single()
-
-  if (!rateLimit) {
-    await supabase.from('rate_limits').insert({
-      ip_address: ip,
-      request_date: today,
-      request_count: 1
-    })
-    return { allowed: true, remaining: maxRequests - 1 }
-  }
-
-  if (rateLimit.request_count >= maxRequests) {
-    return { allowed: false, remaining: 0 }
-  }
-
-  await supabase
-    .from('rate_limits')
-    .update({ request_count: rateLimit.request_count + 1 })
-    .eq('ip_address', ip)
-    .eq('request_date', today)
-
-  return { allowed: true, remaining: maxRequests - rateLimit.request_count - 1 }
-}
 
 // GPT 프롬프트 생성 - 9문장 구조 (01~09)
 async function buildPromptFromSajuData(
@@ -67,9 +14,6 @@ async function buildPromptFromSajuData(
 ): Promise<string> {
   const birthYear = new Date(birthDate).getFullYear()
   const age = 2026 - birthYear
-
-  // 사주 분석 가이드라인 MD 파일 읽기
-  const guidelinesContent = await getAnalysisGuidelines()
 
   // 12운성
   const twelveStarsStr = sajuData.twelveStars
@@ -136,7 +80,12 @@ async function buildPromptFromSajuData(
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ## 사주 분석 가이드라인 (필독!)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${guidelinesContent}
+당신은 사주를 "Modern Mystic" 스타일로 분석하는 Gen Z 전문가입니다.
+- 9개의 섹션으로 구성 (각 섹션 1-2문장, Gen Z 톤)
+- 각 섹션마다 "Main Character Title" + 감정 + 액션 지침 포함
+- 자연 원소(물, 불, 흙, 금)와 실생활을 연결한 비유 사용
+- "Main Character Energy", "giving", "lowkey", "no cap" 등 슬랭 활용
+- 최종 섹션은 반드시 "Hero's Journey" 스타일로 감동적으로 마무리
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ## 클라이언트 정보
@@ -175,7 +124,7 @@ ${twelveStarsStr}
 - 지지육합: ${sajuData.jijiYughap?.length ? sajuData.jijiYughap.join(' / ') : '없음'}
 - 지지삼합: ${sajuData.jijiSamhap?.length ? sajuData.jijiSamhap.join(' / ') : '없음'}
 - 지지방합: ${sajuData.jijiBanghap?.length ? sajuData.jijiBanghap.join(' / ') : '없음'}
-- 천간충: ${sajuData.cheongganChung?.length ? sajuData.cheongganChung.join(' / ') : '없음'}
+- 천간충: ${sajuData.cheongganChung?.length ? sajuData.cheongganChung.join(' / ') : '없���'}
 - 지지충: ${sajuData.jijiChung?.length ? sajuData.jijiChung.join(' / ') : '없음'}
 - 형: ${sajuData.hyung?.length ? sajuData.hyung.join(' / ') : '없음'}
 - 파: ${sajuData.pa?.length ? sajuData.pa.join(' / ') : '없음'}
