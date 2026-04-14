@@ -225,7 +225,7 @@ ${daeyunStr}
     {
       "id": 4,
       "title": "[God-Tier Micro-Habit]",
-      "content": "부족한 기운을 채우기 위해 [SAJU_ALGORITHM]의 [실행 지침]을 활용한 아주 구체적이고 사소한 루틴을 제안하세요. 뻔한 위로가 아닌, 삶을 긍정적으로 바꿀 수 있는 즉각적인 '작은 승리'를 처방해야 합니다. (필수: Micro-Action Practicality)"
+      "content": "부족한 기운을 채우기 ���해 [SAJU_ALGORITHM]의 [실행 지침]을 활용한 아주 구체적이고 사소한 루틴을 제안하세요. 뻔한 위로가 아닌, 삶을 긍정적으로 바꿀 수 있는 즉각적인 '작은 승리'를 처방해야 합니다. (필수: Micro-Action Practicality)"
     },
     {
       "id": 5,
@@ -305,13 +305,9 @@ ${daeyunStr}
 
 **Section 09. Hero's Journey (Life Theme)**
 - Bind Day Pillar essence with strongest positive energy (Noble Benefactor/Yong-sin) to elevate life into Great Journey. End with soul-stirring sentence.
-- Must Include: Hero's Journey Outro style, emotional/inspiring finale.`
+- Must Include: Hero's Journey Outro style, emotional/inspiring finale.\`
 }
-  ]
-}
-\`\`\`
 
-## 각 문장별 작성 팁:
 To create a consistent, high-converting format that sounds like a human Gen Z marketer rather than a rigid AI, you need to blend ancient wisdom with modern street-smarts. Since you are aiming for 9 compact sections with 1-2 punchy sentences each, here are the 9 style and formatting rules to follow:
 
 9 Rules for the "Modern Mystic" Format
