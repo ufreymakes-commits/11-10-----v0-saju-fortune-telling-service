@@ -9,7 +9,8 @@ import path from 'path'
 // 사주 분석 가이드라인 파일 읽기
 async function getAnalysisGuidelines(): Promise<string> {
   try {
-    const filePath = path.join(process.cwd(), 'lib/saju/analysis-guidelines.md/analysis-guidelines1.md')
+    // public 폴더에서 파일 읽기 (Vercel 배포 환경 호환)
+    const filePath = path.join(process.cwd(), 'public', 'analysis-guidelines.md')
     const content = await fs.readFile(filePath, 'utf-8')
     console.log('[v0] 가이드라인 파일 로드 성공, 길이:', content.length)
     return content
