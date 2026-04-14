@@ -86,8 +86,43 @@ async function buildPromptFromSajuData(
   const unseong12 = sajuData.twelveStars?.map(ts => ts.star) || []
   const sinsal = sajuData.spirits || []
   
-  const interpretations = await getAllInterpretationsForSaju(dayStem, sipsung, unseong12, sinsal)
-  const dbInterpretationStr = formatInterpretationsForPrompt(interpretations)
+  console.log('[v0] DB 조회 시작 - 일간:', dayStem, '십성:', sipsung, '12운성:', unseong12, '신살:', sinsal)
+  
+  let dbInterpretationStr = ''
+  try {
+    const interpretations = await getAllInterpretationsForSaju(dayStem, sipsung, unseong12, sinsal)
+    dbInterpretationStr = formatInterpretationsForPrompt(interpretations)
+    console.log('[v0] DB 조회 결과 길이:', dbInterpretationStr.length)
+    console.log('[v0] DB 조회 결과 미리보기:', dbInterpretationStr.substring(0, 300))
+  } catch (error) {
+    console.error('[v0] DB 조회 실패:', error)
+  }
+  
+  // DB 조회 실패시 하드코딩된 Gen Z 해설 사용
+  if (!dbInterpretationStr || dbInterpretationStr.length < 50) {
+    console.log('[v0] DB 데이터 없음, 하드코딩된 Gen Z 해설 사용')
+    dbInterpretationStr = `
+[일간 해설 - 기토(己)]
+모두의 엄마(Mothering) 역할을 자처하지만 자기 통장 잔고는 절대 안 알려줌. Lowkey(은근히) 야망캐. 포용력 있고 실속 챙기는 스타일.
+
+[12운성 해설 - 관대]
+Delulu is the solulu (망상이 곧 해결책). 근거 없는 자신감으로 똘똘 뭉쳐 일단 직진하는 청춘의 패기. 자존심 강하고 고집 있음.
+
+[12운성 해설 - 제왕]
+I'm the Boss. 남 밑에서 일 못 하는 병에 걸림. 능력은 쩔지만 가끔 꼰대 짓 주의보. 정점에 있는 에너지.
+
+[신살 해설 - 도화살]
+아이돌 센터 바이브. 내가 원하든 원하지 않든 사람들의 시선이 나한테 꽂히는 무대 체질. 시선 집중, 인기, 끼.
+
+[십성 해설 - 정인]
+숨만 쉬어도 사람들이 입양(?)하고 싶어 하는 애완인간 재질. 눈치 백단이라 사랑받는 법을 기가 막히게 앎.
+
+[십성 해설 - 편재]
+Hustle culture / Crypto bro 바이브. 욜로(YOLO) 하다가 골로 갈 수 있지만 일단 스케일 크게 놀고 봄.
+
+위 해설을 참고해서 Gen Z 톤으로 자연스럽게 9개 문장을 작성하세요. 영어 슬랭을 적절히 섞어주세요.
+`
+  }
 
   // 12운성
   const twelveStarsStr = sajuData.twelveStars
