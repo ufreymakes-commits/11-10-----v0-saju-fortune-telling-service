@@ -175,7 +175,7 @@ ${twelveStarsStr}
 - 지지육합: ${sajuData.jijiYughap?.length ? sajuData.jijiYughap.join(' / ') : '없음'}
 - 지지삼합: ${sajuData.jijiSamhap?.length ? sajuData.jijiSamhap.join(' / ') : '없음'}
 - 지지방합: ${sajuData.jijiBanghap?.length ? sajuData.jijiBanghap.join(' / ') : '없음'}
-- 천간충: ${sajuData.cheongganChung?.length ? sajuData.cheongganChung.join(' / ') : '없음'}
+- 천간충: ${sajuData.cheongganChung?.length ? sajuData.cheongganChung.join(' / ') : '없���'}
 - 지지충: ${sajuData.jijiChung?.length ? sajuData.jijiChung.join(' / ') : '없음'}
 - 형: ${sajuData.hyung?.length ? sajuData.hyung.join(' / ') : '없음'}
 - 파: ${sajuData.pa?.length ? sajuData.pa.join(' / ') : '없음'}
@@ -194,7 +194,7 @@ ${sajuData.gongmang?.join('·') || '없음'}
 
 ### 대운
 ${daeyunStr}
-- 현재 대운: ${currentDaeyun ? \`\${currentDaeyun.startAge}~\${currentDaeyun.endAge}세 \${currentDaeyun.fullName || currentDaeyun.stem + currentDaeyun.branch}\` : '계산 안됨'}
+- 현재 대운: ${currentDaeyun ? currentDaeyun.startAge + '~' + currentDaeyun.endAge + '세 ' + (currentDaeyun.fullName || currentDaeyun.stem + currentDaeyun.branch) : '계산 안됨'}
 
 ### 2026년 운세
 - 간지: ${yeonwoon2026Str}
