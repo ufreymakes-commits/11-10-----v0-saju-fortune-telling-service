@@ -56,33 +56,6 @@ async function checkRateLimit(
   return { allowed: true, remaining: maxRequests - rateLimit.request_count - 1 }
 }
 
-// 캐시에서 결과 조회
-async function getCachedFacts(supabase: Awaited<ReturnType<typeof createClient>>, sajuKey: string): Promise<Fact[] | null> {
-  const { data: cache } = await supabase
-    .from('saju_cache')
-    .select('free_facts, hit_count')
-    .eq('saju_key', sajuKey)
-    .single()
-
-  if (cache?.free_facts) {
-    await supabase
-      .from('saju_cache')
-      .update({ hit_count: (cache.hit_count || 0) + 1, updated_at: new Date().toISOString() })
-      .eq('saju_key', sajuKey)
-    return cache.free_facts as Fact[]
-  }
-  return null
-}
-
-// 캐시에 결과 저장
-async function cacheFacts(supabase: Awaited<ReturnType<typeof createClient>>, sajuKey: string, freeFacts: Fact[]): Promise<void> {
-  await supabase.from('saju_cache').upsert({
-    saju_key: sajuKey,
-    free_facts: freeFacts,
-    updated_at: new Date().toISOString()
-  }, { onConflict: 'saju_key' })
-}
-
 // GPT 프롬프트 생성 - 9문장 구조 (01~09)
 async function buildPromptFromSajuData(
   name: string,
@@ -232,51 +205,49 @@ ${daeyunStr}
 
 \`\`\`json
 {
-  "facts": [
-    {
       "id": 1,
       "title": "[Main Character Title]",
-      "content": "일간 메타포와 오행 분포를 자연 풍경으로 비유하여 사용자의 바이브를 한 문장으로 정의하세요. (필수: Vibe Check)"
+      "content": "[SAJU_ALGORITHM]의 '일간 Gen Z 텍스트'로 제목을 뽑고, 오행 분포 점수(120점 만점)를 반영한 '자연 풍경' 비유를 통해 사용자의 상황과 바이브를 딱 한 문장으로 정의하세요. (필수: Main Character Title, Vibe Check, Nature-to-Life Metaphor)"
     },
     {
-      "id": 2,
+      "id": 3,
       "title": "[The Inner Twist]",
-      "content": "겉모습과 실제 내면의 갭을 '입체적인 매력'으로 서술하세요. (필수: Low-key/High-key 표현)"
+      "content": "겉모습과 내면의 간극을 모순이 아닌 '입체적인 매력'으로 서술하세요. 수(水) 과다의 딥다크한 생각이나 화(火)/재성 과다의 용암 같은 욕망 등 감정적 리얼리티를 짚어주어 내담자가 '이게 바로 나'라고 느끼게 만드세요. (필수: Hidden Shadow, Low-key/High-key 표현)"
     },
     {
       "id": 3,
       "title": "[Hidden Stat Analysis]",
-      "content": "가장 높은/낮은 십성 점수를 게임 스탯처럼 분석하고 12운성으로 현재 기세를 설명하세요. (필수: Secret Lore)"
+      "content": "가장 높은/낮은 십성 점수를 게임 스탯처럼 분석하며 내담자의 '치트키급 재능'을 강조하세요. 십이운성 기운을 빌려 현재 에너지가 전성기(제왕/관대)인지 리뉴얼 시즌(사/묘)인지 전략적으로 분석하세요. (필수: Secret Lore(Technical Saju), Stat 메타포)"
     },
     {
       "id": 4,
       "title": "[God-Tier Micro-Habit]",
-      "content": "부족한 기운을 채울 수 있는 아주 구체적이고 사소한 루틴 하나를 제안하세요. (필수: Micro-Action)"
+      "content": "부족한 기운을 채우기 위해 [SAJU_ALGORITHM]의 [실행 지침]을 활용한 아주 구체적이고 사소한 루틴을 제안하세요. 뻔한 위로가 아닌, 삶을 긍정적으로 바꿀 수 있는 즉각적인 '작은 승리'를 처방해야 합니다. (필수: Micro-Action Practicality)"
     },
     {
       "id": 5,
       "title": "[Social Persona DNA]",
-      "content": "월지 격국을 통해 사회적 면허증을 설명하고, 나만 몰랐던 필살기를 언급하세요. (필수: 현대적 직업 언어)"
+      "content": "월지 격국을 통해 세상이 부여한 '사회적 면허증'을 설명하세요. 합/충으로 인한 변화를 '나만 몰랐던 필살기'로 해석하여 내담자가 자신의 사회적 역할을 자랑스럽게 느끼도록 만드세요. (필수: 현대적 직업 언어 변환 - 예: 정인격→전문 지식 라이선서)"
     },
     {
       "id": 6,
       "title": "[Career Industry Match]",
-      "content": "오행 점수 기반으로 성공할 수 있는 구체적인 산업군과 업무 형태를 콕 집어 제안하세요. (필수: 'Chills' 유발 디테일)"
+      "content": "[SAJU_ALGORITHM]의 [TABLE B: 현대적 산업 분야]를 참조하여 내담자가 본능적으로 끌릴 산업군과 업무 형태를 제안하세요. 내담자가 '소름 돋네, 내가 지금 관심 있는 분야인데!'라고 느낄 만큼 구체적인 카테고리를 찍어주어야 합니다. (필수: 'By any chance...' 구문 사용)"
     },
     {
       "id": 7,
       "title": "[Reality Check]",
-      "content": "결핍된 기운이 일으킬 실수를 blunt한 친구처럼 경고하되 성공을 위한 퍼즐로 프레이밍하세요. (필수: Red Flag)"
+      "content": "결핍된 기운(0점)이나 과다 에너지가 일으킬 실수를 blunt한 친구처럼 경고하되, 반드시 '이것만 보완하면 무적'이라는 뉘앙스를 유지하세요. 리스크를 '실패'가 아닌 '성공을 위한 마지막 퍼즐'로 프레이밍하세요. (필수: Reality Check, Red Flag 단어)"
     },
     {
       "id": 8,
       "title": "[God-Mode Update]",
-      "content": "대운과 세운을 결합해 지금이 어떤 '시즌'인지 정의하세요. (필수: 2026년 연운 반영)"
+      "content": "대운과 2026년 병오(丙午)년 세운을 결합해 지금이 어떤 '시즌'인지 정의하세요. 힘든 시기는 '레벨업을 위한 하드코어 퀘스트', 좋은 시기는 '갓모드 버프'로 설명하며 행동 강령을 제시하세요. (필수: God-Mode Activated, Season Update 용어)"
     },
     {
       "id": 9,
       "title": "[The Hero's Journey]",
-      "content": "본질과 귀인 에너지를 묶어 인생 전체를 긍정하는 감동적인 문장으로 마무리하세요. (필수: Self-affirmation)"
+      "content": "일간의 본질과 최고의 긍정 에너지(귀인/용신)를 묶어 삶을 '위대한 여정'으로 승화시키세요. '당신은 이미 충분히 훌륭하다'는 메시지와 함께 스스로를 사랑하게 만드는 소울풀한 문장으로 마무리하세요. (필수: Hero's Journey Outro, 감동적인 finale)"
     }
   ]
 }
@@ -495,21 +466,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: '사주 데이터가 없습니다.' }, { status: 400 })
     }
 
-    // 캐시 키 생성
-    const sajuKey = `${saju_data.yearPillar?.fullName || saju_data.yearPillar?.stem}_${saju_data.monthPillar?.fullName || saju_data.monthPillar?.stem}_${saju_data.dayPillar?.fullName || saju_data.dayPillar?.stem}_${saju_data.hourPillar?.fullName || 'none'}`
-
-    // 캐시 확인
-    const cachedFacts = await getCachedFacts(supabase, sajuKey)
-    let freeFacts: Fact[]
-
-    if (cachedFacts) {
-      console.log('[v0] 캐시 히트!')
-      freeFacts = cachedFacts
-    } else {
-      console.log('[v0] ���시 미스, AI 생성 시작...')
-      freeFacts = await generateFactsFromAI(name, gender, birth_country, birth_date, saju_data)
-      await cacheFacts(supabase, sajuKey, freeFacts)
-    }
+    // 매번 새로 AI 생성 (캐시 없음)
+    console.log('[v0] AI 생성 시작...')
+    const freeFacts = await generateFactsFromAI(name, gender, birth_country, birth_date, saju_data)
 
     // 티저 팩트 (locked)
     const teaserFacts = Array.from({ length: 5 }, (_, i) => ({
