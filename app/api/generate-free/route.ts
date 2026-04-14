@@ -267,7 +267,7 @@ ${daeyunStr}
 | 무자 (없음) | 원국 및 지장간에 관/재성 없음 | 38세 이후 (무조건 늦게) | 대운/세운에 관성(여)/재성(남) 들어올 때 결혼운. 여럿 만나보고 결정 |
 
 ### 일지 십성별 배우자 우선순위 테이블
-| 일지 십성 | 배우자 모습/결혼 생활 성향 | 남성 인생 우선순위 (1/2/3) | 여성 인생 우선순위 (1/2/3) |
+| 일지 십성 | 배우자 모습/결��� 생활 성향 | 남성 인생 우선순위 (1/2/3) | 여성 인생 우선순위 (1/2/3) |
 |----------|-------------------------|-------------------------|-------------------------|
 | 비견 | 독립적, 대등한 파트너, 간섭 싫어함 | 형제/친구 > 본인 > 배우자 | 본인 > 자매/친구 > 배우자 |
 | 겁재 | 열정적, 자극적, 경쟁심 강함 | 형제/친구 > 본인 > 배우자(경쟁자 인식) | 자매/친구 > 본인 > 배우자(주도권 싸움) |
@@ -286,7 +286,49 @@ ${daeyunStr}
 ${dbInterpretationStr || '(해당 데이터 없음)'}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-## 9문장 작성 지침
+## 응답 형식 (필수)
+반드시 아래 JSON 형식으로 응답하세요:
+\`\`\`json
+{
+  "facts": [
+    { "id": 1, "category": "성격/기질", "title": "일간 캐릭터", "content": "일간의 본질과 오행 분포를 설명..." },
+    { "id": 2, "category": "성격/기질", "title": "오행 환경", "content": "오행 분포 속 감정 상태..." },
+    { "id": 3, "category": "에너지", "title": "십신 과다/부족", "content": "십신 점수 불균형 해석..." },
+    { "id": 4, "category": "에너지", "title": "12운성", "content": "12운성 기반 에너지 상태..." },
+    { "id": 5, "category": "사회적역할", "title": "격국 분석", "content": "월지 기반 사회적 직분..." },
+    { "id": 6, "category": "사회적역할", "title": "첫인상 vs 실제", "content": "외적 이미지와 내면의 갭..." },
+    { "id": 7, "category": "직업적성", "title": "직업 적성", "content": "4단계 로직(격국→수행방식→리스크→신살디테일) 기반 직업 제안..." },
+    { "id": 8, "category": "관계/연애", "title": "대인관계", "content": "신살과 12운성 기반 연애/관계 성향..." },
+    { "id": 9, "category": "2026년운세", "title": "연간 운세", "content": "2026년 병오년의 기운 분석..." }
+  ]
+}
+\`\`\`
+
+## 9문장 작성 핵심 규칙 (필독)
+
+**절대 규칙:**
+1. 위 사용자 DB 해설 데이터 활용하되, 너무 강하게 Gen Z 톤을 밀어붙이지 말 것. 자연스럽게 1-2문장만 스며들게 함
+2. 사주 풀이가 중심이고, DB 해설은 참고용. 절대 DB 해설을 그대로 복붙하지 말 것
+3. 문법이 정확해야 하고, 자연스러운 한국어를 사용할 것
+4. 각 문장은 독립적으로 의미가 있어야 함
+
+**각 문장별 가이드:**
+- 1문: 일간 본질 + 오행 분포의 비유적 설명 (자신감 있게)
+- 2문: 오행 환경 속 주요 감정/심리 상태
+- 3문: 십신 점수 불균형 (과다 or 부족) 해석
+- 4문: 12운성(일지+월지) 기반 에너지 상태
+- 5문: 격국(월지 지장간) 기반 사회적 직분
+- 6문: 첫인상 vs 실제 내면의 반전
+- 7문: 직업 적성 (4단계: 격국→수행방식→리스크→신살디테일)
+- 8문: 대인관계/연애 성향 (신살 기반)
+- 9문: 2026년 운세 (간단명료함)
+
+**금지 사항:**
+❌ 오류 있는 문장 (비문, 주술 호응 오류)
+❌ 반복되는 내용
+❌ 사주 풀이가 아닌 철학적 장황함
+❌ DB 해설을 그대로 사용
+❌ 너무 과한 Gen Z 슬래프
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ### 문장 01~02: 일간 캐릭터 + 오행 분포 설명
@@ -411,7 +453,12 @@ async function generateFactsFromAI(
 ): Promise<Fact[]> {
   const prompt = await buildPromptFromSajuData(name, gender, birthCountry, birthDate, sajuData)
 
-  console.log('[v0] GPT 프롬프트 생성 완료, API 호출 시작...')
+  console.log('[v0] GPT 프롬프트 생성 완료')
+  console.log('[v0] 프롬프트 길이:', prompt.length)
+  console.log('[v0] 프롬프트 첫 1000자:', prompt.substring(0, 1000))
+  console.log('[v0] DB 해석 데이터 포함 여부:', prompt.includes('DB 해설'))
+  console.log('[v0] Gen Z 스타일 포함 여부:', prompt.includes('Main Character'))
+  console.log('[v0] API 호출 시작...')
 
   const result = await generateText({
     model: 'openai/gpt-4o-mini',
@@ -471,7 +518,7 @@ export async function POST(req: Request) {
     // Rate Limit 체크 - 개발 중 비활성화 (배포 시 아래 주석 해제)
     // const { allowed, remaining } = await checkRateLimit(supabase, ip, 100)
     // if (!allowed) {
-    //   return NextResponse.json({ error: '하루 10회 제한입니다.' }, { status: 429 })
+    //   return NextResponse.json({ error: '하루 10회 ��한입니다.' }, { status: 429 })
     // }
 
     // DB에서 submission 조회
