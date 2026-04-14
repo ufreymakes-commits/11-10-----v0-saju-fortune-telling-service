@@ -175,7 +175,7 @@ ${twelveStarsStr}
 - 지지육합: ${sajuData.jijiYughap?.length ? sajuData.jijiYughap.join(' / ') : '없음'}
 - 지지삼합: ${sajuData.jijiSamhap?.length ? sajuData.jijiSamhap.join(' / ') : '없음'}
 - 지지방합: ${sajuData.jijiBanghap?.length ? sajuData.jijiBanghap.join(' / ') : '없음'}
-- 천간충: ${sajuData.cheongganChung?.length ? sajuData.cheongganChung.join(' / ') : '없���'}
+- 천간충: ${sajuData.cheongganChung?.length ? sajuData.cheongganChung.join(' / ') : '없음'}
 - 지지충: ${sajuData.jijiChung?.length ? sajuData.jijiChung.join(' / ') : '없음'}
 - 형: ${sajuData.hyung?.length ? sajuData.hyung.join(' / ') : '없음'}
 - 파: ${sajuData.pa?.length ? sajuData.pa.join(' / ') : '없음'}
@@ -225,7 +225,7 @@ ${daeyunStr}
     {
       "id": 4,
       "title": "[God-Tier Micro-Habit]",
-      "content": "부족한 기운을 채우기 ���해 [SAJU_ALGORITHM]의 [실행 지침]을 활용한 아주 구체적이고 사소한 루틴을 제안하세요. 뻔한 위로가 아닌, 삶을 긍정적으로 바꿀 수 있는 즉각적인 '작은 승리'를 처방해야 합니다. (필수: Micro-Action Practicality)"
+      "content": "부족한 기운을 채우기 위해 [SAJU_ALGORITHM]의 [실행 지침]을 활용한 아주 구체적이고 사소한 루틴을 제안하세요. 뻔한 위로가 아닌, 삶을 긍정적으로 바꿀 수 있는 즉각적인 '작은 승리'를 처방해야 합니다. (필수: Micro-Action Practicality)"
     },
     {
       "id": 5,
