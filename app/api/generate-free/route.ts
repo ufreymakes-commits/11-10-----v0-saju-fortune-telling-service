@@ -3,7 +3,21 @@ import { generateText } from 'ai'
 import { createClient } from '@/lib/supabase/server'
 import type { SajuData, Fact } from '@/lib/types'
 import { headers } from 'next/headers'
-import { getAllInterpretationsForSaju, formatInterpretationsForPrompt } from '@/lib/saju/interpretation-service'
+import { promises as fs } from 'fs'
+import path from 'path'
+
+// 사주 분석 가이드라인 파일 읽기
+async function getAnalysisGuidelines(): Promise<string> {
+  try {
+    const filePath = path.join(process.cwd(), 'lib/saju/analysis-guidelines.md/analysis-guidelines1.md')
+    const content = await fs.readFile(filePath, 'utf-8')
+    console.log('[v0] 가이드라인 파일 로드 성공, 길이:', content.length)
+    return content
+  } catch (error) {
+    console.error('[v0] 가이드라인 파일 로드 실패:', error)
+    return ''
+  }
+}
 
 // Rate Limit 체크 (IP당 하루 N회)
 async function checkRateLimit(
@@ -71,7 +85,6 @@ async function cacheFacts(supabase: Awaited<ReturnType<typeof createClient>>, sa
 
 // GPT 프롬프트 생성 - 9문장 구조 (01~09)
 async function buildPromptFromSajuData(
-  supabase: any,
   name: string,
   gender: string,
   birthCountry: string,
@@ -81,49 +94,8 @@ async function buildPromptFromSajuData(
   const birthYear = new Date(birthDate).getFullYear()
   const age = 2026 - birthYear
 
-  // DB에서 해설 데이터 가져오기
-  const dayStem = sajuData.dayPillar?.stem || ''
-  const sipsung = sajuData.tenGods?.present || []
-  const unseong12 = sajuData.twelveStars?.map(ts => ts.star) || []
-  const sinsal = sajuData.spirits || []
-  
-  console.log('[v0] DB 조회 시작 - 일간:', dayStem, '십성:', sipsung, '12운성:', unseong12, '신살:', sinsal)
-  
-  let dbInterpretationStr = ''
-  try {
-    const interpretations = await getAllInterpretationsForSaju(supabase, dayStem, sipsung, unseong12, sinsal)
-    dbInterpretationStr = formatInterpretationsForPrompt(interpretations)
-    console.log('[v0] DB 조회 결과 길이:', dbInterpretationStr.length)
-    console.log('[v0] DB 조회 결과 미리보기:', dbInterpretationStr.substring(0, 300))
-  } catch (error) {
-    console.error('[v0] DB 조회 실패:', error)
-  }
-  
-  // DB 조회 실패시 하드코딩된 Gen Z 해설 사용
-  if (!dbInterpretationStr || dbInterpretationStr.length < 50) {
-    console.log('[v0] DB 데이터 없음, 하드코딩된 Gen Z 해설 사용')
-    dbInterpretationStr = `
-[일간 해설 - 기토(己)]
-모두의 엄마(Mothering) 역할을 자처하지만 자기 통장 잔고는 절대 안 알려줌. Lowkey(은근히) 야망캐. 포용력 있고 실속 챙기는 스타일.
-
-[12운성 해설 - 관대]
-Delulu is the solulu (망상이 곧 해결책). 근거 없는 자신감으로 똘똘 뭉쳐 일단 직진하는 청춘의 패기. 자존심 강하고 고집 있음.
-
-[12운성 해설 - 제왕]
-I'm the Boss. 남 밑에서 일 못 하는 병에 걸림. 능력은 쩔지만 가끔 꼰대 짓 주의보. 정점에 있는 에너지.
-
-[신살 해설 - 도화살]
-아이돌 센터 바이브. 내가 원하든 원하지 않든 사람들의 시선이 나한테 꽂히는 무대 체질. 시선 집중, 인기, 끼.
-
-[십성 해설 - 정인]
-숨만 쉬어도 사람들이 입양(?)하고 싶어 하는 애완인간 재질. 눈치 백단이라 사랑받는 법을 기가 막히게 앎.
-
-[십성 해설 - 편재]
-Hustle culture / Crypto bro 바이브. 욜로(YOLO) 하다가 골로 갈 수 있지만 일단 스케일 크게 놀고 봄.
-
-위 해설을 참고해서 Gen Z 톤으로 자연스럽게 9개 문장을 작성하세요. 영어 슬랭을 적절히 섞어주세요.
-`
-  }
+  // 사주 분석 가이드라인 MD 파일 읽기
+  const guidelinesContent = await getAnalysisGuidelines()
 
   // 12운성
   const twelveStarsStr = sajuData.twelveStars
@@ -185,35 +157,12 @@ Hustle culture / Crypto bro 바이브. 욜로(YOLO) 하다가 골로 갈 수 있
     ? (sajuData.hourPillar.fullName || sajuData.hourPillar.stem + sajuData.hourPillar.branch)
     : '미상'
 
-  return `당신은 미국 Gen Z를 위한 사주 전문가입니다. 한국 명리학을 재미있고 공감 가게 설명합니다.
+  return `당신은 사주 분석 전문가입니다. 아래 "사주 분석 가이드라인"을 반드시 읽고 그 원칙에 따라 분석하세요.
 
-## 말투 규칙 (매우 중요!!!)
-- 영어 슬랭을 자연스럽게 섞어서 사용하세요: "Main Character Energy", "giving...", "lowkey", "no cap", "it's giving", "slay", "vibe" 등
-- 친구에게 카톡하듯이 편하게 작성하세요
-- "~입니다", "~합니다" 대신 "~해요", "~거든요", "~있잖아요" 사용
-- 재미있는 비유와 밈을 활용하세요
-- 너무 점쟁이 느낌 말고 친한 언니/오빠가 조언하는 느낌으로
-
-## 일간별 캐릭터 참고 (반드시 활용!)
-- 甲(갑목): "Main Character Energy. 내가 곧 법이고 룰. 굽히느니 부러지겠다는 뚝심 소유자."
-- 乙(을목): "눈치 만렙 서바이버. 겉으로는 Soft한데 속은 강철 멘탈. 밟아도 다시 일어남."
-- 丙(병화): "인간 태양 등장. 어딜 가나 스포트라이트 받아야 직성 풀리는 E 끝판왕. 텐션 폼 미쳤음."
-- 丁(정화): "플러팅 장인. 은은하게 스며드는 매력인데, 빡치면 촛불에서 산불로 변함."
-- 戊(무토): "인간 바위. 웬만한 어그로에는 흔들리지 않는 멘탈 갑. 은근 다 지켜보고 있음."
-- 己(기토): "모두의 엄마 역할 자처하지만 자기 통장 잔고는 절대 안 알려줌. Lowkey 야망캐."
-- 庚(경금): "선 넘으면 바로 손절. 의리에 죽고 사는 마피아 재질. 팩트 폭격기."
-- 辛(신금): "인간 샤넬. 예민하고 까칠한데 본업 존잘이라 아무도 못 건드림. 완벽주의자."
-- 壬(임수): "생각의 깊이가 마리아나 해구 급. 겉보기엔 Chill한데 속으로는 우주 정복 계획 세우는 중."
-- 癸(계수): "맑은 눈의 광인. 조용히 상황 다 지켜보는 빅데이터 두뇌. 웃으면서 자기 몫 제일 잘 챙김."
-
-## 12운성 참고
-- 관대: "Delulu is the solulu. 근거 없는 자신감으로 직진하는 청춘 패기. 자존심 MAX."
-- 제왕: "I'm the Boss. 남 밑에서 일 못 하는 병 걸림. 능력은 쩔지만 가끔 꼰대 짓 주의보."
-- 장생: "새로운 시작의 설렘. 뭐든 시작하면 두근두근. 잠재력 폭발 타이밍."
-
-## 신살 참고
-- 도화살: "아이돌 센터 바이브. 내가 원하든 원치 않든 사람들 시선이 나한테 꽂히는 무대 체질."
-- 역마살: "정착 불가 유목민. 가만히 있으면 병 날 것 같은 체질. 여행, 이직, 변화가 인생 연료."
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## 사주 분석 가이드라인 (필독!)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${guidelinesContent}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ## 클라이언트 정보
@@ -221,9 +170,6 @@ Hustle culture / Crypto bro 바이브. 욜로(YOLO) 하다가 골로 갈 수 있
 이름: ${name} | 성별: ${gender} | 나이: ${age}세
 사주: ${yearP} - ${monthP} - ${dayP} - ${hourP}
 일간: ${sajuData.dayPillar?.stem || ''}
-
-## DB 해설 참고 (있으면 활용)
-${dbInterpretationStr || '위 일간별 캐릭터 참고 데이터를 활용하세요.'}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ## 분석 데이터 (참고용)
@@ -308,14 +254,13 @@ ${dbInterpretationStr || '위 일간별 캐릭터 참고 데이터를 활용하�
 
 // AI를 통한 9개 팩트 생성
 async function generateFactsFromAI(
-  supabase: any,
   name: string,
   gender: string,
   birthCountry: string,
   birthDate: string,
   sajuData: SajuData
 ): Promise<Fact[]> {
-  const prompt = await buildPromptFromSajuData(supabase, name, gender, birthCountry, birthDate, sajuData)
+  const prompt = await buildPromptFromSajuData(name, gender, birthCountry, birthDate, sajuData)
 
   console.log('[v0] GPT 프롬프트 생성 완료')
   console.log('[v0] 프롬프트 길이:', prompt.length)
@@ -366,7 +311,7 @@ export async function POST(req: Request) {
 
     const supabase = await createClient()
 
-    // Rate Limit 체크 - 개발 중 비활성화 (배포 시 아래 주석 해제)
+    // Rate Limit 체크 - 개발 중 비활성화 (배포 시 아래 주석 ���제)
     // const { allowed, remaining } = await checkRateLimit(supabase, ip, 100)
     // if (!allowed) {
     //   return NextResponse.json({ error: '하루 10회 ��한입니다.' }, { status: 429 })
@@ -405,7 +350,7 @@ export async function POST(req: Request) {
       freeFacts = cachedFacts
     } else {
       console.log('[v0] ���시 미스, AI 생성 시작...')
-      freeFacts = await generateFactsFromAI(supabase, name, gender, birth_country, birth_date, saju_data)
+      freeFacts = await generateFactsFromAI(name, gender, birth_country, birth_date, saju_data)
       await cacheFacts(supabase, sajuKey, freeFacts)
     }
 
