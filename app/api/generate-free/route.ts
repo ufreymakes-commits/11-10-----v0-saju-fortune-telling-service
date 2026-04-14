@@ -71,6 +71,7 @@ async function cacheFacts(supabase: Awaited<ReturnType<typeof createClient>>, sa
 
 // GPT 프롬프트 생성 - 9문장 구조 (01~09)
 async function buildPromptFromSajuData(
+  supabase: any,
   name: string,
   gender: string,
   birthCountry: string,
@@ -90,7 +91,7 @@ async function buildPromptFromSajuData(
   
   let dbInterpretationStr = ''
   try {
-    const interpretations = await getAllInterpretationsForSaju(dayStem, sipsung, unseong12, sinsal)
+    const interpretations = await getAllInterpretationsForSaju(supabase, dayStem, sipsung, unseong12, sinsal)
     dbInterpretationStr = formatInterpretationsForPrompt(interpretations)
     console.log('[v0] DB 조회 결과 길이:', dbInterpretationStr.length)
     console.log('[v0] DB 조회 결과 미리보기:', dbInterpretationStr.substring(0, 300))
@@ -222,7 +223,7 @@ ${dbInterpretationStr || '(해설 데이터 없음)'}
   "facts": [
     {
       "id": 1,
-      "title": "당신의 핵심 성격",
+      "title": "당신의 핵심 성��",
       "content": "일간과 오행 분포 기반 성격 해석. 구체적인 행동 패턴과 함께."
     },
     {
@@ -285,13 +286,14 @@ ${dbInterpretationStr || '(해설 데이터 없음)'}
 
 // AI를 통한 9개 팩트 생성
 async function generateFactsFromAI(
+  supabase: any,
   name: string,
   gender: string,
   birthCountry: string,
   birthDate: string,
   sajuData: SajuData
 ): Promise<Fact[]> {
-  const prompt = await buildPromptFromSajuData(name, gender, birthCountry, birthDate, sajuData)
+  const prompt = await buildPromptFromSajuData(supabase, name, gender, birthCountry, birthDate, sajuData)
 
   console.log('[v0] GPT 프롬프트 생성 완료')
   console.log('[v0] 프롬프트 길이:', prompt.length)
@@ -381,7 +383,7 @@ export async function POST(req: Request) {
       freeFacts = cachedFacts
     } else {
       console.log('[v0] ���시 미스, AI 생성 시작...')
-      freeFacts = await generateFactsFromAI(name, gender, birth_country, birth_date, saju_data)
+      freeFacts = await generateFactsFromAI(supabase, name, gender, birth_country, birth_date, saju_data)
       await cacheFacts(supabase, sajuKey, freeFacts)
     }
 

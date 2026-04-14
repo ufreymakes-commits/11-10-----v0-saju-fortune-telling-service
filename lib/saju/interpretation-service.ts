@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import type { SupabaseClient } from "@supabase/supabase-js"
 
 // 실제 DB 구조에 맞춘 타입
 export interface TerminologyRow {
@@ -52,8 +52,7 @@ const DAY_STEM_MAP: Record<string, string> = {
 }
 
 // 용어 해설 가져오기 (카테고리별, 부분 일치)
-export async function getTerminologyByCategory(category: string): Promise<TerminologyRow[]> {
-  const supabase = await createClient()
+export async function getTerminologyByCategory(supabase: SupabaseClient, category: string): Promise<TerminologyRow[]> {
   const dbCategory = CATEGORY_MAP[category] || category
   
   const { data, error } = await supabase
@@ -70,8 +69,7 @@ export async function getTerminologyByCategory(category: string): Promise<Termin
 }
 
 // 일간 해설 가져오기
-export async function getDayMasterInterpretation(dayStem: string): Promise<TerminologyRow | null> {
-  const supabase = await createClient()
+export async function getDayMasterInterpretation(supabase: SupabaseClient, dayStem: string): Promise<TerminologyRow | null> {
   const searchChar = DAY_STEM_MAP[dayStem] || dayStem
   
   const { data, error } = await supabase
@@ -90,8 +88,7 @@ export async function getDayMasterInterpretation(dayStem: string): Promise<Termi
 }
 
 // 십성 해설 가져오기
-export async function getSipsungInterpretations(sipsung: string[]): Promise<TerminologyRow[]> {
-  const supabase = await createClient()
+export async function getSipsungInterpretations(supabase: SupabaseClient, sipsung: string[]): Promise<TerminologyRow[]> {
   const uniqueSipsung = [...new Set(sipsung)]
   
   if (uniqueSipsung.length === 0) return []
@@ -113,8 +110,7 @@ export async function getSipsungInterpretations(sipsung: string[]): Promise<Term
 }
 
 // 12운성 해설 가져오기
-export async function get12UnseongInterpretations(unseong: string[]): Promise<TerminologyRow[]> {
-  const supabase = await createClient()
+export async function get12UnseongInterpretations(supabase: SupabaseClient, unseong: string[]): Promise<TerminologyRow[]> {
   const uniqueUnseong = [...new Set(unseong)]
   
   if (uniqueUnseong.length === 0) return []
@@ -135,8 +131,7 @@ export async function get12UnseongInterpretations(unseong: string[]): Promise<Te
 }
 
 // 신살 해설 가져오기 (12신살 + 특수신살 + 길성/귀인)
-export async function getSinsalInterpretations(sinsal: string[]): Promise<TerminologyRow[]> {
-  const supabase = await createClient()
+export async function getSinsalInterpretations(supabase: SupabaseClient, sinsal: string[]): Promise<TerminologyRow[]> {
   const uniqueSinsal = [...new Set(sinsal)]
   
   if (uniqueSinsal.length === 0) return []
@@ -157,8 +152,7 @@ export async function getSinsalInterpretations(sinsal: string[]): Promise<Termin
 }
 
 // 십성 조합 해설 가져오기
-export async function getComboInterpretations(sipsung: string[]): Promise<ComboInterpretation[]> {
-  const supabase = await createClient()
+export async function getComboInterpretations(supabase: SupabaseClient, sipsung: string[]): Promise<ComboInterpretation[]> {
   
   const comboKeys: string[] = []
   for (let i = 0; i < sipsung.length; i++) {
@@ -185,6 +179,7 @@ export async function getComboInterpretations(sipsung: string[]): Promise<ComboI
 
 // 사주 분석에 필요한 모든 해설 데이터 가져오기
 export async function getAllInterpretationsForSaju(
+  supabase: SupabaseClient,
   dayStem: string,
   sipsung: string[],
   unseong12: string[],
@@ -199,11 +194,11 @@ export async function getAllInterpretationsForSaju(
   console.log("[v0] DB 해설 조회 시작:", { dayStem, sipsung, unseong12, sinsal })
   
   const [dayMaster, sipsungList, unseongList, sinsalList, comboList] = await Promise.all([
-    getDayMasterInterpretation(dayStem),
-    getSipsungInterpretations(sipsung),
-    get12UnseongInterpretations(unseong12),
-    getSinsalInterpretations(sinsal),
-    getComboInterpretations(sipsung)
+    getDayMasterInterpretation(supabase, dayStem),
+    getSipsungInterpretations(supabase, sipsung),
+    get12UnseongInterpretations(supabase, unseong12),
+    getSinsalInterpretations(supabase, sinsal),
+    getComboInterpretations(supabase, sipsung)
   ])
   
   console.log("[v0] DB 해설 조회 결과:", {
