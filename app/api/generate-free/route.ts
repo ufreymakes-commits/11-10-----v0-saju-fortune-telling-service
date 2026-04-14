@@ -194,24 +194,26 @@ ${sajuData.gongmang?.join('·') || '없음'}
 
 ### 대운
 ${daeyunStr}
-- 현재 대운: ${currentDaeyun ? `${currentDaeyun.startAge}~${currentDaeyun.endAge}세 ${currentDaeyun.fullName || currentDaeyun.stem + currentDaeyun.branch}` : '계산 안됨'}
+- 현재 대운: ${currentDaeyun ? \`\${currentDaeyun.startAge}~\${currentDaeyun.endAge}세 \${currentDaeyun.fullName || currentDaeyun.stem + currentDaeyun.branch}\` : '계산 안됨'}
 
 ### 2026년 운세
 - 간지: ${yeonwoon2026Str}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ## 9개 문장 작성 지침
-━━━━━━━━━━���━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 반드시 JSON 형식으로 응답하세요:
 
 \`\`\`json
 {
+  "facts": [
+    {
       "id": 1,
       "title": "[Main Character Title]",
       "content": "[SAJU_ALGORITHM]의 '일간 Gen Z 텍스트'로 제목을 뽑고, 오행 분포 점수(120점 만점)를 반영한 '자연 풍경' 비유를 통해 사용자의 상황과 바이브를 딱 한 문장으로 정의하세요. (필수: Main Character Title, Vibe Check, Nature-to-Life Metaphor)"
     },
     {
-      "id": 3,
+      "id": 2,
       "title": "[The Inner Twist]",
       "content": "겉모습과 내면의 간극을 모순이 아닌 '입체적인 매력'으로 서술하세요. 수(水) 과다의 딥다크한 생각이나 화(火)/재성 과다의 용암 같은 욕망 등 감정적 리얼리티를 짚어주어 내담자가 '이게 바로 나'라고 느끼게 만드세요. (필수: Hidden Shadow, Low-key/High-key 표현)"
     },
@@ -250,6 +252,61 @@ ${daeyunStr}
       "title": "[The Hero's Journey]",
       "content": "일간의 본질과 최고의 긍정 에너지(귀인/용신)를 묶어 삶을 '위대한 여정'으로 승화시키세요. '당신은 이미 충분히 훌륭하다'는 메시지와 함께 스스로를 사랑하게 만드는 소울풀한 문장으로 마무리하세요. (필수: Hero's Journey Outro, 감동적인 finale)"
     }
+  ]
+}
+\`\`\`
+
+## 9 Rules for the "Modern Mystic" Format & 9-Step Sectional Frame Prompt Instructions
+
+1. **Main Character Energy**: 매 섹션마다 영화나 트렌딩 TikTok 주제처럼 들리는 타이틀 사용. 자연 원소(Water, Earth, Fire)와 라이프스타일 바이브를 결합한 메타포 사용.
+2. **Vibe Check**: 차가운 분석 대신 사용자의 오라나 현재 감정을 1문장 훅으로 표현. "You give off major calm vibes on the outside, but your inner world is literal boiling lava." 스타일.
+3. **Gen Z Dialect**: 섹션당 1-2개 슬래프 삽입 (Vibe, Low-key, High-key, Main Character Energy, Red Flag, It is what it is).
+4. **Nature-to-Life Metaphor**: 사주의 기술적 요소(목/화/수 등)를 실생활 시나리오와 즉시 연결.
+5. **Secret Lore**: 기술 용어(식상, 원진살 등)를 비디오 게임 스탯처럼 취급하면서 권위성 유지.
+6. **Reality Check**: "Let's be real", "Honestly", "Fact check" 같은 직설적인 친구의 톤 사용.
+7. **Micro-Action**: 애매한 인생 목표 대신 즉시 실행 가능한 구체적 루틴 제안 (예: 30분 '방해금지' 루틴).
+8. **Hidden Shadow**: 모든 섹션에 "겉 vs 속"의 역전 또는 반전 포함. 사용자가 "이거 어떻게 알았냐?!"라고 느끼게 함.
+9. **Hero's Journey Outro**: 마지막 섹션은 반드시 사용자가 자신의 "운명"을 컨트롤할 수 있다고 느끼게 하는 하이노트로 끝맺음.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## Section-by-Section Directive
+
+**Section 01. Character Vibe Check (Day Pillar Metaphor)**
+- Pull Day Pillar Gen Z text, metaphorize user's situation as natural landscape reflecting Five Elements scores to define character in exactly one sentence.
+- Must Include: Main Character Title, Vibe Check, Nature-to-Life Metaphor.
+
+**Section 02. Inner Reversal (Psychological Conflict)**
+- Explain outward-vs-inner gap as three-dimensional charm, not contradiction. Pinpoint emotional reality (deep-sea thinking if Water excess, lava-like desire if Fire/Wealth excess).
+- Must Include: Hidden Shadow style, Low-key/High-key phrasing.
+
+**Section 03. Energy Stat Analysis (10 Gods Lore)**
+- Describe highest/lowest 10 Gods scores like video game stats. Use 12 Un-seong (Life Stages) to assess if current energy is in prime (Imperial/Cap) or restructuring phase (Death/Grave).
+- Must Include: Secret Lore terminology, Stat metaphors.
+
+**Section 04. Micro-Action for God-Tier Life (Remedy)**
+- Provide highly specific, actionable behavioral guidelines to fill missing energies. Suggest a small win that immediately turns life positive.
+- Must Include: Micro-Action Practicality (specific time routines, item usage).
+
+**Section 05. Social Persona (Gyeok-guk DNA)**
+- Explain Social License granted by Month Branch (Gyeok-guk). Interpret Clash/Harmony changes as hidden ultimate move.
+- Must Include: Modern career translation of Gyeok-guk (e.g., Proper Resource → Professional Knowledge Licenser).
+
+**Section 06. Career Industry Layer (Elemental Matching)**
+- Reference modern industries. Suggest categories so specific client reacts: "Chills... that's exactly what I've been interested in!"
+- Must Include: "By any chance, aren't you interested in this (Industry) as (Role)?" phrasing.
+
+**Section 07. Reality Check (Deficiency Risk)**
+- Warn about potential mistakes from deficient (0 pts) or excessive energies like a blunt friend. Frame as last puzzle piece for success, not labels.
+- Must Include: Reality Check interjection, Red Flag terminology.
+
+**Section 08. Current Fortune Update (Dae-un Vibe)**
+- Combine 10-year Great Fortune (Dae-un) and Yearly Fortune (Se-un) to identify current season. Frame hard times as hardcore quests, good times as God-Mode buffs.
+- Must Include: God-Mode Activated, Season Update terminology.
+
+**Section 09. Hero's Journey (Life Theme)**
+- Bind Day Pillar essence with strongest positive energy (Noble Benefactor/Yong-sin) to elevate life into Great Journey. End with soul-stirring sentence.
+- Must Include: Hero's Journey Outro style, emotional/inspiring finale.`
+}
   ]
 }
 \`\`\`
