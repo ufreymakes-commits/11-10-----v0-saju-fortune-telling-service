@@ -79,12 +79,12 @@ async function buildPromptFromSajuData(
 
 CRITICAL INSTRUCTIONS:
 1. Respond ONLY with valid JSON wrapped in triple backticks (json)
+2. Do not calculate anything. Use the provided data as is. Accurately reflect the calculateddata in the insights.
 2. Each fact must have: id, title, content
 3. Each content must be 1-2 sentences maximum
-4. Use Gen Z tone with English slang: "Main Character Energy", "giving", "lowkey", "no cap", "Red Flag"
-5. Connect Five Elements (Wood/Fire/Earth/Metal/Water) to real-life scenarios
-6. Include action items, not just analysis
-7. Final insight (#9) must be inspirational "Hero's Journey" style
+4. Use Gen Z tone with English slang: "Main Character Energy", "giving", "lowkey", "no cap", "Red Flag
+5. Include action items, not just analysis
+6. Final insight (#9) must be inspirational "Hero's Journey" style
 
 CLIENT DATA:
 Name: ${name} | Gender: ${gender} | Age: ${age}
