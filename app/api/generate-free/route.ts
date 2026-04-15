@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { generateText } from 'ai'
 import { createClient } from '@/lib/supabase/server'
-import type { SajuData, Fact, InsightMap } from '@/lib/types'
+import type { SajuData, Fact, InsightMapV2 } from '@/lib/types'
 import { headers } from 'next/headers'
 import { SAJU_MASTERPIECE_GUIDE } from '@/lib/saju/masterpiece'
 
@@ -12,55 +12,59 @@ import { SAJU_MASTERPIECE_GUIDE } from '@/lib/saju/masterpiece'
  * Stage 1 (analyze API)에서 받은 InsightMap을 기반으로 최종 9개 문장 생성
  * 모든 사주 데이터 필드 추적 가능하며, 단 하나도 생략되지 않음
  */
-async function generateFactsFromInsightMap(insightMap: InsightMap): Promise<Fact[]> {
-  console.log('[v0] Stage 2: Generating 9 sentences from InsightMap')
+async function generateFactsFromInsightMap(insightMapV2: InsightMapV2): Promise<Fact[]> {
+  console.log('[v0] Stage 2: Generating 9 sections from InsightMapV2 blueprints')
 
-  // InsightMap의 모든 근거를 추적
-  const allEvidenceFields = new Set<string>()
-  insightMap.insights.forEach(insight => {
-    insight.evidence.forEach(ev => {
-      allEvidenceFields.add(ev.dataField)
-    })
+  // BlueprintHints에서 포인터 정보 추출
+  const allPointers = new Set<string>()
+  insightMapV2.blueprints.forEach(bp => {
+    bp.pointerHints.forEach(hint => allPointers.add(hint))
   })
 
-  console.log('[v0] Tracked Saju Data Fields:', Array.from(allEvidenceFields).join(', '))
+  console.log('[v0] Available pointers:', Array.from(allPointers).join(', '))
+  console.log('[v0] CoreDiagnosis: yongsin.exists =', insightMapV2.coreDiagnosis.yongsin.exists)
 
-  const factsPrompt = `You are a Saju analyst writing hyper-personalized insights. Write 9 sections describing THIS SPECIFIC PERSON's life, not general truths.
+  const factsPrompt = `You are a Saju analyst writing hyper-personalized insights based on InsightMapV2 blueprints.
 
-CORE RULES (CRITICAL):
-1. Length: 2-3 sentences per section ONLY (not 1-2, not 3-5)
-2. Every section MUST end with ⟦data pointer 1⟧ ⟦data pointer 2-3⟧ showing the Saju basis
-3. Write AS IF describing real life scenes: "When you enter a meeting..." NOT "You tend to be..."
-4. NO abstract psychology - describe actual patterns THIS PERSON exhibits
-5. Section 4, 5, or 6 MUST be career-specific (industry + role suggestion)
-6. If yongsin.exists = false, NEVER use word "용신" - use element names + adjustment scores instead
-7. Gen-Z tone but grounded: "gives main character energy in pressure situations" not "may sometimes be assertive"
+CRITICAL RULES:
+1. Length: EXACTLY 2-3 sentences per section (count sentences carefully)
+2. Every section MUST end with ⟦pointer1⟧ ⟦pointer2-3⟧ (required, not optional)
+3. Write as REAL LIFE SCENES: "When you walk into a negotiation..." NOT "You tend to be..."
+4. NO abstract psychology - describe THIS PERSON's actual patterns
+5. Section 4 or 5 MUST be career-specific with industry + role suggestion
+6. yongsin.exists = ${insightMapV2.coreDiagnosis.yongsin.exists} → ${insightMapV2.coreDiagnosis.yongsin.exists ? 'Can use "용신"' : 'NEVER use "용신" - use element + adjustment scores instead'}
+7. Use mechanismSteps from blueprints to build causality chain
+8. Reference lifeSceneCandidates to ground insights in reality
 
-Saju Data Points for Pointers:
-- sinGangSinYak.grade (신강/약)
-- elementBalanceAdjusted (오행 조정)
-- tenGods.present (십신 존재)
-- harmonies/clashes (합충)
-- lifeStage (12운성)
-- daeyun (대운)
-- yongsin.status (존재 여부)
+BLUEPRINTS (설계도):
+${JSON.stringify(insightMapV2.blueprints, null, 2)}
 
-Insight Map:
-${JSON.stringify(insightMap, null, 2)}
+CORE DIAGNOSIS:
+${JSON.stringify(insightMapV2.coreDiagnosis, null, 2)}
 
-OUTPUT FORMAT - EXACTLY:
+POINTER REFERENCE:
+- sinGangSinYak.grade: ${insightMapV2.coreDiagnosis.shinGangGrade} (${insightMapV2.coreDiagnosis.shinGangRatio}%)
+- elementBalanceAdjusted: 木${insightMapV2.coreDiagnosis.gapSurvey.woodStatus} 火${insightMapV2.coreDiagnosis.gapSurvey.fireStatus} 土${insightMapV2.coreDiagnosis.gapSurvey.earthStatus} 金${insightMapV2.coreDiagnosis.gapSurvey.metalStatus} 水${insightMapV2.coreDiagnosis.gapSurvey.waterStatus}
+- topTenGods: ${insightMapV2.coreDiagnosis.topTenGods.map(g => g.name).join(', ')}
+
+GENERATION HINTS:
+- Use mechanismSteps to explain causality (cause → effect)
+- Reference lifeSceneCandidates for concrete examples
+- Each pointer must reference actual blueprint data
+
+OUTPUT FORMAT (EXACT JSON):
 \`\`\`json
 {
   "facts": [
-    {"id": 1, "title": "[Title]", "content": "[2-3 real-life sentences describing actual behavior] ⟦pointer1⟧ ⟦pointer2⟧"},
-    {"id": 2, "title": "[Title]", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
-    {"id": 3, "title": "[Title]", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
-    {"id": 4, "title": "[Career/Social - REQUIRED]", "content": "[2-3 sentences: specific industry + role suggestion + why they'd excel] ⟦pointer1⟧ ⟦pointer2⟧"},
-    {"id": 5, "title": "[Title]", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
-    {"id": 6, "title": "[Title]", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
-    {"id": 7, "title": "[Title]", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
-    {"id": 8, "title": "[Title]", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
-    {"id": 9, "title": "[Title]", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"}
+    {"id": 1, "title": "Blueprint 1 Title", "content": "[2-3 real-life sentences grounded in mechanism] ⟦pointer1⟧ ⟦pointer2⟧"},
+    {"id": 2, "title": "Blueprint 2 Title", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
+    {"id": 3, "title": "Blueprint 3 Title", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
+    {"id": 4, "title": "Career Path", "content": "[2-3 sentences: industry + role suggestion + why they excel] ⟦pointer1⟧ ⟦pointer2⟧"},
+    {"id": 5, "title": "Blueprint 5 Title", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
+    {"id": 6, "title": "Blueprint 6 Title", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
+    {"id": 7, "title": "Blueprint 7 Title", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
+    {"id": 8, "title": "Blueprint 8 Title", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
+    {"id": 9, "title": "Blueprint 9 Title", "content": "[2-3 real-life sentences with hero's journey tone] ⟦pointer1⟧ ⟦pointer2⟧"}
   ]
 }
 \`\`\``
@@ -99,15 +103,15 @@ OUTPUT FORMAT - EXACTLY:
 }
 
 /**
- * Stage 1 호출: Saju 계산 데이터로부터 InsightMap 생성
+ * Stage 1 호출: Saju 계산 데이터로부터 InsightMapV2 생성
  */
 async function callAnalyzeAPI(
   name: string,
   gender: string,
   birthDate: string,
   sajuData: SajuData
-): Promise<InsightMap> {
-  console.log('[v0] Calling Stage 1 (Analyze API) to create InsightMap')
+): Promise<InsightMapV2> {
+  console.log('[v0] Calling Stage 1 (Analyze API) to create InsightMapV2')
 
   const baseUrl = process.env.VERCEL_URL 
     ? `https://${process.env.VERCEL_URL}`
@@ -131,7 +135,10 @@ async function callAnalyzeAPI(
   }
 
   const { insightMap } = await analyzeResponse.json()
-  console.log('[v0] Stage 1 InsightMap received with', insightMap.insights.length, 'insights')
+  console.log('[v0] Stage 1 InsightMapV2 received:')
+  console.log(`  - coreDiagnosis.yongsin.exists: ${insightMap.coreDiagnosis.yongsin.exists}`)
+  console.log(`  - blueprints: ${insightMap.blueprints.length}`)
+  console.log(`  - coverage: ${insightMap.coverage.coveragePercentage}%`)
   
   return insightMap
 }
@@ -169,33 +176,75 @@ export async function POST(req: Request) {
     }
 
     // Generate fresh AI insights using 3-stage pipeline:
-    // Stage 1: Analyze (create InsightMap)
-    // Stage 2: Generate (9 sentences)
+    // Stage 1: Analyze (create InsightMapV2)
+    // Stage 2: Generate (9 sections with pointers)
     // Stage 3: Validate (quality check)
     console.log('[v0] Starting 3-stage pipeline...')
     
-    let insightMap: InsightMap
+    let insightMapV2: InsightMapV2
     try {
-      insightMap = await callAnalyzeAPI(name, gender, birth_date, saju_data)
+      insightMapV2 = await callAnalyzeAPI(name, gender, birth_date, saju_data)
     } catch (error) {
-      console.error('[v0] Stage 1 failed, falling back to direct generation')
-      // Fallback: Skip insight map, use direct generation
-      insightMap = {
+      console.error('[v0] Stage 1 failed:', error)
+      // Fallback: Skip insight map v2, use basic structure
+      insightMapV2 = {
         submissionId,
         createdAt: new Date().toISOString(),
         clientInfo: {
           name,
           dayMaster: saju_data.dayPillar?.stem || '',
           lifeStage: saju_data.gyeokguk || '',
-          yongsin: saju_data.eokbuYongsin || ''
+          yongsin: {
+            exists: !!saju_data.eokbuYongsin,
+            element: saju_data.eokbuYongsin
+          }
         },
-        insights: [],
-        version: '1.0',
+        coreDiagnosis: {
+          submissionId,
+          shinGangGrade: saju_data.sinGangSinYak?.grade || 'Unknown',
+          shinGangRatio: saju_data.sinGangSinYak?.ratio || 0,
+          gapSurvey: {
+            woodStatus: 'balanced',
+            fireStatus: 'balanced',
+            earthStatus: 'balanced',
+            metalStatus: 'balanced',
+            waterStatus: 'balanced'
+          },
+          yongsin: {
+            exists: !!saju_data.eokbuYongsin,
+            element: saju_data.eokbuYongsin
+          },
+          jojo: {
+            season: 'Unknown',
+            impact: 'Unknown',
+            adjustmentFactor: 1
+          },
+          topTenGods: [],
+          keyHarmonyClash: []
+        },
+        blueprints: [],
+        coverage: {
+          submissionId,
+          dayMaster: { used: false, insightIds: [] },
+          tenGods: { used: false, insightIds: [], coverage: [] },
+          elements: { used: false, insightIds: [], coverage: [] },
+          harmonies: { used: false, insightIds: [], coverage: [] },
+          clashes: { used: false, insightIds: [], coverage: [] },
+          spirits: { used: false, insightIds: [], coverage: [] },
+          lifeStages: { used: false, insightIds: [], coverage: [] },
+          fortunes: { used: false, insightIds: [], coverage: [] },
+          emptyPoints: { used: false, insightIds: [], coverage: [] },
+          nobleBenefactors: { used: false, insightIds: [], coverage: [] },
+          totalFields: 0,
+          coveredFields: 0,
+          coveragePercentage: 0
+        },
+        version: '2.0',
         stagePassed: 'analysis'
       }
     }
 
-    const freeFacts = await generateFactsFromInsightMap(insightMap)
+    const freeFacts = await generateFactsFromInsightMap(insightMapV2)
 
     // Teaser facts (locked)
     const teaserFacts = Array.from({ length: 5 }, (_, i) => ({

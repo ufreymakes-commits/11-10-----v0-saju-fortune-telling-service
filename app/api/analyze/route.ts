@@ -1,67 +1,128 @@
 import { NextResponse } from 'next/server'
 import { generateObject } from 'ai'
 import { SAJU_MASTERPIECE_GUIDE } from '@/lib/saju/masterpiece'
-import type { SajuData, InsightMap, InsightClaim } from '@/lib/types'
+import type { SajuData, InsightMapV2, CoreDiagnosisPack, InsightBlueprint, CoverageMap } from '@/lib/types'
 import { z } from 'zod'
 
 /**
- * Stage 1: Analysis API
+ * Stage 1: Analysis API (v2)
  * Input: saju_data
- * Output: InsightMap (9 insights with full evidence tracking)
+ * Output: InsightMapV2 (CoreDiagnosisPack + 9 InsightBlueprints + CoverageMap)
  * 
- * This stage generates structured insights with complete saju data traceability.
- * Each insight includes: thesis, evidence (≥2), mechanism, event window, risk, strategy
+ * This stage generates:
+ * 1. CoreDiagnosisPack: 신강/격/용신 핵심 3지표
+ * 2. InsightBlueprint[9]: 각 인사이트의 설계도 (본문이 아니라 청사진)
+ * 3. CoverageMap: 모든 사주 필드 감시 (audit 목적)
  * 
- * CRITICAL: No saju data fields are omitted or deleted.
- * All evidence references back to original data field names.
+ * 핵심: 본문 강제가 아니라 audit으로 모든 데이터 포함 확인
  */
 
+const MechanismStepSchema = z.object({
+  step: z.number(),
+  cause: z.string(),
+  effect: z.string(),
+  dataPointer: z.string(),
+  generationHint: z.string()
+})
+
+const LifeSceneCandidateSchema = z.object({
+  domain: z.enum(['career', 'relationship', 'mobility', 'finance', 'social', 'health']),
+  scenario: z.string(),
+  expectedBehavior: z.string(),
+  counterfactualBreaker: z.string().optional()
+})
+
 const EvidenceSchema = z.object({
-  type: z.enum(['day_master', 'ten_gods', 'element', 'harmony', 'clash', 'spirit', 'life_stage', 'fortune', 'empty_point', 'noble_benefactor', 'other']),
-  value: z.string().describe('Specific saju element value'),
-  dataField: z.string().describe('Original data field name (for traceability)'),
-  explanation: z.string()
+  type: z.string(),
+  value: z.string(),
+  dataField: z.string()
 })
 
-const MechanismSchema = z.object({
-  principle: z.string(),
-  sajuRule: z.string(),
-  psychologicalImpact: z.string()
-})
-
-const InsightClaimSchema = z.object({
+const InsightBlueprintSchema = z.object({
   id: z.number(),
   domain: z.enum(['personality', 'career', 'relationship', 'fortune', 'lifestyle']),
-  thesis: z.string().describe('Core insight claim'),
-  evidence: z.array(EvidenceSchema).min(2).max(5).describe('At least 2 saju data points'),
-  mechanism: MechanismSchema,
-  eventWindow: z.object({
-    type: z.enum(['current', 'next_10_years', 'next_3_years', '2026', 'lifetime']),
-    description: z.string()
-  }).optional(),
-  risk: z.string().optional(),
-  strategy: z.string().describe('Actionable micro-habit or strategy'),
-  validationScore: z.number().min(0).max(1).optional(),
-  isCounterfactualValid: z.boolean().optional()
+  thesis: z.string(),
+  mechanismSteps: z.array(MechanismStepSchema).min(2).max(4),
+  lifeSceneCandidates: z.array(LifeSceneCandidateSchema).min(1).max(2),
+  mustUseEvidence: z.array(EvidenceSchema).min(2).max(3),
+  counterfactualKey: z.string(),
+  pointerHints: z.array(z.string()).min(2).max(4),
+  yongsinNote: z.string().optional()
 })
 
-const InsightMapSchema = z.object({
+const CoreDiagnosisPackSchema = z.object({
+  submissionId: z.string(),
+  shinGangGrade: z.string(),
+  shinGangRatio: z.number(),
+  gapSurvey: z.object({
+    woodStatus: z.enum(['excess', 'balanced', 'deficient']),
+    fireStatus: z.enum(['excess', 'balanced', 'deficient']),
+    earthStatus: z.enum(['excess', 'balanced', 'deficient']),
+    metalStatus: z.enum(['excess', 'balanced', 'deficient']),
+    waterStatus: z.enum(['excess', 'balanced', 'deficient'])
+  }),
+  yongsin: z.object({
+    exists: z.boolean(),
+    element: z.string().optional(),
+    rationale: z.string().optional(),
+    alternatives: z.array(z.string()).optional()
+  }),
+  jojo: z.object({
+    season: z.string(),
+    impact: z.string(),
+    adjustmentFactor: z.number()
+  }),
+  topTenGods: z.array(z.object({
+    name: z.string(),
+    strength: z.enum(['strong', 'moderate', 'weak']),
+    role: z.string()
+  })).length(3),
+  keyHarmonyClash: z.array(z.object({
+    type: z.enum(['harmony', 'clash']),
+    pillars: z.string(),
+    implication: z.string()
+  }))
+})
+
+const CoverageMapSchema = z.object({
+  submissionId: z.string(),
+  dayMaster: z.object({ used: z.boolean(), insightIds: z.array(z.number()) }),
+  tenGods: z.object({ used: z.boolean(), insightIds: z.array(z.number()), coverage: z.array(z.string()) }),
+  elements: z.object({ used: z.boolean(), insightIds: z.array(z.number()), coverage: z.array(z.string()) }),
+  harmonies: z.object({ used: z.boolean(), insightIds: z.array(z.number()), coverage: z.array(z.string()) }),
+  clashes: z.object({ used: z.boolean(), insightIds: z.array(z.number()), coverage: z.array(z.string()) }),
+  spirits: z.object({ used: z.boolean(), insightIds: z.array(z.number()), coverage: z.array(z.string()) }),
+  lifeStages: z.object({ used: z.boolean(), insightIds: z.array(z.number()), coverage: z.array(z.string()) }),
+  fortunes: z.object({ used: z.boolean(), insightIds: z.array(z.number()), coverage: z.array(z.string()) }),
+  emptyPoints: z.object({ used: z.boolean(), insightIds: z.array(z.number()), coverage: z.array(z.string()) }),
+  nobleBenefactors: z.object({ used: z.boolean(), insightIds: z.array(z.number()), coverage: z.array(z.string()) }),
+  totalFields: z.number(),
+  coveredFields: z.number(),
+  coveragePercentage: z.number()
+})
+
+const InsightMapV2Schema = z.object({
   submissionId: z.string(),
   createdAt: z.string(),
   clientInfo: z.object({
     name: z.string(),
     dayMaster: z.string(),
     lifeStage: z.string(),
-    yongsin: z.string()
+    yongsin: z.object({
+      exists: z.boolean(),
+      element: z.string().optional()
+    })
   }),
-  insights: z.array(InsightClaimSchema).length(9),
-  version: z.literal('1.0'),
+  coreDiagnosis: CoreDiagnosisPackSchema,
+  blueprints: z.array(InsightBlueprintSchema).length(9),
+  coverage: CoverageMapSchema,
+  version: z.literal('2.0'),
   stagePassed: z.literal('analysis')
 })
 
 export async function POST(request: Request) {
   try {
-    const { name, sajuData, submissionId } = await request.json()
+    const { name, gender, birthDate, sajuData, submissionId } = await request.json()
 
     if (!sajuData || !submissionId) {
       return NextResponse.json(
@@ -70,85 +131,66 @@ export async function POST(request: Request) {
       )
     }
 
-    // 모든 사주 데이터를 정렬된 형식으로 준비 (근거 추적용)
-    const allSajuFields = {
-      dayMaster: sajuData.dayPillar?.stem || '',
-      dayMasterKorean: sajuData.dayMasterKorean || '',
-      dayPillar: `${sajuData.dayPillar?.fullName || ''}`,
-      lifeStage: sajuData.gyeokguk || '',
-      yongsin: sajuData.eokbuYongsin || '',
-      energyLevel: sajuData.sinGangSinYak?.grade || '',
-      elementBasic: sajuData.elementBalance ? Object.entries(sajuData.elementBalance).map(([k, v]) => `${k}:${v}`).join(', ') : '',
-      elementAdjusted: sajuData.elementBalanceAdjusted ? Object.entries(sajuData.elementBalanceAdjusted).map(([k, v]) => `${k}:${v}`).join(', ') : '',
-      tenGodsPresent: sajuData.tenGods?.present.join(', ') || 'None',
-      tenGodsMissing: sajuData.tenGods?.missing.join(', ') || 'None',
-      twelveStars: sajuData.twelveStars?.map(s => `${s.position}:${s.star}`).join(', ') || '',
-      cheongganHap: sajuData.cheongganHap?.join(', ') || 'None',
-      jijiYughap: sajuData.jijiYughap?.join(', ') || 'None',
-      jijiSamhap: sajuData.jijiSamhap?.join(', ') || 'None',
-      jijiBanghap: sajuData.jijiBanghap?.join(', ') || 'None',
-      cheongganChung: sajuData.cheongganChung?.join(', ') || 'None',
-      jijiChung: sajuData.jijiChung?.join(', ') || 'None',
-      hyung: sajuData.hyeong?.join(', ') || 'None',
-      pa: sajuData.pa?.join(', ') || 'None',
-      hae: sajuData.hae?.join(', ') || 'None',
-      wonjin: sajuData.wonjin?.join(', ') || 'None',
-      gongmang: sajuData.gongmang?.join(', ') || 'None',
-      spirits: sajuData.spirits?.join(', ') || '',
-      gilseong: sajuData.gilseong ? `cheonul:${sajuData.gilseong.cheonul?.join(',')} taegeuk:${sajuData.gilseong.taegeuk?.join(',')}` : '',
-      daewoon: sajuData.daewoon?.map(d => `${d.startAge}-${d.endAge}:${d.fullName}`).join(', ') || '',
-      yeonwoon: sajuData.yeonwoon?.map(y => `${y.year}:${y.fullName}`).join(', ') || ''
-    }
-
     const masterpieceGuideStr = JSON.stringify(SAJU_MASTERPIECE_GUIDE, null, 2)
 
-    const analysisPrompt = `You are a Korean fortune-telling (Saju) expert performing STAGE 1: ANALYSIS.
+    const allSajuFields = {
+      dayMaster: sajuData.dayPillar?.stem || '',
+      dayPillarFull: sajuData.dayPillar?.fullName || '',
+      lifeStage: sajuData.gyeokguk || '',
+      yongsin: sajuData.eokbuYongsin || '',
+      shinGang: sajuData.sinGangSinYak?.grade || '',
+      shinGangRatio: sajuData.sinGangSinYak?.ratio || 0,
+      elementBasic: sajuData.elementBalance ? JSON.stringify(sajuData.elementBalance) : '',
+      elementAdjusted: sajuData.elementBalanceAdjusted ? JSON.stringify(sajuData.elementBalanceAdjusted) : '',
+      tenGodsPresent: sajuData.tenGods?.present.join(', ') || '',
+      tenGodsMissing: sajuData.tenGods?.missing.join(', ') || '',
+      twelveStars: sajuData.twelveStars?.map(s => `${s.position}:${s.star}`).join(', ') || '',
+      harmonies: [sajuData.cheongganHap, sajuData.jijiYughap, sajuData.jijiSamhap, sajuData.jijiBanghap].filter(Boolean).flat().join(', '),
+      clashes: [sajuData.cheongganChung, sajuData.jijiChung].filter(Boolean).flat().join(', '),
+      spirits: sajuData.spirits?.join(', ') || '',
+      gongmang: sajuData.gongmang?.join(', ') || '',
+      daewoon: sajuData.daewoon?.map(d => `${d.startAge}-${d.endAge}:${d.fullName}`).slice(0, 3).join(', ') || '',
+      yeonwoon2026: sajuData.yeonwoon?.find(y => y.year === 2026)?.fullName || ''
+    }
 
-Your task: Generate exactly 9 InsightClaims based on the provided saju data.
-Each claim must have MINIMUM 2 DIFFERENT saju data points as evidence.
+    const analysisPrompt = `You are a Saju expert performing STAGE 1: Analysis (v2).
 
-CRITICAL RULES:
-1. PRESERVE ALL SAJU DATA - Every field listed below must be referenced at least once across all 9 claims
-2. Each evidence must reference actual dataField names (shown below)
-3. Include mechanism (WHY this saju element creates this trait)
-4. Every insight must be FALSIFIABLE (would NOT apply to someone with different month branch/yongsin)
-5. Use SAJU_MASTERPIECE_GUIDE for interpretation framework
+TASK: Generate InsightMapV2 with 3 components:
+1. CoreDiagnosisPack: 신강/격/용신 핵심 진단 (3개 지표)
+2. InsightBlueprint[9]: 각 인사이트의 설계도 (본문 아님, 청사진)
+3. CoverageMap: 모든 사주 필드 감시 (audit용)
 
-AVAILABLE SAJU DATA (ALL must be used):
+KEY RULES:
+1. CoreDiagnosisPack의 yongsin.exists는 정확히 판단 (false면 Stage 2에서 용신 단어 금지)
+2. InsightBlueprint는 "thesis + mechanismSteps + lifeSceneCandidates + mustUseEvidence"로 구성
+3. lifeSceneCandidates는 반드시 현실 장면 (직업/관계/이동 등)
+4. CoverageMap에서 모든 saju 필드 포함도 확인 (본문 강제 아님!)
+5. 하나의 필드도 누락하지 않기
+
+SAJU DATA:
 ${JSON.stringify(allSajuFields, null, 2)}
 
-SAJU_MASTERPIECE_GUIDE REFERENCE:
-${masterpieceGuideStr}
+GUIDE:
+${masterpieceGuideStr.substring(0, 5000)}...
 
-GENERATE 9 INSIGHTS with this domain distribution:
-- Insight 1-3: personality (character vibe, inner reversal, energy stat)
-- Insight 4-6: career + lifestyle (micro-action, social persona, career match)
-- Insight 7-9: fortune + destiny (reality check, fortune update, hero's journey)
+생성 후:
+- CoreDiagnosis.yongsin.exists: 용신 실제 존재 여부 정확히 판단
+- 9개 Blueprint의 lifeSceneCandidates는 구체적인 장면으로 (추상성 금지)
+- CoverageMap에서 모든 필드 1회 이상 사용 확인`
 
-EXAMPLE EVIDENCE STRUCTURE:
-{
-  "type": "day_master",
-  "value": "甲 (Wood Day Master)",
-  "dataField": "dayPillar",
-  "explanation": "Wood element 35 points, excess compared to earth"
-}
-
-Return VALID JSON matching InsightMapSchema.`
-
-    // GPT-4o로 Structured Output 생성
-    const { object: insightMap } = await generateObject({
+    const { object: insightMapV2 } = await generateObject({
       model: 'openai/gpt-4o-mini',
-      schema: InsightMapSchema,
+      schema: InsightMapV2Schema,
       prompt: analysisPrompt,
-      system: `You are a Saju analysis expert. Respond ONLY with valid JSON matching the schema.
-All evidence dataFields must match the provided saju field names.
-No data fields should be left unused.`
+      system: 'You are a Saju analysis expert. Generate InsightMapV2 with CoreDiagnosisPack, 9 Blueprints, and CoverageMap. Respond ONLY with valid JSON.'
     })
 
-    console.log(`[v0] Analysis complete: ${insightMap.insights.length} insights generated`)
-    console.log(`[v0] Saju fields used: ${new Set(insightMap.insights.flatMap(i => i.evidence.map(e => e.dataField))).size} unique fields`)
+    console.log(`[v0] Stage 1 Analysis complete:`)
+    console.log(`  - CoreDiagnosis: yongsin.exists = ${insightMapV2.coreDiagnosis.yongsin.exists}`)
+    console.log(`  - 9 Blueprints generated`)
+    console.log(`  - Coverage: ${insightMapV2.coverage.coveragePercentage}% (${insightMapV2.coverage.coveredFields}/${insightMapV2.coverage.totalFields} fields)`)
 
-    return NextResponse.json(insightMap)
+    return NextResponse.json({ insightMap: insightMapV2 })
   } catch (error) {
     console.error('[v0] Analysis API error:', error)
     return NextResponse.json(
