@@ -166,6 +166,9 @@ function trackMasterpieceUsage(facts: ValidatedFact[]): {
     keyConceptsReferenced: Array.from(keyConceptsReferenced)
   }
 }
+
+/**
+ * DDT (Data Density Test)
  * 사주 데이터가 충분히 포함되었는가?
  * - 천간(Day Master): 1점
  * - 십신(Ten Gods): 1점
