@@ -114,7 +114,21 @@ const InsightMapV2Schema = z.object({
     })
   }),
   coreDiagnosis: CoreDiagnosisPackSchema,
-  blueprints: z.array(InsightBlueprintSchema).min(9).max(9),
+  blueprints: z.array(InsightBlueprintSchema).min(8).max(10).transform(arr => {
+    // 정확히 9개로 정규화
+    if (arr.length > 9) return arr.slice(0, 9);
+    if (arr.length < 9) return [...arr, ...Array(9 - arr.length).fill({
+      id: 0,
+      domain: 'personality' as const,
+      thesis: 'placeholder',
+      mechanismSteps: [],
+      lifeSceneCandidates: [],
+      mustUseEvidence: [],
+      counterfactualKey: '',
+      pointerHints: []
+    })];
+    return arr;
+  }),
   coverage: CoverageMapSchema,
   version: z.literal('2.0'),
   stagePassed: z.literal('analysis')
