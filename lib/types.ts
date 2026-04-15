@@ -135,7 +135,125 @@ export interface Fact {
   category: string
   title?: string
   isMasked?: boolean
+}
+
+// ========== SAJU 3-STAGE PIPELINE TYPES ==========
+
+/**
+ * Evidence: 근거 데이터 (천간, 십신, 오행, 합충 등 구체적인 사주 요소)
+ * - 모든 사주 데이터를 세부적으로 추적하여 생략/삭제 방지
+ */
+export interface Evidence {
+  type: 'day_master' | 'ten_gods' | 'element' | 'harmony' | 'clash' | 'spirit' | 'life_stage' | 'fortune' | 'empty_point' | 'noble_benefactor' | 'other'
+  value: string // e.g. "甲 (Day Master)", "食神 (Eating God)", "木 40 points"
+  dataField: string // 원본 데이터 필드명 (생략 방지용)
+  explanation: string // 근거 설명
+}
+
+/**
+ * Mechanism: 해석 메커니즘 (왜 이 근거가 이 성질을 만드는가?)
+ */
+export interface Mechanism {
+  principle: string // e.g. "Wood + Water = Flow + Communication"
+  sajuRule: string // e.g. "Eating God + Day Master 甲 = Creative Expression"
+  psychologicalImpact: string // Gen Z 톤의 심리적 해석
+}
+
+/**
+ * InsightClaim: 단일 인사이트 (원본 사주 데이터를 근거로 한 주장)
+ * - 9개 문장 중 1개에 해당
+ */
+export interface InsightClaim {
+  id: number
+  domain: 'personality' | 'career' | 'relationship' | 'fortune' | 'lifestyle'
+  thesis: string // 핵심 주장 (e.g. "You are a natural communicator with hidden leadership")
+  
+  // 근거 추적 (모든 사주 데이터 보존)
+  evidence: Evidence[] // 최소 2개 이상, 최대 5개
+  
+  // 해석 메커니즘
+  mechanism: Mechanism
+  
+  // 시간 범위 (대운/월지 연동)
+  eventWindow?: {
+    type: 'current' | 'next_10_years' | 'next_3_years' | '2026' | 'lifetime'
+    description: string
   }
+  
+  // 위험/주의사항
+  risk?: string // e.g. "tendency to overthink due to Water excess"
+  
+  // 액션 아이템
+  strategy: string // e.g. "daily 30-min no-disturb routine to channel creativity"
+  
+  // 검증 데이터 (Barnum 필터/반사실 테스트 통과 여부)
+  validationScore?: number // 0-1, 얼마나 고유한가?
+  isCounterfactualValid?: boolean // 다른 월지에는 성립하지 않나?
+}
+
+/**
+ * InsightMap: 분석 단계 (Stage 1) 의 전체 결과
+ * - 모든 사주 데이터를 근거로 한 9개 인사이트
+ */
+export interface InsightMap {
+  submissionId: string
+  createdAt: string
+  
+  // 고객 정보 (원본 데이터 보존)
+  clientInfo: {
+    name: string
+    dayMaster: string
+    lifeStage: string // 격국
+    yongsin: string // 용신
+  }
+  
+  // 9개의 인사이트 (각각이 최종 9문장 중 1개로 변환될 예정)
+  insights: InsightClaim[]
+  
+  // 메타데이터
+  version: '1.0'
+  stagePassed: 'analysis' // 분석 단계 통과 표시
+}
+
+/**
+ * ValidatedFact: 검증 단계 (Stage 3) 의 최종 결과
+ * - DDT (Data Density Test) + Counterfactual 통과한 9문장
+ */
+export interface ValidatedFact {
+  id: number
+  title: string
+  content: string // 최종 생성된 1-2 문장
+  
+  // 검증 데이터
+  evidenceCount: number // 포함된 근거 개수
+  dataDensityScore: number // DDT 점수 (0-100)
+  counterfactualValid: boolean // 다른 월지에는 성립하지 않나? 
+  qualityFlags: string[] // 주의사항 (empty)
+  
+  // 추적 가능성 (근거 명시)
+  trackedEvidence: string[] // 이 문장의 근거가 되는 사주 요소들
+}
+
+/**
+ * ValidatedReport: 최종 보고서 (Stage 3 완료)
+ * - 검증 통과한 9개 검증된 문장 + 메타데이터
+ */
+export interface ValidatedReport {
+  submissionId: string
+  facts: ValidatedFact[]
+  
+  // 전체 검증 결과
+  totalDataDensityScore: number // 평균 DDT
+  allCounterfactualValid: boolean // 모두 고유한가?
+  passedQualityGate: boolean
+  
+  // 통계
+  totalEvidenceUsed: number // 사용된 총 사주 데이터 포인트
+  uniqueDataFields: string[] // 사용된 모든 사주 필드명
+  
+  createdAt: string
+  stagePassed: 'validation' // 검증 단계 통과 표시
+}
 
 export interface ReportSection {
   key: string
