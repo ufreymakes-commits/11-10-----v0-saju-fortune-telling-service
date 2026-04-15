@@ -318,7 +318,7 @@ export interface InsightBlueprint {
   pointerHints: string[] // ["sinGangSinYak.grade", "elementBalanceAdjusted.wood", ...]
   
   // 용신 주의사항
-  yongsinNote?: string // yongsin.exists=false면 여기에 대체 설명
+  yongsinNote?: string // yongsin.exists=false면 ���기에 대체 설명
 }
 
 /**
@@ -378,7 +378,10 @@ export interface InsightMapV2 {
 }
 
 // ===== Legacy Support (호환성) =====
- * - DDT (Data Density Test) + Counterfactual 통과한 9문장
+
+/**
+ * ValidatedFact: 검증 단계 (Stage 3) 의 최종 결과
+ * DDT (Data Density Test) + Counterfactual 통과한 9문장
  */
 export interface ValidatedFact {
   id: number
