@@ -216,7 +216,168 @@ export interface InsightMap {
 }
 
 /**
- * ValidatedFact: 검증 단계 (Stage 3) 의 최종 결과
+ * MechanismStep: 인과 단계별 설명 (2-4개의 단계)
+ * 각 단계마다 데이터 포인터 포함
+ */
+export interface MechanismStep {
+  step: number
+  cause: string // e.g. "신강 90점"
+  effect: string // e.g. "결정력 강함"
+  dataPointer: string // 참조 필드 (e.g. "sinGangSinYak.grade")
+  generationHint: string // 2-5문장 생성 시 이 인과 관계를 어떻게 표현할지
+}
+
+/**
+ * LifeSceneCandidate: 현실에서 검증 가능한 장면 (반사실 테스트용)
+ */
+export interface LifeSceneCandidate {
+  domain: 'career' | 'relationship' | 'mobility' | 'finance' | 'social' | 'health'
+  scenario: string // e.g. "high-pressure job with rapid decision-making"
+  expectedBehavior: string // e.g. "thrives and leads naturally"
+  counterfactualBreaker?: string // e.g. "if Water dominated instead, would feel overwhelmed"
+}
+
+/**
+ * CoreDiagnosisPack: Stage 1의 필수 산출물
+ * 모든 9개 InsightBlueprint의 기초가 되는 핵심 진단
+ */
+export interface CoreDiagnosisPack {
+  submissionId: string
+  
+  // 신강/격/용신 핵심 3지표
+  shinGangGrade: string // "Strong" | "Moderate" | "Weak"
+  shinGangRatio: number // 0-100
+  gapSurvey: {
+    // 모든 오행 포함
+    woodStatus: 'excess' | 'balanced' | 'deficient'
+    fireStatus: 'excess' | 'balanced' | 'deficient'
+    earthStatus: 'excess' | 'balanced' | 'deficient'
+    metalStatus: 'excess' | 'balanced' | 'deficient'
+    waterStatus: 'excess' | 'balanced' | 'deficient'
+  }
+  
+  // 용신 (존재 여부 명시)
+  yongsin: {
+    exists: boolean // 핵심! 없으면 "용신" 단어 금지
+    element?: string
+    rationale?: string
+    alternatives?: string[] // 용신이 없으면 "차선의 오행" 명시
+  }
+  
+  // 조후 (계절 영향)
+  jojo: {
+    season: string
+    impact: string
+    adjustmentFactor: number
+  }
+  
+  // 상위 십신 3개 (기능 기반)
+  topTenGods: Array<{
+    name: string
+    strength: 'strong' | 'moderate' | 'weak'
+    role: string
+  }>
+  
+  // 핵심 합충 (존재하는 것만)
+  keyHarmonyClash: Array<{
+    type: 'harmony' | 'clash'
+    pillars: string
+    implication: string
+  }>
+}
+
+/**
+ * InsightBlueprint: Stage 1의 설계도
+ * 실제 9개 InsightClaim을 생성하기 위한 청사진
+ * (본문에 "모든 필드 사용" 억지로 끼우지 않음)
+ */
+export interface InsightBlueprint {
+  id: number
+  domain: 'personality' | 'career' | 'relationship' | 'fortune' | 'lifestyle'
+  
+  // 핵심 주장 (짧음)
+  thesis: string // e.g. "You thrive under pressure"
+  
+  // 인과 관계: 2-4개 단계
+  mechanismSteps: MechanismStep[]
+  
+  // 현실 검증 (반사실 포함)
+  lifeSceneCandidates: LifeSceneCandidate[]
+  
+  // 필수 근거 (본문에 반드시 포함되어야 함)
+  mustUseEvidence: Array<{
+    type: string
+    value: string
+    dataField: string
+  }>
+  
+  // 반사실 테스트용 키
+  counterfactualKey: string // "이게 바뀌면 이 주장은 무너짐" (e.g. "if Water=0 and Metal=95")
+  
+  // 포인터 (최종 문장에 표기할 데이터 참조 위치)
+  pointerHints: string[] // ["sinGangSinYak.grade", "elementBalanceAdjusted.wood", ...]
+  
+  // 용신 주의사항
+  yongsinNote?: string // yongsin.exists=false면 여기에 대체 설명
+}
+
+/**
+ * CoverageMap: 모든 사주 필드가 9개 인사이트에서 최소 1회 이상 사용되었는가?
+ * (본문 강제가 아니라 audit으로 추적)
+ */
+export interface CoverageMap {
+  submissionId: string
+  dayMaster: { used: boolean; insightIds: number[] }
+  tenGods: { used: boolean; insightIds: number[]; coverage: string[] }
+  elements: { used: boolean; insightIds: number[]; coverage: string[] }
+  harmonies: { used: boolean; insightIds: number[]; coverage: string[] }
+  clashes: { used: boolean; insightIds: number[]; coverage: string[] }
+  spirits: { used: boolean; insightIds: number[]; coverage: string[] }
+  lifeStages: { used: boolean; insightIds: number[]; coverage: string[] }
+  fortunes: { used: boolean; insightIds: number[]; coverage: string[] }
+  emptyPoints: { used: boolean; insightIds: number[]; coverage: string[] }
+  nobleBenefactors: { used: boolean; insightIds: number[]; coverage: string[] }
+  
+  // 통계
+  totalFields: number
+  coveredFields: number
+  coveragePercentage: number
+}
+
+/**
+ * InsightMapV2: 개선된 구조
+ * Stage 1 → CoreDiagnosisPack + InsightBlueprint[9] 생성
+ * (더 이상 InsightClaim 직접 생성 안 함)
+ */
+export interface InsightMapV2 {
+  submissionId: string
+  createdAt: string
+  
+  // 고객 정보
+  clientInfo: {
+    name: string
+    dayMaster: string
+    lifeStage: string
+    yongsin: {
+      exists: boolean
+      element?: string
+    }
+  }
+  
+  // 핵심 진단
+  coreDiagnosis: CoreDiagnosisPack
+  
+  // 9개 설계도
+  blueprints: InsightBlueprint[]
+  
+  // 커버리지 감사
+  coverage: CoverageMap
+  
+  version: '2.0'
+  stagePassed: 'analysis'
+}
+
+// ===== Legacy Support (호환성) =====
  * - DDT (Data Density Test) + Counterfactual 통과한 9문장
  */
 export interface ValidatedFact {
