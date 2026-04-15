@@ -76,7 +76,7 @@ const CoreDiagnosisPackSchema = z.object({
     name: z.string(),
     strength: z.enum(['strong', 'moderate', 'weak']),
     role: z.string()
-  })).length(3),
+  })).min(1).max(5),
   keyHarmonyClash: z.array(z.object({
     type: z.enum(['harmony', 'clash']),
     pillars: z.string(),
@@ -114,7 +114,7 @@ const InsightMapV2Schema = z.object({
     })
   }),
   coreDiagnosis: CoreDiagnosisPackSchema,
-  blueprints: z.array(InsightBlueprintSchema).length(9),
+  blueprints: z.array(InsightBlueprintSchema).min(9).max(9),
   coverage: CoverageMapSchema,
   version: z.literal('2.0'),
   stagePassed: z.literal('analysis')

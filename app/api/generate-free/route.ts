@@ -185,63 +185,12 @@ export async function POST(req: Request) {
     try {
       insightMapV2 = await callAnalyzeAPI(name, gender, birth_date, saju_data)
     } catch (error) {
-      console.error('[v0] Stage 1 failed:', error)
-      // Fallback: Skip insight map v2, use basic structure
-      insightMapV2 = {
-        submissionId,
-        createdAt: new Date().toISOString(),
-        clientInfo: {
-          name,
-          dayMaster: saju_data.dayPillar?.stem || '',
-          lifeStage: saju_data.gyeokguk || '',
-          yongsin: {
-            exists: !!saju_data.eokbuYongsin,
-            element: saju_data.eokbuYongsin
-          }
-        },
-        coreDiagnosis: {
-          submissionId,
-          shinGangGrade: saju_data.sinGangSinYak?.grade || 'Unknown',
-          shinGangRatio: saju_data.sinGangSinYak?.ratio || 0,
-          gapSurvey: {
-            woodStatus: 'balanced',
-            fireStatus: 'balanced',
-            earthStatus: 'balanced',
-            metalStatus: 'balanced',
-            waterStatus: 'balanced'
-          },
-          yongsin: {
-            exists: !!saju_data.eokbuYongsin,
-            element: saju_data.eokbuYongsin
-          },
-          jojo: {
-            season: 'Unknown',
-            impact: 'Unknown',
-            adjustmentFactor: 1
-          },
-          topTenGods: [],
-          keyHarmonyClash: []
-        },
-        blueprints: [],
-        coverage: {
-          submissionId,
-          dayMaster: { used: false, insightIds: [] },
-          tenGods: { used: false, insightIds: [], coverage: [] },
-          elements: { used: false, insightIds: [], coverage: [] },
-          harmonies: { used: false, insightIds: [], coverage: [] },
-          clashes: { used: false, insightIds: [], coverage: [] },
-          spirits: { used: false, insightIds: [], coverage: [] },
-          lifeStages: { used: false, insightIds: [], coverage: [] },
-          fortunes: { used: false, insightIds: [], coverage: [] },
-          emptyPoints: { used: false, insightIds: [], coverage: [] },
-          nobleBenefactors: { used: false, insightIds: [], coverage: [] },
-          totalFields: 0,
-          coveredFields: 0,
-          coveragePercentage: 0
-        },
-        version: '2.0',
-        stagePassed: 'analysis'
-      }
+      console.error('[v0] Stage 1 failed, returning error response')
+      // Stage 1 실패 시 에러 반환
+      return NextResponse.json(
+        { error: 'Failed to analyze saju data. Please try again.', details: error instanceof Error ? error.message : '' },
+        { status: 500 }
+      )
     }
 
     const freeFacts = await generateFactsFromInsightMap(insightMapV2)
