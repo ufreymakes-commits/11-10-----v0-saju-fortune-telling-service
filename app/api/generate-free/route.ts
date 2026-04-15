@@ -151,7 +151,7 @@ Directive: Explain the "Social License" granted by the world based on the Month 
 Must Include: Modern career translation of Gyeok-guk terms (e.g., Proper Resource -> Professional Knowledge Licenser).
 
 **Section 06. Career Industry Layer (Elemental Matching)**
-Directive: Refer to CAREER_MODULE in [SAJU_MASTERPIECE_GUIDE] to pinpoint the industry and work format (Business vs. Organization) where the client naturally shines. Suggest categories so specific that the client reacts with, "Chills... that's exactly what I've been interested in lately!". Consider 'Life Tier (Gyeok-guk)', 'Ten Gods Present', 'Adjusted Score', 'Spirits' in CLIENT DATA.
+Directive: Refer to module_career and career in [SAJU_MASTERPIECE_GUIDE] to pinpoint the industry and work format (Business vs. Organization) where the client naturally shines. Suggest categories so specific that the client reacts with, "Chills... that's exactly what I've been interested in lately!". Consider 'Life Tier (Gyeok-guk)', 'Ten Gods Present', 'Adjusted Score', 'Spirits' in CLIENT DATA.
 Must Include: "By any chance, aren't you interested in this (Industry) as a (Role)?" phrasing.
 
 **Section 07. Reality Check (Deficiency Risk)**
