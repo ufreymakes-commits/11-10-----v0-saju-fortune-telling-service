@@ -130,41 +130,7 @@ Current Age Fortune: ${currentDaeyun ? currentDaeyun.startAge + '-' + currentDae
 ## 9 SECTIONS - DETAILED DIRECTIVES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Section 01. Character Vibe Check (Identity Metaphor)
-Directive: By analyzing the Day Master and the highest Adjusted Score, reveal the character metaphor. Metaphorize the Day Master (e.g., 己-Small Land, 庚-Rock) as a natural object, then set the environment (weather/location) based on the element with the highest Adjusted Score (e.g., strong Fire = "Under the Sunlight", strong Water = "Deep Sea at Night"). When the outward personality of the Day Master conflicts with the inner energy (Adjusted Score or element placement), apply the keywords "Hidden Charm" or "Inner Strength, Outer Softness." Consider Day Master, Adjusted Score, and Five Element Count in CLIENT DATA.
-Must Include: Main Character Title, Vibe Check, "You are like [Day Master Metaphor] in [Environment]" phrasing.
-
-Section 02. Structural Context (Environmental Dynamics)
-Directive: Define the inherent nature of the Day Pillar (e.g., Gi-mi = Dry and solid soil). Analyze the impact of the highest element from the Adjusted Score (caused by Combinations, Heavenly Clash, or Earthly Clash) on the Day Pillar. Describe the "Weight of Life" or the "Overload of Energy" (e.g., high Wealth = Weight of wealth/responsibilities, high Output = Overload of expression). Mention the difficulty of this environment but always present the "Reward/Achievement" (Wealth, Honor, etc.) that comes after overcoming it. Consider Day Pillar, Adjusted Score, Heavenly Clash, and Earthly Clash in CLIENT DATA.
-Must Include: Structural Difficulty Analysis, Potential Reward, Environmental Impact.
-
-Section 03. Psychological Logic (Inner Causal Links)
-Directive: Connect the Ten Gods Missing and Ten Gods Present to derive psychological characteristics (e.g., Missing Output + Excessive Wealth = Anxiety from obsession with results). Translate Spirits into psychological traits: Original Essence (Wonjin) or Spirits (like Gwi-mun) = "Sensitivity/Insight," Hwa-gae = "Artistry/Solitude," and Yeok-ma = "Desire for Change." Explain how the Day Pillar (the root) helps or requires effort depending on whether it supports the self (Friend/Resource) or consumes power (Output/Wealth/Official). Consider Ten Gods Present, Ten Gods Missing, Spirits, Original Essence (Wonjin), and Day Pillar in CLIENT DATA.
-Must Include: "Psychological Logic" mapping, Sensitivity vs. Insight analysis.
-
-Section 04. Actionable Advice (Strategic Solution)
-Directive: Transform the Destiny Element (Yongsin) into actual behavior (e.g., Wood = Study/Growth, Fire = External Activity/PR). Define high-intensity Spirits (e.g., Hyeon-chim, Yeok-ma) as the user's "Weapons" (e.g., Hyeon-chim = Professional Technique, Yeok-ma = Global Activity). Provide a "Real-life Remedy" using metaphorical imagery, such as "Building a dam (Earth) to block the wave (Water)," and suggest specific items like certifications, hobbies, or attitudes. Consider Destiny Element (Yongsin) and Spirits in CLIENT DATA.
-Must Include: "Behavioral Transformation" of Yong-sin, "Sinsal as a Tool" rule.
-
-Section 05. Social Persona (Rule vs. Freedom)
-Directive: Analyze the score and presence of "Gwan-seong" (Official Star) within Ten Gods Present. If "Gwan-seong" is 10~40 (Appropriate), define them as a "Pillar of the Organization" (Civil service, Admin). If 0~9 (Deficient), define them as a "Free Soul" who should avoid rigid hierarchies. If 50+ (Excessive), warn about perfectionism and self-censorship. Focus on the client's "Survival Potential" and "Psychological Comfort" within an organization. Consider Ten Gods Present and Adjusted Score (Career Module) in CLIENT DATA.
-Must Include: "Hierarchy vs. Freedom" verdict, Recommended work environment.
-
-Section 06. Career Industry Layer (Field & Function)
-Directive: Refer to the highest Adjusted Score to match the "Industry" (Wood=Edu/Startup, Fire=Media/IT, Earth=Real Estate/Consulting, Metal=Medical/Legal, Water=IT/Logistics). Then, use the dominant Ten Gods Present to determine the "Job Function" (Output=Creative/Production, Resource=Planning/Research). Define the role specifically: "You should sail a [Ten Gods Function] ship in the [Element Industry] sea." Consider Adjusted Score, Ten Gods Present, and Life Tier (Gyeok-guk) in CLIENT DATA.
-Must Include: Industry (Field) x Function (Role) matching.
-
-Section 07. Reality Check (Wealth & Format)
-Directive: Determine the "Work Format" based on the Energy Level: If Strong, recommend Entrepreneur/Freelancer/Independent; if Weak, recommend Organization/System-dependent. For "Wealth Strategy" (Jae-seong), if the score is 10~40, encourage direct wealth capture; if 50+, warn against excessive greed and recommend delegating asset management. Provide a clear "Reality Check" on whether they should be an independent soldier or part of a regular army. Consider Energy Level, Ten Gods Present, and Adjusted Score in CLIENT DATA.
-Must Include: "Independent vs. Organization" verdict, Wealth Management strategy.
-
-Section 08. Hero's Scene 01 (Landscape of Existence & Deficiency)
-Directive: Compose exactly two sentences for this paragraph. In Sentence 1 (Identity), place the Day Master as the protagonist on the stage of the Day Pillar's environment and describe it like a landscape painting. In Sentence 2 (Deficiency/Excess), declare that Ten Gods Missing or excessive elements are not flaws, but rather the source of the protagonist's unique potential or energy. Frame the "Deficiency" as a poetic positive. Consider Day Master, Adjusted Score, and Five Element Count in CLIENT DATA.
-Must Include: "Visual Metaphor" of the Saju 원국, Poetic reinterpretation of 0-point elements.
-
-Section 09. Hero's Scene 02 (Inner Jewel & Promised Season)
-Directive: Compose exactly two sentences for this paragraph. In Sentence 1 (Disposition), translate the sensitivity of Spirits or the desires of Ten Gods Present into a "Jewel-like Talent" or "Literary Disposition" rather than a struggle. In Sentence 2 (Future), use Destiny Element (Yongsin), Noble Benefactors, and 2026 Prediction to metaphorize the upcoming luck as a "Promised Season" or the "Appearance of a Benefactor," ending with a soulful confirmation of success. Consider Spirits, Ten Gods Present, Destiny Element (Yongsin), Noble Benefactors, Great Fortune (10-Year), Current Age Fortune, and 2026 Prediction in CLIENT DATA.
-Must Include: "Inner Talent" metaphor, Confident finale about the "Season of Success."
+Based on all the provided Saju data, generate 9 uniquely profound sentences that are so disturbingly accurate they give the client goosebumps. These insights must be uncomfortably sharp, hitting the mark with surgical precision. Channel the wisdom of a Saju grandmaster with 30 years of experience to comprehensively synthesize the complex interplay of the eight pillars. Each sentence should encompass the person's core truth: their worldview, recurring internal monologues, the feedback they constantly hear from others, and their instinctive career leanings.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ## OUTPUT FORMAT
