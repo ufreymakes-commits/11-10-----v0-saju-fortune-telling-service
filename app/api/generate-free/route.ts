@@ -115,11 +115,13 @@ Relationships:
 - Heavenly Stem Harmony: ${sajuData.cheongganHap?.length ? sajuData.cheongganHap.join(' / ') : 'None'}
 - Earthly Branch Harmony: ${sajuData.jijiYughap?.length ? sajuData.jijiYughap.join(' / ') : 'None'}
 - Three Harmony: ${sajuData.jijiSamhap?.length ? sajuData.jijiSamhap.join(' / ') : 'None'}
+- Four Harmony: ${sajuData.jijiBanghap?.length ? sajuData.jijiBanghap.join(' / ') : 'None'}
 - Heavenly Clash: ${sajuData.cheongganChung?.length ? sajuData.cheongganChung.join(' / ') : 'None'}
 - Earthly Clash: ${sajuData.jijiChung?.length ? sajuData.jijiChung.join(' / ') : 'None'}
 - Harm: ${sajuData.hyung?.length ? sajuData.hyung.join(' / ') : 'None'}
 - Break: ${sajuData.pa?.length ? sajuData.pa.join(' / ') : 'None'}
 - Punishment: ${sajuData.hae?.length ? sajuData.hae.join(' / ') : 'None'}
+- Original Essence (Wonjin): ${sajuData.wonjin?.length ? sajuData.wonjin.join(' / ') : 'None'}
 
 Spirits: ${sinsalStr}
 Noble Benefactors: ${gilseongStr}
