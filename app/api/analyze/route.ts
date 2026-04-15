@@ -114,21 +114,7 @@ const InsightMapV2Schema = z.object({
     })
   }),
   coreDiagnosis: CoreDiagnosisPackSchema,
-  blueprints: z.array(InsightBlueprintSchema).min(8).max(10).transform(arr => {
-    // 정확히 9개로 정규화
-    if (arr.length > 9) return arr.slice(0, 9);
-    if (arr.length < 9) return [...arr, ...Array(9 - arr.length).fill({
-      id: 0,
-      domain: 'personality' as const,
-      thesis: 'placeholder',
-      mechanismSteps: [],
-      lifeSceneCandidates: [],
-      mustUseEvidence: [],
-      counterfactualKey: '',
-      pointerHints: []
-    })];
-    return arr;
-  }),
+  blueprints: z.array(InsightBlueprintSchema).length(9),
   coverage: CoverageMapSchema,
   version: z.literal('2.0'),
   stagePassed: z.literal('analysis')
@@ -169,17 +155,22 @@ export async function POST(request: Request) {
 
     const analysisPrompt = `You are a Saju expert performing STAGE 1: Analysis (v2).
 
+CRITICAL: You MUST generate EXACTLY 9 InsightBlueprints. No more, no less.
+
 TASK: Generate InsightMapV2 with 3 components:
 1. CoreDiagnosisPack: 신강/격/용신 핵심 진단 (3개 지표)
-2. InsightBlueprint[9]: 각 인사이트의 설계도 (본문 아님, 청사진)
+2. InsightBlueprint[9]: EXACTLY 9개 인사이트 설계도 (본문 아님, 청사진)
+   - ID 1-3: Personality (character, inner self, energy)
+   - ID 4-6: Career & Lifestyle (action, social, career)
+   - ID 7-9: Fortune & Destiny (reality check, season, hero's journey)
 3. CoverageMap: 모든 사주 필드 감시 (audit용)
 
 KEY RULES:
-1. CoreDiagnosisPack의 yongsin.exists는 정확히 판단 (false면 Stage 2에서 용신 단어 금지)
-2. InsightBlueprint는 "thesis + mechanismSteps + lifeSceneCandidates + mustUseEvidence"로 구성
-3. lifeSceneCandidates는 반드시 현실 장면 (직업/관계/이동 등)
-4. CoverageMap에서 모든 saju 필드 포함도 확인 (본문 강제 아님!)
-5. 하나의 필드도 누락하지 않기
+1. blueprints 배열의 길이는 반드시 9 (JSON에 id: 1~9인 항목 정확히 9개)
+2. CoreDiagnosisPack의 yongsin.exists는 정확히 판단 (false면 Stage 2에서 용신 단어 금지)
+3. InsightBlueprint는 "thesis + mechanismSteps(2-4개) + lifeSceneCandidates(1-2개) + mustUseEvidence(2-3개)"로 구성
+4. lifeSceneCandidates는 반드시 현실 장면 (직업/관계/이동 등)
+5. CoverageMap에서 모든 saju 필드 포함도 확인
 
 SAJU DATA:
 ${JSON.stringify(allSajuFields, null, 2)}
@@ -187,10 +178,10 @@ ${JSON.stringify(allSajuFields, null, 2)}
 GUIDE:
 ${masterpieceGuideStr.substring(0, 5000)}...
 
-생성 후:
-- CoreDiagnosis.yongsin.exists: 용신 실제 존재 여부 정확히 판단
-- 9개 Blueprint의 lifeSceneCandidates는 구체적인 장면으로 (추상성 금지)
-- CoverageMap에서 모든 필드 1회 이상 사용 확인`
+VALIDATION:
+- blueprints.length === 9 (MUST be exactly 9)
+- All blueprint.id values from 1 to 9
+- No duplicates in blueprint IDs`
 
     const { object: insightMapV2 } = await generateObject({
       model: 'openai/gpt-4o-mini',
