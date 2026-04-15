@@ -76,7 +76,7 @@ const CoreDiagnosisPackSchema = z.object({
     name: z.string(),
     strength: z.enum(['strong', 'moderate', 'weak']),
     role: z.string()
-  })).min(1).max(5),
+  })).min(1),
   keyHarmonyClash: z.array(z.object({
     type: z.enum(['harmony', 'clash']),
     pillars: z.string(),
