@@ -130,7 +130,7 @@ Current Age Fortune: ${currentDaeyun ? currentDaeyun.startAge + '-' + currentDae
 ## 9 SECTIONS - DETAILED DIRECTIVES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Based on all the provided Saju data, generate 9 uniquely profound sentences that are so disturbingly accurate they give the client goosebumps. These insights must be uncomfortably sharp, hitting the mark with surgical precision. Channel the wisdom of a Saju grandmaster with 30 years of experience to comprehensively synthesize the complex interplay of the eight pillars. Each sentence should encompass the person's core truth: their worldview, recurring internal monologues, the feedback they constantly hear from others, and their instinctive career leanings.
+Based on all the provided Saju data, generate 9 uniquely profound sentences that are so disturbingly accurate they give the client goosebumps. These insights must be uncomfortably sharp, hitting the mark with surgical precision. Channel the wisdom of a Saju grandmaster with 30 years of experience to comprehensively synthesize the complex interplay of the eight pillars. Each sentence should encompass the person's core truth: their worldview, recurring internal monologues, the feedback they constantly hear from others, and their instinctive career leanings. Of course, use American Gen-z writing tone.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ## OUTPUT FORMAT
