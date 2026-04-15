@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { ValidatedFact, ValidatedReport } from '@/lib/types'
+import { SAJU_MASTERPIECE_GUIDE } from '@/lib/saju/masterpiece'
 
 /**
  * Stage 3: 검증 API (Validation Pipeline)
@@ -31,7 +32,140 @@ interface ValidationRequest {
 }
 
 /**
- * DDT (Data Density Test)
+ * Masterpiece Guide 일치도 검증
+ * SAJU_MASTERPIECE_GUIDE의 내용과 생성된 문장이 부합하는가?
+ * 
+ * 검사 항목:
+ * 1. Gen Z 톤 사용: "giving", "lowkey", "main character energy", "no cap", "Red Flag" 등
+ * 2. 메커니즘 설명: 왜 이 사주 요소가 이 성질을 만드는가? (abstract 해석 금지)
+ * 3. 섹션별 가이드라인 준수: 일간/십신/오행/합충/신살 등 정확히 사용
+ * 4. Barnum 필터: 일반적인 표현 제거
+ */
+function validateMasterpieceAlignment(
+  fact: { id: number; title: string; content: string },
+  evidenceTypes: string[]
+): { score: number; issues: string[] } {
+  const issues: string[] = []
+  let score = 100
+
+  // 1. Gen Z 톤 확인
+  const genZTones = ['giving', 'lowkey', 'main character', 'no cap', 'red flag', 
+                     'vibe', 'chills', 'energy', 'literally', 'honestly', 'facts']
+  const hasGenZTone = genZTones.some(tone => fact.content.toLowerCase().includes(tone))
+  
+  if (!hasGenZTone && evidenceTypes.length > 0) {
+    issues.push('Gen Z tone not prominent')
+    score -= 10
+  }
+
+  // 2. 구체적인 사주 요소 언급 확인
+  const specificElements = ['master', 'god', 'element', 'harmony', 'clash', 'spirit', 'stage', 'fortune']
+  const hasSajuElements = specificElements.some(elem => fact.content.toLowerCase().includes(elem))
+  
+  if (!hasSajuElements && evidenceTypes.length > 0) {
+    issues.push('Missing specific Saju elements reference')
+    score -= 15
+  }
+
+  // 3. 메커니즘/원인 설명 확인 ("because", "이유는", "따라서" 등)
+  const mechanismKeywords = ['because', '때문에', '이유로', '따라서', '결과', 'due to', 'as a result']
+  const hasMechanism = mechanismKeywords.some(kw => fact.content.toLowerCase().includes(kw))
+  
+  if (!hasMechanism && evidenceTypes.length >= 2) {
+    issues.push('Mechanism/explanation missing - too abstract')
+    score -= 20
+  }
+
+  // 4. Barnum 키워드 재확인
+  const barnumTerms = ['sometimes', 'may', 'can be', 'adaptable', 'both', 'sensitive']
+  const hasBarnum = barnumTerms.some(term => fact.content.toLowerCase().includes(term))
+  
+  if (hasBarnum) {
+    issues.push('Barnum effect detected - too generic')
+    score -= 25
+  }
+
+  // 5. 섹션별 가이드라인 검증
+  // Section 1-3: 성격/심리 → day_master, ten_gods 필수
+  if (fact.id <= 3 && !evidenceTypes.includes('day_master') && !evidenceTypes.includes('ten_gods')) {
+    issues.push('Section 1-3: missing day_master or ten_gods')
+    score -= 10
+  }
+
+  // Section 4-6: 경력/사회역할 → element, harmony/clash, career 데이터 필수
+  if (fact.id >= 4 && fact.id <= 6) {
+    const hasCareerEvidence = evidenceTypes.includes('element') || 
+                             evidenceTypes.includes('harmony') || 
+                             evidenceTypes.includes('clash')
+    if (!hasCareerEvidence) {
+      issues.push('Section 4-6: missing career-related evidence')
+      score -= 10
+    }
+  }
+
+  // Section 7-9: 운세/미래 → fortune, life_stage 필수
+  if (fact.id >= 7) {
+    const hasFortuneEvidence = evidenceTypes.includes('fortune') || 
+                              evidenceTypes.includes('life_stage')
+    if (!hasFortuneEvidence) {
+      issues.push('Section 7-9: missing fortune/life_stage evidence')
+      score -= 10
+    }
+  }
+
+  return {
+    score: Math.max(0, score),
+    issues
+  }
+}
+
+/**
+ * Masterpiece Guide 데이터 활용도 검증
+ * 생성된 9개 문장이 SAJU_MASTERPIECE_GUIDE의 어떤 부분을 활용했는가?
+ */
+function trackMasterpieceUsage(facts: ValidatedFact[]): {
+  modulesUsed: string[]
+  keyConceptsReferenced: string[]
+} {
+  const modulesUsed = new Set<string>()
+  const keyConceptsReferenced = new Set<string>()
+
+  const contentJoined = facts.map(f => f.content).join(' ')
+
+  // masterpiece.ts의 주요 모듈 추적
+  const masterpiececModules = Object.keys(SAJU_MASTERPIECE_GUIDE)
+    .filter(key => typeof SAJU_MASTERPIECE_GUIDE[key as keyof typeof SAJU_MASTERPIECE_GUIDE] === 'object')
+
+  masterpiececModules.forEach(module => {
+    const moduleContent = JSON.stringify(SAJU_MASTERPIECE_GUIDE[module as keyof typeof SAJU_MASTERPIECE_GUIDE])
+    if (contentJoined.toLowerCase().includes(module.replace(/_/g, ' '))) {
+      modulesUsed.add(module)
+    }
+  })
+
+  // 핵심 개념 추적
+  const keyPhrases = [
+    'gen z',
+    'main character',
+    'microaction',
+    'remedy',
+    'life stage',
+    'element',
+    'noble benefactor',
+    'hero journey'
+  ]
+
+  keyPhrases.forEach(phrase => {
+    if (contentJoined.toLowerCase().includes(phrase)) {
+      keyConceptsReferenced.add(phrase)
+    }
+  })
+
+  return {
+    modulesUsed: Array.from(modulesUsed),
+    keyConceptsReferenced: Array.from(keyConceptsReferenced)
+  }
+}
  * 사주 데이터가 충분히 포함되었는가?
  * - 천간(Day Master): 1점
  * - 십신(Ten Gods): 1점
@@ -121,6 +255,9 @@ export async function POST(request: Request) {
 
       const ddt = calculateDataDensityScore(evidenceTypes)
       const isCounterfactual = isCounterfactualValid(fact.content, evidenceTypes)
+      
+      // Masterpiece 일치도 검증 추가
+      const masterpieceAlignment = validateMasterpieceAlignment(fact, evidenceTypes)
 
       return {
         id: fact.id,
@@ -129,7 +266,10 @@ export async function POST(request: Request) {
         evidenceCount: evidenceTypes.length,
         dataDensityScore: Math.round(ddt),
         counterfactualValid: isCounterfactual,
-        qualityFlags: !isCounterfactual ? ['Too generic / Barnum effect detected'] : [],
+        qualityFlags: [
+          ...(!isCounterfactual ? ['Too generic / Barnum effect detected'] : []),
+          ...(masterpieceAlignment.issues)
+        ],
         trackedEvidence: dataFields,
       }
     })
@@ -148,6 +288,9 @@ export async function POST(request: Request) {
       new Set(validatedFacts.flatMap(f => f.trackedEvidence))
     )
 
+    // Masterpiece 가이드라인 활용도 추적
+    const masterpieceUsage = trackMasterpieceUsage(validatedFacts)
+
     const report: ValidatedReport = {
       submissionId,
       facts: validatedFacts,
@@ -165,6 +308,8 @@ export async function POST(request: Request) {
       totalDDT: report.totalDataDensityScore,
       counterfactualValid: report.allCounterfactualValid,
       passedQualityGate: report.passedQualityGate,
+      masterpieceModulesUsed: masterpieceUsage.modulesUsed,
+      keyConceptsReferenced: masterpieceUsage.keyConceptsReferenced,
     })
 
     return NextResponse.json(report)
