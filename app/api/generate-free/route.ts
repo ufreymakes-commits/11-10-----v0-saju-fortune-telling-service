@@ -128,48 +128,6 @@ async function callAnalyzeAPI(
   
   return insightMap
 }
-  name: string,
-  gender: string,
-  birthCountry: string,
-  birthDate: string,
-  sajuData: SajuData
-): Promise<Fact[]> {
-  const prompt = await buildPromptFromSajuData(name, gender, birthCountry, birthDate, sajuData)
-
-  console.log('[v0] Prompt generated, length:', prompt.length)
-
-  const result = await generateText({
-    model: 'openai/gpt-4o-mini',
-    prompt,
-    temperature: 0.7,
-    maxOutputTokens: 2500,
-  })
-
-  console.log('[v0] API response received')
-
-  try {
-    const jsonMatch = result.text.match(/```json\n([\s\S]*?)\n```/)
-    if (!jsonMatch) throw new Error('JSON format not found')
-
-    const parsed = JSON.parse(jsonMatch[1])
-    const facts: Fact[] = parsed.facts.map((f: any, idx: number) => ({
-      id: f.id || idx + 1,
-      category: f.category || 'unknown',
-      title: f.title || '',
-      text: f.content || f.text || 'No content'
-    }))
-
-    return facts
-  } catch (error) {
-    console.error('[v0] JSON parse error:', result.text.substring(0, 500))
-    return [{
-      id: 1,
-      category: 'error',
-      title: 'Analysis Error',
-      text: 'An error occurred while processing your saju analysis.'
-    }]
-  }
-}
 
 // POST handler
 export async function POST(req: Request) {
