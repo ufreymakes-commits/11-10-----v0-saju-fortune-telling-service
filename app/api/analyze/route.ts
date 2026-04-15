@@ -198,8 +198,11 @@ VALIDATION:
     return NextResponse.json({ insightMap: insightMapV2 })
   } catch (error) {
     console.error('[v0] Analysis API error:', error)
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    console.error('[v0] Error details:', errorMsg)
+    
     return NextResponse.json(
-      { error: 'Failed to analyze saju data', details: error instanceof Error ? error.message : '' },
+      { error: 'Failed to analyze saju data', details: errorMsg },
       { status: 500 }
     )
   }

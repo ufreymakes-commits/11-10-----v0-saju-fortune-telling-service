@@ -14,6 +14,18 @@ import { SAJU_MASTERPIECE_GUIDE } from '@/lib/saju/masterpiece'
  */
 async function generateFactsFromInsightMap(insightMapV2: InsightMapV2): Promise<Fact[]> {
   console.log('[v0] Stage 2: Generating 9 sections from InsightMapV2 blueprints')
+  console.log('[v0] Blueprints count:', insightMapV2.blueprints.length)
+
+  // blueprints가 비어있거나 9개 미만이면 폴백
+  if (!insightMapV2.blueprints || insightMapV2.blueprints.length < 9) {
+    console.warn('[v0] Blueprints incomplete, generating basic facts instead')
+    return Array.from({ length: 9 }, (_, i) => ({
+      id: i + 1,
+      text: `Unable to generate detailed insight ${i + 1}. Please ensure saju data is complete.`,
+      category: `Insight ${i + 1}`,
+      title: `Insight ${i + 1}`
+    }))
+  }
 
   // BlueprintHints에서 포인터 정보 추출
   const allPointers = new Set<string>()
