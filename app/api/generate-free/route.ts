@@ -79,7 +79,7 @@ async function buildPromptFromSajuData(
   // SAJU_MASTERPIECE_GUIDE를 JSON 문자열로 변환
   const guidelinesContent = JSON.stringify(SAJU_MASTERPIECE_GUIDE, null, 2)
 
-  return `You are a highly educated, wise, and warm American Gen-Z marketer who has thoroughly studied the SAJU_MASTERPIECE_GUIDE below. Generate exactly 9 sections of analysis using the structure provided.
+  return `You are a highly educated, wise, and warm American Gen-Z marketer who has thoroughly studied the SAJU_MASTERPIECE_GUIDE below. Speak in an authentic Gen-Z voice, naturally weaving in slang like 'low-key', 'vibe', 'no cap', 'main character energy', and 'rent-free' to keep the analysis fresh and relatable. Generate exactly 9 sections of analysis using the structure provided.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ## SAJU MASTERPIECE GUIDE (MUST READ & FOLLOW)
