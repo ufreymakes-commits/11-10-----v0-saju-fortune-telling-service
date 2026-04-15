@@ -25,35 +25,42 @@ async function generateFactsFromInsightMap(insightMap: InsightMap): Promise<Fact
 
   console.log('[v0] Tracked Saju Data Fields:', Array.from(allEvidenceFields).join(', '))
 
-  const factsPrompt = `You are generating Gen-Z style personalized Saju insights based on a structured Insight Map. Each sentence must directly reference the specific Saju elements and mechanisms provided.
+  const factsPrompt = `You are a Saju analyst writing hyper-personalized insights. Write 9 sections describing THIS SPECIFIC PERSON's life, not general truths.
 
-CRITICAL REQUIREMENTS:
-1. Generate exactly 9 sentences (1-2 sentences each)
-2. Each sentence MUST include at least 2 evidence references from the Insight Map
-3. Reference specific Saju data fields: Day Master, Ten Gods, Elements, Harmonies, Clashes, Spirits, Life Stages, Fortunes
-4. Include the mechanism (WHY this data creates this trait)
-5. NO generic Barnum language - be brutally specific to this chart
-6. Gen-Z tone: "Main Character Energy", "giving", "lowkey", "Red Flag", "no cap"
+CORE RULES (CRITICAL):
+1. Length: 2-3 sentences per section ONLY (not 1-2, not 3-5)
+2. Every section MUST end with ⟦data pointer 1⟧ ⟦data pointer 2-3⟧ showing the Saju basis
+3. Write AS IF describing real life scenes: "When you enter a meeting..." NOT "You tend to be..."
+4. NO abstract psychology - describe actual patterns THIS PERSON exhibits
+5. Section 4, 5, or 6 MUST be career-specific (industry + role suggestion)
+6. If yongsin.exists = false, NEVER use word "용신" - use element names + adjustment scores instead
+7. Gen-Z tone but grounded: "gives main character energy in pressure situations" not "may sometimes be assertive"
 
-All Saju Data Fields Being Used:
-${Array.from(allEvidenceFields).join(', ')}
+Saju Data Points for Pointers:
+- sinGangSinYak.grade (신강/약)
+- elementBalanceAdjusted (오행 조정)
+- tenGods.present (십신 존재)
+- harmonies/clashes (합충)
+- lifeStage (12운성)
+- daeyun (대운)
+- yongsin.status (존재 여부)
 
 Insight Map:
 ${JSON.stringify(insightMap, null, 2)}
 
-Respond ONLY with valid JSON (no markdown text before or after):
+OUTPUT FORMAT - EXACTLY:
 \`\`\`json
 {
   "facts": [
-    {"id": 1, "title": "[Title from Insight 1]", "content": "[1-2 sentences with evidence references]"},
-    {"id": 2, "title": "[Title from Insight 2]", "content": "[1-2 sentences with evidence references]"},
-    {"id": 3, "title": "[Title from Insight 3]", "content": "[1-2 sentences with evidence references]"},
-    {"id": 4, "title": "[Title from Insight 4]", "content": "[1-2 sentences with evidence references]"},
-    {"id": 5, "title": "[Title from Insight 5]", "content": "[1-2 sentences with evidence references]"},
-    {"id": 6, "title": "[Title from Insight 6]", "content": "[1-2 sentences with evidence references]"},
-    {"id": 7, "title": "[Title from Insight 7]", "content": "[1-2 sentences with evidence references]"},
-    {"id": 8, "title": "[Title from Insight 8]", "content": "[1-2 sentences with evidence references]"},
-    {"id": 9, "title": "[Title from Insight 9]", "content": "[1-2 sentences with evidence references]"}
+    {"id": 1, "title": "[Title]", "content": "[2-3 real-life sentences describing actual behavior] ⟦pointer1⟧ ⟦pointer2⟧"},
+    {"id": 2, "title": "[Title]", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
+    {"id": 3, "title": "[Title]", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
+    {"id": 4, "title": "[Career/Social - REQUIRED]", "content": "[2-3 sentences: specific industry + role suggestion + why they'd excel] ⟦pointer1⟧ ⟦pointer2⟧"},
+    {"id": 5, "title": "[Title]", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
+    {"id": 6, "title": "[Title]", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
+    {"id": 7, "title": "[Title]", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
+    {"id": 8, "title": "[Title]", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
+    {"id": 9, "title": "[Title]", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"}
   ]
 }
 \`\`\``
