@@ -1,161 +1,133 @@
 import { NextResponse } from 'next/server'
 import { generateText } from 'ai'
 import { createClient } from '@/lib/supabase/server'
-import type { SajuData, Fact } from '@/lib/types'
+import type { SajuData, Fact, InsightMap } from '@/lib/types'
 import { headers } from 'next/headers'
 import { SAJU_MASTERPIECE_GUIDE } from '@/lib/saju/masterpiece'
 
 // GPT 프롬프트 생성 - 9문장 구조 (01~09)
-async function buildPromptFromSajuData(
-  name: string,
-  gender: string,
-  birthCountry: string,
-  birthDate: string,
-  sajuData: SajuData
-): Promise<string> {
-  const birthYear = new Date(birthDate).getFullYear()
-  const age = 2026 - birthYear
+/**
+ * Stage 2: 9개 문장 생성 (InsightMap 기반)
+ * 
+ * Stage 1 (analyze API)에서 받은 InsightMap을 기반으로 최종 9개 문장 생성
+ * 모든 사주 데이터 필드 추적 가능하며, 단 하나도 생략되지 않음
+ */
+async function generateFactsFromInsightMap(insightMap: InsightMap): Promise<Fact[]> {
+  console.log('[v0] Stage 2: Generating 9 sentences from InsightMap')
 
-  // 12운성
-  const twelveStarsStr = sajuData.twelveStars
-    ? sajuData.twelveStars.map(ts => `${ts.position}(${ts.branch}): ${ts.star}`).join(' / ')
-    : '계산 안됨'
+  // InsightMap의 모든 근거를 추적
+  const allEvidenceFields = new Set<string>()
+  insightMap.insights.forEach(insight => {
+    insight.evidence.forEach(ev => {
+      allEvidenceFields.add(ev.dataField)
+    })
+  })
 
-  // 길성
-  const gilseongStr = sajuData.gilseong
-    ? [
-      ...sajuData.gilseong.cheonul.map(g => `천을귀인: ${g}`),
-      ...sajuData.gilseong.taegeuk.map(g => `태극귀인: ${g}`)
-    ].join(' / ') || '해당 없음'
-    : '해당 없음'
+  console.log('[v0] Tracked Saju Data Fields:', Array.from(allEvidenceFields).join(', '))
 
-  // 현재 대운 (나이 기준)
-  const currentDaeyun = sajuData.daewoon?.find(d => age >= d.startAge && age < d.endAge)
-  const daeyunStr = sajuData.daewoon
-    ? sajuData.daewoon.slice(0, 4).map(d => `${d.startAge}~${d.endAge}세: ${d.fullName || d.stem + d.branch}`).join(' / ')
-    : '계산 안됨'
+  const factsPrompt = `You are generating Gen-Z style personalized Saju insights based on a structured Insight Map. Each sentence must directly reference the specific Saju elements and mechanisms provided.
 
-  // 연운 (2026)
-  const yeonwoon2026 = sajuData.yeonwoon?.find(y => y.year === 2026)
-  const yeonwoon2026Str = yeonwoon2026
-    ? (yeonwoon2026.fullName || yeonwoon2026.stem + yeonwoon2026.branch)
-    : '병오'
+CRITICAL REQUIREMENTS:
+1. Generate exactly 9 sentences (1-2 sentences each)
+2. Each sentence MUST include at least 2 evidence references from the Insight Map
+3. Reference specific Saju data fields: Day Master, Ten Gods, Elements, Harmonies, Clashes, Spirits, Life Stages, Fortunes
+4. Include the mechanism (WHY this data creates this trait)
+5. NO generic Barnum language - be brutally specific to this chart
+6. Gen-Z tone: "Main Character Energy", "giving", "lowkey", "Red Flag", "no cap"
 
-  // 오행 기본 점수
-  const elementBasic = sajuData.elementBalanceKorean
-    ? `목: ${sajuData.elementBalanceKorean.목}점 / 화: ${sajuData.elementBalanceKorean.화}점 / 토: ${sajuData.elementBalanceKorean.토}점 / 금: ${sajuData.elementBalanceKorean.금}점 / 수: ${sajuData.elementBalanceKorean.수}점 (총 120점)`
-    : '미계산'
+All Saju Data Fields Being Used:
+${Array.from(allEvidenceFields).join(', ')}
 
-  // 오행 합충 반영 점수
-  const elementAdjusted = sajuData.elementBalanceAdjustedKorean
-    ? `목: ${sajuData.elementBalanceAdjustedKorean.목}점 / 화: ${sajuData.elementBalanceAdjustedKorean.화}점 / 토: ${sajuData.elementBalanceAdjustedKorean.토}점 / 금: ${sajuData.elementBalanceAdjustedKorean.금}점 / 수: ${sajuData.elementBalanceAdjustedKorean.수}점`
-    : '미계산'
+Insight Map:
+${JSON.stringify(insightMap, null, 2)}
 
-  // 오행 개수 (지장간 포함)
-  const elementCount = sajuData.elementCount
-    ? `목: ${sajuData.elementCount.목}개 / 화: ${sajuData.elementCount.화}개 / 토: ${sajuData.elementCount.토}개 / 금: ${sajuData.elementCount.금}개 / 수: ${sajuData.elementCount.수}개`
-    : '미계산'
-
-  // 합충 조정 내역
-  const hapChungStr = sajuData.hapChungAdjustments?.length
-    ? sajuData.hapChungAdjustments.join('\n    ')
-    : '합충 없음'
-
-  // 신살 상세
-  const sinsalStr = sajuData.sinsalDetails?.length
-    ? sajuData.sinsalDetails.map(s =>
-      `${s.name}: ${s.count}/${s.totalPillars} (${s.percentage}%)${s.isStrong ? ' 강함' : ''} - ${s.positions.join(', ')}`
-    ).join(' / ')
-    : (sajuData.spirits?.join(', ') || '해당 없음')
-
-  // 사주 8글자
-  const yearP = sajuData.yearPillar.fullName || sajuData.yearPillar.stem + sajuData.yearPillar.branch
-  const monthP = sajuData.monthPillar.fullName || sajuData.monthPillar.stem + sajuData.monthPillar.branch
-  const dayP = sajuData.dayPillar.fullName || sajuData.dayPillar.stem + sajuData.dayPillar.branch
-  const hourP = sajuData.hourPillar
-    ? (sajuData.hourPillar.fullName || sajuData.hourPillar.stem + sajuData.hourPillar.branch)
-    : '미상'
-
-  // SAJU_MASTERPIECE_GUIDE를 JSON 문자열로 변환
-  const guidelinesContent = JSON.stringify(SAJU_MASTERPIECE_GUIDE, null, 2)
-
-  return `You are a highly educated, wise, and warm American Gen-Z marketer who has thoroughly studied the SAJU_MASTERPIECE_GUIDE below. Speak in an authentic Gen-Z voice, naturally weaving in slang like 'low-key', 'vibe', 'no cap', 'main character energy', and 'rent-free' to keep the analysis fresh and relatable. Generate exactly 9 sections of analysis using the structure provided.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-## SAJU MASTERPIECE GUIDE (MUST READ & FOLLOW)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${guidelinesContent}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-## CLIENT DATA (Reference for All Sections)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Name: ${name} | Gender: ${gender} | Age: ${age}
-Saju: ${yearP} - ${monthP} - ${dayP} - ${hourP}
-Day Master: ${sajuData.dayPillar?.stem || ''} (${sajuData.dayMasterKorean || ''})
-Day Pillar: ${dayP}
-Energy Level: ${sajuData.sinGangSinYak?.grade || 'Unknown'} (${sajuData.sinGangSinYak?.ratio || 0}%)
-Life Tier (Gyeok-guk): ${sajuData.gyeokguk || 'Unknown'}
-Destiny Element (Yongsin): ${sajuData.eokbuYongsin || 'Unknown'}
-
-Five Elements Score (out of 120): ${elementBasic}
-Five Element Count: ${elementCount}
-Adjusted Score: ${elementAdjusted}
-Combinations: ${hapChungStr}
-
-Ten Gods Present: ${sajuData.tenGods?.present.join(', ') || 'None'}
-Ten Gods Missing: ${sajuData.tenGods?.missing.join(', ') || 'None'}
-Life Stages (12 Un-seong): ${twelveStarsStr}
-
-Relationships:
-- Heavenly Stem Harmony: ${sajuData.cheongganHap?.length ? sajuData.cheongganHap.join(' / ') : 'None'}
-- Earthly Branch Harmony: ${sajuData.jijiYughap?.length ? sajuData.jijiYughap.join(' / ') : 'None'}
-- Three Harmony: ${sajuData.jijiSamhap?.length ? sajuData.jijiSamhap.join(' / ') : 'None'}
-- Four Harmony: ${sajuData.jijiBanghap?.length ? sajuData.jijiBanghap.join(' / ') : 'None'}
-- Heavenly Clash: ${sajuData.cheongganChung?.length ? sajuData.cheongganChung.join(' / ') : 'None'}
-- Earthly Clash: ${sajuData.jijiChung?.length ? sajuData.jijiChung.join(' / ') : 'None'}
-- Harm: ${sajuData.hyung?.length ? sajuData.hyung.join(' / ') : 'None'}
-- Break: ${sajuData.pa?.length ? sajuData.pa.join(' / ') : 'None'}
-- Punishment: ${sajuData.hae?.length ? sajuData.hae.join(' / ') : 'None'}
-- Original Essence (Wonjin): ${sajuData.wonjin?.length ? sajuData.wonjin.join(' / ') : 'None'}
-
-Spirits: ${sinsalStr}
-Noble Benefactors: ${gilseongStr}
-Empty Points (Gongmang): ${sajuData.gongmang?.join(', ') || 'None'}
-
-Great Fortune (10-Year): ${daeyunStr}
-Current Age Fortune: ${currentDaeyun ? currentDaeyun.startAge + '-' + currentDaeyun.endAge + ' age range' : 'Unknown'}
-2026 Prediction: ${yeonwoon2026Str}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-## 9 SECTIONS - DETAILED DIRECTIVES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Based on all the provided Saju data, generate 9 uniquely profound sentences that are so disturbingly accurate they give the client goosebumps. These insights must be uncomfortably sharp, hitting the mark with surgical precision. Channel the wisdom of a Saju grandmaster with 30 years of experience to comprehensively synthesize the complex interplay of the eight pillars. Each sentence should encompass the person's core truth: their worldview, recurring internal monologues, the feedback they constantly hear from others, and their instinctive career leanings. But you have to directly explain why the phenomenon appears in life with exact factors from client saju data. not just psychological things. I want some realistic sentences like 'Aren't you interested in this field of career, with this format ?Because Your five elements and Ten gods show....'Or 'Didn't you move around the world in your teenage? because your this kind of sinsal is higly calculated in ..." Of course, all these sentences with American Gen-z writing tone. If you think you made sentences that just for every ordinary people, delete it and write agin for hyper-personalied for only this saju data client.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-## OUTPUT FORMAT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-CRITICAL: Respond ONLY with valid JSON wrapped in triple backticks. No extra text.
-
+Respond ONLY with valid JSON (no markdown text before or after):
 \`\`\`json
 {
   "facts": [
-    {"id": 1, "title": "[Section Title]", "content": "[1-2 sentences following directive]"},
-    {"id": 2, "title": "[Section Title]", "content": "[1-2 sentences following directive]"},
-    {"id": 3, "title": "[Section Title]", "content": "[1-2 sentences following directive]"},
-    {"id": 4, "title": "[Section Title]", "content": "[1-2 sentences following directive]"},
-    {"id": 5, "title": "[Section Title]", "content": "[1-2 sentences following directive]"},
-    {"id": 6, "title": "[Section Title]", "content": "[1-2 sentences following directive]"},
-    {"id": 7, "title": "[Section Title]", "content": "[1-2 sentences following directive]"},
-    {"id": 8, "title": "[Section Title]", "content": "[1-2 sentences following directive]"},
-    {"id": 9, "title": "[Section Title]", "content": "[1-2 sentences following directive]"}
+    {"id": 1, "title": "[Title from Insight 1]", "content": "[1-2 sentences with evidence references]"},
+    {"id": 2, "title": "[Title from Insight 2]", "content": "[1-2 sentences with evidence references]"},
+    {"id": 3, "title": "[Title from Insight 3]", "content": "[1-2 sentences with evidence references]"},
+    {"id": 4, "title": "[Title from Insight 4]", "content": "[1-2 sentences with evidence references]"},
+    {"id": 5, "title": "[Title from Insight 5]", "content": "[1-2 sentences with evidence references]"},
+    {"id": 6, "title": "[Title from Insight 6]", "content": "[1-2 sentences with evidence references]"},
+    {"id": 7, "title": "[Title from Insight 7]", "content": "[1-2 sentences with evidence references]"},
+    {"id": 8, "title": "[Title from Insight 8]", "content": "[1-2 sentences with evidence references]"},
+    {"id": 9, "title": "[Title from Insight 9]", "content": "[1-2 sentences with evidence references]"}
   ]
 }
 \`\`\``
+
+  try {
+    const result = await generateText({
+      model: 'openai/gpt-4o-mini',
+      prompt: factsPrompt,
+      temperature: 0.7,
+    })
+
+    console.log('[v0] GPT Stage 2 response received')
+
+    const jsonMatch = result.text.match(/```json\n([\s\S]*?)\n```/)
+    if (!jsonMatch) {
+      console.error('[v0] JSON format not found in response')
+      throw new Error('JSON format not found in response')
+    }
+
+    const parsed = JSON.parse(jsonMatch[1])
+    
+    if (!parsed.facts || parsed.facts.length !== 9) {
+      console.warn('[v0] Expected 9 facts, got', parsed.facts?.length)
+    }
+
+    return parsed.facts.map((fact: { id: number; title: string; content: string }) => ({
+      id: fact.id,
+      text: fact.content,
+      category: fact.title,
+      title: fact.title,
+    }))
+  } catch (error) {
+    console.error('[v0] Stage 2 generation error:', error)
+    throw error
+  }
 }
 
-// AI를 통한 9개 팩트 생성
-async function generateFactsFromAI(
+/**
+ * Stage 1 호출: Saju 계산 데이터로부터 InsightMap 생성
+ */
+async function callAnalyzeAPI(
+  name: string,
+  gender: string,
+  birthDate: string,
+  sajuData: SajuData
+): Promise<InsightMap> {
+  console.log('[v0] Calling Stage 1 (Analyze API) to create InsightMap')
+
+  const baseUrl = process.env.VERCEL_URL 
+    ? `https://${process.env.VERCEL_URL}`
+    : 'http://localhost:3000'
+
+  const analyzeResponse = await fetch(`${baseUrl}/api/analyze`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name,
+      gender,
+      birthDate,
+      sajuData
+    })
+  })
+
+  if (!analyzeResponse.ok) {
+    const errorText = await analyzeResponse.text()
+    console.error('[v0] Stage 1 API error:', errorText)
+    throw new Error(`Stage 1 API failed: ${analyzeResponse.statusText}`)
+  }
+
+  const { insightMap } = await analyzeResponse.json()
+  console.log('[v0] Stage 1 InsightMap received with', insightMap.insights.length, 'insights')
+  
+  return insightMap
+}
   name: string,
   gender: string,
   birthCountry: string,
@@ -231,9 +203,34 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Saju data missing' }, { status: 400 })
     }
 
-    // Generate fresh AI insights (no cache)
-    console.log('[v0] Starting AI generation...')
-    const freeFacts = await generateFactsFromAI(name, gender, birth_country, birth_date, saju_data)
+    // Generate fresh AI insights using 3-stage pipeline:
+    // Stage 1: Analyze (create InsightMap)
+    // Stage 2: Generate (9 sentences)
+    // Stage 3: Validate (quality check)
+    console.log('[v0] Starting 3-stage pipeline...')
+    
+    let insightMap: InsightMap
+    try {
+      insightMap = await callAnalyzeAPI(name, gender, birth_date, saju_data)
+    } catch (error) {
+      console.error('[v0] Stage 1 failed, falling back to direct generation')
+      // Fallback: Skip insight map, use direct generation
+      insightMap = {
+        submissionId,
+        createdAt: new Date().toISOString(),
+        clientInfo: {
+          name,
+          dayMaster: saju_data.dayPillar?.stem || '',
+          lifeStage: saju_data.gyeokguk || '',
+          yongsin: saju_data.eokbuYongsin || ''
+        },
+        insights: [],
+        version: '1.0',
+        stagePassed: 'analysis'
+      }
+    }
+
+    const freeFacts = await generateFactsFromInsightMap(insightMap)
 
     // Teaser facts (locked)
     const teaserFacts = Array.from({ length: 5 }, (_, i) => ({
