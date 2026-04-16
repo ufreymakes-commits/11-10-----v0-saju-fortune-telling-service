@@ -42,50 +42,131 @@ CORE RULES:
 7. Domains: Personality (1-3) → Career/Lifestyle (4-6) → Fortune/Destiny (7-9)`
 
     // ===== USER PROMPT (변수: 고객 데이터 + 요청) =====
+    // 십신별 개수 계산
+    const tenGodsCounts: Record<string, number> = {}
+    if (saju_data.tenGods?.present) {
+      saju_data.tenGods.present.forEach(tenGod => {
+        tenGodsCounts[tenGod] = (tenGodsCounts[tenGod] || 0) + 1
+      })
+    }
+    
+    // 십신 포맷팅: "비견 (3개), 식신 (2개)" 형식
+    const tenGodsFormatted = Object.entries(tenGodsCounts)
+      .map(([name, count]) => `${name} (${count}개)`)
+      .join(', ')
+    
     const allSajuData = {
+      // 기본 정보
       name,
       gender,
       birthDate: birth_date,
+      birthCountry: birth_country,
+      
+      // 4주 (천간/지지)
+      fourPillars: {
+        yearPillar: `${saju_data.yearPillar?.stem || ''}${saju_data.yearPillar?.branch || ''}`,
+        monthPillar: `${saju_data.monthPillar?.stem || ''}${saju_data.monthPillar?.branch || ''}`,
+        dayPillar: `${saju_data.dayPillar?.stem || ''}${saju_data.dayPillar?.branch || ''}`,
+        hourPillar: saju_data.hourPillar ? `${saju_data.hourPillar.stem}${saju_data.hourPillar.branch}` : 'N/A'
+      },
+      
+      // 일간 (중요)
       dayMaster: saju_data.dayPillar?.stem || '',
       dayMasterKorean: saju_data.dayMasterKorean || '',
+      
+      // 격국
       lifeStage: saju_data.gyeokguk || '',
+      
+      // 신강/신약
       energyGrade: saju_data.sinGangSinYak?.grade || '',
       energyRatio: saju_data.sinGangSinYak?.ratio || 0,
-      // 오행 점수 3가지
+      
+      // 오행 점수 3가지 (모두 포함)
       elementBasic: saju_data.elementBalanceKorean || {}, // 지장간 미포함
       elementWithHiddenStems: saju_data.elementBalanceWithHiddenStemsKorean || {}, // 지장간 포함
       elementAdjusted: saju_data.elementBalanceAdjustedKorean || {}, // 합충 반영
       elementCount: saju_data.elementCount || {},
+      dominantElement: saju_data.dominantElement || '',
+      
+      // 십신 (개수 포함)
       tenGodsPresent: saju_data.tenGods?.present || [],
+      tenGodsPresentWithCount: tenGodsFormatted,
       tenGodsMissing: saju_data.tenGods?.missing || [],
-      twelveStars: saju_data.twelveStars?.map(s => `${s.position}:${s.star}`).join(', ') || '',
+      tenGodsCounts: tenGodsCounts, // 원본 객체도 포함
+      
+      // 12운성 (상세)
+      twelveStars: saju_data.twelveStars?.map(s => ({
+        position: s.position,
+        star: s.star,
+        branch: s.branch
+      })) || [],
+      
+      // 관계식 (모두 포함)
       harmonies: {
         cheongganHap: saju_data.cheongganHap || [],
         jijiYughap: saju_data.jijiYughap || [],
         jijiSamhap: saju_data.jijiSamhap || [],
         jijiBanghap: saju_data.jijiBanghap || []
       },
+      
       clashes: {
         cheongganChung: saju_data.cheongganChung || [],
         jijiChung: saju_data.jijiChung || []
       },
-      spirits: saju_data.spirits || [],
+      
+      hyeong: saju_data.hyeong || [],
+      pa: saju_data.pa || [],
+      hae: saju_data.hae || [],
+      wonjin: saju_data.wonjin || [],
+      
+      // 길성 (천을귀인, 태극귀인 등)
+      gilseong: saju_data.gilseong || {},
+      
+      // 공망
       gongmang: saju_data.gongmang || [],
+      
+      // 신살 (모두 포함)
+      spirits: saju_data.spirits || [],
+      sinsalDetails: saju_data.sinsalDetails || [],
+      sinsalSummary: saju_data.sinsalSummary || '',
+      sinsalCombinedGuide: saju_data.sinsalCombinedGuide || '',
+      
+      // 용신 (상세)
       yongsin: {
-        value: saju_data.eokbuYongsin || 'None',
-        exists: !!saju_data.eokbuYongsin
+        eokbu: saju_data.eokbuYongsin || 'None',
+        johu: saju_data.johuYongsin || 'None',
+        exists: !!saju_data.eokbuYongsin || !!saju_data.johuYongsin
       },
-      daewoon: saju_data.daewoon?.slice(0, 3).map(d => `${d.startAge}-${d.endAge}: ${d.fullName}`).join(', ') || '',
-      yeonwoon2026: saju_data.yeonwoon?.find(y => y.year === 2026)?.fullName || ''
+      
+      // 대운 (처음 3개)
+      daewoon: saju_data.daewoon?.slice(0, 3).map(d => ({
+        startAge: d.startAge,
+        endAge: d.endAge,
+        ganzi: `${d.stem}${d.branch}`,
+        fullName: d.fullName
+      })) || [],
+      
+      // 연운 (2026년 포함)
+      yeonwoon: {
+        current2026: saju_data.yeonwoon?.find(y => y.year === 2026)?.fullName || 'N/A',
+        allYears: saju_data.yeonwoon?.slice(0, 5).map(y => ({
+          year: y.year,
+          ganzi: `${y.stem}${y.branch}`,
+          fullName: y.fullName
+        })) || []
+      },
+      
+      // 합충 요약
+      hapChungSummary: saju_data.hapChungSummary || ''
     }
 
-    console.log('[v0] ===== FINAL CUSTOMER DATA SENT TO GPT =====')
+    console.log('[v0] ===== FINAL COMPLETE CUSTOMER DATA SENT TO GPT =====')
     console.log('[v0]', JSON.stringify(allSajuData, null, 2))
-    console.log('[v0] =============================================')
+    console.log('[v0] =====================================================')
 
     const userPrompt = `Generate EXACTLY 9 personalized Saju insights for this person:
 
-CLIENT DATA:
+CLIENT DATA (모든 사주 계산값 포함):
 ${JSON.stringify(allSajuData, null, 2)}
 
 REQUIREMENTS:
@@ -95,12 +176,16 @@ REQUIREMENTS:
 - Section 4 또는 5는 커리어 (산업+직무 제안)
 - Section 7-9는 운세/미래 (hero's journey 톤)
 - Yongsin.exists=${allSajuData.yongsin.exists} → ${allSajuData.yongsin.exists ? '용신 단어 허용' : '용신 단어 금지! 대신 오행 점수/상태로 표현'}
+- 십신 개수 활용: ${tenGodsFormatted}
 
-POINTER REFERENCE:
-- sinGangSinYak.grade: ${allSajuData.energyGrade} (${allSajuData.energyRatio}%)
-- elementBalanceAdjusted: 木${Object.keys(allSajuData.elementAdjusted).length ? '있음' : '없음'}
-- tenGods.present: ${allSajuData.tenGodsPresent.join(', ')}
-- yongsin.exists: ${allSajuData.yongsin.exists}
+CRITICAL RULE:
+계산된 모든 사주 데이터는 당신의 분석 근거입니다. 
+- elementAdjusted의 점수 차이
+- tenGodsCounts의 편향성 (특정 십신 과다/부재)
+- 합충이 오행에 미치는 영향
+- 신살의 위치와 강도
+- 대운의 오행이 현재와 만날 때의 상충/조화
+위 모든 것을 분석에 정확히 반영하세요.
 
 OUTPUT FORMAT (ONLY JSON):
 \`\`\`json
