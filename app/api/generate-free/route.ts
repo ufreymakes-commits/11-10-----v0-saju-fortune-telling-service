@@ -1,226 +1,165 @@
 import { NextResponse } from 'next/server'
 import { generateText } from 'ai'
 import { createClient } from '@/lib/supabase/server'
-import type { SajuData, Fact, InsightMapV2 } from '@/lib/types'
+import type { SajuData, Fact } from '@/lib/types'
 import { headers } from 'next/headers'
 import { SAJU_MASTERPIECE_GUIDE } from '@/lib/saju/masterpiece'
 
-// GPT 프롬프트 생성 - 9문장 구조 (01~09)
 /**
- * Stage 2: 9개 문장 생성 (InsightMap 기반)
- * 
- * Stage 1 (analyze API)에서 받은 InsightMap을 기반으로 최종 9개 문장 생성
- * 모든 사주 데이터 필드 추적 가능하며, 단 하나도 생략되지 않음
+ * Single-Shot Generation: 
+ * 모든 프롬프트를 한 번에 발사
+ * System: 마스터피스 가이드 + 역할 정의 (고정)
+ * User: 고객 사주 데이터 + 최종 요청 (변수)
  */
-async function generateFactsFromInsightMap(insightMapV2: InsightMapV2): Promise<Fact[]> {
-  console.log('[v0] Stage 2: Generating 9 sections from InsightMapV2 blueprints')
-  console.log('[v0] Blueprints count:', insightMapV2.blueprints.length)
 
-  // blueprints가 비어있거나 9개 미만이면 폴백
-  if (!insightMapV2.blueprints || insightMapV2.blueprints.length < 9) {
-    console.warn('[v0] Blueprints incomplete, generating basic facts instead')
-    return Array.from({ length: 9 }, (_, i) => ({
-      id: i + 1,
-      text: `Unable to generate detailed insight ${i + 1}. Please ensure saju data is complete.`,
-      category: `Insight ${i + 1}`,
-      title: `Insight ${i + 1}`
-    }))
-  }
+export async function POST(request: Request) {
+  try {
+    const { name, gender, birth_country, birth_date, saju_data } = await request.json()
 
-  // BlueprintHints에서 포인터 정보 추출
-  const allPointers = new Set<string>()
-  insightMapV2.blueprints.forEach(bp => {
-    bp.pointerHints.forEach(hint => allPointers.add(hint))
-  })
+    if (!saju_data) {
+      return NextResponse.json({ error: 'Missing saju_data' }, { status: 400 })
+    }
 
-  console.log('[v0] Available pointers:', Array.from(allPointers).join(', '))
-  console.log('[v0] CoreDiagnosis: yongsin.exists =', insightMapV2.coreDiagnosis.yongsin.exists)
+    console.log(`[v0] Generating 9 facts for ${name}`)
 
-  const factsPrompt = `You are a Saju analyst writing hyper-personalized insights based on InsightMapV2 blueprints.
+    // ===== SYSTEM PROMPT (고정: 마스터피스 가이드 + 역할 정의) =====
+    const systemPrompt = `You are a hyper-specialized Saju(사주) analyst trained on the following masterpiece guide. Your role is to generate exactly 9 personalized insights that are:
+- SPECIFIC to THIS PERSON's unique birth chart (not generic)
+- GROUNDED in actual life scenarios (not abstract psychology)
+- FALSIFIABLE (would NOT apply to different birth data)
+- POINTERS REQUIRED (each sentence ends with ⟦dataPointer⟧)
 
-CRITICAL RULES:
-1. Length: EXACTLY 2-3 sentences per section (count sentences carefully)
-2. Every section MUST end with ⟦pointer1⟧ ⟦pointer2-3⟧ (required, not optional)
-3. Write as REAL LIFE SCENES: "When you walk into a negotiation..." NOT "You tend to be..."
-4. NO abstract psychology - describe THIS PERSON's actual patterns
-5. Section 4 or 5 MUST be career-specific with industry + role suggestion
-6. yongsin.exists = ${insightMapV2.coreDiagnosis.yongsin.exists} → ${insightMapV2.coreDiagnosis.yongsin.exists ? 'Can use "용신"' : 'NEVER use "용신" - use element + adjustment scores instead'}
-7. Use mechanismSteps from blueprints to build causality chain
-8. Reference lifeSceneCandidates to ground insights in reality
+MASTERPIECE GUIDE (당신의 모든 분석의 근거):
+${JSON.stringify(SAJU_MASTERPIECE_GUIDE, null, 2)}
 
-BLUEPRINTS (설계도):
-${JSON.stringify(insightMapV2.blueprints, null, 2)}
+CORE RULES:
+1. Length: 2-3 sentences EXACTLY per section
+2. Tone: Gen-Z (giving, lowkey, main character energy, no cap) + informative
+3. Format: Each section ends with ⟦pointer1⟧ ⟦pointer2⟧
+4. Real life: "When you..." NOT "You tend to..."
+5. Section 4 or 5 MUST be career-specific (industry + role)
+6. Yongsin handling: If no yongsin exists, NEVER use "용신" - use element scores/status instead
+7. Domains: Personality (1-3) → Career/Lifestyle (4-6) → Fortune/Destiny (7-9)`
 
-CORE DIAGNOSIS:
-${JSON.stringify(insightMapV2.coreDiagnosis, null, 2)}
+    // ===== USER PROMPT (변수: 고객 데이터 + 요청) =====
+    const allSajuData = {
+      name,
+      gender,
+      birthDate: birth_date,
+      dayMaster: saju_data.dayPillar?.stem || '',
+      dayMasterKorean: saju_data.dayMasterKorean || '',
+      lifeStage: saju_data.gyeokguk || '',
+      energyGrade: saju_data.sinGangSinYak?.grade || '',
+      energyRatio: saju_data.sinGangSinYak?.ratio || 0,
+      elementBasic: saju_data.elementBalanceKorean || {},
+      elementAdjusted: saju_data.elementBalanceAdjustedKorean || {},
+      elementCount: saju_data.elementCount || {},
+      tenGodsPresent: saju_data.tenGods?.present || [],
+      tenGodsMissing: saju_data.tenGods?.missing || [],
+      twelveStars: saju_data.twelveStars?.map(s => `${s.position}:${s.star}`).join(', ') || '',
+      harmonies: {
+        cheongganHap: saju_data.cheongganHap || [],
+        jijiYughap: saju_data.jijiYughap || [],
+        jijiSamhap: saju_data.jijiSamhap || [],
+        jijiBanghap: saju_data.jijiBanghap || []
+      },
+      clashes: {
+        cheongganChung: saju_data.cheongganChung || [],
+        jijiChung: saju_data.jijiChung || []
+      },
+      spirits: saju_data.spirits || [],
+      gongmang: saju_data.gongmang || [],
+      yongsin: {
+        value: saju_data.eokbuYongsin || 'None',
+        exists: !!saju_data.eokbuYongsin
+      },
+      daewoon: saju_data.daewoon?.slice(0, 3).map(d => `${d.startAge}-${d.endAge}: ${d.fullName}`).join(', ') || '',
+      yeonwoon2026: saju_data.yeonwoon?.find(y => y.year === 2026)?.fullName || ''
+    }
+
+    const userPrompt = `Generate EXACTLY 9 personalized Saju insights for this person:
+
+CLIENT DATA:
+${JSON.stringify(allSajuData, null, 2)}
+
+REQUIREMENTS:
+- 정확히 9개 섹션 (id: 1-9)
+- 각 섹션: 2-3문장
+- 마지막 문장 끝에 포인터 필수: ⟦데이터필드⟧ ⟦데이터필드⟧
+- Section 4 또는 5는 커리어 (산업+직무 제안)
+- Section 7-9는 운세/미래 (hero's journey 톤)
+- Yongsin.exists=${allSajuData.yongsin.exists} → ${allSajuData.yongsin.exists ? '용신 단어 허용' : '용신 단어 금지! 대신 오행 점수/상태로 표현'}
 
 POINTER REFERENCE:
-- sinGangSinYak.grade: ${insightMapV2.coreDiagnosis.shinGangGrade} (${insightMapV2.coreDiagnosis.shinGangRatio}%)
-- elementBalanceAdjusted: 木${insightMapV2.coreDiagnosis.gapSurvey.woodStatus} 火${insightMapV2.coreDiagnosis.gapSurvey.fireStatus} 土${insightMapV2.coreDiagnosis.gapSurvey.earthStatus} 金${insightMapV2.coreDiagnosis.gapSurvey.metalStatus} 水${insightMapV2.coreDiagnosis.gapSurvey.waterStatus}
-- topTenGods: ${insightMapV2.coreDiagnosis.topTenGods.map(g => g.name).join(', ')}
+- sinGangSinYak.grade: ${allSajuData.energyGrade} (${allSajuData.energyRatio}%)
+- elementBalanceAdjusted: 木${Object.keys(allSajuData.elementAdjusted).length ? '있음' : '없음'}
+- tenGods.present: ${allSajuData.tenGodsPresent.join(', ')}
+- yongsin.exists: ${allSajuData.yongsin.exists}
 
-GENERATION HINTS:
-- Use mechanismSteps to explain causality (cause → effect)
-- Reference lifeSceneCandidates for concrete examples
-- Each pointer must reference actual blueprint data
-
-OUTPUT FORMAT (EXACT JSON):
+OUTPUT FORMAT (ONLY JSON):
 \`\`\`json
 {
   "facts": [
-    {"id": 1, "title": "Blueprint 1 Title", "content": "[2-3 real-life sentences grounded in mechanism] ⟦pointer1⟧ ⟦pointer2⟧"},
-    {"id": 2, "title": "Blueprint 2 Title", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
-    {"id": 3, "title": "Blueprint 3 Title", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
-    {"id": 4, "title": "Career Path", "content": "[2-3 sentences: industry + role suggestion + why they excel] ⟦pointer1⟧ ⟦pointer2⟧"},
-    {"id": 5, "title": "Blueprint 5 Title", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
-    {"id": 6, "title": "Blueprint 6 Title", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
-    {"id": 7, "title": "Blueprint 7 Title", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
-    {"id": 8, "title": "Blueprint 8 Title", "content": "[2-3 real-life sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
-    {"id": 9, "title": "Blueprint 9 Title", "content": "[2-3 real-life sentences with hero's journey tone] ⟦pointer1⟧ ⟦pointer2⟧"}
+    {"id": 1, "title": "[Title 1]", "content": "[2-3 sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
+    {"id": 2, "title": "[Title 2]", "content": "[2-3 sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
+    {"id": 3, "title": "[Title 3]", "content": "[2-3 sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
+    {"id": 4, "title": "[Career/Social]", "content": "[2-3 sentences: industry+role] ⟦pointer1⟧ ⟦pointer2⟧"},
+    {"id": 5, "title": "[Title 5]", "content": "[2-3 sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
+    {"id": 6, "title": "[Title 6]", "content": "[2-3 sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
+    {"id": 7, "title": "[Title 7]", "content": "[2-3 sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
+    {"id": 8, "title": "[Title 8]", "content": "[2-3 sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
+    {"id": 9, "title": "[Title 9]", "content": "[2-3 sentences: hero's journey] ⟦pointer1⟧ ⟦pointer2⟧"}
   ]
 }
 \`\`\``
 
-  try {
+    console.log('[v0] Calling GPT with System/User separation')
+
+    // generateText with System prompt
     const result = await generateText({
       model: 'openai/gpt-4o-mini',
-      prompt: factsPrompt,
-      temperature: 0.7,
+      system: systemPrompt,
+      prompt: userPrompt,
+      temperature: 0.8,
+      maxTokens: 3000
     })
 
-    console.log('[v0] GPT Stage 2 response received')
+    console.log('[v0] GPT response received, parsing...')
 
+    // JSON 파싱
     const jsonMatch = result.text.match(/```json\n([\s\S]*?)\n```/)
     if (!jsonMatch) {
-      console.error('[v0] JSON format not found in response')
-      throw new Error('JSON format not found in response')
+      console.error('[v0] JSON not found in response')
+      throw new Error('JSON format not found')
     }
 
     const parsed = JSON.parse(jsonMatch[1])
-    
-    if (!parsed.facts || parsed.facts.length !== 9) {
-      console.warn('[v0] Expected 9 facts, got', parsed.facts?.length)
-    }
-
-    return parsed.facts.map((fact: { id: number; title: string; content: string }) => ({
-      id: fact.id,
-      text: fact.content,
-      category: fact.title,
-      title: fact.title,
+    const facts: Fact[] = parsed.facts.map((f: any) => ({
+      id: f.id,
+      text: f.content,
+      category: f.title,
+      title: f.title
     }))
-  } catch (error) {
-    console.error('[v0] Stage 2 generation error:', error)
-    throw error
-  }
-}
 
-/**
- * Stage 1 호출: Saju 계산 데이터로부터 InsightMapV2 생성
- */
-async function callAnalyzeAPI(
-  name: string,
-  gender: string,
-  birthDate: string,
-  sajuData: SajuData
-): Promise<InsightMapV2> {
-  console.log('[v0] Calling Stage 1 (Analyze API) to create InsightMapV2')
+    console.log(`[v0] Generated ${facts.length} facts`)
 
-  const baseUrl = process.env.VERCEL_URL 
-    ? `https://${process.env.VERCEL_URL}`
-    : 'http://localhost:3000'
-
-  const analyzeResponse = await fetch(`${baseUrl}/api/analyze`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      name,
-      gender,
-      birthDate,
-      sajuData
-    })
-  })
-
-  if (!analyzeResponse.ok) {
-    const errorText = await analyzeResponse.text()
-    console.error('[v0] Stage 1 API error:', errorText)
-    throw new Error(`Stage 1 API failed: ${analyzeResponse.statusText}`)
-  }
-
-  const { insightMap } = await analyzeResponse.json()
-  console.log('[v0] Stage 1 InsightMapV2 received:')
-  console.log(`  - coreDiagnosis.yongsin.exists: ${insightMap.coreDiagnosis.yongsin.exists}`)
-  console.log(`  - blueprints: ${insightMap.blueprints.length}`)
-  console.log(`  - coverage: ${insightMap.coverage.coveragePercentage}%`)
-  
-  return insightMap
-}
-
-// POST handler
-export async function POST(req: Request) {
-  try {
-    const body = await req.json()
-    const { submissionId } = body
-
-    const headersList = await headers()
-    const ip = headersList.get('x-forwarded-for')?.split(',')[0].trim() ||
-      headersList.get('x-real-ip') || 'unknown'
-
-    const supabase = await createClient()
-
-    // DB에서 submission 조회
-    const { data: submission, error: dbError } = await supabase
-      .from('submissions')
-      .select('*')
-      .eq('id', submissionId)
-      .single()
-
-    if (dbError || !submission) {
-      console.error('[v0] DB fetch error:', dbError)
-      return NextResponse.json({ error: 'Submission not found' }, { status: 404 })
-    }
-
-    const { name, gender, birth_country, birth_date, saju_data } = submission
-
-    console.log('[v0] Submission loaded:', { name, gender })
-
-    if (!saju_data) {
-      return NextResponse.json({ error: 'Saju data missing' }, { status: 400 })
-    }
-
-    // Generate fresh AI insights using 3-stage pipeline:
-    // Stage 1: Analyze (create InsightMapV2)
-    // Stage 2: Generate (9 sections with pointers)
-    // Stage 3: Validate (quality check)
-    console.log('[v0] Starting 3-stage pipeline...')
-    
-    let insightMapV2: InsightMapV2
-    try {
-      insightMapV2 = await callAnalyzeAPI(name, gender, birth_date, saju_data)
-    } catch (error) {
-      console.error('[v0] Stage 1 failed, returning error response')
-      // Stage 1 실패 시 에러 반환
-      return NextResponse.json(
-        { error: 'Failed to analyze saju data. Please try again.', details: error instanceof Error ? error.message : '' },
-        { status: 500 }
-      )
-    }
-
-    const freeFacts = await generateFactsFromInsightMap(insightMapV2)
-
-    // Teaser facts (locked)
-    const teaserFacts = Array.from({ length: 5 }, (_, i) => ({
-      id: 10 + i,
-      text: 'This insight is locked. Purchase the full report to unlock all 99 facts about your destiny.'
+    // 응답 준비
+    const teaser_facts = facts.map(fact => ({
+      title: fact.title,
+      teaser: fact.text.split('⟦')[0].substring(0, 100) + '...'
     }))
 
     return NextResponse.json({
-      freeFacts,
-      teaserFacts,
-      submission: { name, sajuData: saju_data }
+      status: 'success',
+      facts,
+      teaser_facts,
+      message: 'Birth chart analysis complete'
     })
-
   } catch (error) {
-    console.error('[v0] generate-free error:', error)
-    return NextResponse.json({ error: 'Error generating insights' }, { status: 500 })
+    console.error('[v0] Error:', error)
+    return NextResponse.json(
+      { error: 'Failed to generate insights', details: error instanceof Error ? error.message : '' },
+      { status: 500 }
+    )
   }
 }
