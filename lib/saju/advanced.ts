@@ -1314,7 +1314,7 @@ const SINSAL_USAGE_GUIDE: Record<string, string> = {
   "복성귀인": "주변의 도움과 귀인을 자주 만나 어려운 상황에서도 길이 열립니다",
   "천록귀인": "노력한 만큼 정당한 보상을 받는 복록이 따르는 귀인입니다",
   "암록": "드러나지 않는 곳에서 은밀하게 도와주는 귀인이 있습니다",
-  "간여지동": "강한 자아의식과 독립심���로 자기 분야에서 전문가로 성장합니다",
+  "간여지동": "강한 자아의식과 독립심�����로 자기 분야에서 전문가로 성장합니다",
   "일덕": "덕이 있어 주변으로부터 신뢰받고, 위기에서 귀인의 도움을 받습니다",
   "곡각살": "토의 기운이 강해 완고함이 있으나, 끈기와 지구력은 뛰어납니다",
   "낙정관살": "예상치 못한 함정이나 고립에 주의하며, 신중한 판단이 필요합니다",
@@ -1420,7 +1420,7 @@ export function calcAllSinsal(
   if (checkIlgui(dayStem, dayBranch)) sinsalList.push("일귀")
   if (checkGyosinseong(dayStem, dayBranch)) sinsalList.push("교신성")
   if (checkNoegongTanoegwan(dayStem, dayBranch)) sinsalList.push("뇌공타뇌관")
-  if (checkGuchuBanghae(dayStem, dayBranch)) sinsalList.push("구추��해")
+  if (checkGuchuBanghae(dayStem, dayBranch)) sinsalList.push("��추��해")
 
   // 지지 기준 추가
   if (checkChilSal(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("칠살")
@@ -1691,7 +1691,7 @@ const TEN_GODS_MAP: Record<string, Record<string, string>> = {
   "을": { "갑": "겁재", "을": "비견", "병": "상관", "정": "식신", "무": "정재", "기": "편재", "경": "정관", "신": "편관", "임": "정인", "계": "편인" },
   "병": { "갑": "편인", "을": "정���", "병": "비견", "정": "겁재", "무": "식신", "기": "상관", "경": "편재", "신": "정재", "임": "편관", "계": "정관" },
   "정": { "갑": "정인", "을": "편인", "병": "겁재", "정": "비견", "무": "상관", "기": "식신", "경": "정재", "신": "편재", "임": "정관", "계": "편관" },
-  "무": { "갑": "편관", "을": "정관", "병": "편인", "정": "정인", "무": "비견", "기": "겁재", "���": "식신", "신": "상관", "임": "편재", "계": "정재" },
+  "무": { "갑": "편관", "을": "정관", "병": "편인", "정": "정인", "무": "비견", "기": "겁���", "���": "식신", "신": "상관", "임": "편재", "계": "정재" },
   "기": { "갑": "정관", "을": "편관", "병": "정인", "정": "편인", "무": "겁재", "기": "비견", "경": "상관", "신": "식신", "임": "정재", "계": "편재" },
   "경": { "갑": "편재", "을": "정재", "병": "편관", "정": "정관", "무": "편인", "기": "정인", "경": "비견", "신": "겁재", "임": "식신", "계": "상관" },
   "신": { "갑": "정재", "을": "편재", "병": "정관", "정": "편관", "무": "정인", "기": "편인", "경": "겁재", "신": "비견", "임": "상관", "계": "식신" },
@@ -1805,19 +1805,58 @@ export function calcDaeyun(
 
   const startAge = Math.round((diffHours / 72) * 10) / 10
 
-  // 월주의 60간지 인덱스 계산 (올바른 공식: 천간*12 + 지지)
-  const monthStemIdx = stems.indexOf(monthStem)
-  const monthBranchIdx = branches.indexOf(monthBranch)
-  const monthPillarIndex = (monthStemIdx * 12 + monthBranchIdx) % 60
+  // 60간지 순환 (갑자, 을축, 병인, ... 계해)
+  const sixtyGanzhi = [
+    { stem: "갑", branch: "자" }, { stem: "을", branch: "축" },
+    { stem: "병", branch: "인" }, { stem: "정", branch: "묘" },
+    { stem: "무", branch: "진" }, { stem: "기", branch: "사" },
+    { stem: "경", branch: "오" }, { stem: "신", branch: "미" },
+    { stem: "임", branch: "신" }, { stem: "계", branch: "유" },
+    { stem: "갑", branch: "술" }, { stem: "을", branch: "해" },
+    { stem: "병", branch: "자" }, { stem: "정", branch: "축" },
+    { stem: "무", branch: "인" }, { stem: "기", branch: "묘" },
+    { stem: "경", branch: "진" }, { stem: "신", branch: "사" },
+    { stem: "임", branch: "오" }, { stem: "계", branch: "미" },
+    { stem: "갑", branch: "신" }, { stem: "을", branch: "유" },
+    { stem: "병", branch: "술" }, { stem: "정", branch: "해" },
+    { stem: "무", branch: "자" }, { stem: "기", branch: "축" },
+    { stem: "경", branch: "인" }, { stem: "신", branch: "묘" },
+    { stem: "임", branch: "진" }, { stem: "계", branch: "사" },
+    { stem: "갑", branch: "오" }, { stem: "을", branch: "미" },
+    { stem: "병", branch: "신" }, { stem: "정", branch: "유" },
+    { stem: "무", branch: "술" }, { stem: "기", branch: "해" },
+    { stem: "경", branch: "자" }, { stem: "신", branch: "축" },
+    { stem: "임", branch: "인" }, { stem: "계", branch: "묘" },
+    { stem: "갑", branch: "진" }, { stem: "을", branch: "사" },
+    { stem: "병", branch: "오" }, { stem: "정", branch: "미" },
+    { stem: "무", branch: "신" }, { stem: "기", branch: "유" },
+    { stem: "경", branch: "술" }, { stem: "신", branch: "해" },
+    { stem: "임", branch: "자" }, { stem: "계", branch: "축" },
+    { stem: "갑", branch: "인" }, { stem: "을", branch: "묘" },
+    { stem: "병", branch: "진" }, { stem: "정", branch: "사" },
+    { stem: "무", branch: "오" }, { stem: "기", branch: "미" },
+    { stem: "경", branch: "신" }, { stem: "신", branch: "유" },
+    { stem: "임", branch: "술" }, { stem: "계", branch: "해" }
+  ]
+
+  // 월주의 60간지 인덱스 찾기
+  let monthPillarIndex = -1
+  for (let i = 0; i < sixtyGanzhi.length; i++) {
+    if (sixtyGanzhi[i].stem === monthStem && sixtyGanzhi[i].branch === monthBranch) {
+      monthPillarIndex = i
+      break
+    }
+  }
+  
+  if (monthPillarIndex === -1) monthPillarIndex = 0
 
   const daeWoonList: Array<{ startAge: number; endAge: number; stem: string; branch: string; fullName: string }> = []
   const dir = isForward ? 1 : -1
   let currentAge = startAge
 
   for (let i = 0; i < 8; i++) {
-    const idx = (monthPillarIndex + dir * (i + 1) + 600) % 60
-    const stem = stems[idx % 10]
-    const branch = branches[idx % 12]
+    const idx = (monthPillarIndex + dir * (i + 1) + 60 * 10) % 60
+    const { stem, branch } = sixtyGanzhi[idx]
     
     daeWoonList.push({
       startAge: parseFloat((currentAge).toFixed(1)),
