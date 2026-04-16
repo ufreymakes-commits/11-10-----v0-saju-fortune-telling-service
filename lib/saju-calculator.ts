@@ -425,7 +425,7 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     // 대운 (정확한 계산)
     daewoon: calcDaeyun(
       date,
-      birthInfo.gender === '여' ? 'female' : 'male',
+      birthInfo.gender === '여' || birthInfo.gender === 'female' ? 'female' : 'male',
       yearStem,
       monthStem,
       monthBranch
