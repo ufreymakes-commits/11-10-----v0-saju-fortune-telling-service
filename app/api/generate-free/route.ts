@@ -79,6 +79,10 @@ CORE RULES:
       yeonwoon2026: saju_data.yeonwoon?.find(y => y.year === 2026)?.fullName || ''
     }
 
+    console.log('[v0] ===== FINAL CUSTOMER DATA SENT TO GPT =====')
+    console.log('[v0]', JSON.stringify(allSajuData, null, 2))
+    console.log('[v0] =============================================')
+
     const userPrompt = `Generate EXACTLY 9 personalized Saju insights for this person:
 
 CLIENT DATA:
