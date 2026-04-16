@@ -51,8 +51,10 @@ CORE RULES:
       lifeStage: saju_data.gyeokguk || '',
       energyGrade: saju_data.sinGangSinYak?.grade || '',
       energyRatio: saju_data.sinGangSinYak?.ratio || 0,
-      elementBasic: saju_data.elementBalanceKorean || {},
-      elementAdjusted: saju_data.elementBalanceAdjustedKorean || {},
+      // 오행 점수 3가지
+      elementBasic: saju_data.elementBalanceKorean || {}, // 지장간 미포함
+      elementWithHiddenStems: saju_data.elementBalanceWithHiddenStemsKorean || {}, // 지장간 포함
+      elementAdjusted: saju_data.elementBalanceAdjustedKorean || {}, // 합충 반영
       elementCount: saju_data.elementCount || {},
       tenGodsPresent: saju_data.tenGods?.present || [],
       tenGodsMissing: saju_data.tenGods?.missing || [],

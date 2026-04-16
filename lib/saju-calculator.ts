@@ -2,7 +2,7 @@
 // Complete analysis including all advanced calculations
 
 import type { BirthInfo, SajuData } from './types'
-import { runFullAnalysis, calculateElementScores, calculateElementScoresWithHapChung, countElementsWithHiddenStems } from './saju/core-calculator'
+import { runFullAnalysis, calculateElementScores, calculateElementScoresWithHiddenStems, calculateElementScoresWithHapChung, countElementsWithHiddenStems } from './saju/core-calculator'
 import {
   calcTwelveStars,
   calcCheongganHap,
@@ -250,6 +250,10 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
   // 천간: 각 10점, 지지: 연지 10점, 월지 30점, 일지 20점, 시지 20점
   const elementScores = calculateElementScores(fp)
   
+  // === 지장간 포함 오행 점수 계산 ===
+  // 천간 + 지지 본기 + 지장간 (본기 50%, 중기 30%, 말기 20%)
+  const elementScoresWithHiddenStems = calculateElementScoresWithHiddenStems(fp)
+  
   // === 합충 반영 오행 점수 계산 ===
   const hapChungAnalysis = calculateElementScoresWithHapChung(
     fp,
@@ -257,7 +261,7 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     allBranches
   )
   
-  // 기본 점수 (합충 미반영)
+  // 기본 점수 (지장간 미포함) - 천간 + 지지만
   const elementBalance = {
     wood: elementScores['목'] || 0,
     fire: elementScores['화'] || 0,
@@ -273,6 +277,23 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     토: elementScores['토'] || 0,
     금: elementScores['금'] || 0,
     수: elementScores['수'] || 0
+  }
+  
+  // 지장간 포함 점수
+  const elementBalanceWithHiddenStems = {
+    wood: elementScoresWithHiddenStems['목'] || 0,
+    fire: elementScoresWithHiddenStems['화'] || 0,
+    earth: elementScoresWithHiddenStems['토'] || 0,
+    metal: elementScoresWithHiddenStems['금'] || 0,
+    water: elementScoresWithHiddenStems['수'] || 0
+  }
+  
+  const elementBalanceWithHiddenStemsKorean = {
+    목: elementScoresWithHiddenStems['목'] || 0,
+    화: elementScoresWithHiddenStems['화'] || 0,
+    토: elementScoresWithHiddenStems['토'] || 0,
+    금: elementScoresWithHiddenStems['금'] || 0,
+    수: elementScoresWithHiddenStems['수'] || 0
   }
   
   // 합충 반영 점수
@@ -338,6 +359,10 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     dominantElement: Object.entries(elementBalance).reduce((a, b) => 
       a[1] > b[1] ? a : b
     )[0],
+    
+    // 오행 (지장간 포함 점수)
+    elementBalanceWithHiddenStems,
+    elementBalanceWithHiddenStemsKorean,
     
     // 오행 (합충 반영 점수)
     elementBalanceAdjusted,

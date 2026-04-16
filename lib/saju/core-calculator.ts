@@ -424,7 +424,125 @@ export function calculateElementScores(fourPillars: FourPillars): ElementCount {
   return scores;
 }
 
-// ================================================================
+/**
+ * 지장간 포함 오행 점수 계산
+ * = 천간 점수 + 지지 본기 점수 + 지장간 점수
+ * 지장간 배분: 본기(50%) + 중기(30%) + 말기(20%)
+ */
+export function calculateElementScoresWithHiddenStems(fourPillars: FourPillars): ElementCount {
+  const scores: ElementCount = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+
+  // 지장간 (HIDDEN_STEMS from constants)
+  // 자: 계(본) / 축: 기(본) 정(중) 계(말) / 인: 갑(본) 병(중) 무(말) / ... 등
+  const HIDDEN_STEMS_INFO: Record<string, Array<{ stem: string; weight: 'main' | 'middle' | 'minor' }>> = {
+    '자': [{ stem: '계', weight: 'main' }],
+    '축': [
+      { stem: '기', weight: 'main' },
+      { stem: '정', weight: 'middle' },
+      { stem: '계', weight: 'minor' }
+    ],
+    '인': [
+      { stem: '갑', weight: 'main' },
+      { stem: '병', weight: 'middle' },
+      { stem: '무', weight: 'minor' }
+    ],
+    '묘': [{ stem: '을', weight: 'main' }],
+    '진': [
+      { stem: '무', weight: 'main' },
+      { stem: '을', weight: 'middle' },
+      { stem: '계', weight: 'minor' }
+    ],
+    '사': [
+      { stem: '병', weight: 'main' },
+      { stem: '소', weight: 'middle' },
+      { stem: '무', weight: 'minor' }
+    ],
+    '오': [{ stem: '정', weight: 'main' }],
+    '미': [
+      { stem: '기', weight: 'main' },
+      { stem: '을', weight: 'middle' },
+      { stem: '정', weight: 'minor' }
+    ],
+    '신': [
+      { stem: '경', weight: 'main' },
+      { stem: '임', weight: 'middle' },
+      { stem: '무', weight: 'minor' }
+    ],
+    '유': [{ stem: '신', weight: 'main' }],
+    '술': [
+      { stem: '무', weight: 'main' },
+      { stem: '신', weight: 'middle' },
+      { stem: '을', weight: 'minor' }
+    ],
+    '해': [
+      { stem: '임', weight: 'main' },
+      { stem: '갑', weight: 'middle' },
+      { stem: '을', weight: 'minor' }
+    ]
+  };
+
+  // 천간 점수 (각 10점)
+  const yearStemElement = STEM_TO_ELEMENT[fourPillars.year.stem];
+  scores[yearStemElement] += 10;
+
+  const monthStemElement = STEM_TO_ELEMENT[fourPillars.month.stem];
+  scores[monthStemElement] += 10;
+
+  const dayStemElement = STEM_TO_ELEMENT[fourPillars.day.stem];
+  scores[dayStemElement] += 10;
+
+  if (fourPillars.hour) {
+    const hourStemElement = STEM_TO_ELEMENT[fourPillars.hour.stem];
+    scores[hourStemElement] += 10;
+  }
+
+  // 지지 본기 점수 (연지 10점, 월지 30점, 일지 20점, 시지 20점)
+  const yearBranchElement = BRANCH_TO_ELEMENT[fourPillars.year.branch];
+  scores[yearBranchElement] += 10;
+
+  const monthBranchElement = BRANCH_TO_ELEMENT[fourPillars.month.branch];
+  scores[monthBranchElement] += 30;
+
+  const dayBranchElement = BRANCH_TO_ELEMENT[fourPillars.day.branch];
+  scores[dayBranchElement] += 20;
+
+  if (fourPillars.hour) {
+    const hourBranchElement = BRANCH_TO_ELEMENT[fourPillars.hour.branch];
+    scores[hourBranchElement] += 20;
+  }
+
+  // 지장간 점수 추가
+  const addHiddenStemScores = (branch: string, weight: number) => {
+    const hidden = HIDDEN_STEMS_INFO[branch];
+    if (!hidden) return;
+    
+    hidden.forEach(({ stem, weight: itemWeight }) => {
+      const element = STEM_TO_ELEMENT[stem as any];
+      if (!element) return;
+      
+      const points = itemWeight === 'main' ? weight * 0.5 : 
+                    itemWeight === 'middle' ? weight * 0.3 : 
+                    weight * 0.2;
+      scores[element] += points;
+    });
+  };
+
+  // 연지 지장간 (10점 기준)
+  addHiddenStemScores(fourPillars.year.branch, 10);
+
+  // 월지 지장간 (30점 기준)
+  addHiddenStemScores(fourPillars.month.branch, 30);
+
+  // 일지 지장간 (20점 기준)
+  addHiddenStemScores(fourPillars.day.branch, 20);
+
+  // 시지 지장간 (20점 기준)
+  if (fourPillars.hour) {
+    addHiddenStemScores(fourPillars.hour.branch, 20);
+  }
+
+  return scores;
+}
 // 합충 반영 오행 점수 계산 (수치론 + 합충 분석)
 // 합화(合化): 결과 오행으로 점수 이동 (투출시 100%, 미투출시 70%)
 // 충(沖): 극받는 쪽 50% 삭감
