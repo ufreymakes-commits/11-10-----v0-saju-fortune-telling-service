@@ -1041,7 +1041,7 @@ function checkUicheouibSal(dayStem: string, dayBranch: string): boolean {
 
 // 신병살: 특정 일주
 function checkSinbyeongSal(dayStem: string, dayBranch: string): boolean {
-  const sinbyeongList = ["갑신","을��","병자","정해","무자","기해","경인","신묘","임오","계사"]
+  const sinbyeongList = ["갑신","을���","병자","정해","무자","기해","경인","신묘","임오","계사"]
   return sinbyeongList.includes(dayStem + dayBranch)
 }
 
@@ -1314,7 +1314,7 @@ const SINSAL_USAGE_GUIDE: Record<string, string> = {
   "복성귀인": "주변의 도움과 귀인을 자주 만나 어려운 상황에서도 길이 열립니다",
   "천록귀인": "노력한 만큼 정당한 보상을 받는 복록이 따르는 귀인입니다",
   "암록": "드러나지 않는 곳에서 은밀하게 도와주는 귀인이 있습니다",
-  "간여지동": "강한 자아의식과 독립심�����로 자기 분야에서 전문가로 성장합니다",
+  "간여지동": "강한 자아의식과 독립심�������로 자기 분야에서 전문가로 성장합니다",
   "일덕": "덕이 있어 주변으로부터 신뢰받고, 위기에서 귀인의 도움을 받습니다",
   "곡각살": "토의 기운이 강해 완고함이 있으나, 끈기와 지구력은 뛰어납니다",
   "낙정관살": "예상치 못한 함정이나 고립에 주의하며, 신중한 판단이 필요합니다",
@@ -1420,7 +1420,7 @@ export function calcAllSinsal(
   if (checkIlgui(dayStem, dayBranch)) sinsalList.push("일귀")
   if (checkGyosinseong(dayStem, dayBranch)) sinsalList.push("교신성")
   if (checkNoegongTanoegwan(dayStem, dayBranch)) sinsalList.push("뇌공타뇌관")
-  if (checkGuchuBanghae(dayStem, dayBranch)) sinsalList.push("��추��해")
+  if (checkGuchuBanghae(dayStem, dayBranch)) sinsalList.push("����추��해")
 
   // 지지 기준 추가
   if (checkChilSal(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("칠살")
@@ -1855,7 +1855,7 @@ export function calcDaeyun(
   let currentAge = startAge
 
   for (let i = 0; i < 8; i++) {
-    const idx = (monthPillarIndex + dir * (i + 1) + 60 * 10) % 60
+    const idx = ((monthPillarIndex + dir * (i + 1)) % 60 + 60) % 60
     const { stem, branch } = sixtyGanzhi[idx]
     
     daeWoonList.push({
