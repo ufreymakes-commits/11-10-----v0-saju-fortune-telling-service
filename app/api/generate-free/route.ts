@@ -138,12 +138,14 @@ CORE RULES:
         exists: !!saju_data.eokbuYongsin || !!saju_data.johuYongsin
       },
       
-      // 대운 (처음 3개)
+      // 대운 (처음 3개 + 십신 + 12운성)
       daewoon: saju_data.daewoon?.slice(0, 3).map(d => ({
         startAge: d.startAge,
         endAge: d.endAge,
         ganzi: `${d.stem}${d.branch}`,
-        fullName: d.fullName
+        fullName: d.fullName,
+        tenGod: d.tenGod || 'N/A',
+        twelveStar: d.twelveStar || 'N/A'
       })) || [],
       
       // 연운 (2026년 포함)

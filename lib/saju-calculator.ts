@@ -22,7 +22,8 @@ import {
   calcJohuYongsin,
   calcAllSinsal,
   calcDetailedSinsal,
-  calcDaeyun
+  calcDaeyun,
+  enrichDaeWoonWithTenGodsAndStars
 } from './saju/advanced'
 import { STEMS, BRANCHES, STEM_TO_ELEMENT } from './saju/constants'
 
@@ -422,13 +423,16 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     sinsalSummary: detailedSinsal.summary,
     sinsalCombinedGuide: detailedSinsal.combinedGuide,
     
-    // 대운 (정확한 계산)
-    daewoon: calcDaeyun(
-      date,
-      birthInfo.gender === '여' || birthInfo.gender === 'female' ? 'female' : 'male',
-      yearStem,
-      monthStem,
-      monthBranch
+    // 대운 (정확한 계산) + 십신/12운성 추가
+    daewoon: enrichDaeWoonWithTenGodsAndStars(
+      calcDaeyun(
+        date,
+        birthInfo.gender === '여' || birthInfo.gender === 'female' ? 'female' : 'male',
+        yearStem,
+        monthStem,
+        monthBranch
+      ),
+      dayStem
     ),
     
     // 연운

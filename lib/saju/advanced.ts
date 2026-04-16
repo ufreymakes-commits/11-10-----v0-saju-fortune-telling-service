@@ -1310,11 +1310,11 @@ const SINSAL_USAGE_GUIDE: Record<string, string> = {
   "천라지망": "구속과 제약 속에서 내면의 성찰을 통해 진정한 자유를 찾아가는 운입니다",
   "탕화살": "강한 열정과 창의성이 있지만, 충동적 결정을 조심해야 합니다",
   "효신살": "부모나 윗사람과의 관계에 각별히 신경 쓰며, 효심을 통해 복을 쌓습니다",
-  "학당귀인": "배움과 학문에 뛰어난 자질이 있어 ��육·연구·전문직에서 성취합니다",
+  "학당귀인": "배움과 학문에 뛰어난 자질이 있어 ���육·연구·전문직에서 성취합니다",
   "복성귀인": "주변의 도움과 귀인을 자주 만나 어려운 상황에서도 길이 열립니다",
   "천록귀인": "노력한 만큼 정당한 보상을 받는 복록이 따르는 귀인입니다",
   "암록": "드러나지 않는 곳에서 은밀하게 도와주는 귀인이 있습니다",
-  "간여지동": "강한 자아의식과 독���������������로 자기 분야에서 전문가로 성장합니다",
+  "간여지동": "강한 자아의식과 ������������������로 자기 분야에서 전문가로 성장합니다",
   "일덕": "덕이 있어 주변으로부터 신뢰받고, 위기에서 귀인의 도움을 받습니다",
   "곡각살": "토의 기운이 강해 완고함이 있으나, 끈기와 지구력은 뛰어납니다",
   "낙정관살": "예상치 못한 함정이나 고립에 주의하며, 신중한 판단이 필요합니다",
@@ -1851,7 +1851,7 @@ export function calcDaeyun(
   if (startAge === 0) startAge = 1  // 최소 1세 보장
 
   // 60간지 계산을 인덱스 기반으로 (천간 10개 x 지지 12개가 최소공배수 60에서 만남)
-  // 갑자(0) → 을축(1) → 병인(2) → ... → 계해(59)
+  // 갑자(0) → 을축(1) → 병���(2) → ... → 계해(59)
   // 규칙: 60���지의 n번째 = stems[n % 10] + branches[n % 12]
   
   // 월주의 60간지 인덱스 계산
@@ -1891,6 +1891,36 @@ export function calcDaeyun(
   }
 
   return daeWoonList
+}
+
+/**
+ * 대운의 천간/지지로부터 십신과 12운성 계산
+ */
+export function enrichDaeWoonWithTenGodsAndStars(
+  daeWoonList: Array<{ startAge: number; endAge: number; stem: string; branch: string; fullName: string }>,
+  dayStem: string
+): Array<{ 
+  startAge: number; 
+  endAge: number; 
+  stem: string; 
+  branch: string; 
+  fullName: string;
+  tenGod: string;
+  twelveStar: string;
+}> {
+  return daeWoonList.map(daewoon => {
+    // 대운 천간의 십신 계산
+    const tenGod = TEN_GODS_MAP[dayStem]?.[daewoon.stem] || "미상"
+    
+    // 대운 지지의 12운성 계산
+    const twelveStar = getTwelveStar(dayStem, daewoon.branch)
+    
+    return {
+      ...daewoon,
+      tenGod,
+      twelveStar
+    }
+  })
 }
 
 // ================================================================
