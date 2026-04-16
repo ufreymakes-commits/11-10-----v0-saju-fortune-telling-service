@@ -1304,7 +1304,7 @@ const SINSAL_USAGE_GUIDE: Record<string, string> = {
   "겁살": "강한 추진력과 돌파력으로 경쟁적인 환경에서 두각을 나타낼 수 있습니다",
   "지살": "외교적 능력과 현장 감각을 살려 현장직이나 대외 활동에서 빛을 발합니다",
   "천살": "하늘의 시험처럼 예측 불가한 변화를 겪지만, 이를 통해 단련됩니다",
-  "년살": "사람을 끌어당기는 매력이 있어 인간관계와 연애에서 자주 주목받습니다",
+  "년살": "사람을 끌어당��는 매력이 있어 인간관계와 연애에서 자주 주목받습니다",
   "백호살": "강렬한 에너지로 두각을 나타내지만, 급격한 변화나 사고에 주의가 필요합니다",
   "귀문관살": "직관력과 영적 감수성이 뛰어나 예술·상담·치유 분야에서 빛을 발합니다",
   "천라지망": "구속과 제약 속에서 내면의 성찰을 통해 진정한 자유를 찾아가는 운입니다",
@@ -1314,7 +1314,7 @@ const SINSAL_USAGE_GUIDE: Record<string, string> = {
   "복성귀인": "주변의 도움과 귀인을 자주 만나 어려운 상황에서도 길이 열립니다",
   "천록귀인": "노력한 만큼 정당한 보상을 받는 복록이 따르는 귀인입니다",
   "암록": "드러나지 않는 곳에서 은밀하게 도와주는 귀인이 있습니다",
-  "간여지동": "강한 자아의식과 독립심�������로 자기 분야에서 전문가로 성장합니다",
+  "간여지동": "강한 자아의식과 독립����������로 자기 분야에서 전문가로 성장합니다",
   "일덕": "덕이 있어 주변으로부터 신뢰받고, 위기에서 귀인의 도움을 받습니다",
   "곡각살": "토의 기운이 강해 완고함이 있으나, 끈기와 지구력은 뛰어납니다",
   "낙정관살": "예상치 못한 함정이나 고립에 주의하며, 신중한 판단이 필요합니다",
@@ -1744,29 +1744,63 @@ export function calcDaeyun(
   const isYangYear = yangStems.includes(yearStem)
   const isForward = (gender === 'male' && isYangYear) || (gender === 'female' && !isYangYear)
 
-  // 절기 ��이터 (기본값만 포함, 실제로는 ipjeolMap이 필요하지만 간단히)
-  const IPJEOL_MAP: Record<number, Array<{ date: Date; name: string }>> = {
-    1998: [
-      { date: new Date(1998, 1, 4, 20, 59), name: "입춘" },
-      { date: new Date(1998, 3, 5, 12, 0), name: "청명" },
-      { date: new Date(1998, 4, 5, 10, 30), name: "입하" },
-      { date: new Date(1998, 5, 20, 22, 30), name: "하지" },
-      { date: new Date(1998, 6, 7, 10, 0), name: "입추" },
-      { date: new Date(1998, 8, 23, 4, 0), name: "추분" },
-      { date: new Date(1998, 9, 8, 19, 0), name: "입동" },
-      { date: new Date(1998, 11, 21, 14, 0), name: "동지" }
+  // 절기 데이터 - 월 경계 절기 (입춘, 경칩, 청명, 입하, 망종, 소서, 입추, 백로, 한로, 입동, 대설, 소한)
+  // 대운 계산에서는 다음/이전 절기까지의 시간을 사용함
+  const JEOLGI_MAP: Record<number, Array<{ date: Date; name: string }>> = {
+    2001: [
+      { date: new Date(2001, 0, 5, 18, 16), name: "소한" },
+      { date: new Date(2001, 1, 4, 2, 29), name: "입춘" },
+      { date: new Date(2001, 2, 5, 20, 32), name: "경칩" },
+      { date: new Date(2001, 3, 5, 0, 24), name: "청명" },
+      { date: new Date(2001, 4, 5, 13, 45), name: "입하" },
+      { date: new Date(2001, 5, 5, 23, 54), name: "망종" },
+      { date: new Date(2001, 6, 7, 10, 36), name: "소서" },
+      { date: new Date(2001, 7, 7, 20, 53), name: "입추" },
+      { date: new Date(2001, 8, 7, 23, 46), name: "백로" },
+      { date: new Date(2001, 9, 8, 18, 19), name: "한로" },
+      { date: new Date(2001, 10, 7, 21, 21), name: "입동" },
+      { date: new Date(2001, 11, 7, 14, 29), name: "대설" }
+    ],
+    2002: [
+      { date: new Date(2002, 0, 5, 23, 43), name: "소한" },
+      { date: new Date(2002, 1, 4, 8, 24), name: "입춘" },
+      { date: new Date(2002, 2, 6, 2, 27), name: "경칩" },
+      { date: new Date(2002, 3, 5, 6, 18), name: "청명" },
+      { date: new Date(2002, 4, 5, 19, 33), name: "입하" },
+      { date: new Date(2002, 5, 6, 5, 44), name: "망종" },
+      { date: new Date(2002, 6, 7, 16, 27), name: "소서" },
+      { date: new Date(2002, 7, 8, 2, 47), name: "입추" },
+      { date: new Date(2002, 8, 8, 5, 31), name: "백로" },
+      { date: new Date(2002, 9, 8, 23, 58), name: "한로" },
+      { date: new Date(2002, 10, 8, 2, 50), name: "입동" },
+      { date: new Date(2002, 11, 7, 19, 59), name: "대설" }
+    ],
+    2003: [
+      { date: new Date(2003, 0, 6, 5, 27), name: "소한" },
+      { date: new Date(2003, 1, 4, 13, 57), name: "입춘" },
+      { date: new Date(2003, 2, 6, 8, 5), name: "경칩" },
+      { date: new Date(2003, 3, 5, 12, 12), name: "청명" }
     ],
     1996: [
-      { date: new Date(1996, 1, 4, 20, 59), name: "입춘" },
-      { date: new Date(1996, 3, 4, 19, 40), name: "청명" },
-      { date: new Date(1996, 4, 5, 19, 24), name: "입하" },
-      { date: new Date(1996, 5, 20, 23, 30), name: "하지" },
-      { date: new Date(1996, 6, 7, 10, 53), name: "입추" },
-      { date: new Date(1996, 8, 23, 4, 28), name: "추분" },
-      { date: new Date(1996, 9, 8, 19, 34), name: "입동" },
-      { date: new Date(1996, 11, 21, 13, 58), name: "동지" }
+      { date: new Date(1996, 0, 6, 7, 8), name: "소한" },
+      { date: new Date(1996, 1, 4, 15, 8), name: "입춘" },
+      { date: new Date(1996, 2, 5, 9, 3), name: "경칩" },
+      { date: new Date(1996, 3, 4, 12, 53), name: "청명" },
+      { date: new Date(1996, 4, 5, 2, 3), name: "입하" },
+      { date: new Date(1996, 5, 5, 12, 17), name: "망종" },
+      { date: new Date(1996, 6, 6, 23, 13), name: "소서" },
+      { date: new Date(1996, 7, 7, 9, 27), name: "입추" },
+      { date: new Date(1996, 8, 7, 12, 6), name: "백로" },
+      { date: new Date(1996, 9, 8, 6, 33), name: "한로" },
+      { date: new Date(1996, 10, 7, 9, 36), name: "입동" },
+      { date: new Date(1996, 11, 7, 2, 47), name: "대설" }
+    ],
+    1997: [
+      { date: new Date(1997, 0, 5, 13, 1), name: "소한" },
+      { date: new Date(1997, 1, 3, 21, 2), name: "입춘" }
     ]
   }
+  const IPJEOL_MAP = JEOLGI_MAP
 
   const year = birthDate.getUTCFullYear()
   const allJeolgi: Array<{ date: Date; name: string }> = []
@@ -1805,45 +1839,20 @@ export function calcDaeyun(
 
   const startAge = Math.round((diffHours / 72) * 10) / 10
 
-  // 60간지 순환 (갑자, 을축, 병인, ... 계해)
-  const sixtyGanzhi = [
-    { stem: "갑", branch: "자" }, { stem: "을", branch: "축" },
-    { stem: "병", branch: "인" }, { stem: "정", branch: "묘" },
-    { stem: "무", branch: "진" }, { stem: "기", branch: "사" },
-    { stem: "경", branch: "오" }, { stem: "신", branch: "미" },
-    { stem: "임", branch: "신" }, { stem: "계", branch: "유" },
-    { stem: "갑", branch: "술" }, { stem: "을", branch: "해" },
-    { stem: "병", branch: "자" }, { stem: "정", branch: "축" },
-    { stem: "무", branch: "인" }, { stem: "기", branch: "묘" },
-    { stem: "경", branch: "진" }, { stem: "신", branch: "사" },
-    { stem: "임", branch: "오" }, { stem: "계", branch: "미" },
-    { stem: "갑", branch: "신" }, { stem: "을", branch: "유" },
-    { stem: "병", branch: "술" }, { stem: "정", branch: "해" },
-    { stem: "무", branch: "자" }, { stem: "기", branch: "축" },
-    { stem: "경", branch: "인" }, { stem: "신", branch: "묘" },
-    { stem: "임", branch: "진" }, { stem: "계", branch: "사" },
-    { stem: "갑", branch: "오" }, { stem: "을", branch: "미" },
-    { stem: "병", branch: "신" }, { stem: "정", branch: "유" },
-    { stem: "무", branch: "술" }, { stem: "기", branch: "해" },
-    { stem: "경", branch: "자" }, { stem: "신", branch: "축" },
-    { stem: "임", branch: "인" }, { stem: "계", branch: "묘" },
-    { stem: "갑", branch: "진" }, { stem: "을", branch: "사" },
-    { stem: "병", branch: "오" }, { stem: "정", branch: "미" },
-    { stem: "무", branch: "신" }, { stem: "기", branch: "유" },
-    { stem: "경", branch: "술" }, { stem: "신", branch: "해" },
-    { stem: "임", branch: "자" }, { stem: "계", branch: "축" },
-    { stem: "갑", branch: "인" }, { stem: "을", branch: "묘" },
-    { stem: "병", branch: "진" }, { stem: "정", branch: "사" },
-    { stem: "무", branch: "오" }, { stem: "기", branch: "미" },
-    { stem: "경", branch: "신" }, { stem: "신", branch: "유" },
-    { stem: "임", branch: "술" }, { stem: "계", branch: "해" }
-  ]
-
-  // 월주의 60간지 인덱스 찾기
+  // 60간지 계산을 인덱스 기반으로 (천간 10개 x 지지 12개가 최소공배수 60에서 만남)
+  // 갑자(0) → 을축(1) → 병인(2) → ... → 계해(59)
+  // 규칙: 60간지의 n번째 = stems[n % 10] + branches[n % 12]
+  
+  // 월주의 60간지 인덱스 계산
+  const monthStemIdx = stems.indexOf(monthStem)
+  const monthBranchIdx = branches.indexOf(monthBranch)
+  
+  // 60간지 인덱스 찾기: 천간 인덱스와 지지 인덱스가 맞아떨어지는 값
+  // n % 10 = monthStemIdx, n % 12 = monthBranchIdx 를 만족하는 n (0-59)
   let monthPillarIndex = -1
-  for (let i = 0; i < sixtyGanzhi.length; i++) {
-    if (sixtyGanzhi[i].stem === monthStem && sixtyGanzhi[i].branch === monthBranch) {
-      monthPillarIndex = i
+  for (let n = 0; n < 60; n++) {
+    if (n % 10 === monthStemIdx && n % 12 === monthBranchIdx) {
+      monthPillarIndex = n
       break
     }
   }
@@ -1854,9 +1863,10 @@ export function calcDaeyun(
   const dir = isForward ? 1 : -1
   let currentAge = startAge
 
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 10; i++) {
     const idx = ((monthPillarIndex + dir * (i + 1)) % 60 + 60) % 60
-    const { stem, branch } = sixtyGanzhi[idx]
+    const stem = stems[idx % 10]
+    const branch = branches[idx % 12]
     
     daeWoonList.push({
       startAge: parseFloat((currentAge).toFixed(1)),
