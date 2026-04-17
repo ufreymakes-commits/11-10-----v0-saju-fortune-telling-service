@@ -620,8 +620,8 @@ Meaning of absence: developmental themes, ...`
         exists: !!saju_data.eokbuYongsin || !!saju_data.johuYongsin
       },
       
-      // 대운 (처음 3개 + 십신 + 12운성)
-      daewoon: saju_data.daewoon?.slice(0, 3).map(d => ({
+      // 대운 (8개 + 십신 + 12운성)
+      daewoon: saju_data.daewoon?.slice(0, 8).map(d => ({
         startAge: d.startAge,
         endAge: d.endAge,
         ganzi: `${d.stem}${d.branch}`,
@@ -640,8 +640,11 @@ Meaning of absence: developmental themes, ...`
         })) || []
       },
       
-      // 합충 요약
-      hapChungSummary: saju_data.hapChungSummary || ''
+      // 합충 요약 (텍스트)
+      hapChungSummary: saju_data.hapChungSummary || '',
+      
+      // 합충 조정 상세 내역 (오행 점수 변화)
+      hapChungAdjustmentDetails: saju_data.hapChungAdjustmentDetails || saju_data.elementAdjustmentHistory || []
     }
 
     console.log('[v0] Gemini: ===== COMPLETE CUSTOMER DATA FOR GEMINI 1.5 PRO =====')

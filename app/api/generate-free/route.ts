@@ -1578,8 +1578,8 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
         exists: !!saju_data.eokbuYongsin || !!saju_data.johuYongsin
       },
 
-      // 대운 (처음 3개 + 십신 + 12운성)
-      daewoon: saju_data.daewoon?.slice(0, 3).map(d => ({
+      // 대운 (8개 + 십신 + 12운성)
+      daewoon: saju_data.daewoon?.slice(0, 8).map(d => ({
         startAge: d.startAge,
         endAge: d.endAge,
         ganzi: `${d.stem}${d.branch}`,
@@ -1587,7 +1587,7 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
         tenGod: d.tenGod || 'N/A',
         twelveStar: d.twelveStar || 'N/A'
       })) || [],
-
+      
       // 연운 (2026년 포함)
       yeonwoon: {
         current2026: saju_data.yeonwoon?.find(y => y.year === 2026)?.fullName || 'N/A',
@@ -1597,9 +1597,12 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
           fullName: y.fullName
         })) || []
       },
-
-      // 합충 요약
-      hapChungSummary: saju_data.hapChungSummary || ''
+      
+      // 합충 요약 (텍스트)
+      hapChungSummary: saju_data.hapChungSummary || '',
+      
+      // 합충 조정 상세 내역 (오행 점수 변화)
+      hapChungAdjustmentDetails: saju_data.hapChungAdjustmentDetails || saju_data.elementAdjustmentHistory || []
     }
 
     console.log('[v0] ===== FINAL COMPLETE CUSTOMER DATA SENT TO GPT =====')
