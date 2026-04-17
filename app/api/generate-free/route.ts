@@ -24,6 +24,7 @@ export async function POST(request: Request) {
     
     // submissionId로 받으면 Supabase에서 조회
     if (body.submissionId) {
+      console.log('[v0] Fetching submission:', body.submissionId)
       const supabase = await createClient()
       const { data: submission, error } = await supabase
         .from('submissions')
@@ -36,6 +37,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Submission not found' }, { status: 404 })
       }
       
+      console.log('[v0] Submission fetched successfully')
       name = submission.name
       gender = submission.gender
       birth_country = submission.birth_country
@@ -1380,7 +1382,7 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
 1. 갑목 - 비견 : Competes with peers through upright will and directness. As a tall tree, Gapmok competes by standing firm and growing higher, never bending easily.
 2. 갑목 - 겁재 : Challenges authority with assertive independence. When others try to control, Gapmok resists with rooted strength and pride.
 3. 갑목 - 식신 : Expresses ideas boldly with productive focus. Like a tree producing fruit, expression is a form of contribution and pride.
-4. 갑목 - 상관 : Pursues freedom of speech, sometimes rebellious. Growth becomes wild vine energy when suppressed — can challenge authority.
+4. 갑목 - ��관 : Pursues freedom of speech, sometimes rebellious. Growth becomes wild vine energy when suppressed — can challenge authority.
 5. 갑목 - 정재 : Earns wealth with effort and steady planning. Cultivates stable land over time, prefers tangible, planned accumulation.
 6. 갑목 - 편재 : Adventurous in managing irregular wealth or opportunities. Reaches wide with branches for resources, opportunistic yet generous.
 7. 갑목 - 정관 : Follows rules with clear responsibility and dignity. Tall trees obey the sun — honors hierarchy and structure.
