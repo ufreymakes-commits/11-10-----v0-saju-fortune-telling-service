@@ -1453,19 +1453,19 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
         tenGodsCounts[tenGod] = (tenGodsCounts[tenGod] || 0) + 1
       })
     }
-    
+
     // 십신 포맷팅: "비견 (3개), 식신 (2개)" 형식
     const tenGodsFormatted = Object.entries(tenGodsCounts)
       .map(([name, count]) => `${name} (${count}개)`)
       .join(', ')
-    
+
     const allSajuData = {
       // 기본 정보
       name,
       gender,
       birthDate: birth_date,
       birthCountry: birth_country,
-      
+
       // 4주 (천간/지지)
       fourPillars: {
         yearPillar: `${saju_data.yearPillar?.stem || ''}${saju_data.yearPillar?.branch || ''}`,
@@ -1473,38 +1473,38 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
         dayPillar: `${saju_data.dayPillar?.stem || ''}${saju_data.dayPillar?.branch || ''}`,
         hourPillar: saju_data.hourPillar ? `${saju_data.hourPillar.stem}${saju_data.hourPillar.branch}` : 'N/A'
       },
-      
+
       // 일간 (중요)
       dayMaster: saju_data.dayPillar?.stem || '',
       dayMasterKorean: saju_data.dayMasterKorean || '',
-      
+
       // 격국
       lifeStage: saju_data.gyeokguk || '',
-      
+
       // 신강/신약
       energyGrade: saju_data.sinGangSinYak?.grade || '',
       energyRatio: saju_data.sinGangSinYak?.ratio || 0,
-      
+
       // 오행 점수 3가지 (모두 포함)
       elementBasic: saju_data.elementBalanceKorean || {}, // 지장간 미포함
       elementWithHiddenStems: saju_data.elementBalanceWithHiddenStemsKorean || {}, // 지장간 포함
       elementAdjusted: saju_data.elementBalanceAdjustedKorean || {}, // 합충 반영
       elementCount: saju_data.elementCount || {},
       dominantElement: saju_data.dominantElement || '',
-      
+
       // 십신 (개수 포함)
       tenGodsPresent: saju_data.tenGods?.present || [],
       tenGodsPresentWithCount: tenGodsFormatted,
       tenGodsMissing: saju_data.tenGods?.missing || [],
       tenGodsCounts: tenGodsCounts, // 원본 객체도 포함
-      
+
       // 12운성 (상세)
       twelveStars: saju_data.twelveStars?.map(s => ({
         position: s.position,
         star: s.star,
         branch: s.branch
       })) || [],
-      
+
       // 관계식 (모두 포함)
       harmonies: {
         cheongganHap: saju_data.cheongganHap || [],
@@ -1512,36 +1512,36 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
         jijiSamhap: saju_data.jijiSamhap || [],
         jijiBanghap: saju_data.jijiBanghap || []
       },
-      
+
       clashes: {
         cheongganChung: saju_data.cheongganChung || [],
         jijiChung: saju_data.jijiChung || []
       },
-      
+
       hyeong: saju_data.hyeong || [],
       pa: saju_data.pa || [],
       hae: saju_data.hae || [],
       wonjin: saju_data.wonjin || [],
-      
+
       // 길성 (천을귀인, 태극귀인 등)
       gilseong: saju_data.gilseong || {},
-      
+
       // 공망
       gongmang: saju_data.gongmang || [],
-      
+
       // 신살 (모두 포함)
       spirits: saju_data.spirits || [],
       sinsalDetails: saju_data.sinsalDetails || [],
       sinsalSummary: saju_data.sinsalSummary || '',
       sinsalCombinedGuide: saju_data.sinsalCombinedGuide || '',
-      
+
       // 용신 (상세)
       yongsin: {
         eokbu: saju_data.eokbuYongsin || 'None',
         johu: saju_data.johuYongsin || 'None',
         exists: !!saju_data.eokbuYongsin || !!saju_data.johuYongsin
       },
-      
+
       // 대운 (처음 3개 + 십신 + 12운성)
       daewoon: saju_data.daewoon?.slice(0, 3).map(d => ({
         startAge: d.startAge,
@@ -1551,7 +1551,7 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
         tenGod: d.tenGod || 'N/A',
         twelveStar: d.twelveStar || 'N/A'
       })) || [],
-      
+
       // 연운 (2026년 포함)
       yeonwoon: {
         current2026: saju_data.yeonwoon?.find(y => y.year === 2026)?.fullName || 'N/A',
@@ -1561,7 +1561,7 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
           fullName: y.fullName
         })) || []
       },
-      
+
       // 합충 요약
       hapChungSummary: saju_data.hapChungSummary || ''
     }
@@ -1572,7 +1572,7 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
 
     const userPrompt = `Now, generate a total of 9 chillingly insightful sentences for him or her — the kind of sentences someone would want to share with a friend because they're just that on point.Sentences that make them truly feel like, 'Wow, this is tailored to my personal Saju chart, rather than being a generic one for everyone. This captures every detail of my Saju all at once.
 
-Before writing the 9 sentences, silently read and internalize the full Advanced Saju Data field({{ 11.\`22\` }}). Treat every value — 12운성, 공망, 형, 원진, 천간합, 삼합, 길성, 조후용신, 신강신약 percentage — as background intelligence that shapes how you see this person's life. You do not need to mention any of these terms. You do not need to explain them. Just let them inform the specificity of what you write, the way a doctor reads lab results before speaking to a patient — the results never appear in the conversation, but they make every observation more precise. The 9 sentences should feel like they could only have been written for this exact chart, not because they reference Saju structure, but because they describe a life too accurately to be generic.
+Before writing the 9 sentences, silently read and internalize the full allSajuData. Treat every value — 12운성, 공망, 형, 원진, 천간합, 삼합, 길성, 조후용신, 신강신약 percentage — as background intelligence that shapes how you see this person's life. You do not need to mention any of these terms. You do not need to explain them. Just let them inform the specificity of what you write, the way a doctor reads lab results before speaking to a patient — the results never appear in the conversation, but they make every observation more precise. The 9 sentences should feel like they could only have been written for this exact chart, not because they reference Saju structure, but because they describe a life too accurately to be generic.
 
 Each sentence must feel realistic, specific, and emotionally resonant, as if it could have truly happened in their life.Make each line count.
 
