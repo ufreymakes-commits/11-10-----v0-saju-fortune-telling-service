@@ -1457,7 +1457,7 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
     
     // 십신 포맷팅: "비견 (3개), 식신 (2개)" 형식
     const tenGodsFormatted = Object.entries(tenGodsCounts)
-      .map(([name, count]) => `${ name } (${ count }개)`)
+      .map(([name, count]) => `${name} (${count}개)`)
       .join(', ')
     
     const allSajuData = {
@@ -1469,10 +1469,10 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
       
       // 4주 (천간/지지)
       fourPillars: {
-        yearPillar: `${ saju_data.yearPillar?.stem || '' }${ saju_data.yearPillar?.branch || '' } `,
-        monthPillar: `${ saju_data.monthPillar?.stem || '' }${ saju_data.monthPillar?.branch || '' } `,
-        dayPillar: `${ saju_data.dayPillar?.stem || '' }${ saju_data.dayPillar?.branch || '' } `,
-        hourPillar: saju_data.hourPillar ? `${ saju_data.hourPillar.stem }${ saju_data.hourPillar.branch } ` : 'N/A'
+        yearPillar: `${saju_data.yearPillar?.stem || ''}${saju_data.yearPillar?.branch || ''}`,
+        monthPillar: `${saju_data.monthPillar?.stem || ''}${saju_data.monthPillar?.branch || ''}`,
+        dayPillar: `${saju_data.dayPillar?.stem || ''}${saju_data.dayPillar?.branch || ''}`,
+        hourPillar: saju_data.hourPillar ? `${saju_data.hourPillar.stem}${saju_data.hourPillar.branch}` : 'N/A'
       },
       
       // 일간 (중요)
