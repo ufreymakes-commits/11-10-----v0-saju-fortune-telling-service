@@ -1547,7 +1547,7 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
       daewoon: saju_data.daewoon?.slice(0, 3).map(d => ({
         startAge: d.startAge,
         endAge: d.endAge,
-        ganzi: `${ d.stem }${ d.branch } `,
+        ganzi: `${d.stem}${d.branch}`,
         fullName: d.fullName,
         tenGod: d.tenGod || 'N/A',
         twelveStar: d.twelveStar || 'N/A'
@@ -1558,7 +1558,7 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
         current2026: saju_data.yeonwoon?.find(y => y.year === 2026)?.fullName || 'N/A',
         allYears: saju_data.yeonwoon?.slice(0, 5).map(y => ({
           year: y.year,
-          ganzi: `${ y.stem }${ y.branch } `,
+          ganzi: `${y.stem}${y.branch}`,
           fullName: y.fullName
         })) || []
       },
@@ -1571,9 +1571,9 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
     console.log('[v0]', JSON.stringify(allSajuData, null, 2))
     console.log('[v0] =====================================================')
 
-    const userPrompt = `Now, generate a total of 9 chillingly insightful sentences for him or her — the kind of sentences someone would want to share with a friend because they’re just that on point.Sentences that make them truly feel like, 'Wow, this is tailored to my personal Saju chart, rather than being a generic one for everyone. This captures every detail of my Saju all at once.
+    const userPrompt = `Now, generate a total of 9 chillingly insightful sentences for him or her — the kind of sentences someone would want to share with a friend because they're just that on point.Sentences that make them truly feel like, 'Wow, this is tailored to my personal Saju chart, rather than being a generic one for everyone. This captures every detail of my Saju all at once.
 
-Before writing the 9 sentences, silently read and internalize the full Advanced Saju Data field({{ 11.`22` }}). Treat every value — 12운성, 공망, 형, 원진, 천간합, 삼합, 길성, 조후용신, 신강신약 percentage — as background intelligence that shapes how you see this person's life. You do not need to mention any of these terms. You do not need to explain them. Just let them inform the specificity of what you write, the way a doctor reads lab results before speaking to a patient — the results never appear in the conversation, but they make every observation more precise. The 9 sentences should feel like they could only have been written for this exact chart, not because they reference Saju structure, but because they describe a life too accurately to be generic.
+Before writing the 9 sentences, silently read and internalize the full Advanced Saju Data field({{ 11.\`22\` }}). Treat every value — 12운성, 공망, 형, 원진, 천간합, 삼합, 길성, 조후용신, 신강신약 percentage — as background intelligence that shapes how you see this person's life. You do not need to mention any of these terms. You do not need to explain them. Just let them inform the specificity of what you write, the way a doctor reads lab results before speaking to a patient — the results never appear in the conversation, but they make every observation more precise. The 9 sentences should feel like they could only have been written for this exact chart, not because they reference Saju structure, but because they describe a life too accurately to be generic.
 
 Each sentence must feel realistic, specific, and emotionally resonant, as if it could have truly happened in their life.Make each line count.
 
@@ -1583,7 +1583,7 @@ Focus on uncovering aspects like:
 
 What kind of job they are likely doing now(guess a few jobs with the career rule step 1 to 8),
 
-Whether they’re working in a company, for the government, running their own business, freelancing, or unemployed,
+Whether they're working in a company, for the government, running their own business, freelancing, or unemployed,
 
     When their first love happened, and when they got married or will get married or they don't want to get married,
 
@@ -1597,7 +1597,7 @@ What they will be doing in the future(very specific),
 
       Which region or country would bring them better fortune,
 
-        What inner thoughts they’ve repeated often throughout life,
+        What inner thoughts they've repeated often throughout life,
 
           What others have told them frequently,
 
@@ -1619,12 +1619,12 @@ What they will be doing in the future(very specific),
 
   Body 1(2 sentences): Detailed analysis of wealth and career.Provide two sentences that define the core theme of their career and financial life.These must be realistic, specific, and address the practical concerns or dreams they are likely to have.Avoid vague generalizations.
 
-    Body 2(3 sentences): Love, health, and relationships.Provide two sentences about their main themes in love and marriage.These should be highly factual and specific, not ambiguous.You may mention the timing of their first love, but do not reveal the spouse’s profession or personality yet(as this is a free report).
+    Body 2(3 sentences): Love, health, and relationships.Provide two sentences about their main themes in love and marriage.These should be highly factual and specific, not ambiguous.You may mention the timing of their first love, but do not reveal the spouse's profession or personality yet(as this is a free report).
 
       Conclusion(2 sentences): Advice for improving fortune and future direction. (But don't spoil the exact luck element yet as it will appear on another premium report ) Identify a specific theme that might be causing them inner struggle. Offer two sentences of realistic yet touching comfort. If they are someone better suited for living abroad rather than their home country, provide encouragement for that path. Alternatively, if they have a painful past, offer sincere consolation.
 
 OUTPUT FORMAT(ONLY JSON):
-        \`\`\`json
+\`\`\`json
 {
   "facts": [
     {"id": 1, "title": "[Title 1]", "content": "[2-3 sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
@@ -1638,6 +1638,60 @@ OUTPUT FORMAT(ONLY JSON):
     {"id": 9, "title": "[Title 9]", "content": "[2-3 sentences: hero's journey] ⟦pointer1⟧ ⟦pointer2⟧"}
   ]
 }
+\`\`\`
+
+ADVANCED CUSTOMER SAJU DATA:
+${JSON.stringify(allSajuData, null, 2)}`
+
+    console.log('[v0] Calling GPT with System/User separation')
+
+    // generateText with System prompt
+    const result = await generateText({
+      model: 'openai/gpt-4o-mini',
+      system: systemPrompt,
+      prompt: userPrompt,
+      temperature: 0.8,
+      maxTokens: 3000
+    })
+
+    console.log('[v0] GPT response received, parsing...')
+
+    // JSON 파싱
+    const jsonMatch = result.text.match(/```json\n([\s\S]*?)\n```/)
+    if (!jsonMatch) {
+      console.error('[v0] JSON not found in response')
+      throw new Error('JSON format not found')
+    }
+
+    const parsed = JSON.parse(jsonMatch[1])
+    const facts: Fact[] = parsed.facts.map((f: any) => ({
+      id: f.id,
+      text: f.content,
+      category: f.title,
+      title: f.title
+    }))
+
+    console.log(`[v0] Generated ${facts.length} facts`)
+
+    // 응답 준비
+    const teaser_facts = facts.map(fact => ({
+      title: fact.title,
+      teaser: fact.text.split('⟦')[0].substring(0, 100) + '...'
+    }))
+
+    return NextResponse.json({
+      status: 'success',
+      facts,
+      teaser_facts,
+      message: 'Birth chart analysis complete'
+    })
+  } catch (error) {
+    console.error('[v0] Error:', error)
+    return NextResponse.json(
+      { error: 'Failed to generate insights', details: error instanceof Error ? error.message : '' },
+      { status: 500 }
+    )
+  }
 \`\`\``
 
     console.log('[v0] Calling GPT with System/User separation')
