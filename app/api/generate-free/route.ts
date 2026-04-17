@@ -1443,8 +1443,7 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
 98. 계수 - 편관 : Feels pressure deeply, adapts quietly. Appears still but processes pressure inwardly.
 99. 계수 - 정인 : Finds deep comfort in learning. Draws emotional security from insight.
 100. 계수 - 편인 : Private, intuitive, protective of inner world. Recharges alone, defends inner sanctuary with care.
-
-
+`
 
     // ===== USER PROMPT (변수: 고객 데이터 + 요청) =====
     // 십신별 개수 계산
