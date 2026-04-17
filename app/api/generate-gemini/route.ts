@@ -749,18 +749,22 @@ ${JSON.stringify(allSajuData, null, 2)}`
     }))
 
     console.log(`[v0] Gemini: Generated ${facts.length} facts`)
+    console.log('[v0] Gemini: ===== COMPLETE SAJU DATA SENT TO GEMINI 1.5 PRO =====')
+    console.log(JSON.stringify(allSajuData, null, 2))
+    console.log('[v0] Gemini: ====================================================')
 
     // 프론트엔드가 기대하는 형식으로 응답 준비
     // freeFacts: 9개 무료 인사이트
     // teaserFacts: 티저 (빈 배열, 유료 서비스에서 사용)
-    // submission: 고객 정보 + 사주 데이터
+    // submission: 고객 정보 + 사주 데이터 + allSajuData (검증용)
     return NextResponse.json({
       freeFacts: facts,
       teaserFacts: [],
       submission: {
         name,
         sajuData: saju_data
-      }
+      },
+      allSajuDataSentToGemini: allSajuData
     })
   } catch (error) {
     console.error('[v0] Gemini: Error:', error)
