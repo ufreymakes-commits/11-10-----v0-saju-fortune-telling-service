@@ -96,32 +96,24 @@ export interface BirthInfo {
 // ================================================================
 
 export function getHourBranchIndex(hour: number, minute: number = 0, countryCode: string = 'KR'): number {
-  // 한국은 30분 보정 적용 (KST가 실제 태양시보다 30분 빠름)
-  // 자시: 23:30~01:30, 축시: 01:30~03:30, ...
+  // 자시: 23:00~01:00 = 0
+  // 축시: 01:00~03:00 = 1
+  // 인시: 03:00~05:00 = 2
+  // ...
+  // 미시: 13:00~15:00 = 6
+  // 신시: 15:00~17:00 = 7
+  // ...
+  
   const totalMin = hour * 60 + minute;
   
-  // 한국 등 30분 보정 국가
-  const offset30Countries = ['KR'];
-  const useOffset = offset30Countries.includes(countryCode);
+  // 모든 국가 동일하게 표준 시각 기준으로 계산
+  // (30분 보정은 폐기 - 실제 시각으로 계산해야 정확함)
   
-  if (useOffset) {
-    // 한국식 30분 보정: 23:30~01:30 = 자시, 01:30~03:30 = 축시, ...
-    // 30분 빼서 계산 (23:30 -> 23:00 기준으로 맞춤)
-    const adjustedMin = totalMin - 30;
-    const branchIndex = Math.floor((adjustedMin - 60) / 120) + 1;
-    
-    // 23:00 이후 (adjustedMin 기준)는 자시(0)
-    if (adjustedMin >= 1380 || adjustedMin < 0) return 0; // 23:30~00:29 -> 자시
-    if (adjustedMin < 60) return 0;    // 00:30~01:29 -> 자시
-    
-    // 01:00부터 2시간 단위 (adjustedMin 기준)
-    return branchIndex;
-  }
+  if (totalMin >= 1380) return 0; // 23:00~23:59 = 자시(0)
+  if (totalMin < 60) return 0;    // 00:00~00:59 = 자시(0)
   
-  // 기본 (30분 보정 없음): 23:00~01:00 = 자시, 01:00~03:00 = 축시, ...
-  if (totalMin >= 1380) return 0; // 23:00~23:59
-  if (totalMin < 60) return 0;    // 00:00~00:59
-  
+  // 01:00부터 2시간 단위
+  // 01:00~03:00 = 축시(1), 03:00~05:00 = 인시(2), ...
   return Math.floor((totalMin - 60) / 120) + 1;
 }
 
