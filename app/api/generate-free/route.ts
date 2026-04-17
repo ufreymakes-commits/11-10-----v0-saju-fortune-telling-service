@@ -14,7 +14,41 @@ import { SAJU_MASTERPIECE_GUIDE } from '@/lib/saju/masterpiece'
 
 export async function POST(request: Request) {
   try {
-    const { name, gender, birth_country, birth_date, saju_data } = await request.json()
+    const body = await request.json()
+    
+    let name: string
+    let gender: string
+    let birth_country: string
+    let birth_date: string
+    let saju_data: SajuData
+    
+    // submissionId로 받으면 Supabase에서 조회
+    if (body.submissionId) {
+      const supabase = await createClient()
+      const { data: submission, error } = await supabase
+        .from('submissions')
+        .select('*')
+        .eq('id', body.submissionId)
+        .single()
+      
+      if (error || !submission) {
+        console.error('[v0] Submission not found:', error)
+        return NextResponse.json({ error: 'Submission not found' }, { status: 404 })
+      }
+      
+      name = submission.name
+      gender = submission.gender
+      birth_country = submission.birth_country
+      birth_date = submission.birth_date
+      saju_data = submission.saju_data
+    } else {
+      // 직접 데이터 전달
+      name = body.name
+      gender = body.gender
+      birth_country = body.birth_country
+      birth_date = body.birth_date
+      saju_data = body.saju_data
+    }
 
     if (!saju_data) {
       return NextResponse.json({ error: 'Missing saju_data' }, { status: 400 })
@@ -1672,17 +1706,17 @@ ${JSON.stringify(allSajuData, null, 2)}`
 
     console.log(`[v0] Generated ${facts.length} facts`)
 
-    // 응답 준비
-    const teaser_facts = facts.map(fact => ({
-      title: fact.title,
-      teaser: fact.text.split('⟦')[0].substring(0, 100) + '...'
-    }))
-
+    // 프론트엔드가 기대하는 형식으로 응답 준비
+    // freeFacts: 9개 무료 인사이트
+    // teaserFacts: 티저 (빈 배열, 유료 서비스에서 사용)
+    // submission: 고객 정보 + 사주 데이터
     return NextResponse.json({
-      status: 'success',
-      facts,
-      teaser_facts,
-      message: 'Birth chart analysis complete'
+      freeFacts: facts,
+      teaserFacts: [],
+      submission: {
+        name,
+        sajuData: saju_data
+      }
     })
   } catch (error) {
     console.error('[v0] Error:', error)
