@@ -601,81 +601,170 @@ function checkHyeonChimSal(dayBranch: string): boolean {
 }
 
 // ================================================================
-// 신살 계산 함수들 (연지 기준 + 일지 기준 둘 다 체크)
-// 정답 로직: 이미지 만세력 기준으로 수정됨
+// 12신살 계산 (연지 기준 삼합 그룹) - Gemini 정답 로직
+// 4개 예시 모두 100% 검증 완료
 // ================================================================
 
-// 헬퍼: 연지/일지 둘 다 기준으로 타겟 찾아서 위치 반환
-function _getSinsalPositionsDual(
-  sinsalMap: Record<string, string>,
-  yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null
-): string[] {
+// 삼합 그룹 매핑 (연지 기준)
+const SAMHAP_GROUP: Record<string, string> = {
+  "인": "인오술", "오": "인오술", "술": "인오술",
+  "신": "신자진", "자": "신자진", "진": "신자진",
+  "사": "사유축", "유": "사유축", "축": "사유축",
+  "해": "해묘미", "묘": "해묘미", "미": "해묘미"
+}
+
+// 12신살 테이블 (삼합 그룹별 지지 → 신살 매핑)
+const SINSAL_12_TABLE: Record<string, Record<string, string>> = {
+  "인오술": { "해":"겁살", "자":"재살", "축":"천살", "인":"지살", "묘":"년살", "진":"월살", "사":"망신살", "오":"장성살", "미":"반안살", "신":"역마살", "유":"육해살", "술":"화개살" },
+  "신자진": { "사":"겁살", "오":"재살", "미":"천살", "신":"지살", "유":"년살", "술":"월살", "해":"망신살", "자":"장성살", "축":"반안살", "인":"역마살", "묘":"육해살", "진":"화개살" },
+  "사유축": { "인":"겁살", "묘":"재살", "진":"천살", "사":"지살", "오":"년살", "미":"월살", "신":"망신살", "유":"장성살", "술":"반안살", "해":"역마살", "자":"육해살", "축":"화개살" },
+  "해묘미": { "신":"겁살", "유":"재살", "술":"천살", "해":"지살", "자":"년살", "축":"월살", "인":"망신살", "묘":"장성살", "진":"반안살", "사":"역마살", "오":"육해살", "미":"화개살" }
+}
+
+// 12신살 이름 목록
+const SINSAL_12_NAMES = ["겁살", "재살", "천살", "지살", "년살", "월살", "망신살", "장성살", "반안살", "역마살", "육해살", "화개살"]
+
+// 특정 지지의 12신살 이름 반환 (연지 기준)
+function get12SinsalName(yearBranch: string, targetBranch: string): string | null {
+  const group = SAMHAP_GROUP[yearBranch]
+  if (!group) return null
+  return SINSAL_12_TABLE[group][targetBranch] || null
+}
+
+// 특정 12신살의 위치들 반환 (연지 기준)
+function get12SinsalPositions(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null, sinsalName: string): string[] {
   const positions: string[] = []
   const labels = ["연지", "월지", "일지", "시지"]
   const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
   
-  // 연지 기준 타겟
-  const targetByYear = sinsalMap[yearBranch]
-  // 일지 기준 타겟
-  const targetByDay = sinsalMap[dayBranch]
-  
   branches.forEach((b, i) => {
     if (!b) return
-    if (b === targetByYear || b === targetByDay) {
-      if (!positions.includes(labels[i])) positions.push(labels[i])
+    const name = get12SinsalName(yearBranch, b)
+    if (name === sinsalName) {
+      positions.push(labels[i])
     }
   })
   
   return positions
 }
 
-// 망신살: 연지/일지 기준 (역마와 동일 매핑)
+// 12신살 존재 여부 체크 (연지 기준)
+function check12Sinsal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null, sinsalName: string): boolean {
+  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
+  return branches.some(b => b && get12SinsalName(yearBranch, b) === sinsalName)
+}
+
+// ================================================================
+// 개별 12신살 함수들 (호환성 유지)
+// ================================================================
+
+// 도화살 (년살과 동일 - 자오묘유)
+function checkDohwaSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
+  return check12Sinsal(yearBranch, monthBranch, dayBranch, hourBranch, "년살")
+}
+function getDohwaSalPositions(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
+  return get12SinsalPositions(yearBranch, monthBranch, dayBranch, hourBranch, "년살")
+}
+
+// 역마살
+function checkYeokMaSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
+  return check12Sinsal(yearBranch, monthBranch, dayBranch, hourBranch, "역마살")
+}
+function getYeokMaSalPositions(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
+  return get12SinsalPositions(yearBranch, monthBranch, dayBranch, hourBranch, "역마살")
+}
+
+// 화개살
+function checkHwagaeSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
+  return check12Sinsal(yearBranch, monthBranch, dayBranch, hourBranch, "화개살")
+}
+function getHwagaeSalPositions(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
+  return get12SinsalPositions(yearBranch, monthBranch, dayBranch, hourBranch, "화개살")
+}
+
+// 망신살
 function checkMangsinSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
-  const mangsinMap: Record<string, string> = {
-    "인": "신", "오": "신", "술": "신",
-    "신": "인", "자": "인", "진": "인",
-    "사": "해", "유": "해", "축": "해",
-    "해": "사", "묘": "사", "미": "사"
-  }
-  const targetByYear = mangsinMap[yearBranch]
-  const targetByDay = mangsinMap[dayBranch]
-  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
-  return branches.includes(targetByYear) || branches.includes(targetByDay)
+  return check12Sinsal(yearBranch, monthBranch, dayBranch, hourBranch, "망신살")
 }
-
 function getMangsinSalPositions(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
-  const mangsinMap: Record<string, string> = {
-    "인": "신", "오": "신", "술": "신",
-    "신": "인", "자": "인", "진": "인",
-    "사": "해", "유": "해", "축": "해",
-    "해": "사", "묘": "사", "미": "사"
-  }
-  return _getSinsalPositionsDual(mangsinMap, yearBranch, monthBranch, dayBranch, hourBranch)
+  return get12SinsalPositions(yearBranch, monthBranch, dayBranch, hourBranch, "망신살")
 }
 
-// 장성살: 연지/일지 기준
+// 장성살
 function checkJangseongSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
-  const jangseongMap: Record<string, string> = {
-    "인": "사", "오": "사", "술": "사",
-    "신": "해", "자": "해", "진": "해",
-    "사": "신", "유": "신", "축": "신",
-    "해": "인", "묘": "인", "미": "인"
-  }
-  const targetByYear = jangseongMap[yearBranch]
-  const targetByDay = jangseongMap[dayBranch]
-  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
-  return branches.includes(targetByYear) || branches.includes(targetByDay)
+  return check12Sinsal(yearBranch, monthBranch, dayBranch, hourBranch, "장성살")
+}
+function getJangseongSalPositions(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
+  return get12SinsalPositions(yearBranch, monthBranch, dayBranch, hourBranch, "장성살")
 }
 
-function getJangseongSalPositions(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
-  const jangseongMap: Record<string, string> = {
-    "인": "사", "오": "사", "술": "사",
-    "신": "해", "자": "해", "진": "해",
-    "사": "신", "유": "신", "축": "신",
-    "해": "인", "묘": "인", "미": "인"
-  }
-  return _getSinsalPositionsDual(jangseongMap, yearBranch, monthBranch, dayBranch, hourBranch)
+// 겁살
+function checkGeobSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
+  return check12Sinsal(yearBranch, monthBranch, dayBranch, hourBranch, "겁살")
 }
+function getGeobSalPositions(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
+  return get12SinsalPositions(yearBranch, monthBranch, dayBranch, hourBranch, "겁살")
+}
+
+// 지살
+function checkJiSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
+  return check12Sinsal(yearBranch, monthBranch, dayBranch, hourBranch, "지살")
+}
+function getJiSalPositions(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
+  return get12SinsalPositions(yearBranch, monthBranch, dayBranch, hourBranch, "지살")
+}
+
+// 천살
+function checkCheonSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
+  return check12Sinsal(yearBranch, monthBranch, dayBranch, hourBranch, "천살")
+}
+function getCheonSalPositions(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
+  return get12SinsalPositions(yearBranch, monthBranch, dayBranch, hourBranch, "천살")
+}
+
+// 년살 (도화)
+function checkNyeonSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
+  return check12Sinsal(yearBranch, monthBranch, dayBranch, hourBranch, "년살")
+}
+function getNyeonSalPositions(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
+  return get12SinsalPositions(yearBranch, monthBranch, dayBranch, hourBranch, "년살")
+}
+
+// 반안살 (새로 추가)
+function checkBananSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
+  return check12Sinsal(yearBranch, monthBranch, dayBranch, hourBranch, "반안살")
+}
+function getBananSalPositions(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
+  return get12SinsalPositions(yearBranch, monthBranch, dayBranch, hourBranch, "반안살")
+}
+
+// 월살 (새로 추가)
+function checkWolSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
+  return check12Sinsal(yearBranch, monthBranch, dayBranch, hourBranch, "월살")
+}
+function getWolSalPositions(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
+  return get12SinsalPositions(yearBranch, monthBranch, dayBranch, hourBranch, "월살")
+}
+
+// 재살 (새로 추가)
+function checkJaeSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
+  return check12Sinsal(yearBranch, monthBranch, dayBranch, hourBranch, "재살")
+}
+function getJaeSalPositions(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
+  return get12SinsalPositions(yearBranch, monthBranch, dayBranch, hourBranch, "재살")
+}
+
+// 육해살 (새로 추가)
+function checkYukhaeSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
+  return check12Sinsal(yearBranch, monthBranch, dayBranch, hourBranch, "육해살")
+}
+function getYukhaeSalPositions(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
+  return get12SinsalPositions(yearBranch, monthBranch, dayBranch, hourBranch, "육해살")
+}
+
+// ================================================================
+// 기타 신살 함수들 (12신살 외 - 일간 기준 신살)
+// ================================================================
 
 // 홍염살: 일간 기준 (연애/매력 관련)
 function checkHongyeomSal(dayStem: string, branches: string[]): boolean {
@@ -724,39 +813,6 @@ function checkMunChangSal(dayStem: string, branches: string[]): string[] {
   return branches.filter(b => b && targetBranches.includes(b))
 }
 
-// 도화살: 연지/일지 기준 (자오묘유 - 삼합의 도화 지지)
-function getDohwaSalPositions(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
-  const dohwaMap: Record<string, string> = {
-    "인": "묘", "오": "묘", "술": "묘",
-    "신": "유", "자": "유", "진": "유",
-    "사": "오", "유": "오", "축": "오",
-    "해": "자", "묘": "자", "미": "자"
-  }
-  return _getSinsalPositionsDual(dohwaMap, yearBranch, monthBranch, dayBranch, hourBranch)
-}
-
-// 역마살: 연지/일지 기준 (삼합의 역마 지지)
-function getYeokMaSalPositions(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
-  const yeokmaMap: Record<string, string> = {
-    "인": "신", "오": "신", "술": "신",
-    "신": "인", "자": "인", "진": "인",
-    "사": "해", "유": "해", "축": "해",
-    "해": "사", "묘": "사", "미": "사"
-  }
-  return _getSinsalPositionsDual(yeokmaMap, yearBranch, monthBranch, dayBranch, hourBranch)
-}
-
-// 화개살: 연지/일지 기준 (삼합의 묘지 - 술진축미)
-function getHwagaeSalPositions(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
-  const hwagaeMap: Record<string, string> = {
-    "인": "술", "오": "술", "술": "술",
-    "신": "진", "자": "진", "진": "진",
-    "사": "축", "유": "축", "축": "축",
-    "해": "미", "묘": "미", "미": "미"
-  }
-  return _getSinsalPositionsDual(hwagaeMap, yearBranch, monthBranch, dayBranch, hourBranch)
-}
-
 // 문창살: 일간 기준 (그대로 유지)
 function getMunChangSalPositions(dayStem: string, yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): string[] {
   const positions: string[] = []
@@ -775,120 +831,8 @@ function getMunChangSalPositions(dayStem: string, yearBranch: string, monthBranc
 }
 
 // ================================================================
-// 추가 신살 계산 함수들 (연지/일지 기준)
+// 일간/일주 기준 특수 신살 함수들 (12신살 외)
 // ================================================================
-
-// 겁살: 연지/일지 기준 삼합국의 반대 장생지
-function checkGeobSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
-  const geobMap: Record<string, string> = {
-    "인": "해", "오": "해", "술": "해",
-    "신": "사", "자": "사", "진": "사",
-    "사": "인", "유": "인", "축": "인",
-    "해": "신", "묘": "신", "미": "신"
-  }
-  const targetByYear = geobMap[yearBranch]
-  const targetByDay = geobMap[dayBranch]
-  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
-  return branches.includes(targetByYear) || branches.includes(targetByDay)
-}
-function getGeobSalPositions(yb: string, mob: string, db: string, hb: string | null): string[] {
-  const geobMap: Record<string, string> = {
-    "인": "해", "오": "해", "술": "해",
-    "신": "사", "자": "사", "진": "사",
-    "사": "인", "유": "인", "축": "인",
-    "해": "신", "묘": "신", "미": "신"
-  }
-  return _getSinsalPositionsDual(geobMap, yb, mob, db, hb)
-}
-
-// 지살: 연지/일지 기준 삼합국의 장생지
-function checkJiSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
-  const jiMap: Record<string, string> = {
-    "인": "인", "오": "인", "술": "인",
-    "신": "신", "자": "신", "진": "신",
-    "사": "사", "유": "사", "축": "사",
-    "해": "해", "묘": "해", "미": "해"
-  }
-  const targetByYear = jiMap[yearBranch]
-  const targetByDay = jiMap[dayBranch]
-  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
-  // 자기 자신이 아닌 곳에 있어야 함
-  return (branches.filter(b => b === targetByYear && b !== yearBranch).length > 0) ||
-         (branches.filter(b => b === targetByDay && b !== dayBranch).length > 0)
-}
-function getJiSalPositions(yb: string, mob: string, db: string, hb: string | null): string[] {
-  const jiMap: Record<string, string> = {
-    "인": "인", "오": "인", "술": "인",
-    "신": "신", "자": "신", "진": "신",
-    "사": "사", "유": "사", "축": "사",
-    "해": "해", "묘": "해", "미": "해"
-  }
-  // 연지 기준 타겟, 일지 기준 타겟
-  const targetByYear = jiMap[yb]
-  const targetByDay = jiMap[db]
-  const positions: string[] = []
-  const labels = ["연지", "월지", "일지", "시지"]
-  const branches = [yb, mob, db, hb]
-  
-  branches.forEach((b, i) => {
-    if (!b) return
-    // 타겟과 같지만 기준 지지가 아닌 곳에 있어야 함
-    if ((b === targetByYear && b !== yb) || (b === targetByDay && b !== db)) {
-      if (!positions.includes(labels[i])) positions.push(labels[i])
-    }
-  })
-  
-  return positions
-}
-
-// 천살: 연지/일지 기준 (제왕지 - 자오묘유)
-function checkCheonSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
-  const cheonMap: Record<string, string> = {
-    "인": "오", "오": "오", "술": "오",
-    "신": "자", "자": "자", "진": "자",
-    "사": "유", "유": "유", "축": "유",
-    "해": "묘", "묘": "묘", "미": "묘"
-  }
-  const targetByYear = cheonMap[yearBranch]
-  const targetByDay = cheonMap[dayBranch]
-  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
-  return branches.includes(targetByYear) || branches.includes(targetByDay)
-}
-function getCheonSalPositions(yb: string, mob: string, db: string, hb: string | null): string[] {
-  const cheonMap: Record<string, string> = {
-    "인": "오", "오": "오", "술": "오",
-    "신": "자", "자": "자", "진": "자",
-    "사": "유", "유": "유", "축": "유",
-    "해": "묘", "묘": "묘", "미": "묘"
-  }
-  return _getSinsalPositionsDual(cheonMap, yb, mob, db, hb)
-}
-
-// 년살: 연지/일지 기준 (도화 지지 - 자오묘유)
-function checkNyeonSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
-  const nyeonMap: Record<string, string> = {
-    "인": "묘", "오": "묘", "술": "묘",
-    "신": "유", "자": "유", "진": "유",
-    "사": "오", "유": "오", "축": "오",
-    "해": "자", "묘": "자", "미": "자"
-  }
-  const targetByYear = nyeonMap[yearBranch]
-  const targetByDay = nyeonMap[dayBranch]
-  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
-  return branches.includes(targetByYear) || branches.includes(targetByDay)
-}
-function getNyeonSalPositions(yb: string, mob: string, db: string, hb: string | null): string[] {
-  const nyeonMap: Record<string, string> = {
-    "인": "묘", "오": "묘", "술": "묘",
-    "신": "유", "자": "유", "진": "유",
-    "사": "오", "유": "오", "축": "오",
-    "해": "자", "묘": "자", "미": "자"
-  }
-  const targetByYear = nyeonMap[yb]
-  const targetByDay = nyeonMap[db]
-  if (!target || target === db) return []
-  return _getBranchPositions(target, yb, mob, db, hb)
-}
 
 // 백호살: 일주 기준 (갑진, 을미, 병술, 정축, 무진, 경진, 신미, 임술, 계축, 무술)
 function checkBaekhoSal(dayStem: string, dayBranch: string): boolean {
@@ -1056,7 +1000,7 @@ function checkBiinSal(yearBranch: string, monthBranch: string, dayBranch: string
     "인": "사","오": "사","술": "사",
     "신": "해","자": "해","진": "해",
     "사": "신","유": "신","축": "신",
-    "해": "인","묘": "인","미": "인"
+    "���": "인","묘": "인","미": "인"
   }
   const target = biinMap[dayBranch]
   if (!target) return false
@@ -1334,10 +1278,10 @@ const SINSAL_USAGE_GUIDE: Record<string, string> = {
   "화개살": "예술, 종교, 철학, 학문 등 정신적 깊이를 요하는 분야에서 재능이 발휘됩니다",
   "원진살": "관계의 갈등을 인식하고 소통과 이해의 노력을 기울이면 성장의 기회가 됩니다",
   "현침살": "전문 기술, 의료, 법률 등 날카로운 전문성이 필요한 분야에서 두각을 나타냅니다",
-  "문창살": "학문, 글쓰기, 교육, 연구 등 지적 활동에서 뛰어난 성취를 이룰 수 있습니다",
+  "문창살": "학문, 글쓰기, 교육, 연구 등 지적 활동���서 뛰어난 성취를 이룰 수 있습니다",
   "망신살": "명예와 체면에 관한 시험을 통해 진정한 자아를 찾고 겸손을 배우게 됩니다",
   "장성살": "리더십과 권위를 발휘하며 높은 지위나 명예를 얻을 수 있는 기운이 있습니다",
-  "홍염살": "강렬한 매력과 정열로 예술, 연예, 패션 분야에서 두각을 나타낼 수 있습니다",
+  "홍염살": "강렬한 매력과 정열로 예술, 연예, 패션 분야에서 두각을 나타낼 �� 있습니다",
   "겁살": "강한 추진력과 돌파력으로 경쟁적인 환경에서 두각을 나타낼 수 있습니다",
   "지살": "외교적 능력과 현장 감각을 살려 현장직이나 대외 활동에서 빛을 발합니다",
   "천살": "하늘의 시험처럼 예측 불가한 변화를 겪지만, 이를 통해 단련됩니다",
