@@ -484,26 +484,28 @@ export function calcGilseong(
   dayBranch: string,
   hourBranch: string | null
 ): { cheonul: string[]; taegeuk: string[] } {
-  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
-  const labels = ["연지", "월지", "일지", "시지"]
+  const cheonul: string[] = []
+  const taegeuk: string[] = []
   
-  // 천을귀인
+  // 천을귀인 (연주 또는 시주에만 나타남 - 일간 기준)
   const cheonulTargets = CHEONUL_MAP[dayStem] || []
-  const cheonul = cheonulTargets
-    .flatMap(target => 
-      branches
-        .map((b, i) => b === target ? `${labels[i]}${b}` : null)
-        .filter(Boolean)
-    ) as string[]
   
-  // 태극귀인
+  if (yearBranch && cheonulTargets.includes(yearBranch)) {
+    cheonul.push("연주")
+  }
+  if (hourBranch && cheonulTargets.includes(hourBranch)) {
+    cheonul.push("시주")
+  }
+  
+  // 태극귀인 (월주 또는 일주에만 나타남 - 일간 기준)
   const taegeukTargets = TAEGEUK_MAP[dayStem] || []
-  const taegeuk = taegeukTargets
-    .flatMap(target => 
-      branches
-        .map((b, i) => b === target ? `${labels[i]}${b}` : null)
-        .filter(Boolean)
-    ) as string[]
+  
+  if (monthBranch && taegeukTargets.includes(monthBranch)) {
+    taegeuk.push("월주")
+  }
+  if (dayBranch && taegeukTargets.includes(dayBranch)) {
+    taegeuk.push("일주")
+  }
   
   return { cheonul, taegeuk }
 }
@@ -1035,7 +1037,7 @@ function checkGokgakSal(dayBranch: string): boolean {
 
 // 낙정관살: 일지 기준
 function checkNakjeongSal(dayStem: string, dayBranch: string): boolean {
-  const nakjeongList = ["갑자","을해","병자","정해","무자","기해","경자","신해","임자","계해"]
+  const nakjeongList = ["갑자","을해","병자","정해","무자","기해","경자","신해","임자","계���"]
   return nakjeongList.includes(dayStem + dayBranch)
 }
 
@@ -1379,7 +1381,7 @@ const SINSAL_USAGE_GUIDE: Record<string, string> = {
   "음인": "음의 귀인으로, 은밀하게 도와주는 사람이 있으며 직관과 감각이 뛰어납니다",
   "진신": "전진하는 기운으로 새로운 시작과 도전에 유리하며 적극��인 행동력이 있습니다",
   "퇴신": "물러나는 기운으로 정리와 마무리에 능하며 신중한 판단력이 장점입니다",
-  "단장관": "외모와 치장에 관심이 많고 미적 감각이 뛰어나 패션/뷰티 분야에서 두각을 나타냅니다",
+  "단장관": "외모와 치장에 관심이 ��고 미적 감각이 뛰어나 패션/뷰티 분야에서 두각을 나타냅니다",
   "괴강": "강인하고 결단력 있는 성격으로 리더십이 뛰어나지만 고집이 셀 수 있습니다",
   "월덕귀인": "해당 월의 덕을 받아 주변 사람들의 도움과 협조를 쉽게 얻을 수 있습니다",
   "천덕귀인": "하늘의 덕을 받아 위기 상황에서도 귀인의 도움으로 무사히 넘길 수 있습니다",
