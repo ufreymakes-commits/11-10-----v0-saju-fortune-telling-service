@@ -414,7 +414,7 @@ export function calcWonjin(
 }
 
 // ================================================================
-// 길성 (천을귀인, 문창귀인, 태극귀인)
+// 길성 (��을귀인, 문창귀인, 태극귀인)
 // ================================================================
 const CHEONUL_MAP: Record<string, string[]> = {
   "갑": ["축", "미"], "무": ["축", "미"], "경": ["축", "미"],
@@ -600,48 +600,6 @@ export function calcJohuYongsin(dayStem: string, monthBranch: string): string {
 }
 
 // ================================================================
-// 신살 계산 (Free.js에서 가져옴)
-// ================================================================
-function checkDohwaSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
-  const dohwa = ["자", "오", "묘", "유"]
-  return [yearBranch, monthBranch, dayBranch, hourBranch].some(b => dohwa.includes(b || ""))
-}
-
-function checkYeokMaSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
-  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
-  if ((branches.includes("신") || branches.includes("자") || branches.includes("진")) && branches.includes("인")) return true
-  if ((branches.includes("인") || branches.includes("오") || branches.includes("술")) && branches.includes("신")) return true
-  if ((branches.includes("사") || branches.includes("유") || branches.includes("축")) && branches.includes("해")) return true
-  if ((branches.includes("해") || branches.includes("묘") || branches.includes("미")) && branches.includes("사")) return true
-  return false
-}
-
-function checkHwagaeSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
-  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
-  if ((branches.includes("신") || branches.includes("자") || branches.includes("진")) && branches.includes("진")) return true
-  if ((branches.includes("인") || branches.includes("오") || branches.includes("술")) && branches.includes("술")) return true
-  if ((branches.includes("사") || branches.includes("유") || branches.includes("축")) && branches.includes("축")) return true
-  if ((branches.includes("해") || branches.includes("묘") || branches.includes("미")) && branches.includes("미")) return true
-  return false
-}
-
-function checkWonJinSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
-  const wonjin: [string, string][] = [
-    ["자", "미"], ["축", "오"], ["인", "유"],
-    ["묘", "신"], ["진", "해"], ["사", "술"]
-  ]
-  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
-  for (const pair of wonjin) {
-    if (branches.includes(pair[0]) && branches.includes(pair[1])) return true
-  }
-  return false
-}
-
-function checkHyeonChimSal(dayBranch: string): boolean {
-  return ["해", "묘", "미"].includes(dayBranch)
-}
-
-// ================================================================
 // 12신살 계산 (연지 기준 삼합 그룹) - Gemini 정답 로직
 // 4개 예시 모두 100% 검증 완료
 // ================================================================
@@ -804,8 +762,26 @@ function getYukhaeSalPositions(yearBranch: string, monthBranch: string, dayBranc
 }
 
 // ================================================================
-// 기타 신살 함수들 (12신살 외 - 일간 기준 신살)
+// 기타 신살 함수들 (12신살 외 - 일간/일지 기준 신살)
 // ================================================================
+
+// 원진살: 지지 간의 충돌 관계
+function checkWonJinSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
+  const wonjin: [string, string][] = [
+    ["자", "미"], ["축", "오"], ["인", "유"],
+    ["묘", "신"], ["진", "해"], ["사", "술"]
+  ]
+  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
+  for (const pair of wonjin) {
+    if (branches.includes(pair[0]) && branches.includes(pair[1])) return true
+  }
+  return false
+}
+
+// 현침살: 일지 기준
+function checkHyeonChimSal(dayBranch: string): boolean {
+  return ["해", "묘", "미"].includes(dayBranch)
+}
 
 // 홍염살: 일간 기준 (연애/매력 관련)
 function checkHongyeomSal(dayStem: string, branches: string[]): boolean {
@@ -1358,7 +1334,7 @@ const SINSAL_USAGE_GUIDE: Record<string, string> = {
   "칠살": "충돌과 경쟁의 기운이 있어 승부욕이 강하고 경쟁적인 환경에서 두각을 나타냅니다",
   "구추방해": "재물이나 건강에 방해가 될 수 있으니 평소 건강 관리와 재정 관리에 신경 쓰세요",
   "음인": "음의 귀인으로, 은밀하게 도와주는 사람이 있으며 직관과 감각이 뛰어납니다",
-  "진신": "전진하는 기운으로 새로운 시작과 도전에 유리하며 적극적인 행동력이 있습니다",
+  "진신": "전진하는 기운으로 새로운 시작과 도전에 유리하며 적극��인 행동력이 있습니다",
   "퇴신": "물러나는 기운으로 정리와 마무리에 능하며 신중한 판단력이 장점입니다",
   "단장관": "외모와 치장에 관심이 많고 미적 감각이 뛰어나 패션/뷰티 분야에서 두각을 나타냅니다",
   "괴강": "강인하고 결단력 있는 성격으로 리더십이 뛰어나지만 고집이 셀 수 있습니다",
