@@ -275,7 +275,14 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
                 <span className="text-red-400">미계산</span>
               )}
               <div className="mt-2 text-[10px]">
-                <div>보유: {submission.sajuData.tenGods?.present?.join(', ') || <span className="text-red-400">미계산</span>}</div>
+                <div>보유 (개수): {(() => {
+                  const bp = submission.sajuData.tenGods?.byPosition
+                  if (!bp) return <span className="text-red-400">미계산</span>
+                  const all = [bp.yearStem, bp.yearBranch, bp.monthStem, bp.monthBranch, bp.dayStem, bp.dayBranch, bp.hourStem, bp.hourBranch].filter(Boolean)
+                  const counts: Record<string, number> = {}
+                  all.forEach(tg => { counts[tg] = (counts[tg] || 0) + 1 })
+                  return Object.entries(counts).map(([k, v]) => `${k}(${v})`).join(', ')
+                })()}</div>
                 <div>부재: {submission.sajuData.tenGods?.missing?.join(', ') || <span className="text-red-400">미계산</span>}</div>
               </div>
             </div>

@@ -524,10 +524,17 @@ Premise of non-moral judgment for "more/less" (talent and bias can coexist)
 Meaning of absence: developmental themes, ...`
 
     // ===== 십신 포맷팅: "비견 (3개), 식신 (2개)" 형식 =====
-    // 십신별 개수 계산
+    // 십신별 개수 계산 (byPosition 기준 - 8개 위치에서 실제 개수 세기)
     const tenGodsCounts: Record<string, number> = {}
-    if (saju_data.tenGods?.present) {
-      saju_data.tenGods.present.forEach(tenGod => {
+    const bp = saju_data.tenGods?.byPosition
+    if (bp) {
+      const allPositions = [
+        bp.yearStem, bp.yearBranch, 
+        bp.monthStem, bp.monthBranch, 
+        bp.dayStem, bp.dayBranch, 
+        bp.hourStem, bp.hourBranch
+      ].filter(Boolean)
+      allPositions.forEach(tenGod => {
         tenGodsCounts[tenGod] = (tenGodsCounts[tenGod] || 0) + 1
       })
     }

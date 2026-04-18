@@ -1482,10 +1482,17 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
 `
 
     // ===== USER PROMPT (변수: 고객 데이터 + 요청) =====
-    // 십신별 개수 계산
+    // 십신별 개수 계산 (byPosition 기준 - 8개 위치에서 실제 개수 세기)
     const tenGodsCounts: Record<string, number> = {}
-    if (saju_data.tenGods?.present) {
-      saju_data.tenGods.present.forEach(tenGod => {
+    const bp = saju_data.tenGods?.byPosition
+    if (bp) {
+      const allPositions = [
+        bp.yearStem, bp.yearBranch, 
+        bp.monthStem, bp.monthBranch, 
+        bp.dayStem, bp.dayBranch, 
+        bp.hourStem, bp.hourBranch
+      ].filter(Boolean)
+      allPositions.forEach(tenGod => {
         tenGodsCounts[tenGod] = (tenGodsCounts[tenGod] || 0) + 1
       })
     }
