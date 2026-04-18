@@ -1565,11 +1565,24 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
       // 공망
       gongmang: saju_data.gongmang || [],
 
-      // 신살 (모두 포함)
+      // 신살 (모두 포함 - 상세)
       spirits: saju_data.spirits || [],
       sinsalDetails: saju_data.sinsalDetails || [],
       sinsalSummary: saju_data.sinsalSummary || '',
       sinsalCombinedGuide: saju_data.sinsalCombinedGuide || '',
+      
+      // 12신살 (연지 기준 - 정확한 매핑)
+      twelveSinsal: {
+        yearBranch: saju_data.yearPillar?.branch || '',
+        monthBranch: saju_data.monthPillar?.branch || '',
+        dayBranch: saju_data.dayPillar?.branch || '',
+        hourBranch: saju_data.hourPillar?.branch || '',
+        // 각 위치별 12신살 이름
+        yearSinsal: saju_data.twelveSinsal?.year || '',
+        monthSinsal: saju_data.twelveSinsal?.month || '',
+        daySinsal: saju_data.twelveSinsal?.day || '',
+        hourSinsal: saju_data.twelveSinsal?.hour || ''
+      },
 
       // 용신 (상세)
       yongsin: {
@@ -1578,23 +1591,26 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
         exists: !!saju_data.eokbuYongsin || !!saju_data.johuYongsin
       },
 
-      // 대운 (8개 + 십신 + 12운성)
-      daewoon: saju_data.daewoon?.slice(0, 8).map(d => ({
+      // 대운 (10개 전부 + 십신 + 12운성)
+      daewoon: saju_data.daewoon?.slice(0, 10).map(d => ({
         startAge: d.startAge,
         endAge: d.endAge,
         ganzi: `${d.stem}${d.branch}`,
         fullName: d.fullName,
         tenGod: d.tenGod || 'N/A',
-        twelveStar: d.twelveStar || 'N/A'
+        twelveStar: d.twelveStar || 'N/A',
+        element: d.element || 'N/A'
       })) || [],
       
-      // 연운 (2026년 포함)
+      // 연운 (2026년 전후 10년)
       yeonwoon: {
         current2026: saju_data.yeonwoon?.find(y => y.year === 2026)?.fullName || 'N/A',
-        allYears: saju_data.yeonwoon?.slice(0, 5).map(y => ({
+        allYears: saju_data.yeonwoon?.slice(0, 10).map(y => ({
           year: y.year,
           ganzi: `${y.stem}${y.branch}`,
-          fullName: y.fullName
+          fullName: y.fullName,
+          tenGod: y.tenGod || 'N/A',
+          twelveStar: y.twelveStar || 'N/A'
         })) || []
       },
       

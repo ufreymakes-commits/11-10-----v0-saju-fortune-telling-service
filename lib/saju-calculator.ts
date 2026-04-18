@@ -5,6 +5,7 @@ import type { BirthInfo, SajuData } from './types'
 import { runFullAnalysis, calculateElementScores, calculateElementScoresWithHiddenStems, calculateElementScoresWithHapChung, countElementsWithHiddenStems } from './saju/core-calculator'
 import {
   calcTwelveStars,
+  calcTwelveSinsal,
   calcCheongganHap,
   calcJijiYughap,
   calcJijiSamhap,
@@ -244,6 +245,14 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     hourStem as string | null
   )
   
+  // === 12신살 계산 (연지 기준 삼합 그룹) ===
+  const twelveSinsal = calcTwelveSinsal(
+    yearBranch as string,
+    monthBranch as string,
+    dayBranch as string,
+    hourBranch as string | null
+  )
+  
   // === 오행 개수 계산 (지장간 포함) - 비율 표시용 ===
   const elementCounts = countElementsWithHiddenStems(fp)
   
@@ -422,6 +431,9 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     sinsalDetails: detailedSinsal.details,
     sinsalSummary: detailedSinsal.summary,
     sinsalCombinedGuide: detailedSinsal.combinedGuide,
+    
+    // 12신살 (연지 기준 삼합 그룹)
+    twelveSinsal,
     
     // 대운 (정확한 계산) + 십신/12운성 추가
     daewoon: enrichDaeWoonWithTenGodsAndStars(

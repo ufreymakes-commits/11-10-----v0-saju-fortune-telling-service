@@ -44,6 +44,47 @@ export function calcTwelveStars(
 }
 
 // ================================================================
+// 12신살 계산 (연지 기준 삼합 그룹) - Gemini 정답 로직
+// ================================================================
+
+// 12신살 삼합 그룹 매핑
+const SAMHAP_GROUP_MAP: Record<string, string> = {
+  "인": "인오술", "오": "인오술", "술": "인오술",
+  "신": "신자진", "자": "신자진", "진": "신자진",
+  "사": "사유축", "유": "사유축", "축": "사유축",
+  "해": "해묘미", "묘": "해묘미", "미": "해묘미"
+}
+
+// 12신살 테이블 (삼합 그룹별)
+const TWELVE_SINSAL_TABLE: Record<string, Record<string, string>> = {
+  "인오술": { "해":"겁살", "자":"재살", "축":"천살", "인":"지살", "묘":"년살", "진":"월살", "사":"망신살", "오":"장성살", "미":"반안살", "신":"역마살", "유":"육해살", "술":"화개살" },
+  "신자진": { "사":"겁살", "오":"재살", "미":"천살", "신":"지살", "유":"년살", "술":"월살", "해":"망신살", "자":"장성살", "축":"반안살", "인":"역마살", "묘":"육해살", "진":"화개살" },
+  "사유축": { "인":"겁살", "묘":"재살", "진":"천살", "사":"지살", "오":"년살", "미":"월살", "신":"망신살", "유":"장성살", "술":"반안살", "해":"역마살", "자":"육해살", "축":"화개살" },
+  "해묘미": { "신":"겁살", "유":"재살", "술":"천살", "해":"지살", "자":"년살", "축":"월살", "인":"망신살", "묘":"장성살", "진":"반안살", "사":"역마살", "오":"육해살", "미":"화개살" }
+}
+
+// 12신살 계산 (연지 기준) - 외부 호출용
+export function calcTwelveSinsal(
+  yearBranch: string,
+  monthBranch: string,
+  dayBranch: string,
+  hourBranch: string | null
+): { year: string; month: string; day: string; hour: string } {
+  const group = SAMHAP_GROUP_MAP[yearBranch]
+  if (!group) {
+    return { year: '', month: '', day: '', hour: '' }
+  }
+  
+  const table = TWELVE_SINSAL_TABLE[group]
+  return {
+    year: table[yearBranch] || '',
+    month: table[monthBranch] || '',
+    day: table[dayBranch] || '',
+    hour: hourBranch ? (table[hourBranch] || '') : ''
+  }
+}
+
+// ================================================================
 // 천간합
 // ================================================================
 const CHEONGGAN_HAP: [string, string, string][] = [

@@ -310,6 +310,34 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
           </div>
 
           <div className="border-t border-green-500/20 pt-2 mt-2">
+            <span className="text-yellow-400">12신살 (연지 기준 - 정확):</span>
+            <div className="ml-2 text-[11px]">
+              {submission.sajuData.twelveSinsal ? (
+                <div className="grid grid-cols-4 gap-2 mt-1">
+                  <div className="text-center">
+                    <div className="text-gray-400 text-[9px]">연주</div>
+                    <div className="text-lime-400 font-bold">{submission.sajuData.twelveSinsal.year || '-'}</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-gray-400 text-[9px]">월주</div>
+                    <div className="text-lime-400 font-bold">{submission.sajuData.twelveSinsal.month || '-'}</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-gray-400 text-[9px]">일주</div>
+                    <div className="text-lime-400 font-bold">{submission.sajuData.twelveSinsal.day || '-'}</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-gray-400 text-[9px]">시주</div>
+                    <div className="text-lime-400 font-bold">{submission.sajuData.twelveSinsal.hour || '-'}</div>
+                  </div>
+                </div>
+              ) : (
+                <span className="text-red-400">미계산</span>
+              )}
+            </div>
+          </div>
+
+          <div className="border-t border-green-500/20 pt-2 mt-2">
             <span className="text-yellow-400">신살 (상세 분석):</span>
             <div className="ml-2 text-[10px]">
               {submission.sajuData.sinsalDetails?.length ? (

@@ -85,6 +85,14 @@ export interface SajuData {
   sinsalSummary?: string
   sinsalCombinedGuide?: string
   
+  // 12신살 (연지 기준 삼합 그룹)
+  twelveSinsal?: {
+    year: string  // 연주 12신살 이름 (예: 장성살)
+    month: string // 월주 12신살 이름
+    day: string   // 일주 12신살 이름
+    hour: string  // 시주 12신살 이름
+  }
+  
   // 대운
   daewoon?: Array<{ startAge: number; endAge: number; stem: string; branch: string; fullName?: string }>
   
@@ -216,7 +224,7 @@ export interface InsightBlueprint {
   // 반사실 테스트용 키
   counterfactualKey: string // "이게 바뀌면 이 주장은 무너짐" (e.g. "if Water=0 and Metal=95")
   
-  // 포인터 (최종 문장에 표기할 데이터 참조 위치)
+  // 포인터 (최종 문장에 표기할 데이��� 참조 위치)
   pointerHints: string[] // ["sinGangSinYak.grade", "elementBalanceAdjusted.wood", ...]
   
   // 용신 주의사항
