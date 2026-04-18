@@ -20,19 +20,16 @@ export interface SajuData {
   dayMaster: string
   dayMasterKorean?: string
   
-  // 오행 개수 (지장간 포함 - 비율 표시용)
+  // 오행 개수 (지장간 미포함 - 천간/지지만)
+  elementCountBasic?: { 목: number; 화: number; 토: number; 금: number; 수: number }
+  
+  // 오행 개수 (지장간 포함 - 잠재적 욕구)
   elementCount?: { 목: number; 화: number; 토: number; 금: number; 수: number }
   
-  // 오행 (기본 점수 - 수치론 120점)
+  // 오행 점수 (수치론 120점 - 월령 중심 - 가장 정확)
   elementBalance: { wood: number; fire: number; earth: number; metal: number; water: number }
   elementBalanceKorean?: { 목: number; 화: number; 토: number; 금: number; 수: number }
   dominantElement: string
-  
-  // 오행 (합충 반영 점수)
-  elementBalanceAdjusted?: { wood: number; fire: number; earth: number; metal: number; water: number }
-  elementBalanceAdjustedKorean?: { 목: number; 화: number; 토: number; 금: number; 수: number }
-  hapChungAdjustments?: string[]
-  hapChungSummary?: string
   
   // 12운성
   twelveStars?: Array<{ position: string; branch: string; star: string }>

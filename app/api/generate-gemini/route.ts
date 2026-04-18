@@ -1587,11 +1587,12 @@ FYI
       energyGrade: saju_data.sinGangSinYak?.grade || '',
       energyRatio: saju_data.sinGangSinYak?.ratio || 0,
 
-      // 오행 점수 3가지 (모두 포함)
-      elementBasic: saju_data.elementBalanceKorean || {}, // 지장간 미포함
-      elementWithHiddenStems: saju_data.elementBalanceWithHiddenStemsKorean || {}, // 지장간 포함
-      elementAdjusted: saju_data.elementBalanceAdjustedKorean || {}, // 합충 반영
-      elementCount: saju_data.elementCount || {},
+      // 오행 개수 (2가지)
+      elementCountBasic: saju_data.elementCountBasic || {}, // 지장간 미포함 - 천간/지지만
+      elementCountWithHidden: saju_data.elementCount || {}, // 지장간 포함 - 잠재적 욕구
+      
+      // 오행 점수 (수치론 120점 - 월령 중심 - 가장 정확)
+      elementScore: saju_data.elementBalanceKorean || {},
       dominantElement: saju_data.dominantElement || '',
 
       // 십신 (개수 포함 + 위치별)

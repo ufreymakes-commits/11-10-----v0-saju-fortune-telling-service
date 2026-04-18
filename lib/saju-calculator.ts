@@ -2,7 +2,7 @@
 // Complete analysis including all advanced calculations
 
 import type { BirthInfo, SajuData } from './types'
-import { runFullAnalysis, calculateElementScores, calculateElementScoresWithHiddenStems, calculateElementScoresWithHapChung, countElementsWithHiddenStems } from './saju/core-calculator'
+import { runFullAnalysis, calculateElementScores, calculateElementScoresWithHiddenStems, calculateElementScoresWithHapChung, countElementsWithHiddenStems, countElementsBasic } from './saju/core-calculator'
 import {
   calcTwelveStars,
   calcTwelveSinsal,
@@ -253,8 +253,11 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     hourBranch as string | null
   )
   
-  // === 오행 개수 계산 (지장간 포함) - 비율 표시용 ===
+  // === 오행 개수 계산 (지장간 포함) - 잠재적 욕구 표시용 ===
   const elementCounts = countElementsWithHiddenStems(fp)
+  
+  // === 오행 개수 계산 (지장간 미포함) - 천간/지지만 ===
+  const elementCountBasic = countElementsBasic(fp)
   
   // === 오행 점수 계산 (수치론 점수 방식: 총 120점) ===
   // 천간: 각 10점, 지지: 연지 10점, 월지 30점, 일지 20점, 시지 20점
@@ -354,7 +357,16 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     dayMaster: dayStemHanja,
     dayMasterKorean: dayStem,
     
-    // 오행 개수 (지장간 포함 - 비율 표시용)
+    // 오행 개수 (지장간 미포함 - 천간/지지만)
+    elementCountBasic: {
+      목: elementCountBasic['목'] || 0,
+      화: elementCountBasic['화'] || 0,
+      토: elementCountBasic['토'] || 0,
+      금: elementCountBasic['금'] || 0,
+      수: elementCountBasic['수'] || 0
+    },
+    
+    // 오행 개수 (지장간 포함 - 잠재적 욕구)
     elementCount: {
       목: elementCounts['목'] || 0,
       화: elementCounts['화'] || 0,
@@ -363,22 +375,16 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
       수: elementCounts['수'] || 0
     },
     
-    // 오행 (기본 점수 - 수치론 120점)
+    // 오행 점수 (수치론 120점 - 월령 중심 - 가장 정확)
     elementBalance,
     elementBalanceKorean,
     dominantElement: Object.entries(elementBalance).reduce((a, b) => 
       a[1] > b[1] ? a : b
     )[0],
     
-    // 오행 (지장간 포함 점수)
+    // 오행 (지장간 포함 점수) - 참고용
     elementBalanceWithHiddenStems,
     elementBalanceWithHiddenStemsKorean,
-    
-    // 오행 (합충 반영 점수)
-    elementBalanceAdjusted,
-    elementBalanceAdjustedKorean,
-    hapChungAdjustments: hapChungAnalysis.adjustments,
-    hapChungSummary: hapChungAnalysis.summary,
     
     // 12운성
     twelveStars: twelveStars.map(ts => ({

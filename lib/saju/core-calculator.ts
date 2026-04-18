@@ -348,6 +348,27 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
 // 천간 4개 + 지지 4개 + 지장간(지지마다 1~3개)
 // ================================================================
 
+// 오행 개수 계산 (지장간 미포함 - 천간/지지만)
+export function countElementsBasic(fourPillars: FourPillars): ElementCount {
+  const count: ElementCount = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+  
+  const pillars = [fourPillars.year, fourPillars.month, fourPillars.day];
+  if (fourPillars.hour) pillars.push(fourPillars.hour);
+  
+  for (const pillar of pillars) {
+    // 천간 카운트
+    const stemElement = STEM_TO_ELEMENT[pillar.stem];
+    count[stemElement]++;
+    
+    // 지지 카운트
+    const branchElement = BRANCH_TO_ELEMENT[pillar.branch];
+    count[branchElement]++;
+  }
+  
+  return count;
+}
+
+// 오행 개수 계산 (지장간 포함 - 잠재적 욕구)
 export function countElementsWithHiddenStems(fourPillars: FourPillars): ElementCount {
   const count: ElementCount = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
   
