@@ -6,6 +6,7 @@ import { runFullAnalysis, calculateElementScores, calculateElementScoresWithHidd
 import {
   calcTwelveStars,
   calcTwelveSinsal,
+  calcHybridTwelveSinsal,
   calcCheongganHap,
   calcJijiYughap,
   calcJijiSamhap,
@@ -245,8 +246,16 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     hourStem as string | null
   )
   
-  // === 12신살 계산 (연지 기준 삼합 그룹) ===
+  // === 12신살 계산 (연지 기준 - 사회적 성공운) ===
   const twelveSinsal = calcTwelveSinsal(
+    yearBranch as string,
+    monthBranch as string,
+    dayBranch as string,
+    hourBranch as string | null
+  )
+  
+  // === 하이브리드 12신살 (연지 + 일지 기준) - 100만명 일관성 ===
+  const hybridTwelveSinsal = calcHybridTwelveSinsal(
     yearBranch as string,
     monthBranch as string,
     dayBranch as string,
@@ -440,8 +449,11 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     sinsalSummary: detailedSinsal.summary,
     sinsalCombinedGuide: detailedSinsal.combinedGuide,
     
-    // 12신살 (연지 기준 삼합 그룹)
+    // 12신살 (연지 기준 - 사회적 성공운)
     twelveSinsal,
+    
+    // 하이브리드 12신살 (연지 + 일지 기준 모두)
+    hybridTwelveSinsal,
     
     // 대운 (정확한 계산) + 십신/12운성 추가
     daewoon: enrichDaeWoonWithTenGodsAndStars(

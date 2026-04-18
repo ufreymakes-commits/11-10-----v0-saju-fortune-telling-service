@@ -96,12 +96,30 @@ export interface SajuData {
   sinsalSummary?: string
   sinsalCombinedGuide?: string
   
-  // 12신살 (연지 기준 삼합 그룹)
+  // 12신살 (연지 기준 - 사회적 성공운)
   twelveSinsal?: {
     year: string  // 연주 12신살 이름 (예: 장성살)
     month: string // 월주 12신살 이름
     day: string   // 일주 12신살 이름
     hour: string  // 시주 12신살 이름
+  }
+  
+  // 하이브리드 12신살 (연지 + 일지 기준 모두 - 100만명 일관성)
+  hybridTwelveSinsal?: {
+    byYearBranch: {  // 사회적 성공운 (연지 기준)
+      year: string
+      month: string
+      day: string
+      hour: string
+      description: string
+    }
+    byDayBranch: {   // 개인적 성향운 (일지 기준)
+      year: string
+      month: string
+      day: string
+      hour: string
+      description: string
+    }
   }
   
   // 대운

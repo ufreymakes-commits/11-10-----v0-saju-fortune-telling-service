@@ -1639,17 +1639,22 @@ FYI
       sinsalSummary: saju_data.sinsalSummary || '',
       sinsalCombinedGuide: saju_data.sinsalCombinedGuide || '',
 
-      // 12신살 (연지 기준 - 정확한 매핑)
-      twelveSinsal: {
+      // 하이브리드 12신살 (연지 + 일지 기준 - 100만명 일관성 보장)
+      twelveSinsalByYearBranch: {  // 사회적 성공운
         yearBranch: saju_data.yearPillar?.branch || '',
-        monthBranch: saju_data.monthPillar?.branch || '',
+        yearSinsal: saju_data.hybridTwelveSinsal?.byYearBranch?.year || '',
+        monthSinsal: saju_data.hybridTwelveSinsal?.byYearBranch?.month || '',
+        daySinsal: saju_data.hybridTwelveSinsal?.byYearBranch?.day || '',
+        hourSinsal: saju_data.hybridTwelveSinsal?.byYearBranch?.hour || '',
+        description: '사회적 성공운 (연지 기준)'
+      },
+      twelveSinsalByDayBranch: {  // 개인적 성향운
         dayBranch: saju_data.dayPillar?.branch || '',
-        hourBranch: saju_data.hourPillar?.branch || '',
-        // 각 위치별 12신살 이름
-        yearSinsal: saju_data.twelveSinsal?.year || '',
-        monthSinsal: saju_data.twelveSinsal?.month || '',
-        daySinsal: saju_data.twelveSinsal?.day || '',
-        hourSinsal: saju_data.twelveSinsal?.hour || ''
+        yearSinsal: saju_data.hybridTwelveSinsal?.byDayBranch?.year || '',
+        monthSinsal: saju_data.hybridTwelveSinsal?.byDayBranch?.month || '',
+        daySinsal: saju_data.hybridTwelveSinsal?.byDayBranch?.day || '',
+        hourSinsal: saju_data.hybridTwelveSinsal?.byDayBranch?.hour || '',
+        description: '개인적 성향운 (일지 기준)'
       },
 
       // 용신 (상세)

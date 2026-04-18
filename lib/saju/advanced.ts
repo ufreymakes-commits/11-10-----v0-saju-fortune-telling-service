@@ -63,7 +63,7 @@ const TWELVE_SINSAL_TABLE: Record<string, Record<string, string>> = {
   "해묘미": { "신":"겁살", "유":"재살", "술":"천살", "해":"지살", "자":"년살", "축":"월살", "인":"망신살", "묘":"장성살", "진":"반안살", "사":"역마살", "오":"육해살", "미":"화개살" }
 }
 
-// 12신살 계산 (연지 기준) - 외부 호출용
+// 12신살 계산 (연지 기준) - 사회적 성공운
 export function calcTwelveSinsal(
   yearBranch: string,
   monthBranch: string,
@@ -81,6 +81,49 @@ export function calcTwelveSinsal(
     month: table[monthBranch] || '',
     day: table[dayBranch] || '',
     hour: hourBranch ? (table[hourBranch] || '') : ''
+  }
+}
+
+// 12신살 계산 (일지 기준) - 개인적 성향운
+export function calcTwelveSinsalByDayBranch(
+  yearBranch: string,
+  monthBranch: string,
+  dayBranch: string,
+  hourBranch: string | null
+): { year: string; month: string; day: string; hour: string } {
+  const group = SAMHAP_GROUP_MAP[dayBranch]  // 일지 기준
+  if (!group) {
+    return { year: '', month: '', day: '', hour: '' }
+  }
+  
+  const table = TWELVE_SINSAL_TABLE[group]
+  return {
+    year: table[yearBranch] || '',
+    month: table[monthBranch] || '',
+    day: table[dayBranch] || '',
+    hour: hourBranch ? (table[hourBranch] || '') : ''
+  }
+}
+
+// 하이브리드 12신살 (연지 + 일지 기준 모두) - 100만명 일관성 보장
+export function calcHybridTwelveSinsal(
+  yearBranch: string,
+  monthBranch: string,
+  dayBranch: string,
+  hourBranch: string | null
+): {
+  byYearBranch: { year: string; month: string; day: string; hour: string; description: string };
+  byDayBranch: { year: string; month: string; day: string; hour: string; description: string };
+} {
+  return {
+    byYearBranch: {
+      ...calcTwelveSinsal(yearBranch, monthBranch, dayBranch, hourBranch),
+      description: '사회적 성공운 (연지 기준)'
+    },
+    byDayBranch: {
+      ...calcTwelveSinsalByDayBranch(yearBranch, monthBranch, dayBranch, hourBranch),
+      description: '개인적 성향운 (일지 기준)'
+    }
   }
 }
 
@@ -295,16 +338,16 @@ export function calcHyeong(
   const labels = ["연지", "월지", "일지", "시지"]
   const results: string[] = []
   
-  // 무은지형 (인사신)
+  // 지세지형 (인사신) - 권력, 조정, 수술 (사신형)
   const inSaSin = ["인", "사", "신"].filter(b => branches.includes(b))
   if (inSaSin.length >= 2) {
-    results.push(`무은지형(${inSaSin.map(b => `${labels[branches.indexOf(b)]}${b}`).join("+")})`)
+    results.push(`지세지형(${inSaSin.map(b => `${labels[branches.indexOf(b)]}${b}`).join("+")})`)
   }
   
-  // 지세지형 (축술미)
+  // 무은지형 (축술미) - 배신, 냉정, 형제 갈등
   const chukSulMi = ["축", "술", "미"].filter(b => branches.includes(b))
   if (chukSulMi.length >= 2) {
-    results.push(`지세지형(${chukSulMi.map(b => `${labels[branches.indexOf(b)]}${b}`).join("+")})`)
+    results.push(`무은지형(${chukSulMi.map(b => `${labels[branches.indexOf(b)]}${b}`).join("+")})`)
   }
   
   // 무례지형 (자묘)
@@ -414,7 +457,7 @@ export function calcWonjin(
 }
 
 // ================================================================
-// 길성 (��을귀인, 문창귀인, 태극귀인)
+// 길성 (���을귀인, 문창귀인, 태극귀인)
 // ================================================================
 const CHEONUL_MAP: Record<string, string[]> = {
   "갑": ["축", "미"], "무": ["축", "미"], "경": ["축", "미"],
@@ -861,17 +904,17 @@ function checkBaekhoSal(dayStem: string, dayBranch: string): boolean {
   return baekhoList.some(([s, b]) => s === dayStem && b === dayBranch)
 }
 
-// 귀문관살: 지지 조합
+// 귀문관살: 지지 조합 (사-신은 귀문이 아님 - 삭제됨, 자-미는 원진이자 귀문)
 function checkGwimunssal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
   const gwimunPairs: [string, string][] = [
     ["자","유"],["축","오"],["인","미"],
-    ["묘","술"],["진","해"],["사","신"]
+    ["묘","신"],["진","해"],["사","술"]  // 사-신 삭제, 올바른 6쌍 유지
   ]
   const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
   return gwimunPairs.some(([a, b]) => branches.includes(a) && branches.includes(b))
 }
 function getGwimunPositions(yb: string, mob: string, db: string, hb: string | null): string[] {
-  const gwimunPairs: [string, string][] = [["자","유"],["축","오"],["인","미"],["묘","술"],["진","해"],["사","신"]]
+  const gwimunPairs: [string, string][] = [["자","유"],["축","오"],["인","미"],["묘","신"],["진","해"],["사","술"]]  // 올바른 6쌍
   const branches = [yb, mob, db, hb]
   const result: string[] = []
   for (const [a, b] of gwimunPairs) {
@@ -1024,7 +1067,7 @@ function checkBiinSal(yearBranch: string, monthBranch: string, dayBranch: string
   return [yearBranch, monthBranch, dayBranch, hourBranch].includes(target)
 }
 function getBiinPositions(yb: string, mob: string, db: string, hb: string | null): string[] {
-  const map: Record<string, string> = { "인": "사","오": "사","술": "사","신": "해","자": "해","진": "해","사": "신","유": "신","축": "신","해": "인","묘": "인","미": "인" }
+  const map: Record<string, string> = { "인": "사","오": "사","술": "사","신": "해","���": "해","진": "해","사": "신","유": "신","축": "신","해": "인","묘": "인","미": "인" }
   return _getBranchPositions(map[db], yb, mob, db, hb)
 }
 
@@ -1098,7 +1141,7 @@ function getJanggunPositions(dayStem: string, yb: string, mob: string, db: strin
 // 복신: 일간 기준 (복을 가져다 주는 신)
 function checkBoksin(dayStem: string, branches: string[]): boolean {
   const boksinMap: Record<string, string> = {
-    "갑": "인", "을": "축", "병": "사", "정": "진", "무": "사",
+    "갑": "인", "��": "축", "병": "사", "정": "진", "무": "사",
     "기": "진", "경": "신", "신": "미", "임": "해", "계": "술"
   }
   const target = boksinMap[dayStem]
@@ -1298,11 +1341,11 @@ const SINSAL_USAGE_GUIDE: Record<string, string> = {
   "문창살": "학문, 글쓰기, 교육, 연구 등 지적 활동���서 뛰어난 성취를 이룰 수 있습니다",
   "망신살": "명예와 체면에 관한 시험을 통해 진정한 자아를 찾고 겸손을 배우게 됩니다",
   "장성살": "리더십과 권위를 발휘하며 높은 지위나 명예를 얻을 수 있는 기운이 있습니다",
-  "홍염살": "강렬한 매력과 정열로 예술, 연예, 패션 분야에서 두각을 나타낼 �� 있습니다",
+  "홍염살": "강렬한 매력과 정열로 예술, 연예, 패션 분야에서 ���각을 나타낼 �� 있습니다",
   "겁살": "강한 추진력과 돌파력으로 경쟁적인 환경에서 두각을 나타낼 수 있습니다",
   "지살": "외교적 능력과 현장 감각을 살려 현장직이나 대외 활동에서 빛을 발합니다",
   "천살": "하늘의 시험처럼 예측 불가한 변화를 겪지만, 이를 통해 단련됩니다",
-  "년살": "사람을 끌어당��는 매력이 있어 인간관계와 연애에서 자주 주목받습니다",
+  "년살": "사람을 ���어당��는 매력이 있어 인간관계와 연애에서 자주 주목받습니다",
   "백호살": "강렬한 에너지로 두각을 나타내지만, 급격한 변화나 사고에 주의가 필요합니다",
   "귀문관살": "직관력과 영적 감수성이 뛰어나 예술·상담·치유 분야에서 빛을 발합니다",
   "천라지망": "구속과 제약 속에서 내면의 성찰을 통해 진정한 자유를 찾아가는 운입니다",

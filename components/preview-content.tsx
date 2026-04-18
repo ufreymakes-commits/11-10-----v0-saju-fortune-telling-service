@@ -322,25 +322,53 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
           </div>
 
           <div className="border-t border-green-500/20 pt-2 mt-2">
-            <span className="text-yellow-400">12신살 (연지 기준 - 정확):</span>
+            <span className="text-yellow-400">12신살 [연지 기준] 사회적 성공운:</span>
             <div className="ml-2 text-[11px]">
-              {submission.sajuData.twelveSinsal ? (
+              {submission.sajuData.hybridTwelveSinsal?.byYearBranch ? (
                 <div className="grid grid-cols-4 gap-2 mt-1">
                   <div className="text-center">
                     <div className="text-gray-400 text-[9px]">연주</div>
-                    <div className="text-lime-400 font-bold">{submission.sajuData.twelveSinsal.year || '-'}</div>
+                    <div className="text-lime-400 font-bold">{submission.sajuData.hybridTwelveSinsal.byYearBranch.year || '-'}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-gray-400 text-[9px]">월주</div>
-                    <div className="text-lime-400 font-bold">{submission.sajuData.twelveSinsal.month || '-'}</div>
+                    <div className="text-lime-400 font-bold">{submission.sajuData.hybridTwelveSinsal.byYearBranch.month || '-'}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-gray-400 text-[9px]">일주</div>
-                    <div className="text-lime-400 font-bold">{submission.sajuData.twelveSinsal.day || '-'}</div>
+                    <div className="text-lime-400 font-bold">{submission.sajuData.hybridTwelveSinsal.byYearBranch.day || '-'}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-gray-400 text-[9px]">시주</div>
-                    <div className="text-lime-400 font-bold">{submission.sajuData.twelveSinsal.hour || '-'}</div>
+                    <div className="text-lime-400 font-bold">{submission.sajuData.hybridTwelveSinsal.byYearBranch.hour || '-'}</div>
+                  </div>
+                </div>
+              ) : (
+                <span className="text-red-400">미계산</span>
+              )}
+            </div>
+          </div>
+
+          <div className="border-t border-green-500/20 pt-2 mt-2">
+            <span className="text-cyan-400">12신살 [일지 기준] 개인적 성향운:</span>
+            <div className="ml-2 text-[11px]">
+              {submission.sajuData.hybridTwelveSinsal?.byDayBranch ? (
+                <div className="grid grid-cols-4 gap-2 mt-1">
+                  <div className="text-center">
+                    <div className="text-gray-400 text-[9px]">연주</div>
+                    <div className="text-cyan-300 font-bold">{submission.sajuData.hybridTwelveSinsal.byDayBranch.year || '-'}</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-gray-400 text-[9px]">월주</div>
+                    <div className="text-cyan-300 font-bold">{submission.sajuData.hybridTwelveSinsal.byDayBranch.month || '-'}</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-gray-400 text-[9px]">일주</div>
+                    <div className="text-cyan-300 font-bold">{submission.sajuData.hybridTwelveSinsal.byDayBranch.day || '-'}</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-gray-400 text-[9px]">시주</div>
+                    <div className="text-cyan-300 font-bold">{submission.sajuData.hybridTwelveSinsal.byDayBranch.hour || '-'}</div>
                   </div>
                 </div>
               ) : (
