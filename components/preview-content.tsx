@@ -258,10 +258,26 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
           </div>
 
           <div className="border-t border-green-500/20 pt-2 mt-2">
-            <span className="text-yellow-400">십신:</span>
-            <div className="ml-2">
-              <div>보유: {submission.sajuData.tenGods?.present?.join(', ') || <span className="text-red-400">미계산</span>}</div>
-              <div>부재: {submission.sajuData.tenGods?.missing?.join(', ') || <span className="text-red-400">미계산</span>}</div>
+            <span className="text-yellow-400">십신 (위치별):</span>
+            <div className="ml-2 text-[11px]">
+              {submission.sajuData.tenGods?.byPosition ? (
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-1">
+                  <div>연간: <span className="text-lime-400">{submission.sajuData.tenGods.byPosition.yearStem}</span></div>
+                  <div>연지: <span className="text-lime-400">{submission.sajuData.tenGods.byPosition.yearBranch}</span></div>
+                  <div>월간: <span className="text-lime-400">{submission.sajuData.tenGods.byPosition.monthStem}</span></div>
+                  <div>월지: <span className="text-lime-400">{submission.sajuData.tenGods.byPosition.monthBranch}</span></div>
+                  <div>일간: <span className="text-cyan-400">{submission.sajuData.tenGods.byPosition.dayStem}</span></div>
+                  <div>일지: <span className="text-lime-400">{submission.sajuData.tenGods.byPosition.dayBranch}</span></div>
+                  <div>시간: <span className="text-lime-400">{submission.sajuData.tenGods.byPosition.hourStem || '-'}</span></div>
+                  <div>시지: <span className="text-lime-400">{submission.sajuData.tenGods.byPosition.hourBranch || '-'}</span></div>
+                </div>
+              ) : (
+                <span className="text-red-400">미계산</span>
+              )}
+              <div className="mt-2 text-[10px]">
+                <div>보유: {submission.sajuData.tenGods?.present?.join(', ') || <span className="text-red-400">미계산</span>}</div>
+                <div>부재: {submission.sajuData.tenGods?.missing?.join(', ') || <span className="text-red-400">미계산</span>}</div>
+              </div>
             </div>
           </div>
 

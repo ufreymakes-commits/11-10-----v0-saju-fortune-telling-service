@@ -839,35 +839,90 @@ export function countElements(fourPillars: FourPillars, includeHiddenStems: bool
 // 십성 계산
 // ================================================================
 
-export function calculateTenGods(fourPillars: FourPillars): { present: string[]; missing: string[]; details: TenGodResult[] } {
+// 지지의 본기(대표 천간) 매핑 - 지지 십신 계산에 사용
+const BRANCH_MAIN_STEM: Record<Branch, Stem> = {
+  "자": "계", "축": "기", "인": "갑", "묘": "을",
+  "진": "무", "사": "병", "오": "정", "미": "기",
+  "신": "경", "유": "신", "술": "무", "해": "임"
+};
+
+export function calculateTenGods(fourPillars: FourPillars): { 
+  present: string[]; 
+  missing: string[]; 
+  details: TenGodResult[];
+  // 각 위치별 십신 (연간/연지/월간/월지/일간/일지/시간/시지)
+  byPosition: {
+    yearStem: string;
+    yearBranch: string;
+    monthStem: string;
+    monthBranch: string;
+    dayStem: string;
+    dayBranch: string;
+    hourStem: string;
+    hourBranch: string;
+  }
+} {
   const dayStem = fourPillars.day.stem;
   const details: TenGodResult[] = [];
   const presentSet = new Set<string>();
 
-  const yearTenGod = TEN_GODS_TABLE[dayStem][fourPillars.year.stem];
-  details.push({ position: "연간", stem: fourPillars.year.stem, tenGod: yearTenGod });
-  presentSet.add(yearTenGod);
+  // 연간 십신
+  const yearStemTenGod = TEN_GODS_TABLE[dayStem][fourPillars.year.stem];
+  details.push({ position: "연간", stem: fourPillars.year.stem, tenGod: yearStemTenGod });
+  presentSet.add(yearStemTenGod);
 
-  const monthTenGod = TEN_GODS_TABLE[dayStem][fourPillars.month.stem];
-  details.push({ position: "월간", stem: fourPillars.month.stem, tenGod: monthTenGod });
-  presentSet.add(monthTenGod);
+  // 연지 십신 (본기 기준)
+  const yearBranchMainStem = BRANCH_MAIN_STEM[fourPillars.year.branch];
+  const yearBranchTenGod = TEN_GODS_TABLE[dayStem][yearBranchMainStem];
+  details.push({ position: "연지", stem: yearBranchMainStem, tenGod: yearBranchTenGod });
+  presentSet.add(yearBranchTenGod);
 
+  // 월간 십신
+  const monthStemTenGod = TEN_GODS_TABLE[dayStem][fourPillars.month.stem];
+  details.push({ position: "월간", stem: fourPillars.month.stem, tenGod: monthStemTenGod });
+  presentSet.add(monthStemTenGod);
+
+  // 월지 십신 (본기 기준)
+  const monthBranchMainStem = BRANCH_MAIN_STEM[fourPillars.month.branch];
+  const monthBranchTenGod = TEN_GODS_TABLE[dayStem][monthBranchMainStem];
+  details.push({ position: "월지", stem: monthBranchMainStem, tenGod: monthBranchTenGod });
+  presentSet.add(monthBranchTenGod);
+
+  // 일간 십신 (자기 자신 = 비견)
+  const dayStemTenGod = "비견";
+  details.push({ position: "일간", stem: dayStem, tenGod: dayStemTenGod });
+  presentSet.add(dayStemTenGod);
+
+  // 일지 십신 (본기 기준)
+  const dayBranchMainStem = BRANCH_MAIN_STEM[fourPillars.day.branch];
+  const dayBranchTenGod = TEN_GODS_TABLE[dayStem][dayBranchMainStem];
+  details.push({ position: "일지", stem: dayBranchMainStem, tenGod: dayBranchTenGod });
+  presentSet.add(dayBranchTenGod);
+
+  // 시간/시지 십신
+  let hourStemTenGod = "";
+  let hourBranchTenGod = "";
   if (fourPillars.hour) {
-    const hourTenGod = TEN_GODS_TABLE[dayStem][fourPillars.hour.stem];
-    details.push({ position: "시간", stem: fourPillars.hour.stem, tenGod: hourTenGod });
-    presentSet.add(hourTenGod);
+    hourStemTenGod = TEN_GODS_TABLE[dayStem][fourPillars.hour.stem];
+    details.push({ position: "시간", stem: fourPillars.hour.stem, tenGod: hourStemTenGod });
+    presentSet.add(hourStemTenGod);
+
+    const hourBranchMainStem = BRANCH_MAIN_STEM[fourPillars.hour.branch];
+    hourBranchTenGod = TEN_GODS_TABLE[dayStem][hourBranchMainStem];
+    details.push({ position: "시지", stem: hourBranchMainStem, tenGod: hourBranchTenGod });
+    presentSet.add(hourBranchTenGod);
   }
 
+  // 지장간 십신도 포함 (보유 십신 계산용)
   const branches = [
-    { pos: "연지", branch: fourPillars.year.branch },
-    { pos: "월지", branch: fourPillars.month.branch },
-    { pos: "일지", branch: fourPillars.day.branch },
+    fourPillars.year.branch,
+    fourPillars.month.branch,
+    fourPillars.day.branch,
   ];
   if (fourPillars.hour) {
-    branches.push({ pos: "시지", branch: fourPillars.hour.branch });
+    branches.push(fourPillars.hour.branch);
   }
-
-  for (const { branch } of branches) {
+  for (const branch of branches) {
     const hidden = HIDDEN_STEMS[branch];
     for (const hs of hidden) {
       const tenGod = TEN_GODS_TABLE[dayStem][hs];
@@ -879,7 +934,21 @@ export function calculateTenGods(fourPillars: FourPillars): { present: string[];
   const present = Array.from(presentSet);
   const missing = allTenGods.filter(tg => !presentSet.has(tg));
 
-  return { present, missing, details };
+  return { 
+    present, 
+    missing, 
+    details,
+    byPosition: {
+      yearStem: yearStemTenGod,
+      yearBranch: yearBranchTenGod,
+      monthStem: monthStemTenGod,
+      monthBranch: monthBranchTenGod,
+      dayStem: dayStemTenGod,
+      dayBranch: dayBranchTenGod,
+      hourStem: hourStemTenGod,
+      hourBranch: hourBranchTenGod
+    }
+  };
 }
 
 // ================================================================

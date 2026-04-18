@@ -387,10 +387,12 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
       star: ts.star
     })),
     
-    // 십신
+    // 십신 (각 위치별 + 보유/부재)
     tenGods: {
       present: analysis.tenGods.present,
-      missing: analysis.tenGods.missing
+      missing: analysis.tenGods.missing,
+      details: analysis.tenGods.details,
+      byPosition: analysis.tenGods.byPosition
     },
     
     // 관계식

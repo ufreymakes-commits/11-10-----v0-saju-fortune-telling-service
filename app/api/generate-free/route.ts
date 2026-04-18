@@ -1528,11 +1528,12 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
       elementCount: saju_data.elementCount || {},
       dominantElement: saju_data.dominantElement || '',
 
-      // 십신 (개수 포함)
+      // 십신 (개수 포함 + 위치별)
       tenGodsPresent: saju_data.tenGods?.present || [],
       tenGodsPresentWithCount: tenGodsFormatted,
       tenGodsMissing: saju_data.tenGods?.missing || [],
       tenGodsCounts: tenGodsCounts, // 원본 객체도 포함
+      tenGodsByPosition: saju_data.tenGods?.byPosition || {}, // 각 위치별 십신 (연간, 연지, 월간, 월지, 일간, 일지, 시간, 시지)
 
       // 12운성 (상세)
       twelveStars: saju_data.twelveStars?.map(s => ({

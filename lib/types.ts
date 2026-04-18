@@ -38,7 +38,21 @@ export interface SajuData {
   twelveStars?: Array<{ position: string; branch: string; star: string }>
   
   // 십신
-  tenGods?: { present: string[]; missing: string[] }
+  tenGods?: { 
+    present: string[]
+    missing: string[]
+    details?: Array<{ position: string; stem: string; tenGod: string }>
+    byPosition?: {
+      yearStem: string    // 연간 십신
+      yearBranch: string  // 연지 십신
+      monthStem: string   // 월간 십신
+      monthBranch: string // 월지 십신
+      dayStem: string     // 일간 십신 (항상 비견)
+      dayBranch: string   // 일지 십신
+      hourStem: string    // 시간 십신
+      hourBranch: string  // 시지 십신
+    }
+  }
   
   // 관계식
   cheongganHap?: string[]
