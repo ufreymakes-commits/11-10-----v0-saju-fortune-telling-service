@@ -6,12 +6,12 @@ import { headers } from 'next/headers'
 import { SAJU_MASTERPIECE_GUIDE } from '@/lib/saju/masterpiece'
 
 /**
- * Gemini 2.0 Flash 사주 분석 API
+ * Gemini 3 Flash 사주 분석 API
  * 모든 프롬프트를 한 번에 발사
  * System: 마스터피스 가이드 + 역할 정의 (고정)
  * User: 고객 사주 데이터 + 최종 요청 (변수)
  * 
- * Model: google/gemini-2-flash (Gemini 2.0 Flash - 최신, 가장 빠르고 저렴)
+ * Model: google/gemini-3-flash (Gemini 3 Flash - 최신, 가장 빠르고 저렴)
  */
 
 export async function POST(request: Request) {
@@ -1768,7 +1768,7 @@ ${JSON.stringify(allSajuData, null, 2)}`
 
     // generateText with Gemini 1.5 Pro
     const result = await generateText({
-      model: 'google/gemini-2-flash',
+      model: 'google/gemini-3-flash',
       system: systemPrompt,
       prompt: userPrompt,
       temperature: 0.8,
