@@ -20,6 +20,8 @@ export async function POST(request: Request) {
     let gender: string
     let birth_country: string
     let birth_date: string
+    let birth_time: string | null
+    let calendar: string
     let saju_data: SajuData
     
     // submissionId로 받으면 Supabase에서 조회
@@ -42,6 +44,8 @@ export async function POST(request: Request) {
       gender = submission.gender
       birth_country = submission.birth_country
       birth_date = submission.birth_date
+      birth_time = submission.birth_time || null
+      calendar = submission.calendar || 'gregorian'
       saju_data = submission.saju_data
     } else {
       // 직접 데이터 전달
@@ -49,6 +53,8 @@ export async function POST(request: Request) {
       gender = body.gender
       birth_country = body.birth_country
       birth_date = body.birth_date
+      birth_time = body.birth_time || null
+      calendar = body.calendar || 'gregorian'
       saju_data = body.saju_data
     }
 
@@ -1753,6 +1759,10 @@ ${JSON.stringify(allSajuData, null, 2)}`
       teaserFacts: [],
       submission: {
         name,
+        birthDate: birth_date,
+        birthTime: birth_time,
+        gender,
+        calendar,
         sajuData: saju_data
       },
       allSajuDataSentToGPT: allSajuData

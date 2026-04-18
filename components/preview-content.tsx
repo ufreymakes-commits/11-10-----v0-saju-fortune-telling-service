@@ -17,6 +17,10 @@ interface PreviewData {
   teaserFacts: Fact[]
   submission: {
     name: string
+    birthDate: string
+    birthTime: string | null
+    gender: string
+    calendar: string
     sajuData: SajuData
   }
 }
