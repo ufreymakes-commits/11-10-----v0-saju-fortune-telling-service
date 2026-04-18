@@ -420,6 +420,151 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
         </div>
       </div>
 
+      {/* Gemini에 보내는 데이터 (100% 투명 공개) */}
+      <div className="mb-6">
+        <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
+          <span className="text-orange-400">Gemini에 보내는 실제 데이터</span>
+          <span className="text-[10px] bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded">100% 투명 공개</span>
+        </h2>
+        
+        <div className="bg-gray-900 border border-orange-500/30 rounded-lg p-3 text-[10px] font-mono overflow-x-auto max-h-[400px] overflow-y-auto">
+          <pre className="text-orange-200 whitespace-pre-wrap">
+{`// ===== Gemini에 전송되는 allSajuData =====
+
+{
+  // 기본 정보
+  name: "${submission.name}",
+  birthDate: "${submission.birthDate}",
+  birthTime: "${submission.birthTime || '시간 미기재'}",
+  gender: "${submission.gender}",
+  calendar: "${submission.calendar}",
+
+  // 사주 팔자 (4기둥 8글자)
+  fourPillars: {
+    yearPillar: "${submission.sajuData.yearPillar?.stem || ''}${submission.sajuData.yearPillar?.branch || ''}" (${submission.sajuData.yearPillar?.fullNameKorean || '-'}),
+    monthPillar: "${submission.sajuData.monthPillar?.stem || ''}${submission.sajuData.monthPillar?.branch || ''}" (${submission.sajuData.monthPillar?.fullNameKorean || '-'}),
+    dayPillar: "${submission.sajuData.dayPillar?.stem || ''}${submission.sajuData.dayPillar?.branch || ''}" (${submission.sajuData.dayPillar?.fullNameKorean || '-'}),
+    hourPillar: "${submission.sajuData.hourPillar?.stem || '-'}${submission.sajuData.hourPillar?.branch || '-'}" (${submission.sajuData.hourPillar?.fullNameKorean || '시간 미기재'})
+  },
+
+  // 일간 (나를 대표하는 글자)
+  dayMaster: "${submission.sajuData.dayMaster}" (${submission.sajuData.dayMasterKorean || '-'}),
+
+  // 오행 개수 (2가지)
+  elementCountBasic: { // 지장간 미포함 - 천간/지지만
+    목: ${submission.sajuData.elementCountBasic?.목 || 0},
+    화: ${submission.sajuData.elementCountBasic?.화 || 0},
+    토: ${submission.sajuData.elementCountBasic?.토 || 0},
+    금: ${submission.sajuData.elementCountBasic?.금 || 0},
+    수: ${submission.sajuData.elementCountBasic?.수 || 0}
+  },
+  elementCountWithHidden: { // 지장간 포함 - 잠재적 욕구
+    목: ${submission.sajuData.elementCount?.목 || 0},
+    화: ${submission.sajuData.elementCount?.화 || 0},
+    토: ${submission.sajuData.elementCount?.토 || 0},
+    금: ${submission.sajuData.elementCount?.금 || 0},
+    수: ${submission.sajuData.elementCount?.수 || 0}
+  },
+
+  // 오행 점수 (수치론 120점 - 월령 중심 - 가장 정확)
+  elementScore: {
+    목: ${submission.sajuData.elementBalanceKorean?.목 || 0}점,
+    화: ${submission.sajuData.elementBalanceKorean?.화 || 0}점,
+    토: ${submission.sajuData.elementBalanceKorean?.토 || 0}점,
+    금: ${submission.sajuData.elementBalanceKorean?.금 || 0}점,
+    수: ${submission.sajuData.elementBalanceKorean?.수 || 0}점
+  },
+  dominantElement: "${submission.sajuData.dominantElement || '-'}",
+
+  // 십신 (위치별 + 개수)
+  tenGodsByPosition: {
+    연간: "${submission.sajuData.tenGods?.byPosition?.yearStem || '-'}",
+    연지: "${submission.sajuData.tenGods?.byPosition?.yearBranch || '-'}",
+    월간: "${submission.sajuData.tenGods?.byPosition?.monthStem || '-'}",
+    월지: "${submission.sajuData.tenGods?.byPosition?.monthBranch || '-'}",
+    일간: "${submission.sajuData.tenGods?.byPosition?.dayStem || '비견'}",
+    일지: "${submission.sajuData.tenGods?.byPosition?.dayBranch || '-'}",
+    시간: "${submission.sajuData.tenGods?.byPosition?.hourStem || '-'}",
+    시지: "${submission.sajuData.tenGods?.byPosition?.hourBranch || '-'}"
+  },
+  tenGodsCounts: "${(() => {
+    const bp = submission.sajuData.tenGods?.byPosition
+    if (!bp) return '미계산'
+    const all = [bp.yearStem, bp.yearBranch, bp.monthStem, bp.monthBranch, bp.dayStem, bp.dayBranch, bp.hourStem, bp.hourBranch].filter(Boolean)
+    const counts: Record<string, number> = {}
+    all.forEach(tg => { counts[tg] = (counts[tg] || 0) + 1 })
+    return Object.entries(counts).map(([k, v]) => `${k}(${v}개)`).join(', ')
+  })()}",
+
+  // 하이브리드 12신살 (연지 + 일지 기준 - 100만명 일관성 보장)
+  twelveSinsalByYearBranch: { // **연지 기준: 사회적 성공운**
+    기준지지: "${submission.sajuData.yearPillar?.branch || '-'}",
+    연주: "${submission.sajuData.hybridTwelveSinsal?.byYearBranch?.year || '-'}",
+    월주: "${submission.sajuData.hybridTwelveSinsal?.byYearBranch?.month || '-'}",
+    일주: "${submission.sajuData.hybridTwelveSinsal?.byYearBranch?.day || '-'}",
+    시주: "${submission.sajuData.hybridTwelveSinsal?.byYearBranch?.hour || '-'}",
+    description: "사회적 성공운 (연지 기준)"
+  },
+  twelveSinsalByDayBranch: { // **일지 기준: 개인적 성향운**
+    기준지지: "${submission.sajuData.dayPillar?.branch || '-'}",
+    연주: "${submission.sajuData.hybridTwelveSinsal?.byDayBranch?.year || '-'}",
+    월주: "${submission.sajuData.hybridTwelveSinsal?.byDayBranch?.month || '-'}",
+    일주: "${submission.sajuData.hybridTwelveSinsal?.byDayBranch?.day || '-'}",
+    시주: "${submission.sajuData.hybridTwelveSinsal?.byDayBranch?.hour || '-'}",
+    description: "개인적 성향운 (일지 기준)"
+  },
+
+  // 12운성
+  twelveStars: [${submission.sajuData.twelveStars?.map(ts => `"${ts.position}${ts.branch}:${ts.star}"`).join(', ') || ''}],
+
+  // 합/충/형/해/파
+  relations: {
+    천간합: [${submission.sajuData.cheongganHap?.map(h => `"${h}"`).join(', ') || '없음'}],
+    지지육합: [${submission.sajuData.jijiYughap?.map(h => `"${h}"`).join(', ') || '없음'}],
+    지지삼합: [${submission.sajuData.jijiSamhap?.map(h => `"${h}"`).join(', ') || '없음'}],
+    지지방합: [${submission.sajuData.jijiBanghap?.map(h => `"${h}"`).join(', ') || '없음'}],
+    천간충: [${submission.sajuData.cheongganChung?.map(h => `"${h}"`).join(', ') || '없음'}],
+    지지충: [${submission.sajuData.jijiChung?.map(h => `"${h}"`).join(', ') || '없음'}],
+    형: [${submission.sajuData.hyeong?.map(h => `"${h}"`).join(', ') || '없음'}],
+    파: [${submission.sajuData.pa?.map(h => `"${h}"`).join(', ') || '없음'}],
+    해: [${submission.sajuData.hae?.map(h => `"${h}"`).join(', ') || '없음'}],
+    원진: [${submission.sajuData.wonjin?.map(h => `"${h}"`).join(', ') || '없음'}]
+  },
+
+  // 길성
+  gilseong: {
+    천을귀인: [${submission.sajuData.gilseong?.cheonul?.map(g => `"${g}"`).join(', ') || '없음'}],
+    태극귀인: [${submission.sajuData.gilseong?.taegeuk?.map(g => `"${g}"`).join(', ') || '없음'}]
+  },
+
+  // 공망
+  gongmang: [${submission.sajuData.gongmang?.map(g => `"${g}"`).join(', ') || '미계산'}],
+
+  // 신강/신약
+  sinGangSinYak: {
+    grade: "${submission.sajuData.sinGangSinYak?.grade || '미계산'}",
+    ratio: ${submission.sajuData.sinGangSinYak?.ratio || 0}%
+  },
+
+  // 용신
+  yongsin: {
+    억부용신: "${submission.sajuData.eokbuYongsin || '미계산'}",
+    조후용신: "${submission.sajuData.johuYongsin || '미계산'}"
+  },
+
+  // 격국
+  gyeokguk: "${submission.sajuData.gyeokguk || '미계산'}",
+
+  // 대운 (10개)
+  daewoon: [${submission.sajuData.daewoon?.slice(0, 5).map(d => `"${d.startAge}-${d.endAge}세: ${d.stem}${d.branch}(${d.tenGod || '-'})"`).join(', ') || ''}...],
+
+  // 2026년 연운
+  yeonwoon2026: "${submission.sajuData.yeonwoon?.find(y => y.year === 2026)?.fullName || '미계산'}"
+}`}
+          </pre>
+        </div>
+      </div>
+
       {/* Free Facts */}
       <div className="mb-6">
         <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
