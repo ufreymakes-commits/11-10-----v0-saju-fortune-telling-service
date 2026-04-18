@@ -6,12 +6,12 @@ import { headers } from 'next/headers'
 import { SAJU_MASTERPIECE_GUIDE } from '@/lib/saju/masterpiece'
 
 /**
- * Gemini 1.5 Pro Test Version: 
+ * Gemini 1.5 Flash 사주 분석 API
  * 모든 프롬프트를 한 번에 발사
  * System: 마스터피스 가이드 + 역할 정의 (고정)
  * User: 고객 사주 데이터 + 최종 요청 (변수)
  * 
- * Model: google/gemini-1.5-pro (Gemini 1.5 Pro 테스트)
+ * Model: google/gemini-1.5-flash (Gemini 1.5 Flash - 빠르고 저렴)
  */
 
 export async function POST(request: Request) {
@@ -1465,7 +1465,7 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
 67. 경금 - 정관 : Just enforcer of norms. Rules are not just suggestions — they are law.
 68. 경금 - 편관 : May cause tension under inflexible pressure. Needs to learn when to yield.
 69. 경금 - 정인 : Absorbs discipline and moral lessons. Trusts systems of knowledge to grow.
-70. 경금 - 편인 : Sharp mind, possibly isolated. May over-analyze and detach emotionally.
+70. 경금 - ���인 : Sharp mind, possibly isolated. May over-analyze and detach emotionally.
 71. 신금 - 비견 : Neat and polished self-confidence. Shines in individual excellence, avoids disorder.
 72. 신금 - 겁재 : Competitive in a refined manner. Subtle yet strong in personal stance.
 73. 신금 - 식신 : Crafts beauty with detail. Creates slowly but perfectly.
@@ -1768,7 +1768,7 @@ ${JSON.stringify(allSajuData, null, 2)}`
 
     // generateText with Gemini 1.5 Pro
     const result = await generateText({
-      model: 'google/gemini-1.5-pro',
+      model: 'google/gemini-1.5-flash',
       system: systemPrompt,
       prompt: userPrompt,
       temperature: 0.8,
