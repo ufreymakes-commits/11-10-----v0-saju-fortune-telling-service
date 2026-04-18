@@ -89,17 +89,27 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="relative w-20 h-20 mx-auto mb-4 animate-float">
+        <div className="text-center max-w-sm px-6">
+          {/* 캐릭터 모음집 이미지 (추후 교체 예정) */}
+          <div className="relative w-64 h-48 mx-auto mb-6">
             <Image
               src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%85%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"
-              alt="Sajume mascot"
+              alt="Sajume characters"
               fill
-              className="object-contain"
+              className="object-contain animate-float"
             />
           </div>
-          <Spinner className="w-5 h-5 mx-auto mb-2" />
-          <p className="text-sm text-foreground/70">Reading the stars for you...</p>
+          <h2 className="text-lg font-semibold text-foreground mb-2">
+            Your Main Character is stepping in...
+          </h2>
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <Spinner className="w-5 h-5" />
+            <span className="text-2xl">⏳</span>
+          </div>
+          <p className="text-sm text-foreground/70">
+            Don&apos;t close the window!<br />
+            We&apos;ll be done in less than a minute.
+          </p>
         </div>
       </div>
     )
