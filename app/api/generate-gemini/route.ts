@@ -1495,7 +1495,50 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
 97. 계수 - 정관 : Follows rules, but with inner discretion. Quietly compliant, rarely rigid.
 98. 계수 - 편관 : Feels pressure deeply, adapts quietly. Appears still but processes pressure inwardly.
 99. 계수 - 정인 : Finds deep comfort in learning. Draws emotional security from insight.
-100. 계수 - 편인 : Private, intuitive, protective of inner world. Recharges alone, defends inner sanctuary with care.`
+100. 계수 - 편인 : Private, intuitive, protective of inner world. Recharges alone, defends inner sanctuary with care.
+
+FYI
+1990년: 경오(庚午)년
+1991년: 신미(辛未)년
+1992년: 임신(壬申)년
+1993년: 계유(癸酉)년
+1994년: 갑술(甲戌)년
+1995년: 을해(乙亥)년
+1996년: 병자(丙子)년
+1997년: 정축(丁丑)년
+1998년: 무인(戊寅)년
+1999년: 기묘(己卯)년
+2000년: 경진(庚辰)년
+2001년: 신사(辛巳)년
+2002년: 임오(壬午)년
+2003년: 계미(癸未)년
+2004년: 갑신(甲申)년
+2005년: 을유(乙酉)년
+2006년: 병술(丙戌)년
+2007년: 정해(丁亥)년
+2008년: 무자(戊子)년
+2009년: 기축(己丑)년
+2010년: 경인(庚寅)년
+2011년: 신묘(辛卯)년
+2012년: 임진(壬辰)년
+2013년: 계사(癸巳)년
+2014년: 갑오(甲午)년
+2015년: 을미(乙未)년
+2016년: 병신(丙申)년
+2017년: 정유(丁酉)년
+2018년: 무술(戊戌)년
+2019년: 기해(己亥)년
+2020년: 경자(庚子)년
+2021년: 신축(辛丑)년
+2022년: 임인(壬寅)년
+2023년: 계묘(癸卯)년
+2024년: 갑진(甲辰)년
+2025년: 을사(乙巳)년
+2026년: 병오(丙午)년
+2027년: 정미(丁未)년
+2028년: 무신(戊申)년
+2029년: 기유(己酉)년
+2030년: 경술(庚戌)년`
 
     // ===== 십신 포맷팅: "비견 (3개), 식신 (2개)" 형식 =====
     // 십신별 개수 계산 (byPosition 기준 - 8개 위치에서 실제 개수 세기)
