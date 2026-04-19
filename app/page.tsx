@@ -16,12 +16,26 @@ const REVIEW_IMAGES = [
   { id: 8, src: "/images/reviews/review-08.png", alt: "Mar 31 - Scary accurate, excited for future" },
   { id: 9, src: "/images/reviews/review-09.png", alt: "Mar 31 - Past predictions on point" },
   { id: 10, src: "/images/reviews/review-10.png", alt: "Mar 30 - Resonates, sense of direction" },
+  // Page 2
   { id: 11, src: "/images/reviews/review-11.png", alt: "Mar 30 - Reassurance when overwhelmed" },
   { id: 12, src: "/images/reviews/review-12.png", alt: "Mar 27 - Scarily accurate, helped see things" },
   { id: 13, src: "/images/reviews/review-13.png", alt: "Mar 21 - Scarily accurate, great advice" },
   { id: 14, src: "/images/reviews/review-14.png", alt: "Mar 20 - Great report!" },
   { id: 15, src: "/images/reviews/review-15.png", alt: "Mar 18 - Crazy accurate, goosebumps" },
   { id: 16, src: "/images/reviews/review-16.png", alt: "Mar 18 - Actual timelines, highly recommend" },
+  { id: 17, src: "/images/reviews/review-17.png", alt: "Mar 18 - Fun and enjoyable read" },
+  { id: 18, src: "/images/reviews/review-18.png", alt: "Mar 6 - Eerily true, shocked" },
+  { id: 19, src: "/images/reviews/review-19.png", alt: "Mar 6 - Scarily true, best impulsive buying" },
+  { id: 20, src: "/images/reviews/review-20.png", alt: "Mar 4 - Concise and exactly what I needed" },
+  // Page 3
+  { id: 21, src: "/images/reviews/review-21.png", alt: "Mar 4 - Premium version is the real deal" },
+  { id: 22, src: "/images/reviews/review-22.png", alt: "Mar 4 - Very precise" },
+  { id: 23, src: "/images/reviews/review-23.png", alt: "Feb 16 - Wow so accurate" },
+  { id: 24, src: "/images/reviews/review-24.png", alt: "Feb 16 - So accurate!" },
+  { id: 25, src: "/images/reviews/review-25.png", alt: "Feb 24 - Excellent reading 10/10" },
+  { id: 26, src: "/images/reviews/review-26.png", alt: "Jan 31 - Extremely helpful and insightful" },
+  { id: 27, src: "/images/reviews/review-27.png", alt: "Jan 3 - Heavily inspired, accurate trajectory" },
+  { id: 28, src: "/images/reviews/review-28.png", alt: "Jan 1 - Spot on love life, appreciate comfort" },
 ]
 
 export default function LandingPage() {
