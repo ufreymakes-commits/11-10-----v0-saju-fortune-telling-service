@@ -90,13 +90,13 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center max-w-sm px-6">
-          {/* 캐릭터 모음집 이미지 (추후 교체 예정) */}
-          <div className="relative w-64 h-48 mx-auto mb-6">
+          {/* 10 일간 캐릭터 모음집 이미지 */}
+          <div className="relative w-72 h-56 mx-auto mb-6">
             <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%85%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"
-              alt="Sajume characters"
+              src="/images/characters-collection.png"
+              alt="Sajume 10 day master characters"
               fill
-              className="object-contain animate-float"
+              className="object-contain"
             />
           </div>
           <h2 className="text-lg font-semibold text-foreground mb-2">
