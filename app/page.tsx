@@ -152,28 +152,6 @@ export default function LandingPage() {
               </div>
             </Link>
 
-            {/* 2026 Monthly Saju Reading */}
-            <div className="group cursor-not-allowed">
-              <div className="bg-gradient-to-br from-blue-900/40 to-purple-900/40 border border-blue-500/30 rounded-xl p-5 opacity-70">
-                <div className="relative w-full h-32 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-blue-500/20 flex items-center justify-center">
-                      <svg className="w-6 h-6 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    <span className="text-xs text-white/40">Coming Soon</span>
-                  </div>
-                </div>
-                <h4 className="text-sm font-semibold text-white mb-1">2026 Monthly Saju Reading (12 times)</h4>
-                <p className="text-xs text-white/60 mb-3">Monthly personalized Saju readings delivered to you every month throughout 2026.</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-blue-300">12 monthly readings</span>
-                  <span className="text-sm font-bold text-white/50">$79</span>
-                </div>
-              </div>
-            </div>
-
             {/* Personal Luck Bracelet */}
             <div className="group cursor-not-allowed">
               <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-amber-500/30 rounded-xl p-5 opacity-70">
@@ -192,6 +170,28 @@ export default function LandingPage() {
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-amber-300">Personalized to your Saju</span>
                   <span className="text-sm font-bold text-white/50">$49.99</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 2026 Monthly Saju Reading */}
+            <div className="group cursor-not-allowed">
+              <div className="bg-gradient-to-br from-blue-900/40 to-purple-900/40 border border-blue-500/30 rounded-xl p-5 opacity-70">
+                <div className="relative w-full h-32 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-blue-500/20 flex items-center justify-center">
+                      <svg className="w-6 h-6 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <span className="text-xs text-white/40">Coming Soon</span>
+                  </div>
+                </div>
+                <h4 className="text-sm font-semibold text-white mb-1">2026 Monthly Saju Reading (12 times)</h4>
+                <p className="text-xs text-white/60 mb-3">Monthly personalized Saju readings delivered to you every month throughout 2026.</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-blue-300">12 monthly readings</span>
+                  <span className="text-sm font-bold text-white/50">$79</span>
                 </div>
               </div>
             </div>
