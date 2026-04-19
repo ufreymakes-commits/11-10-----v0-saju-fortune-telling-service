@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
+import { DayMasterCard } from '@/components/day-master-card'
 import type { Fact, SajuData } from '@/lib/types'
 import { LockIcon } from 'lucide-react'
 
@@ -191,16 +192,13 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
           ))}
         </div>
 
-        {/* Day Master Type */}
-        <div className="border-t border-border/30 pt-4 text-center">
-          <p className="text-[10px] text-muted-foreground mb-2">Your Day Master (일간)</p>
-          <div className="flex items-center justify-center gap-2">
-            <span className="text-2xl">{dayMasterInfo.emoji}</span>
-            <div>
-              <p className="text-sm font-semibold text-foreground">{dayMasterChar} {dayMasterInfo.element}</p>
-              <p className="text-xs text-muted-foreground">{dayMasterInfo.korean}</p>
-            </div>
-          </div>
+        {/* Day Master Type with Character */}
+        <div className="border-t border-border/30 pt-4">
+          <p className="text-[10px] text-muted-foreground mb-3 text-center">Your Day Master (일간)</p>
+          <DayMasterCard 
+            dayMaster={submission.sajuData.dayMaster || '기'} 
+            dayMasterKorean={submission.sajuData.dayMasterKorean}
+          />
         </div>
       </div>
 

@@ -2,21 +2,26 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { StarsBackground } from '@/components/stars-background'
 import { Marquee } from '@/components/marquee'
+import { ReviewSlider } from '@/components/review-slider'
 
+// 리뷰 이미지 (파일명 번호 작은 순 = 최신 순)
 const REVIEW_IMAGES = [
-  { id: 1, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-06%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%208.35.09-JtTw1gHzOfT77JZFdiZLC8jUgRKBtx.png", alt: "Customer reviews about accuracy and insights" },
-  { id: 2, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-06%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%208.35.17-6DPkdhllKYVj7ZPutcDGvw1qhKwLog.png", alt: "Customer reviews about predictions and resonance" },
-  { id: 3, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-06%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%208.35.24-JCEllKQBFoITmhwmOMa3ZjJIx06DXk.png", alt: "Customer review about sample and full report" },
-  { id: 4, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-06%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%208.34.56-enUCu1k6CGSVUYjl9Ikwg8rZLo4OHG.png", alt: "Customer reviews about validation and meaningful reading" },
-  { id: 5, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-06%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%208.35.35-u4rEj3p7ae6s7tZkUuv3STgqj8iTnx.png", alt: "Customer reviews about clarity and introspection" },
-  { id: 6, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-06%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%208.36.05-qffQqwtmUFeWPKusUZq8q2wazcEFyY.png", alt: "Customer reviews about accuracy and timelines" },
-  { id: 7, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-06%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%208.36.17-l0YlKnZMITqebYLhaki9QJoOd98zio.png", alt: "Customer reviews about premium version" },
-  { id: 8, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Frame%20174-rqCFcaSzIHcNyuCtdc8u12FwmEGwoG.png", alt: "Singapore customer review - heavily inspired and insightful" },
-  { id: 9, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Frame%20175-ArYV48RqRbQ6YpjOHOPp8BiJ3mbOfi.png", alt: "Malaysia customer review - trait and challenge accuracy" },
-  { id: 10, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Frame%20172-z0VI9v4lXbRog6PKODQoVrw3Kqz8d2.png", alt: "USA customer review - highly recommend Sajume" },
-  { id: 11, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Frame%20171-5zLupj2JFt4WLbwk4hYZjoGVfXzagB.png", alt: "India customer review - excellent reading 10/10" },
-  { id: 12, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Frame%20167-vLJaABHQEwfTKVDOAz9zJgCn9NjHgK.png", alt: "Korea customer review - extremely helpful and insightful" },
-  { id: 13, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Frame%20173-VHOAs9Y47KImjmRtXKBRESApgWUEO9.png", alt: "USA customer review - very accurate reading" },
+  { id: 1, src: "/images/reviews/review-01.png", alt: "Apr 16 - Uncanny accuracy, felt called out" },
+  { id: 2, src: "/images/reviews/review-02.png", alt: "Apr 10 - Engaging, personal, highly recommend" },
+  { id: 3, src: "/images/reviews/review-03.png", alt: "Apr 1 - Great insight, feeling validated" },
+  { id: 4, src: "/images/reviews/review-04.png", alt: "Apr 1 - Surprised by the reading, meaningful" },
+  { id: 5, src: "/images/reviews/review-05.png", alt: "Mar 31 - Would highly recommend for SJPJ" },
+  { id: 6, src: "/images/reviews/review-06.png", alt: "Mar 31 - Accurate and interesting insights" },
+  { id: 7, src: "/images/reviews/review-07.png", alt: "Mar 31 - Absolutely spot on, wonderful tool" },
+  { id: 8, src: "/images/reviews/review-08.png", alt: "Mar 31 - Scary accurate, excited for future" },
+  { id: 9, src: "/images/reviews/review-09.png", alt: "Mar 31 - Past predictions on point" },
+  { id: 10, src: "/images/reviews/review-10.png", alt: "Mar 30 - Resonates, sense of direction" },
+  { id: 11, src: "/images/reviews/review-11.png", alt: "Mar 30 - Reassurance when overwhelmed" },
+  { id: 12, src: "/images/reviews/review-12.png", alt: "Mar 27 - Scarily accurate, helped see things" },
+  { id: 13, src: "/images/reviews/review-13.png", alt: "Mar 21 - Scarily accurate, great advice" },
+  { id: 14, src: "/images/reviews/review-14.png", alt: "Mar 20 - Great report!" },
+  { id: 15, src: "/images/reviews/review-15.png", alt: "Mar 18 - Crazy accurate, goosebumps" },
+  { id: 16, src: "/images/reviews/review-16.png", alt: "Mar 18 - Actual timelines, highly recommend" },
 ]
 
 export default function LandingPage() {
@@ -114,28 +119,7 @@ export default function LandingPage() {
           <p className="text-center text-xs text-white/40 mb-6">
             If these reviews are found to be manipulated or fake, we will stop selling this service.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {REVIEW_IMAGES.map((review) => (
-              <div key={review.id} className="bg-white rounded-xl p-3 shadow-lg">
-                <div className="flex items-center gap-1 mb-2">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <svg key={i} className="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                    </svg>
-                  ))}
-                </div>
-                <div className="relative w-full">
-                  <Image
-                    src={review.src}
-                    alt={review.alt}
-                    width={400}
-                    height={200}
-                    className="w-full h-auto rounded-lg"
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+          <ReviewSlider reviews={REVIEW_IMAGES} />
         </div>
       </section>
 
