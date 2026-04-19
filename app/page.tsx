@@ -4,22 +4,28 @@ import { StarsBackground } from '@/components/stars-background'
 import { Marquee } from '@/components/marquee'
 import { ReviewSlider } from '@/components/review-slider'
 
-// 리뷰 이미지 (페이지별 배치: 1페이지 3개, 2페이지 4개, 3페이지 4개)
-const REVIEW_IMAGES = [
+// 페이지별 리뷰 배열 (각 배열 = 1페이지)
+const REVIEW_PAGES = [
   // Page 1 - 3개 리뷰
-  { id: 1, src: "/images/reviews/review-01.png", alt: "Page 1, Review 1" },
-  { id: 2, src: "/images/reviews/review-02.png", alt: "Page 1, Review 2" },
-  { id: 3, src: "/images/reviews/review-03.png", alt: "Page 1, Review 3" },
+  [
+    { id: 1, src: "/images/reviews/review-01.png", alt: "Page 1, Review 1" },
+    { id: 2, src: "/images/reviews/review-02.png", alt: "Page 1, Review 2" },
+    { id: 3, src: "/images/reviews/review-03.png", alt: "Page 1, Review 3" },
+  ],
   // Page 2 - 4개 리뷰
-  { id: 4, src: "/images/reviews/review-04.png", alt: "Page 2, Review 1" },
-  { id: 5, src: "/images/reviews/review-05.png", alt: "Page 2, Review 2" },
-  { id: 6, src: "/images/reviews/review-06.png", alt: "Page 2, Review 3" },
-  { id: 7, src: "/images/reviews/review-07.png", alt: "Page 2, Review 4" },
+  [
+    { id: 4, src: "/images/reviews/review-04.png", alt: "Page 2, Review 1" },
+    { id: 5, src: "/images/reviews/review-05.png", alt: "Page 2, Review 2" },
+    { id: 6, src: "/images/reviews/review-06.png", alt: "Page 2, Review 3" },
+    { id: 7, src: "/images/reviews/review-07.png", alt: "Page 2, Review 4" },
+  ],
   // Page 3 - 4개 리뷰
-  { id: 8, src: "/images/reviews/review-08.png", alt: "Page 3, Review 1" },
-  { id: 9, src: "/images/reviews/review-09.png", alt: "Page 3, Review 2" },
-  { id: 10, src: "/images/reviews/review-10.png", alt: "Page 3, Review 3" },
-  { id: 11, src: "/images/reviews/review-11.png", alt: "Page 3, Review 4" },
+  [
+    { id: 8, src: "/images/reviews/review-08.png", alt: "Page 3, Review 1" },
+    { id: 9, src: "/images/reviews/review-09.png", alt: "Page 3, Review 2" },
+    { id: 10, src: "/images/reviews/review-10.png", alt: "Page 3, Review 3" },
+    { id: 11, src: "/images/reviews/review-11.png", alt: "Page 3, Review 4" },
+  ],
 ]
 
 export default function LandingPage() {
@@ -117,7 +123,7 @@ export default function LandingPage() {
           <p className="text-center text-xs text-white/40 mb-6">
             If these reviews are found to be manipulated or fake, we will stop selling this service.
           </p>
-          <ReviewSlider reviews={REVIEW_IMAGES} />
+          <ReviewSlider pages={REVIEW_PAGES} />
         </div>
       </section>
 

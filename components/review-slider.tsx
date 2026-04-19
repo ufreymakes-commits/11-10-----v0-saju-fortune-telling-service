@@ -10,23 +10,17 @@ interface Review {
 }
 
 interface ReviewSliderProps {
-  reviews: Review[]
-  itemsPerPage?: number
+  pages: Review[][]
   autoPlayInterval?: number
 }
 
 export function ReviewSlider({ 
-  reviews, 
-  itemsPerPage = 10,
+  pages,
   autoPlayInterval = 6000 
 }: ReviewSliderProps) {
   const [currentPage, setCurrentPage] = useState(0)
   
-  // 10개씩 페이지로 나누기
-  const totalPages = Math.ceil(reviews.length / itemsPerPage)
-  const pages = Array.from({ length: totalPages }, (_, pageIndex) => 
-    reviews.slice(pageIndex * itemsPerPage, (pageIndex + 1) * itemsPerPage)
-  )
+  const totalPages = pages.length
   
   const nextPage = useCallback(() => {
     setCurrentPage((prev) => (prev + 1) % totalPages)
@@ -42,7 +36,7 @@ export function ReviewSlider({
     const interval = setInterval(nextPage, autoPlayInterval)
     return () => clearInterval(interval)
   }, [totalPages, nextPage, autoPlayInterval])
-  
+
   return (
     <div className="relative">
       {/* 페이지 인디케이터 (점) - 맨 위 */}
