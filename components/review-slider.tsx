@@ -57,11 +57,11 @@ export function ReviewSlider({
               className="w-full flex-shrink-0"
             >
               {/* 10개씩 2열 그리드 */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
                 {pageReviews.map((review) => (
                   <div 
                     key={review.id} 
-                    className="bg-white rounded-lg overflow-hidden"
+                    className="bg-white rounded-sm overflow-hidden"
                   >
                     <Image
                       src={review.src}

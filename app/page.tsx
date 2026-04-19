@@ -36,6 +36,8 @@ const REVIEW_IMAGES = [
   { id: 26, src: "/images/reviews/review-26.png", alt: "Jan 31 - Extremely helpful and insightful" },
   { id: 27, src: "/images/reviews/review-27.png", alt: "Jan 3 - Heavily inspired, accurate trajectory" },
   { id: 28, src: "/images/reviews/review-28.png", alt: "Jan 1 - Spot on love life, appreciate comfort" },
+  { id: 29, src: "/images/reviews/review-29.png", alt: "USA - Very accurate, greatly appreciate the effort" },
+  { id: 30, src: "/images/reviews/review-30.png", alt: "USA - Favorite among all readings, kind team" },
 ]
 
 export default function LandingPage() {
