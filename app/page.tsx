@@ -4,41 +4,22 @@ import { StarsBackground } from '@/components/stars-background'
 import { Marquee } from '@/components/marquee'
 import { ReviewSlider } from '@/components/review-slider'
 
-// 리뷰 이미지 (페이지별 배치: 1페이지 10개, 2페이지 18개 텍스트, 3페이지 이미지 2개)
+// 리뷰 이미지 (페이지별 배치: 1페이지 3개, 2페이지 4개, 3페이지 4개)
 const REVIEW_IMAGES = [
-  // Page 1 - 텍스트 리뷰 10개
-  { id: 1, src: "/images/reviews/review-01.png", alt: "Apr 16 - Uncanny accuracy, felt called out" },
-  { id: 2, src: "/images/reviews/review-02.png", alt: "Apr 10 - Engaging, personal, highly recommend" },
-  { id: 3, src: "/images/reviews/review-03.png", alt: "Apr 1 - Great insight, feeling validated" },
-  { id: 4, src: "/images/reviews/review-04.png", alt: "Apr 1 - Surprised by the reading, meaningful" },
-  { id: 5, src: "/images/reviews/review-05.png", alt: "Mar 31 - Would highly recommend for SJPJ" },
-  { id: 6, src: "/images/reviews/review-06.png", alt: "Mar 31 - Accurate and interesting insights" },
-  { id: 7, src: "/images/reviews/review-07.png", alt: "Mar 31 - Absolutely spot on, wonderful tool" },
-  { id: 8, src: "/images/reviews/review-08.png", alt: "Mar 31 - Scary accurate, excited for future" },
-  { id: 9, src: "/images/reviews/review-09.png", alt: "Mar 31 - Past predictions on point" },
-  { id: 10, src: "/images/reviews/review-10.png", alt: "Mar 30 - Resonates, sense of direction" },
-  // Page 2 - 텍스트 리뷰 18개
-  { id: 11, src: "/images/reviews/review-11.png", alt: "Mar 30 - Reassurance when overwhelmed" },
-  { id: 12, src: "/images/reviews/review-12.png", alt: "Mar 27 - Scarily accurate, helped see things" },
-  { id: 13, src: "/images/reviews/review-13.png", alt: "Mar 21 - Scarily accurate, great advice" },
-  { id: 14, src: "/images/reviews/review-14.png", alt: "Mar 20 - Great report!" },
-  { id: 15, src: "/images/reviews/review-15.png", alt: "Mar 18 - Crazy accurate, goosebumps" },
-  { id: 16, src: "/images/reviews/review-16.png", alt: "Mar 18 - Actual timelines, highly recommend" },
-  { id: 17, src: "/images/reviews/review-17.png", alt: "Mar 18 - Fun and enjoyable read" },
-  { id: 18, src: "/images/reviews/review-18.png", alt: "Mar 6 - Eerily true, shocked" },
-  { id: 19, src: "/images/reviews/review-19.png", alt: "Mar 6 - Scarily true, best impulsive buying" },
-  { id: 20, src: "/images/reviews/review-20.png", alt: "Mar 4 - Concise and exactly what I needed" },
-  { id: 21, src: "/images/reviews/review-21.png", alt: "Mar 4 - Premium version is the real deal" },
-  { id: 22, src: "/images/reviews/review-22.png", alt: "Mar 4 - Very precise" },
-  { id: 23, src: "/images/reviews/review-23.png", alt: "Feb 16 - Wow so accurate" },
-  { id: 24, src: "/images/reviews/review-24.png", alt: "Feb 16 - So accurate!" },
-  { id: 25, src: "/images/reviews/review-25.png", alt: "Feb 24 - Excellent reading 10/10" },
-  { id: 26, src: "/images/reviews/review-26.png", alt: "Jan 31 - Extremely helpful and insightful" },
-  { id: 27, src: "/images/reviews/review-27.png", alt: "Jan 3 - Heavily inspired, accurate trajectory" },
-  { id: 28, src: "/images/reviews/review-28.png", alt: "Jan 1 - Spot on love life, appreciate comfort" },
-  // Page 3 - 이미지 리뷰 2개만
-  { id: 29, src: "/images/reviews/review-29.png", alt: "USA - Very accurate, greatly appreciate the effort" },
-  { id: 30, src: "/images/reviews/review-30.png", alt: "USA - Favorite among all readings, kind team" },
+  // Page 1 - 3개 리뷰
+  { id: 1, src: "/images/reviews/review-01.png", alt: "Page 1, Review 1" },
+  { id: 2, src: "/images/reviews/review-02.png", alt: "Page 1, Review 2" },
+  { id: 3, src: "/images/reviews/review-03.png", alt: "Page 1, Review 3" },
+  // Page 2 - 4개 리뷰
+  { id: 4, src: "/images/reviews/review-04.png", alt: "Page 2, Review 1" },
+  { id: 5, src: "/images/reviews/review-05.png", alt: "Page 2, Review 2" },
+  { id: 6, src: "/images/reviews/review-06.png", alt: "Page 2, Review 3" },
+  { id: 7, src: "/images/reviews/review-07.png", alt: "Page 2, Review 4" },
+  // Page 3 - 4개 리뷰
+  { id: 8, src: "/images/reviews/review-08.png", alt: "Page 3, Review 1" },
+  { id: 9, src: "/images/reviews/review-09.png", alt: "Page 3, Review 2" },
+  { id: 10, src: "/images/reviews/review-10.png", alt: "Page 3, Review 3" },
+  { id: 11, src: "/images/reviews/review-11.png", alt: "Page 3, Review 4" },
 ]
 
 export default function LandingPage() {
