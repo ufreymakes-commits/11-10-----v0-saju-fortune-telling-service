@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { Spinner } from '@/components/ui/spinner'
 import { Progress } from '@/components/ui/progress'
 import type { Submission, Fact, SajuData } from '@/lib/types'
-import { CheckCircleIcon, SparklesIcon, BriefcaseIcon, HeartIcon, CompassIcon } from 'lucide-react'
+import { CheckCircleIcon, SparklesIcon, BriefcaseIcon, HeartIcon, CompassIcon, LinkIcon, CheckIcon } from 'lucide-react'
 
 interface ReportContentProps {
   submission: Submission
@@ -64,6 +64,15 @@ export function ReportContent({ submission }: ReportContentProps) {
   )
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0)
   const [totalFacts, setTotalFacts] = useState(0)
+  const [copied, setCopied] = useState(false)
+
+  const handleCopyLink = () => {
+    if (typeof window !== 'undefined') {
+      navigator.clipboard.writeText(window.location.href)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
   
   const sajuData = submission.saju_data as SajuData
   const dayMasterChar = sajuData.dayPillar?.stem || '甲'
@@ -294,6 +303,24 @@ export function ReportContent({ submission }: ReportContentProps) {
           For entertainment purposes only.
         </p>
       </div>
+
+      {/* Fixed Share Button - bottom right */}
+      <button
+        onClick={handleCopyLink}
+        className="fixed bottom-6 right-5 z-50 flex items-center gap-2 bg-card border border-primary/40 text-foreground text-xs px-4 py-2.5 rounded-full shadow-lg shadow-primary/20 hover:border-primary/70 hover:bg-primary/10 transition-all"
+      >
+        {copied ? (
+          <>
+            <CheckIcon className="w-3.5 h-3.5 text-secondary" />
+            <span className="text-secondary">Copied!</span>
+          </>
+        ) : (
+          <>
+            <LinkIcon className="w-3.5 h-3.5 text-primary" />
+            <span>URL 공유하기</span>
+          </>
+        )}
+      </button>
     </div>
   )
 }
