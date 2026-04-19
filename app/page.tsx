@@ -4,8 +4,9 @@ import { StarsBackground } from '@/components/stars-background'
 import { Marquee } from '@/components/marquee'
 import { ReviewSlider } from '@/components/review-slider'
 
-// 리뷰 이미지 (파일명 번호 작은 순 = 최신 순)
+// 리뷰 이미지 (페이지별 배치: 1페이지 10개, 2페이지 18개 텍스트, 3페이지 이미지 2개)
 const REVIEW_IMAGES = [
+  // Page 1 - 텍스트 리뷰 10개
   { id: 1, src: "/images/reviews/review-01.png", alt: "Apr 16 - Uncanny accuracy, felt called out" },
   { id: 2, src: "/images/reviews/review-02.png", alt: "Apr 10 - Engaging, personal, highly recommend" },
   { id: 3, src: "/images/reviews/review-03.png", alt: "Apr 1 - Great insight, feeling validated" },
@@ -16,7 +17,7 @@ const REVIEW_IMAGES = [
   { id: 8, src: "/images/reviews/review-08.png", alt: "Mar 31 - Scary accurate, excited for future" },
   { id: 9, src: "/images/reviews/review-09.png", alt: "Mar 31 - Past predictions on point" },
   { id: 10, src: "/images/reviews/review-10.png", alt: "Mar 30 - Resonates, sense of direction" },
-  // Page 2
+  // Page 2 - 텍스트 리뷰 18개
   { id: 11, src: "/images/reviews/review-11.png", alt: "Mar 30 - Reassurance when overwhelmed" },
   { id: 12, src: "/images/reviews/review-12.png", alt: "Mar 27 - Scarily accurate, helped see things" },
   { id: 13, src: "/images/reviews/review-13.png", alt: "Mar 21 - Scarily accurate, great advice" },
@@ -27,7 +28,6 @@ const REVIEW_IMAGES = [
   { id: 18, src: "/images/reviews/review-18.png", alt: "Mar 6 - Eerily true, shocked" },
   { id: 19, src: "/images/reviews/review-19.png", alt: "Mar 6 - Scarily true, best impulsive buying" },
   { id: 20, src: "/images/reviews/review-20.png", alt: "Mar 4 - Concise and exactly what I needed" },
-  // Page 3
   { id: 21, src: "/images/reviews/review-21.png", alt: "Mar 4 - Premium version is the real deal" },
   { id: 22, src: "/images/reviews/review-22.png", alt: "Mar 4 - Very precise" },
   { id: 23, src: "/images/reviews/review-23.png", alt: "Feb 16 - Wow so accurate" },
@@ -36,6 +36,7 @@ const REVIEW_IMAGES = [
   { id: 26, src: "/images/reviews/review-26.png", alt: "Jan 31 - Extremely helpful and insightful" },
   { id: 27, src: "/images/reviews/review-27.png", alt: "Jan 3 - Heavily inspired, accurate trajectory" },
   { id: 28, src: "/images/reviews/review-28.png", alt: "Jan 1 - Spot on love life, appreciate comfort" },
+  // Page 3 - 이미지 리뷰 2개만
   { id: 29, src: "/images/reviews/review-29.png", alt: "USA - Very accurate, greatly appreciate the effort" },
   { id: 30, src: "/images/reviews/review-30.png", alt: "USA - Favorite among all readings, kind team" },
 ]
