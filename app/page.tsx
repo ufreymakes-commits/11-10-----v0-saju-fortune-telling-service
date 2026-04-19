@@ -140,9 +140,9 @@ export default function LandingPage() {
       </section>
 
       {/* Products Section */}
-      <section className="relative z-10 py-12 px-4 pb-20">
+      <section className="relative z-10 py-8 px-4 pb-20">
         <div className="max-w-2xl mx-auto">
-          <h3 className="text-center text-lg font-semibold text-white/90 mb-6">Our Readings</h3>
+          <h3 className="text-center text-lg font-semibold text-white/90 mb-4">Our Readings</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* 99 Facts Product */}
             <Link href="/start" className="group">
