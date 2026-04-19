@@ -45,6 +45,24 @@ export function ReviewSlider({
   
   return (
     <div className="relative">
+      {/* 페이지 인디케이터 (점) - 맨 위 */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mb-6">
+          {pages.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentPage(index)}
+              className={`transition-all duration-300 ${
+                index === currentPage 
+                  ? 'w-8 h-2.5 bg-pink-400 rounded-full' 
+                  : 'w-2.5 h-2.5 bg-white/40 rounded-full hover:bg-white/60'
+              }`}
+              aria-label={`Go to page ${index + 1}`}
+            />
+          ))}
+        </div>
+      )}
+      
       {/* Slider container */}
       <div className="overflow-hidden">
         <div 
@@ -100,27 +118,6 @@ export function ReviewSlider({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
-          
-          {/* 페이지 인디케이터 (점) */}
-          <div className="flex items-center justify-center gap-2 mt-6">
-            {pages.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentPage(index)}
-                className={`transition-all duration-300 ${
-                  index === currentPage 
-                    ? 'w-8 h-2.5 bg-pink-400 rounded-full' 
-                    : 'w-2.5 h-2.5 bg-white/40 rounded-full hover:bg-white/60'
-                }`}
-                aria-label={`Go to page ${index + 1}`}
-              />
-            ))}
-          </div>
-          
-          {/* 페이지 카운터 */}
-          <p className="text-center text-sm text-white/60 mt-3">
-            Page {currentPage + 1} of {totalPages}
-          </p>
         </>
       )}
     </div>

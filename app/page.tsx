@@ -130,7 +130,7 @@ export default function LandingPage() {
                 <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
               </svg>
             ))}
-            <span className="text-sm text-white/60 ml-2">5.0 from 200+ reviews</span>
+            <span className="text-sm text-white/60 ml-2">26+ reviews</span>
           </div>
           <p className="text-center text-xs text-white/40 mb-6">
             If these reviews are found to be manipulated or fake, we will stop selling this service.
