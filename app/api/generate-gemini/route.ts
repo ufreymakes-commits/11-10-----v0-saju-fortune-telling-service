@@ -1698,65 +1698,65 @@ FYI
     console.log('[v0] Gemini:', JSON.stringify(allSajuData, null, 2))
     console.log('[v0] Gemini: ==================================================')
 
-    const userPrompt = `Now, generate a total of 9 chillingly insightful sentences for him or her — the kind of sentences someone would want to share with a friend because they're just that on point.Sentences that make them truly feel like, 'Wow, this is tailored to my personal Saju chart, rather than being a generic one for everyone. This captures every detail of my Saju all at once.
+    const userPrompt = `Now, generate a total of 9 chillingly insightful sentences for him or her — the kind of sentences someone would want to share with a friend because they're just that on point. Sentences that make them truly feel like, 'Wow, this is tailored to my personal Saju chart, rather than being a generic one for everyone. This captures every detail of my Saju all at once.'
 
 Before writing the 9 sentences, silently read and internalize the full Advanced Saju Data field. Treat every value — 12운성, 공망, 형, 원진, 천간합, 삼합, 길성, 조후용신, 신강신약 percentage — as background intelligence that shapes how you see this person's life. You do not need to mention any of these terms. You do not need to explain them. Just let them inform the specificity of what you write, the way a doctor reads lab results before speaking to a patient — the results never appear in the conversation, but they make every observation more precise. The 9 sentences should feel like they could only have been written for this exact chart, not because they reference Saju structure, but because they describe a life too accurately to be generic.
 
-Each sentence must feel realistic, specific, and emotionally resonant, as if it could have truly happened in their life.Make each line count.
+Each sentence must feel realistic, specific, and emotionally resonant, as if it could have truly happened in their life. Make each line count.
 
-Please include years(e.g., "in 2017", "by 2032") wherever possible to enhance realism.This year is 2026 just in case to know.
+Please include years (e.g., "in 2017", "by 2032") wherever possible to enhance realism. This year is 2026 just in case to know.
 
 Focus on uncovering aspects like:
 
-What kind of job they are likely doing now(guess a few jobs with the career rule step 1 to 8),
+What kind of job they are likely doing now (guess a few jobs with the career rule step 1 to 8),
 
 Whether they're working in a company, for the government, running their own business, freelancing, or unemployed,
 
-    When their first love happened, and when they got married or will get married or they don't want to get married,
+When their first love happened, and when they got married or will get married or they don't want to get married,
 
-What kind of person they married(age difference, looks, personality, job),
+What kind of person they married (age difference, looks, personality, job),
 
-    What their family dynamics are like(relationship with parents or siblings),
+What their family dynamics are like (relationship with parents or siblings),
 
-What they will be doing in the future(very specific),
+What they will be doing in the future (very specific),
 
-    If they have any health issues, what would be the likely cause,
+If they have any health issues, what would be the likely cause,
 
-      Which region or country would bring them better fortune,
+Which region or country would bring them better fortune,
 
-        What inner thoughts they've repeated often throughout life,
+What inner thoughts they've repeated often throughout life,
 
-          What others have told them frequently,
+What others have told them frequently,
 
-            How they looked or behaved across childhood, youth, adulthood, and old age.
+How they looked or behaved across childhood, youth, adulthood, and old age.
 
 🧱 Formatting Rules(Critical)
 
 ⚠️ Count down every sentence from 1 to 9.
 
-🚫 Only use English.Do not include Korean, Chinese, or any other languages.
+🚫 Only use English. Do not include Korean, Chinese, or any other languages.
 
-🧠 Sentences must be detailed, clear, and insightful; avoid being overly short or vague. Writing just two clear compact sentences for every nine is sufficient.Please provide each numbered point with an average of 50 characters.
+🧠 Sentences must be detailed, clear, and insightful; avoid being overly short or vague. Writing just two clear compact sentences for every nine is sufficient. Please provide each numbered point with an average of 50 characters.
 
 💥 Make each sentence emotionally piercing or deeply accurate, as if you truly know them.
 
 ✍️ Report Structure:
 
-  Introduction(2 sentences): Describe their inborn energy and overall personality.Include a sentence like: "The phrase you probably hear most often from others is: '***'." In the report introduction or personality section, you must provide one warm summary sentence from a positive perspective: "You are a person standing on the footing of [Self (Day Branch)] within the environment of [Stage (Month Branch)]."
+Introduction(2 sentences): Describe their inborn energy and overall personality. Include a sentence like: "The phrase you probably hear most often from others is: '***'." In the report introduction or personality section, you must provide one warm summary sentence from a positive perspective: "You are a person standing on the footing of [Self (Day Branch)] within the environment of [Stage (Month Branch)]."
 
-  Body 1(2 sentences): Detailed analysis of wealth and career.Provide two sentences that define the core theme of their career and financial life.These must be realistic, specific, and address the practical concerns or dreams they are likely to have.Avoid vague generalizations.
+Body 1(2 sentences): Detailed analysis of wealth and career. Provide two sentences that define the core theme of their career and financial life. These must be realistic, specific, and address the practical concerns or dreams they are likely to have. Avoid vague generalizations.
 
-    Body 2(3 sentences): Love, health, and relationships.Provide two sentences about their main themes in love and marriage.These should be highly factual and specific, not ambiguous.You may mention the timing of their first love, but do not reveal the spouse's profession or personality yet(as this is a free report).
+Body 2(3 sentences): Love, health, and relationships. Provide two sentences about their main themes in love and marriage. These should be highly factual and specific, not ambiguous. You may mention the timing of their first love, but do not reveal the spouse's profession or personality yet(as this is a free report).
 
-      Conclusion(2 sentences): Advice for improving fortune and future direction. (But don't spoil the exact luck element yet as it will appear on another premium report ) Identify a specific theme that might be causing them inner struggle. Offer two sentences of realistic yet touching comfort. If they are someone better suited for living abroad rather than their home country, provide encouragement for that path. Alternatively, if they have a painful past, offer sincere consolation.
+Conclusion(2 sentences): Advice for improving fortune and future direction. (But don't spoil the exact luck element yet as it will appear on another premium report) Identify a specific theme that might be causing them inner struggle. Offer two sentences of realistic yet touching comfort. If they are someone better suited for living abroad rather than their home country, provide encouragement for that path. Alternatively, if they have a painful past, offer sincere consolation.
 
 =========================================
 [EXECUTION PROTOCOL: HOW TO WRITE THE 9 FACTS]
 =========================================
-Do not write generic horoscopes. If your sentence can apply to a random person on the street, DELETE IT and rewrite it based STRICTLY on the provided `allSajuData`. 
+Do not write generic horoscopes. If your sentence can apply to a random person on the street, DELETE IT and rewrite it based STRICTLY on the provided \`allSajuData\`. 
 
 STEP 1: FILL THE INTERNAL SCRATCHPAD FIRST
-Before writing the 9 facts, you must analyze the chart in the `"internal_analysis_scratchpad"` JSON field. 
+Before writing the 9 facts, you must analyze the chart in the \`"internal_analysis_scratchpad"\` JSON field. 
 1. Identify the Day Master (Essence) vs. Month Branch (Stage).
 2. Identify the Dominant Element / Ten God (What they have too much of).
 3. Identify the Missing Element / Ten God (What drives their subconscious thirst).
@@ -1772,6 +1772,7 @@ Translate the scratchpad analysis into 9 Gen-Z, emotionally resonant, yet hyper-
 BANNED TROPES: Do not use Barnum Effect statements. ABSOLUTELY DO NOT say "You are creative," "You overthink,(like thinking am i enough?)" or "You should do marketing/freelancing" UNLESS specifically triggered by specific saju data he or she has. Trust the Saju data, not general astrology stereotypes.
 
 OUTPUT FORMAT(ONLY JSON):
+\`\`\`json
 {
 "internal_analysis_scratchpad": {
     "core_energy": "일간 OOO와 월지 OOO의 관계 분석",
