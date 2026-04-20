@@ -78,7 +78,8 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
         const result = await response.json()
         setData(result)
       } catch (err) {
-        setError('Failed to load your birth chart. Please try again.')
+        const msg = err instanceof Error ? err.message : String(err)
+        setError(msg)
         console.error('[v0] Preview fetch error:', err)
       } finally {
         setIsLoading(false)
