@@ -89,43 +89,16 @@ export function ReportContent({ submission }: ReportContentProps) {
   
   const sajuData = submission.saju_data as SajuData
   
-  // DEBUG: 실제 데이터 확인
-  console.log("[v0] sajuData.dayPillar:", sajuData.dayPillar)
-  console.log("[v0] sajuData.daewoon:", sajuData.daewoon)
-  console.log("[v0] sajuData.daewoon type:", typeof sajuData.daewoon, Array.isArray(sajuData.daewoon) ? "array" : "not array")
-  if (sajuData.daewoon?.[0]) {
-    console.log("[v0] daewoon[0] type:", typeof sajuData.daewoon[0], sajuData.daewoon[0])
-  }
-  
-  // stem can be Korean (갑) or Hanja (甲) depending on how it was stored
+  // Get day master stem - can be Korean (갑) or Hanja (己)
   const rawStem = sajuData.dayPillar?.stem || '갑'
-  // Normalize to Korean
-  const dayMasterKorean = HANJA_TO_KOREAN_STEM[rawStem] || rawStem // If already Korean, use as-is
+  // Normalize to Korean (if hanja, convert; if already korean, use as-is)
+  const dayMasterKorean = HANJA_TO_KOREAN_STEM[rawStem] || rawStem
   const dayMasterHanja = KOREAN_TO_HANJA_STEM[dayMasterKorean] || rawStem
   const character = getDayMasterCharacter(dayMasterKorean)
   const quote = DAY_MASTER_QUOTE[dayMasterKorean] || ''
   
-  console.log("[v0] rawStem:", rawStem, "dayMasterKorean:", dayMasterKorean, "character:", character)
-  
-  // Handle both string array (old format) and object array (new format) for daewoon
-  const rawDaewoon = sajuData.daewoon || []
-  const daewoon = rawDaewoon.map((d: any) => {
-    if (typeof d === 'string') {
-      // Parse string format: "6-16세: 정묘(편인)" or "6세~16세: 丁卯"
-      const match = d.match(/(\d+)[세\-~]+(\d+)세?[:\s]+(.+)/)
-      if (match) {
-        return {
-          startAge: parseInt(match[1]),
-          endAge: parseInt(match[2]),
-          stem: '',
-          branch: '',
-          fullName: match[3]
-        }
-      }
-      return { startAge: 0, endAge: 0, stem: '', branch: '', fullName: d }
-    }
-    return d
-  })
+  // Daewoon is an array of objects with startAge, endAge, fullName, etc.
+  const daewoon = Array.isArray(sajuData.daewoon) ? sajuData.daewoon : []
 
   const generateSection = useCallback(async (sectionIndex: number) => {
     const section = SECTION_CONFIG[sectionIndex]
@@ -240,29 +213,31 @@ export function ReportContent({ submission }: ReportContentProps) {
         </div>
 
         {/* Day Master Type */}
-        {character && (
-          <div className="border-t border-border/30 pt-4">
-            <p className="text-[10px] text-muted-foreground mb-3 text-center uppercase tracking-wider">Your Day Master (일간)</p>
-            <div className="flex flex-col items-center">
-              {/* Character Image */}
-              <div className="relative w-28 h-28 mb-3">
-                <Image
-                  src={character.imagePath}
-                  alt={`${dayMasterKorean} character`}
-                  fill
-                  className="object-contain drop-shadow-lg"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/images/characters-collection.png'
-                  }}
-                />
-              </div>
-              {/* Name */}
-              <p className={`text-lg font-bold mb-0.5 ${character.color}`}>
-                {dayMasterHanja} {dayMasterKorean}{character.element}
-              </p>
-              {/* Theme Title */}
-              <p className="text-sm font-semibold text-foreground/90 mb-1">{character.themeTitle}</p>
-              {/* Keywords */}
+        <div className="border-t border-border/30 pt-4">
+          <p className="text-[10px] text-muted-foreground mb-3 text-center uppercase tracking-wider">Your Day Master (일간)</p>
+          <div className="flex flex-col items-center">
+            {/* Character Image */}
+            <div className="relative w-28 h-28 mb-3">
+              <Image
+                src={character?.imagePath || '/images/characters-collection.png'}
+                alt={`${dayMasterKorean} character`}
+                fill
+                className="object-contain drop-shadow-lg"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/images/characters-collection.png'
+                }}
+              />
+            </div>
+            {/* Name */}
+            <p className={`text-lg font-bold mb-0.5 ${character?.color || 'text-foreground'}`}>
+              {dayMasterHanja} {dayMasterKorean}{character?.element || ''}
+            </p>
+            {/* Theme Title */}
+            <p className="text-sm font-semibold text-foreground/90 mb-1">{character?.themeTitle || 'Day Master'}</p>
+            {/* Theme Description */}
+            <p className="text-xs text-muted-foreground/80 mb-2">{character?.themeDescription || ''}</p>
+            {/* Keywords */}
+            {character?.keywords && character.keywords.length > 0 && (
               <div className="flex flex-wrap justify-center gap-1.5 mb-3">
                 {character.keywords.map((kw, i) => (
                   <span key={i} className="text-[10px] px-2 py-0.5 bg-white/10 rounded-full text-white/70">
@@ -270,13 +245,15 @@ export function ReportContent({ submission }: ReportContentProps) {
                   </span>
                 ))}
               </div>
-              {/* One-liner quote */}
+            )}
+            {/* One-liner quote */}
+            {quote && (
               <p className="text-xs text-muted-foreground italic text-center px-4">
                 &ldquo;{quote}&rdquo;
               </p>
-            </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* Major Fortune Periods (대운) */}
