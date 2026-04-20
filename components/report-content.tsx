@@ -149,10 +149,10 @@ export function ReportContent({ submission }: ReportContentProps) {
           </div>
         </Link>
         
-        <div className="relative w-16 h-16 mx-auto mb-3">
+        <div className="relative w-20 h-20 mx-auto mb-3">
           <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%85%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"
-            alt="Sajume mascot"
+            src="/images/characters-collection.png"
+            alt="Sajume characters"
             fill
             className="object-contain"
           />
@@ -277,10 +277,10 @@ export function ReportContent({ submission }: ReportContentProps) {
       {/* Completion Message */}
       {completedSections === sections.length && (
         <div className="mt-6 text-center bg-card border border-primary/40 rounded-xl p-5 shadow-lg shadow-primary/10">
-          <div className="relative w-12 h-12 mx-auto mb-3">
+          <div className="relative w-16 h-16 mx-auto mb-3">
             <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%85%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"
-              alt="Sajume mascot"
+              src="/images/characters-collection.png"
+              alt="Sajume characters"
               fill
               className="object-contain"
             />
