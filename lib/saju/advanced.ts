@@ -1037,7 +1037,7 @@ function checkGokgakSal(dayBranch: string): boolean {
 
 // 낙정관살: 일지 기준
 function checkNakjeongSal(dayStem: string, dayBranch: string): boolean {
-  const nakjeongList = ["갑자","을해","병자","정���","무��","기해","경자","신해","임자","계���"]
+  const nakjeongList = ["갑자","을해","병자","정�����","무��","기해","경자","신해","임자","계���"]
   return nakjeongList.includes(dayStem + dayBranch)
 }
 
@@ -1176,7 +1176,7 @@ function checkNoegongTanoegwan(dayStem: string, dayBranch: string): boolean {
   return noegongList.includes(dayStem + dayBranch)
 }
 
-// 칠살: 일지 기준 삼합국의 7번째 지지 (겁살과 같은 위치이나 다른 해석)
+// 칠살: 일지 기준 삼합국의 7번째 지지 (겁살과 같은 위치이나 다른 ��석)
 function checkChilSal(yearBranch: string, monthBranch: string, dayBranch: string, hourBranch: string | null): boolean {
   const chilMap: Record<string, string> = {
     "인": "신", "오": "자", "술": "진",
@@ -1333,58 +1333,25 @@ function _getBranchPositions(target: string | undefined, yb: string, mob: string
   return positions
 }
 
-// 신살별 활용 가이드
+// 신살별 활용 가이드 (핵심 신살만 유지: 12신살 + 천을귀인 + 문창귀인 + 양인살)
 const SINSAL_USAGE_GUIDE: Record<string, string> = {
-  "도화살": "대인관계와 매력을 활용하는 직업(연예, 영업, 서비스업)에서 빛을 발합니다",
+  // 12신살
   "역마살": "이동과 변화가 많은 환경(해외, 무역, 영업, 출장)에서 에너지가 활성화됩니다",
   "화개살": "예술, 종교, 철학, 학문 등 정신적 깊이를 요하는 분야에서 재능이 발휘됩니다",
-  "원진살": "관계의 갈등을 인식하고 소통과 이해의 노력을 기울이면 성장의 기회가 됩니다",
-  "현침살": "전문 기술, 의료, 법률 등 날카로운 전문성이 필요한 분야에서 두각을 나타냅니다",
-  "문창살": "학문, 글쓰기, 교육, 연구 등 지적 활동���서 뛰어난 성취를 이룰 수 있습니다",
-  "망신살": "명예와 체면에 관한 시험을 통해 진정한 자아를 찾고 겸손을 배우게 됩니다",
+  "도화살": "대인관계와 매력을 활용하는 직업(연예, 영업, 서비스업)에서 빛을 발합니다",
   "장성살": "리더십과 권위를 발휘하며 높은 지위나 명예를 얻을 수 있는 기운이 있습니다",
-  "홍염살": "강렬한 매력과 정열로 예술, 연예, 패션 분야에서 ���각을 나타낼 �� 있습니다",
-  "겁살": "강한 추진력과 돌파력으로 경쟁적인 환경에서 두각을 나타낼 수 있습니다",
+  "망신살": "명예와 체면에 관한 시험을 통해 진정한 자아를 찾고 겸손을 배우게 됩니다",
   "지살": "외교적 능력과 현장 감각을 살려 현장직이나 대외 활동에서 빛을 발합니다",
+  "년살": "사람을 끌어당기는 매력이 있어 인간관계와 연애에서 자주 주목받습니다",
+  "월살": "주변 환경의 변화에 민감하며, 적응력과 유연성이 뛰어납니다",
+  "겁살": "강한 추진력과 돌파력으로 경쟁적인 환경에서 두각을 나타낼 수 있습니다",
+  "재살": "재물 복이 있으나 관리에 신경 써야 하며, 투자보다 저축이 유리합니다",
   "천살": "하늘의 시험처럼 예측 불가한 변화를 겪지만, 이를 통해 단련됩니다",
-  "년살": "사람을 ���어당��는 매력이 있어 인간관계와 연애에서 자주 주목받습니다",
-  "백호살": "강렬한 에너지로 두각을 나타내지만, 급격한 변화나 사고에 주의가 필요합니다",
-  "귀문관살": "직관력과 영적 감수성이 뛰어나 예술·상담·치유 분야에서 빛을 발합니다",
-  "천라지망": "구속과 제약 속에서 내면의 성찰을 통해 진정한 자유를 찾아가는 운입니다",
-  "탕화살": "강한 열정과 창의성이 있지만, 충동적 결정을 조심해야 합니다",
-  "효신살": "부모나 윗사람과의 관계에 각별히 신경 쓰며, 효심을 통해 복을 쌓습니다",
-  "학당귀인": "배움과 학문에 뛰어난 자질이 있어 ���육·연구·전문직에서 성취합니다",
-  "복성귀인": "주변의 도움과 귀인을 자주 만나 어려운 상황에서도 길이 열립니다",
-  "천록귀인": "노력한 만큼 정당한 보상을 받는 복록이 따르는 귀인입니다",
-  "암록": "드러나지 않는 곳에서 은밀하게 도와주는 귀인이 있습니다",
-  "간여지동": "강한 자아의식�� ������������������로 자기 분야에서 전문가로 성장합니다",
-  "일덕": "덕이 있어 주변으로부터 신뢰받고, 위기에서 귀인의 도움을 받습니다",
-  "곡각살": "토의 기운이 강해 완고함이 있���나, 끈기와 지구력은 뛰어납니다",
-  "낙정관살": "예상치 못한 함정이나 고립에 주의하며, 신중한 판단이 필요합니다",
-  "금신": "날카로운 판단력과 결단력으로 위기 상황을 돌파할 수 있습니다",
-  "비인살": "고독과 고립의 기운이 있으나, 독자적인 길을 개척하는 힘이 됩니다",
-  "나체도화": "강렬한 이성적 매력이 있으나, 감정 조절과 관계 경계 설정이 중요합니다",
-  "신병살": "신체적 건강에 주의가 필요하며, 규칙적인 생활 습관이 핵심입니다",
-  "음양살": "음양의 불균형으로 변화가 많은 삶을 살지만, 유연성이 강점입니다",
-  "의처의부살": "배우자와의 신뢰 관계를 쌓는 것이 중요하며, 소통이 핵심입니다",
-  "여연살": "이성에게 자연스럽게 끌림을 주는 매력이 있어 연애운이 활발합니다",
-  "남연살": "이성에게 자연스럽게 끌림을 주는 매력이 있어 연애운이 활발합니다",
-  "육수": "여섯 가지 복이 모이는 자리로, 재물과 건강, 인연 등에서 고른 행운이 있습니다",
-  "음욕살": "감정과 욕구가 풍부하여 예술적 감수성이 뛰어나지만, 절제가 필요할 때가 있습니다",
-  "장군전": "강인한 추진력과 결단력으로 리더십을 발휘하며 큰 일을 도모할 수 있습니다",
-  "복신": "하늘이 내린 복을 받아 어려운 일에서도 귀인의 도움으로 풀려나갑니다",
-  "일귀": "일간의 귀인으로, 중요한 순간에 도움을 주는 사람이 나타납니다",
-  "교신성": "언변과 소통 능력이 뛰어나 외교·협상·교육 분야에서 두각을 나타냅니다",
-  "뇌공타뇌관": "천둥처럼 강렬한 에너지로 순간적인 판단력과 돌파력이 뛰어납니다",
-  "칠살": "충돌과 경쟁의 기운이 있어 승부욕이 강하고 경쟁적인 환경에서 두각을 나타냅니다",
-  "구추방해": "재물이나 건강에 방해가 될 수 있으니 평소 건강 관리와 재정 관리에 신경 쓰세요",
-  "음인": "음의 귀인으로, 은밀하게 도와주는 사람이 있으며 직관과 감각이 뛰어납니다",
-  "진신": "전진하는 기운으로 새로운 시작과 도전에 유리하며 적극��인 행동력이 있습니다",
-  "퇴신": "물러나는 기운으로 정리와 마무리에 능하며 신중한 판단력이 장점��니다",
-  "단장관": "외모와 치장에 관심이 ��고 미적 감각이 뛰어나 패션/뷰티 분야에서 두각을 나타냅니다",
-  "괴강": "강인하고 결단력 있는 성격으로 리더십이 뛰어나지만 고집이 셀 수 있습니다",
-  "월덕귀인": "해당 월의 덕을 받아 주변 사람들의 도움과 협조를 쉽게 얻을 수 있습니다",
-  "천덕귀인": "하늘의 덕을 받아 위기 상황에서도 귀인의 도움으로 무사히 넘길 수 있습니다",
+  "반안살": "안정과 평화를 추구하며, 내면의 균형을 잘 유지합니다",
+  // 귀인
+  "천을귀인": "위기 상황에서 귀인의 도움을 받아 무사히 넘길 수 있습니다",
+  "문창귀인": "학문, 글쓰기, 교육, 연구 등 지적 활동에서 뛰어난 성취를 이룰 수 있습니다",
+  // 기타 핵심 신살
   "양인살": "날카로운 칼의 기운으로 강한 추진력과 결단력이 있으나, 날카로운 언행에 주의가 필요합니다"
 }
 
@@ -1441,48 +1408,9 @@ export function calcAllSinsal(
   if (checkJiSal(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("지살")
   if (checkCheonSal(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("천살")
   if (checkNyeonSal(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("년살")
-  if (checkGwimunssal(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("귀문관살")
-  if (checkCheollaJimang(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("천라지망")
-  if (checkBiinSal(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("비인살")
 
-  // 일주 기준 신살
-  if (checkHyeonChimSal(dayBranch)) sinsalList.push("현침살")
-  if (checkBaekhoSal(dayStem, dayBranch)) sinsalList.push("백호살")
-  if (checkTanghwaSal(dayStem, dayBranch)) sinsalList.push("탕화살")
-  if (checkHyosinSal(dayStem, dayBranch)) sinsalList.push("효신살")
-  if (checkGokgakSal(dayBranch)) sinsalList.push("곡각살")
-  if (checkNakjeongSal(dayStem, dayBranch)) sinsalList.push("낙정관살")
-  if (checkEumyangSal(dayStem, dayBranch)) sinsalList.push("음양살")
-  if (checkGeumsin(dayStem, dayBranch)) sinsalList.push("금신")
-  if (checkGanyeoJidong(dayStem, dayBranch)) sinsalList.push("간여지동")
-  if (checkIldeok(dayStem, dayBranch)) sinsalList.push("일덕")
-  if (checkNachedohwa(dayStem, dayBranch)) sinsalList.push("나체도화")
-  if (checkSinbyeongSal(dayStem, dayBranch)) sinsalList.push("신병살")
-  if (checkUicheouibSal(dayStem, dayBranch)) sinsalList.push("의처의부살")
-  if (checkEumyokSal(dayStem, dayBranch)) sinsalList.push("음욕살")
-  if (checkIlgui(dayStem, dayBranch)) sinsalList.push("일귀")
-  if (checkGyosinseong(dayStem, dayBranch)) sinsalList.push("교신성")
-  if (checkNoegongTanoegwan(dayStem, dayBranch)) sinsalList.push("뇌공타뇌관")
-  if (checkGuchuBanghae(dayStem, dayBranch)) sinsalList.push("����추��해")
-
-  // 지지 기준 추가
-  if (checkChilSal(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("칠살")
-  if (checkJinsin(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("진신")
-  if (checkToesin(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("퇴신")
-  if (checkDanjangGwan(dayStem, dayBranch)) sinsalList.push("단장관")
-  if (checkGoegang(dayStem, dayBranch)) sinsalList.push("괴강")
-
-  // 일간 기준 신살/귀인
-  if (checkMunChangSal(dayStem, branches).length > 0) sinsalList.push("문창살")
-  if (checkHongyeomSal(dayStem, branches)) sinsalList.push("홍염살")
-  if (checkHakdangGuiin(dayStem, branches).length > 0) sinsalList.push("학당귀인")
-  if (checkBokseongGuiin(dayStem, branches)) sinsalList.push("복성귀인")
-  if (checkCheonrokGuiin(dayStem, branches)) sinsalList.push("천록귀인")
-  if (checkAmRok(dayStem, branches)) sinsalList.push("암록")
-  if (checkYuksu(dayStem, branches)) sinsalList.push("육수")
-  if (checkJanggunJeon(dayStem, branches)) sinsalList.push("장군전")
-  if (checkBoksin(dayStem, branches)) sinsalList.push("복신")
-  if (checkEumin(dayStem, branches)) sinsalList.push("음인")
+  // 핵심 신살/귀인만 유지 (12신살 + 천을귀인 + 문창귀인 + 양인살)
+  if (checkMunChangSal(dayStem, branches).length > 0) sinsalList.push("문창귀인")
   if (checkYanginSal(dayStem, branches)) sinsalList.push("양인살")
 
   return sinsalList
@@ -1502,53 +1430,17 @@ export function calcDetailedSinsal(
   const totalPillars = hourBranch ? 4 : 3
   const strongSinsals: string[] = []
   
-  // 월덕귀인, 천덕귀인 (월지+천간 기준)
-  const woldeokPos = getWoldeokPositions(monthBranch, yearStem, monthStem, dayStem, hourStem)
-  if (woldeokPos.length > 0) {
-    details.push({
-      name: "월덕귀인",
-      positions: woldeokPos,
-      count: woldeokPos.length,
-      totalPillars,
-      percentage: Math.round((woldeokPos.length / totalPillars) * 100),
-      intensity: woldeokPos.includes("월간") ? 1.5 : 1,
-      isStrong: woldeokPos.includes("월간"),
-      usageGuide: SINSAL_USAGE_GUIDE["월덕귀인"] || ""
-    })
-    if (woldeokPos.includes("월간")) strongSinsals.push("월덕귀인")
-  }
-  const cheondeokPos = getCheondeokPositions(monthBranch, yearStem, monthStem, dayStem, hourStem)
-  if (cheondeokPos.length > 0) {
-    details.push({
-      name: "천덕귀인",
-      positions: cheondeokPos,
-      count: cheondeokPos.length,
-      totalPillars,
-      percentage: Math.round((cheondeokPos.length / totalPillars) * 100),
-      intensity: cheondeokPos.includes("월간") ? 1.5 : 1,
-      isStrong: cheondeokPos.includes("월간"),
-      usageGuide: SINSAL_USAGE_GUIDE["천덕귀인"] || ""
-    })
-    if (cheondeokPos.includes("월간")) strongSinsals.push("천덕귀인")
-  }
-  
-  // 각 신살별로 상세 분석 (지지 기준)
+  // 핵심 12신살만 상세 분석 (지지 기준)
   const sinsalChecks = [
-    { name: "도화살", check: checkDohwaSal, getPositions: getDohwaSalPositions },
     { name: "역마살", check: checkYeokMaSal, getPositions: getYeokMaSalPositions },
     { name: "화개살", check: checkHwagaeSal, getPositions: getHwagaeSalPositions },
-    { name: "망신살", check: checkMangsinSal, getPositions: getMangsinSalPositions },
+    { name: "도화살", check: checkDohwaSal, getPositions: getDohwaSalPositions },
     { name: "장성살", check: checkJangseongSal, getPositions: getJangseongSalPositions },
-    { name: "겁살",   check: checkGeobSal,     getPositions: getGeobSalPositions },
+    { name: "망신살", check: checkMangsinSal, getPositions: getMangsinSalPositions },
     { name: "지살",   check: checkJiSal,       getPositions: getJiSalPositions },
-    { name: "천살",   check: checkCheonSal,    getPositions: getCheonSalPositions },
     { name: "년살",   check: checkNyeonSal,    getPositions: getNyeonSalPositions },
-    { name: "귀문관살", check: checkGwimunssal, getPositions: getGwimunPositions },
-    { name: "천라지망", check: checkCheollaJimang, getPositions: getCheollaJimangPositions },
-    { name: "비인살", check: checkBiinSal,     getPositions: getBiinPositions },
-    { name: "칠살",   check: checkChilSal,     getPositions: getChilSalPositions },
-    { name: "진신",   check: checkJinsin,      getPositions: getJinsinPositions },
-    { name: "퇴신",   check: checkToesin,      getPositions: getToesinPositions },
+    { name: "겁살",   check: checkGeobSal,     getPositions: getGeobSalPositions },
+    { name: "천살",   check: checkCheonSal,    getPositions: getCheonSalPositions },
   ]
   
   for (const { name, check, getPositions } of sinsalChecks) {
@@ -1579,69 +1471,10 @@ export function calcDetailedSinsal(
     }
   }
   
-  // 일주 기준 신살 (dayStem + dayBranch 조합)
-  const iljooBased: Array<{ name: string; check: boolean; positions: string[] }> = [
-    { name: "현침살",    check: checkHyeonChimSal(dayBranch),             positions: ["일지"] },
-    { name: "백호살",    check: checkBaekhoSal(dayStem, dayBranch),       positions: ["일주"] },
-    { name: "탕화살",    check: checkTanghwaSal(dayStem, dayBranch),      positions: ["일주"] },
-    { name: "효신살",    check: checkHyosinSal(dayStem, dayBranch),       positions: ["일주"] },
-    { name: "곡각살",    check: checkGokgakSal(dayBranch),                positions: ["일지"] },
-    { name: "낙정관살",  check: checkNakjeongSal(dayStem, dayBranch),     positions: ["일주"] },
-    { name: "금신",      check: checkGeumsin(dayStem, dayBranch),         positions: ["일주"] },
-    { name: "간여지동",  check: checkGanyeoJidong(dayStem, dayBranch),    positions: ["일주"] },
-    { name: "일덕",      check: checkIldeok(dayStem, dayBranch),          positions: ["일주"] },
-    { name: "나체도화",  check: checkNachedohwa(dayStem, dayBranch),      positions: ["일주"] },
-    { name: "신병살",    check: checkSinbyeongSal(dayStem, dayBranch),    positions: ["일주"] },
-    { name: "음양살",    check: checkEumyangSal(dayStem, dayBranch),      positions: ["일주"] },
-    { name: "의처의부살",check: checkUicheouibSal(dayStem, dayBranch),    positions: ["일주"] },
-    { name: "음욕살",    check: checkEumyokSal(dayStem, dayBranch),       positions: ["일주"] },
-    { name: "일귀",      check: checkIlgui(dayStem, dayBranch),           positions: ["일주"] },
-    { name: "교신성",    check: checkGyosinseong(dayStem, dayBranch),     positions: ["일주"] },
-    { name: "뇌공타뇌관",check: checkNoegongTanoegwan(dayStem, dayBranch),positions: ["일주"] },
-    { name: "구추방해",  check: checkGuchuBanghae(dayStem, dayBranch),    positions: ["일주"] },
-    { name: "단장관",    check: checkDanjangGwan(dayStem, dayBranch),     positions: ["일주"] },
-    { name: "괴강",      check: checkGoegang(dayStem, dayBranch),         positions: ["일주"] },
-  ]
-
-  for (const { name, check, positions } of iljooBased) {
-    if (check) {
-      const hasStrongPosition = positions.includes("일지") || positions.includes("일주")
-      details.push({
-        name,
-        positions,
-        count: 1,
-        totalPillars,
-        percentage: Math.round((1 / totalPillars) * 100),
-        intensity: hasStrongPosition ? 1.5 : 1,
-        isStrong: hasStrongPosition,
-        usageGuide: SINSAL_USAGE_GUIDE[name] || ""
-      })
-      if (hasStrongPosition) strongSinsals.push(name)
-    }
-  }
-
-  // 일간 기준 귀인/신살
+  // 일간 기준 핵심 귀인/신살만 유지
   const dayStemBased: Array<{ name: string; positions: string[] }> = []
   const munchangPos = getMunChangSalPositions(dayStem, yearBranch, monthBranch, dayBranch, hourBranch)
-  if (munchangPos.length > 0) dayStemBased.push({ name: "문창살", positions: munchangPos })
-  const hongyeomPos = getHongyeomSalPositions(dayStem, yearBranch, monthBranch, dayBranch, hourBranch)
-  if (hongyeomPos.length > 0) dayStemBased.push({ name: "홍염살", positions: hongyeomPos })
-  const hakdangPos = getHakdangPositions(dayStem, yearBranch, monthBranch, dayBranch, hourBranch)
-  if (hakdangPos.length > 0) dayStemBased.push({ name: "학당귀인", positions: hakdangPos })
-  const bokseongPos = getBokseongPositions(dayStem, yearBranch, monthBranch, dayBranch, hourBranch)
-  if (bokseongPos.length > 0) dayStemBased.push({ name: "복성귀인", positions: bokseongPos })
-  const cheonrokPos = getCheonrokPositions(dayStem, yearBranch, monthBranch, dayBranch, hourBranch)
-  if (cheonrokPos.length > 0) dayStemBased.push({ name: "천록귀인", positions: cheonrokPos })
-  const amrokPos = getAmRokPositions(dayStem, yearBranch, monthBranch, dayBranch, hourBranch)
-  if (amrokPos.length > 0) dayStemBased.push({ name: "암록", positions: amrokPos })
-  const yuksuPos = getYuksuPositions(dayStem, yearBranch, monthBranch, dayBranch, hourBranch)
-  if (yuksuPos.length > 0) dayStemBased.push({ name: "육수", positions: yuksuPos })
-  const janggunPos = getJanggunPositions(dayStem, yearBranch, monthBranch, dayBranch, hourBranch)
-  if (janggunPos.length > 0) dayStemBased.push({ name: "장군전", positions: janggunPos })
-  const boksinPos = getBoksinPositions(dayStem, yearBranch, monthBranch, dayBranch, hourBranch)
-  if (boksinPos.length > 0) dayStemBased.push({ name: "복신", positions: boksinPos })
-  const euminPos = getEuminPositions(dayStem, yearBranch, monthBranch, dayBranch, hourBranch)
-  if (euminPos.length > 0) dayStemBased.push({ name: "음인", positions: euminPos })
+  if (munchangPos.length > 0) dayStemBased.push({ name: "문창귀인", positions: munchangPos })
   const yanginPos = getYanginPositions(dayStem, yearBranch, monthBranch, dayBranch, hourBranch)
   if (yanginPos.length > 0) dayStemBased.push({ name: "양인살", positions: yanginPos })
 
@@ -1689,24 +1522,16 @@ export function calcDetailedSinsal(
       return detail ? `${name}의 에너지가 강합니다` : ""
     }).filter(Boolean)
     
-    if (strongSinsals.includes("현침살") && strongSinsals.includes("역마살")) {
-      combinedGuide = "현침살과 역마살이 강하니, 전문적인 지식이나 기술을 가지고 널리 움직이��� 활동하는 것이 신살 에너지를 가장 잘 활용하는 방법입니다."
-    } else if (strongSinsals.includes("문창살") && strongSinsals.includes("화개살")) {
-      combinedGuide = "문창살과 화개살이 강하니, 학문과 예술을 결합한 창의적 연구나 교육 분야에서 큰 성취를 이룰 수 있습니다."
+    if (strongSinsals.includes("문창귀인") && strongSinsals.includes("화개살")) {
+      combinedGuide = "문창귀인과 화개살이 강하니, 학문과 예술을 결합한 창의적 연구나 교육 분야에서 큰 성취를 이룰 수 있습니다."
     } else if (strongSinsals.includes("도화살") && strongSinsals.includes("역마살")) {
       combinedGuide = "도화살과 역마살이 강하니, 대인관계와 이동이 많은 환경(해외영업, 연예, 무역)에서 매력이 극대화됩니다."
-    } else if (strongSinsals.includes("학당귀인") && strongSinsals.includes("문창살")) {
-      combinedGuide = "학당귀인�� 문창살이 강하니, 전문 학문이나 자격증 취득 후 교육·컨설팅 분야에서 탁월한 성취를 이룰 수 있습니다."
-    } else if (strongSinsals.includes("귀문관살") && strongSinsals.includes("화개살")) {
-      combinedGuide = "귀문관살과 화개��이 강하니, 심리상담·철학·예술·영적 치유 분야에서 독보적인 능력을 발휘할 수 있습니다."
     } else if (strongSinsals.includes("겁살") && strongSinsals.includes("장성살")) {
       combinedGuide = "겁살과 장성살이 강하니, 강한 추진력과 리더십으로 경쟁적인 환경에서 두각을 나타낼 수 있습니다."
-    } else if (strongSinsals.includes("홍염살") && strongSinsals.includes("도화살")) {
-      combinedGuide = "홍염살과 도화살이 강하니, 강렬한 매력과 대인 친화력으로 연예·예술·뷰티 분야에서 빛을 발합니다."
-    } else if (strongSinsals.includes("백호살") && strongSinsals.includes("역마살")) {
-      combinedGuide = "백호살과 역마살��� 강하니, 강렬한 에너지와 이동력으로 군경·소방·응급의료 등 현장직에서 능력이 발휘됩니다."
+    } else if (strongSinsals.includes("양인살") && strongSinsals.includes("역마살")) {
+      combinedGuide = "양인살과 역마살이 강하니, 강한 결단력과 이동력으로 도전적인 환경에서 두각을 나타낼 수 있습니다."
     } else {
-      combinedGuide = strongSinsals.map(name => SINSAL_USAGE_GUIDE[name]).join(" 또한, ")
+      combinedGuide = strongSinsals.map(name => SINSAL_USAGE_GUIDE[name]).filter(Boolean).join(" 또한, ")
     }
   } else if (details.length > 0) {
     combinedGuide = "신살의 에너지가 고르게 분포되어 있어 다양한 분야에서 균형 잡힌 발전이 가능합니다."

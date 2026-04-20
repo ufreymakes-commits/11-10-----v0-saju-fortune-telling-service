@@ -909,10 +909,10 @@ export function calculateTenGods(fourPillars: FourPillars): {
   details.push({ position: "월지", stem: monthBranchMainStem, tenGod: monthBranchTenGod });
   presentSet.add(monthBranchTenGod);
 
-  // 일간 십신 (자기 자신 = 비견)
-  const dayStemTenGod = "비견";
+  // 일간 십신 (자기 자신 = 일간으로 표기)
+  const dayStemTenGod = "일간";
   details.push({ position: "일간", stem: dayStem, tenGod: dayStemTenGod });
-  presentSet.add(dayStemTenGod);
+  // 일간은 presentSet에 추가하지 않음 (비견/겁재와 별도 취급)
 
   // 일지 십신 (본기 기준)
   const dayBranchMainStem = BRANCH_MAIN_STEM[fourPillars.day.branch];

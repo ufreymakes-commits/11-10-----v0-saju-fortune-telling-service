@@ -496,7 +496,7 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
     연지: "${submission.sajuData.tenGods?.byPosition?.yearBranch || '-'}",
     월간: "${submission.sajuData.tenGods?.byPosition?.monthStem || '-'}",
     월지: "${submission.sajuData.tenGods?.byPosition?.monthBranch || '-'}",
-    일간: "${submission.sajuData.tenGods?.byPosition?.dayStem || '비견'}",
+    일간: "${submission.sajuData.tenGods?.byPosition?.dayStem || '일간'}",
     일지: "${submission.sajuData.tenGods?.byPosition?.dayBranch || '-'}",
     시간: "${submission.sajuData.tenGods?.byPosition?.hourStem || '-'}",
     시지: "${submission.sajuData.tenGods?.byPosition?.hourBranch || '-'}"
@@ -569,8 +569,8 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
   // 격국
   gyeokguk: "${submission.sajuData.gyeokguk || '미계산'}",
 
-  // 대운 (10개)
-  daewoon: [${submission.sajuData.daewoon?.slice(0, 5).map(d => `"${d.startAge}-${d.endAge}세: ${d.stem}${d.branch}(${d.tenGod || '-'})"`).join(', ') || ''}...],
+  // 대운 (8개)
+  daewoon: [${submission.sajuData.daewoon?.map(d => `"${d.startAge}-${d.endAge}세: ${d.stem}${d.branch}(${d.tenGod || '-'})"`).join(', ') || ''}],
 
   // 2026년 연운
   yeonwoon2026: "${submission.sajuData.yeonwoon?.find(y => y.year === 2026)?.fullName || '미계산'}"
