@@ -1590,7 +1590,7 @@ FYI
       // 오행 개수 (2가지)
       elementCountBasic: saju_data.elementCountBasic || {}, // 지장간 미포함 - 천간/지지만
       elementCountWithHidden: saju_data.elementCount || {}, // 지장간 포함 - 잠재적 욕구
-      
+
       // 오행 점수 (수치론 120점 - 월령 중심 - 가장 정확)
       elementScore: saju_data.elementBalanceKorean || {},
       dominantElement: saju_data.dominantElement || '',
@@ -1750,9 +1750,35 @@ What they will be doing in the future(very specific),
 
       Conclusion(2 sentences): Advice for improving fortune and future direction. (But don't spoil the exact luck element yet as it will appear on another premium report ) Identify a specific theme that might be causing them inner struggle. Offer two sentences of realistic yet touching comfort. If they are someone better suited for living abroad rather than their home country, provide encouragement for that path. Alternatively, if they have a painful past, offer sincere consolation.
 
+=========================================
+[EXECUTION PROTOCOL: HOW TO WRITE THE 9 FACTS]
+=========================================
+Do not write generic horoscopes. If your sentence can apply to a random person on the street, DELETE IT and rewrite it based STRICTLY on the provided `allSajuData`. 
+
+STEP 1: FILL THE INTERNAL SCRATCHPAD FIRST
+Before writing the 9 facts, you must analyze the chart in the `"internal_analysis_scratchpad"` JSON field. 
+1. Identify the Day Master (Essence) vs. Month Branch (Stage).
+2. Identify the Dominant Element / Ten God (What they have too much of).
+3. Identify the Missing Element / Ten God (What drives their subconscious thirst).
+4. Apply Career Rule Step 1 to 8: Define specific, real-world jobs (e.g., If strong Metal + Jeonggwan -> Law enforcement, Tax accountant, Military. NEVER say "marketing" unless Wood/Fire + Sanggwan is dominant).
+
+STEP 2: DRAFT THE 9 CHILLINGLY ACCURATE FACTS
+Translate the scratchpad analysis into 9 Gen-Z, emotionally resonant, yet hyper-specific English sentences. 
+
+- Rule 1 (The Anchor): Every single fact must be secretly anchored to a specific data point (e.g., a specific clash, a missing element, a Daewoon shift). 
+- Rule 2 (No Cliches): BANNED CONCEPTS -> Do not use vague phrases like "You are a creative soul," "You doubt yourself," or "First love in late teens" unless mathematically proven by the chart. 
+- Rule 3 (Factual Brutality wrapped in Warmth): If their chart says they are rigid, stubborn, and built for bureaucracy (Strong Earth + Jeong-gwan), tell them they are a highly respected systemic anchor, maybe working in civil service or auditing. DO NOT force them to be an independent freelancer. Tell them the truth of their chart.
+
+ANNED TROPES: Do not use Barnum Effect statements. ABSOLUTELY DO NOT say "You are creative," "You overthink,(like thinking am i enough?)" or "You should do marketing/freelancing" UNLESS specifically triggered by specific saju data he or she has. Trust the Saju data, not general astrology stereotypes.
+
 OUTPUT FORMAT(ONLY JSON):
-\`\`\`json
 {
+"internal_analysis_scratchpad": {
+    "core_energy": "일간 OOO와 월지 OOO의 관계 분석",
+    "dominant_element_effect": "가장 강한 오행(XX)이 직업/성격에 미치는 팩트",
+    "missing_element_effect": "없는 오행(XX)이 유발하는 내면의 결핍/갈등",
+    "career_logic": "STEP 1~8 규칙에 따른 정확한 직업군 도출 (예: 금/관성 과다 -> 경찰, 군인, 감사관)"
+  },
   "facts": [
     {"id": 1, "title": "[Title 1]", "content": "[2-3 sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
     {"id": 2, "title": "[Title 2]", "content": "[2-3 sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
