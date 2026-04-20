@@ -466,14 +466,14 @@ const CHEONUL_MAP: Record<string, string[]> = {
   "임": ["사", "묘"], "계": ["사", "묘"], "신": ["인", "오"]
 }
 
-// 태극귀인: 일간 기준 - 정통 명리학 기준
-// 목(갑을) → 자오, 화(병정) → 묘유, 토(무기) → 진술축미, 금(경신) → 진술축미, 수(임계) → 인신
+// 태극귀인: 각 주의 천간 기준으로 해당 주의 지지 확인
+// 목(갑을) → 자오, 화(병정) → 묘유, 토(무기) → 진술축미, 금(경신) → 인해, 수(임계) → 사신
 const TAEGEUK_MAP: Record<string, string[]> = {
   "갑": ["자", "오"], "을": ["자", "오"],
   "병": ["묘", "유"], "정": ["묘", "유"],
   "무": ["진", "술", "축", "미"], "기": ["진", "술", "축", "미"],
-  "경": ["진", "술", "축", "미"], "신": ["진", "술", "축", "미"],
-  "임": ["인", "신"], "계": ["인", "신"]
+  "경": ["인", "해"], "신": ["인", "해"],
+  "임": ["사", "신"], "계": ["사", "신"]
 }
 
 export function calcGilseong(
@@ -499,14 +499,24 @@ export function calcGilseong(
     cheonul.push("시주")
   }
   
-  // 태극귀인 (월주 또는 일주에만 나타남 - 일간 기준)
-  const taegeukTargets = TAEGEUK_MAP[dayStem] || []
+  // 태극귀인: 각 주의 천간 기준으로 해당 주의 지지 확인
+  // 연주: yearStem + yearBranch, 월주: monthStem + monthBranch, 등
+  const yearTaegeuk = TAEGEUK_MAP[yearStem] || []
+  const monthTaegeuk = TAEGEUK_MAP[monthStem] || []
+  const dayTaegeuk = TAEGEUK_MAP[dayStem] || []
+  const hourTaegeuk = hourStem ? (TAEGEUK_MAP[hourStem] || []) : []
   
-  if (monthBranch && taegeukTargets.includes(monthBranch)) {
+  if (yearBranch && yearTaegeuk.includes(yearBranch)) {
+    taegeuk.push("연주")
+  }
+  if (monthBranch && monthTaegeuk.includes(monthBranch)) {
     taegeuk.push("월주")
   }
-  if (dayBranch && taegeukTargets.includes(dayBranch)) {
+  if (dayBranch && dayTaegeuk.includes(dayBranch)) {
     taegeuk.push("일주")
+  }
+  if (hourBranch && hourTaegeuk.includes(hourBranch)) {
+    taegeuk.push("시주")
   }
   
   return { cheonul, taegeuk }
@@ -1443,9 +1453,13 @@ export function calcAllSinsal(
   const stems = [yearStem, monthStem, dayStem, hourStem].filter(Boolean) as string[]
   if (checkHyeonChimSal(stems, branches)) sinsalList.push("현침살")
   
-  // 태극귀인: 일간 기준 (getGuiinPositions에서 이미 계산)
-  const taegeukTargets = TAEGEUK_MAP[dayStem] || []
-  if (branches.some(b => taegeukTargets.includes(b))) sinsalList.push("태극귀인")
+  // 태극귀인: 각 주의 천간 기준으로 해당 주의 지지 확인
+  const hasTaegeuk = 
+    (TAEGEUK_MAP[yearStem]?.includes(yearBranch)) ||
+    (TAEGEUK_MAP[monthStem]?.includes(monthBranch)) ||
+    (TAEGEUK_MAP[dayStem]?.includes(dayBranch)) ||
+    (hourStem && hourBranch && TAEGEUK_MAP[hourStem]?.includes(hourBranch))
+  if (hasTaegeuk) sinsalList.push("태극귀인")
 
   return sinsalList
 }
@@ -1516,13 +1530,12 @@ export function calcDetailedSinsal(
   const hyeonchimPos = getHyeonChimSalPositions(yearStem, monthStem, dayStem, hourStem, yearBranch, monthBranch, dayBranch, hourBranch)
   if (hyeonchimPos.length > 0) dayStemBased.push({ name: "현침살", positions: hyeonchimPos })
   
-  // 태극귀인: 일간 기준
+  // 태극귀인: 각 주의 천간 기준으로 해당 주의 지지 확인
   const taegeukPos: string[] = []
-  const taegeukTargets = TAEGEUK_MAP[dayStem] || []
-  if (taegeukTargets.includes(yearBranch)) taegeukPos.push("연지")
-  if (taegeukTargets.includes(monthBranch)) taegeukPos.push("월지")
-  if (taegeukTargets.includes(dayBranch)) taegeukPos.push("일지")
-  if (hourBranch && taegeukTargets.includes(hourBranch)) taegeukPos.push("시지")
+  if (TAEGEUK_MAP[yearStem]?.includes(yearBranch)) taegeukPos.push("연주")
+  if (TAEGEUK_MAP[monthStem]?.includes(monthBranch)) taegeukPos.push("월주")
+  if (TAEGEUK_MAP[dayStem]?.includes(dayBranch)) taegeukPos.push("일주")
+  if (hourStem && hourBranch && TAEGEUK_MAP[hourStem]?.includes(hourBranch)) taegeukPos.push("시주")
   if (taegeukPos.length > 0) dayStemBased.push({ name: "태극귀인", positions: taegeukPos })
 
   for (const { name, positions } of dayStemBased) {
