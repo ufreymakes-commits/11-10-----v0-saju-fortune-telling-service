@@ -1794,7 +1794,8 @@ OUTPUT FORMAT(ONLY JSON):
 \`\`\`
 
 ADVANCED CUSTOMER SAJU DATA:
-${JSON.stringify(allSajuData, null, 2)}`
+${JSON.stringify(allSajuData, null, 2)}
+`
 
     console.log('[v0] Gemini: Calling Gemini 1.5 Pro with System/User separation')
 
