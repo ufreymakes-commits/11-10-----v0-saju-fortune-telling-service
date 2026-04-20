@@ -1700,7 +1700,7 @@ FYI
 
     const userPrompt = `Now, generate a total of 9 chillingly insightful sentences for him or her — the kind of sentences someone would want to share with a friend because they're just that on point.Sentences that make them truly feel like, 'Wow, this is tailored to my personal Saju chart, rather than being a generic one for everyone. This captures every detail of my Saju all at once.
 
-Before writing the 9 sentences, silently read and internalize the full Advanced Saju Data field({{ 11.\`22\` }}). Treat every value — 12운성, 공망, 형, 원진, 천간합, 삼합, 길성, 조후용신, 신강신약 percentage — as background intelligence that shapes how you see this person's life. You do not need to mention any of these terms. You do not need to explain them. Just let them inform the specificity of what you write, the way a doctor reads lab results before speaking to a patient — the results never appear in the conversation, but they make every observation more precise. The 9 sentences should feel like they could only have been written for this exact chart, not because they reference Saju structure, but because they describe a life too accurately to be generic.
+Before writing the 9 sentences, silently read and internalize the full Advanced Saju Data field. Treat every value — 12운성, 공망, 형, 원진, 천간합, 삼합, 길성, 조후용신, 신강신약 percentage — as background intelligence that shapes how you see this person's life. You do not need to mention any of these terms. You do not need to explain them. Just let them inform the specificity of what you write, the way a doctor reads lab results before speaking to a patient — the results never appear in the conversation, but they make every observation more precise. The 9 sentences should feel like they could only have been written for this exact chart, not because they reference Saju structure, but because they describe a life too accurately to be generic.
 
 Each sentence must feel realistic, specific, and emotionally resonant, as if it could have truly happened in their life.Make each line count.
 
@@ -1736,7 +1736,7 @@ What they will be doing in the future(very specific),
 
 🚫 Only use English.Do not include Korean, Chinese, or any other languages.
 
-🧠 Sentences must be detailed, clear, and insightful; avoid being overly short or vague.Writing just two clear compact sentences for every nine is sufficient.Please provide each numbered point with an average of 50 characters.
+🧠 Sentences must be detailed, clear, and insightful; avoid being overly short or vague. Writing just two clear compact sentences for every nine is sufficient.Please provide each numbered point with an average of 50 characters.
 
 💥 Make each sentence emotionally piercing or deeply accurate, as if you truly know them.
 
@@ -1769,7 +1769,7 @@ Translate the scratchpad analysis into 9 Gen-Z, emotionally resonant, yet hyper-
 - Rule 2 (No Cliches): BANNED CONCEPTS -> Do not use vague phrases like "You are a creative soul," "You doubt yourself," or "First love in late teens" unless mathematically proven by the chart. 
 - Rule 3 (Factual Brutality wrapped in Warmth): If their chart says they are rigid, stubborn, and built for bureaucracy (Strong Earth + Jeong-gwan), tell them they are a highly respected systemic anchor, maybe working in civil service or auditing. DO NOT force them to be an independent freelancer. Tell them the truth of their chart.
 
-ANNED TROPES: Do not use Barnum Effect statements. ABSOLUTELY DO NOT say "You are creative," "You overthink,(like thinking am i enough?)" or "You should do marketing/freelancing" UNLESS specifically triggered by specific saju data he or she has. Trust the Saju data, not general astrology stereotypes.
+BANNED TROPES: Do not use Barnum Effect statements. ABSOLUTELY DO NOT say "You are creative," "You overthink,(like thinking am i enough?)" or "You should do marketing/freelancing" UNLESS specifically triggered by specific saju data he or she has. Trust the Saju data, not general astrology stereotypes.
 
 OUTPUT FORMAT(ONLY JSON):
 {
