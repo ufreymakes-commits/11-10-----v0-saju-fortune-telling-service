@@ -88,6 +88,15 @@ export function ReportContent({ submission }: ReportContentProps) {
   }
   
   const sajuData = submission.saju_data as SajuData
+  
+  // DEBUG: 실제 데이터 확인
+  console.log("[v0] sajuData.dayPillar:", sajuData.dayPillar)
+  console.log("[v0] sajuData.daewoon:", sajuData.daewoon)
+  console.log("[v0] sajuData.daewoon type:", typeof sajuData.daewoon, Array.isArray(sajuData.daewoon) ? "array" : "not array")
+  if (sajuData.daewoon?.[0]) {
+    console.log("[v0] daewoon[0] type:", typeof sajuData.daewoon[0], sajuData.daewoon[0])
+  }
+  
   // stem can be Korean (갑) or Hanja (甲) depending on how it was stored
   const rawStem = sajuData.dayPillar?.stem || '갑'
   // Normalize to Korean
@@ -95,7 +104,28 @@ export function ReportContent({ submission }: ReportContentProps) {
   const dayMasterHanja = KOREAN_TO_HANJA_STEM[dayMasterKorean] || rawStem
   const character = getDayMasterCharacter(dayMasterKorean)
   const quote = DAY_MASTER_QUOTE[dayMasterKorean] || ''
-  const daewoon = sajuData.daewoon || []
+  
+  console.log("[v0] rawStem:", rawStem, "dayMasterKorean:", dayMasterKorean, "character:", character)
+  
+  // Handle both string array (old format) and object array (new format) for daewoon
+  const rawDaewoon = sajuData.daewoon || []
+  const daewoon = rawDaewoon.map((d: any) => {
+    if (typeof d === 'string') {
+      // Parse string format: "6-16세: 정묘(편인)" or "6세~16세: 丁卯"
+      const match = d.match(/(\d+)[세\-~]+(\d+)세?[:\s]+(.+)/)
+      if (match) {
+        return {
+          startAge: parseInt(match[1]),
+          endAge: parseInt(match[2]),
+          stem: '',
+          branch: '',
+          fullName: match[3]
+        }
+      }
+      return { startAge: 0, endAge: 0, stem: '', branch: '', fullName: d }
+    }
+    return d
+  })
 
   const generateSection = useCallback(async (sectionIndex: number) => {
     const section = SECTION_CONFIG[sectionIndex]
@@ -254,21 +284,16 @@ export function ReportContent({ submission }: ReportContentProps) {
         <div className="bg-card border border-border rounded-xl p-4 mb-6 shadow-lg shadow-primary/5">
           <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-3 text-center">Major Fortune Periods (대운)</h2>
           <div className="flex flex-col gap-1.5">
-            {daewoon
-              .filter(d => d.startAge < 100)
-              .map((d, i) => (
-                <div key={i} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-background/50">
-                  <span className="text-[10px] text-muted-foreground w-20 flex-shrink-0">
-                    {Math.round(d.startAge)}세 ~ {Math.min(Math.round(d.endAge), 100)}세
-                  </span>
-                  <span className="text-sm font-bold text-foreground tracking-wider">
-                    {d.fullName || `${d.stem}${d.branch}`}
-                  </span>
-                  <span className="text-[10px] text-muted-foreground ml-auto">
-                    {d.stem}{d.branch}
-                  </span>
-                </div>
-              ))}
+            {daewoon.map((d, i) => (
+              <div key={i} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-background/50">
+                <span className="text-[10px] text-muted-foreground w-20 flex-shrink-0">
+                  {d.startAge}세 ~ {d.endAge}세
+                </span>
+                <span className="text-sm font-bold text-foreground tracking-wider">
+                  {d.fullName}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       )}
