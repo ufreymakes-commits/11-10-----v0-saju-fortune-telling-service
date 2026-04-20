@@ -415,7 +415,7 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
           <div className="border-t border-green-500/20 pt-2 mt-2">
             <span className="text-yellow-400">대운:</span>
             <div className="ml-2">
-              {submission.sajuData.daewoon?.slice(0, 5).map((d, i) => (
+              {submission.sajuData.daewoon?.map((d, i) => (
                 <div key={i}>{d.startAge}세~{d.endAge}세: {d.fullName || `${d.stem}${d.branch}`}</div>
               )) || <span className="text-red-400">미계산</span>}
             </div>
