@@ -29,7 +29,13 @@ const SECTION_CONFIG = [
   { key: 'future', title: 'Future & Destiny', description: 'What the cosmos has written for your journey ahead', icon: <CompassIcon className="w-4 h-4" /> }
 ]
 
-// Hanja stem → Korean stem mapping
+// Korean stem → Hanja stem mapping (for display)
+const KOREAN_TO_HANJA_STEM: Record<string, string> = {
+  '갑': '甲', '을': '乙', '병': '丙', '정': '丁', '무': '戊',
+  '기': '己', '경': '庚', '신': '辛', '임': '壬', '계': '癸',
+}
+
+// Hanja stem → Korean stem mapping (fallback if DB stores hanja)
 const HANJA_TO_KOREAN_STEM: Record<string, string> = {
   '甲': '갑', '乙': '을', '丙': '병', '丁': '정', '戊': '무',
   '己': '기', '庚': '경', '辛': '신', '壬': '임', '癸': '계',
@@ -82,8 +88,11 @@ export function ReportContent({ submission }: ReportContentProps) {
   }
   
   const sajuData = submission.saju_data as SajuData
-  const dayMasterHanja = sajuData.dayPillar?.stem || '甲'
-  const dayMasterKorean = HANJA_TO_KOREAN_STEM[dayMasterHanja] || '갑'
+  // stem can be Korean (갑) or Hanja (甲) depending on how it was stored
+  const rawStem = sajuData.dayPillar?.stem || '갑'
+  // Normalize to Korean
+  const dayMasterKorean = HANJA_TO_KOREAN_STEM[rawStem] || rawStem // If already Korean, use as-is
+  const dayMasterHanja = KOREAN_TO_HANJA_STEM[dayMasterKorean] || rawStem
   const character = getDayMasterCharacter(dayMasterKorean)
   const quote = DAY_MASTER_QUOTE[dayMasterKorean] || ''
   const daewoon = sajuData.daewoon || []
@@ -219,7 +228,7 @@ export function ReportContent({ submission }: ReportContentProps) {
               </div>
               {/* Name */}
               <p className={`text-lg font-bold mb-0.5 ${character.color}`}>
-                {character.stemHanja} {dayMasterKorean}{character.element}
+                {dayMasterHanja} {dayMasterKorean}{character.element}
               </p>
               {/* Theme Title */}
               <p className="text-sm font-semibold text-foreground/90 mb-1">{character.themeTitle}</p>

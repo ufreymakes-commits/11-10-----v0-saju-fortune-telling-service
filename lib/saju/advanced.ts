@@ -1037,7 +1037,7 @@ function checkGokgakSal(dayBranch: string): boolean {
 
 // 낙정관살: 일지 기준
 function checkNakjeongSal(dayStem: string, dayBranch: string): boolean {
-  const nakjeongList = ["갑자","을해","병자","정해","무��","기해","경자","신해","임자","계���"]
+  const nakjeongList = ["갑자","을해","병자","정���","무��","기해","경자","신해","임자","계���"]
   return nakjeongList.includes(dayStem + dayBranch)
 }
 
@@ -1698,7 +1698,7 @@ export function calcDetailedSinsal(
     } else if (strongSinsals.includes("학당귀인") && strongSinsals.includes("문창살")) {
       combinedGuide = "학당귀인�� 문창살이 강하니, 전문 학문이나 자격증 취득 후 교육·컨설팅 분야에서 탁월한 성취를 이룰 수 있습니다."
     } else if (strongSinsals.includes("귀문관살") && strongSinsals.includes("화개살")) {
-      combinedGuide = "귀문관살과 화개살이 강하니, 심리상담·철학·예술·영적 치유 분야에서 독보적인 능력을 발휘할 수 있습니다."
+      combinedGuide = "귀문관살과 화개��이 강하니, 심리상담·철학·예술·영적 치유 분야에서 독보적인 능력을 발휘할 수 있습니다."
     } else if (strongSinsals.includes("겁살") && strongSinsals.includes("장성살")) {
       combinedGuide = "겁살과 장성살이 강하니, 강한 추진력과 리더십으로 경쟁적인 환경에서 두각을 나타낼 수 있습니다."
     } else if (strongSinsals.includes("홍염살") && strongSinsals.includes("도화살")) {
@@ -1887,7 +1887,7 @@ export function calcDaeyun(
 
   let startAge = Math.round(diffHours / 72)
   if (startAge === 0) startAge = 1   // 최소 1세 보장
-  if (startAge > 9) startAge = startAge % 10 || 1  // 10세 이상이면 비정상 — 1자리수로 클램핑
+  // startAge는 0~9 범위가 일반적이지만, 절기 간격에 따라 다양할 수 있음
 
   // 60간지 계산을 인덱스 기반으로 (천간 10개 x 지지 12개가 최소공배수 60에서 만남)
   // 갑자(0) → 을축(1) → 병���(2) → ... → 계해(59)
@@ -1913,11 +1913,9 @@ export function calcDaeyun(
   const dir = isForward ? 1 : -1
   let currentAge = startAge
 
-  // 100세까지 커버 (대운 1개 = 10년, 최대 12개 생성하여 100세 이상까지)
-  const maxDaewoon = 12  // 12개 x 10년 = 120세까지 커버
+  // 8개 대운 생성 (사용자 로직: for i = 0; i < 8)
+  const maxDaewoon = 8
   for (let i = 0; i < maxDaewoon; i++) {
-    // 이미 100세 이상 시작이면 중단
-    if (currentAge >= 100) break
     
     const idx = ((monthPillarIndex + dir * (i + 1)) % 60 + 60) % 60
     const stem = stems[idx % 10]
