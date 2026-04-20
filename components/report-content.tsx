@@ -7,6 +7,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { Progress } from '@/components/ui/progress'
 import type { Submission, Fact, SajuData } from '@/lib/types'
 import { CheckCircleIcon, SparklesIcon, BriefcaseIcon, HeartIcon, CompassIcon, LinkIcon, CheckIcon } from 'lucide-react'
+import { getDayMasterCharacter } from '@/lib/day-master-characters'
 
 interface ReportContentProps {
   submission: Submission
@@ -28,18 +29,24 @@ const SECTION_CONFIG = [
   { key: 'future', title: 'Future & Destiny', description: 'What the cosmos has written for your journey ahead', icon: <CompassIcon className="w-4 h-4" /> }
 ]
 
-// Day Master (일간) emoji mapping
-const DAY_MASTER_INFO: Record<string, { korean: string, emoji: string, element: string }> = {
-  '甲': { korean: '갑목', emoji: '🌲', element: 'Wood' },
-  '乙': { korean: '을목', emoji: '🌿', element: 'Wood' },
-  '丙': { korean: '병화', emoji: '☀️', element: 'Fire' },
-  '丁': { korean: '정화', emoji: '🕯️', element: 'Fire' },
-  '戊': { korean: '무토', emoji: '⛰️', element: 'Earth' },
-  '己': { korean: '기토', emoji: '🌾', element: 'Earth' },
-  '庚': { korean: '경금', emoji: '⚔️', element: 'Metal' },
-  '辛': { korean: '신금', emoji: '💎', element: 'Metal' },
-  '壬': { korean: '임수', emoji: '🌊', element: 'Water' },
-  '癸': { korean: '계수', emoji: '💧', element: 'Water' },
+// Hanja stem → Korean stem mapping
+const HANJA_TO_KOREAN_STEM: Record<string, string> = {
+  '甲': '갑', '乙': '을', '丙': '병', '丁': '정', '戊': '무',
+  '己': '기', '庚': '경', '辛': '신', '壬': '임', '癸': '계',
+}
+
+// Day master one-liner quotes
+const DAY_MASTER_QUOTE: Record<string, string> = {
+  '갑': 'Just goes for it. The path? I\'ll make one.',
+  '을': 'Plant me anywhere. I\'ll bloom.',
+  '병': 'The vibe shifts the moment I walk in.',
+  '정': 'You\'ll open up before you even realize it.',
+  '무': 'Lean on me. I\'m not going anywhere.',
+  '기': 'Somehow everything just gets taken care of.',
+  '경': 'Blunt? Sure. But also always right.',
+  '신': 'It\'s not overthinking. It\'s called having standards.',
+  '임': 'Goes wherever life takes them. And it\'s always interesting.',
+  '계': 'Already knew how you felt before you said a word.',
 }
 
 // Stem pronunciations
@@ -75,8 +82,11 @@ export function ReportContent({ submission }: ReportContentProps) {
   }
   
   const sajuData = submission.saju_data as SajuData
-  const dayMasterChar = sajuData.dayPillar?.stem || '甲'
-  const dayMasterInfo = DAY_MASTER_INFO[dayMasterChar] || DAY_MASTER_INFO['甲']
+  const dayMasterHanja = sajuData.dayPillar?.stem || '甲'
+  const dayMasterKorean = HANJA_TO_KOREAN_STEM[dayMasterHanja] || '갑'
+  const character = getDayMasterCharacter(dayMasterKorean)
+  const quote = DAY_MASTER_QUOTE[dayMasterKorean] || ''
+  const daewoon = sajuData.daewoon || []
 
   const generateSection = useCallback(async (sectionIndex: number) => {
     const section = SECTION_CONFIG[sectionIndex]
@@ -191,17 +201,68 @@ export function ReportContent({ submission }: ReportContentProps) {
         </div>
 
         {/* Day Master Type */}
-        <div className="border-t border-border/30 pt-4 text-center">
-          <p className="text-[10px] text-muted-foreground mb-2">Your Day Master (일간)</p>
-          <div className="flex items-center justify-center gap-2">
-            <span className="text-2xl">{dayMasterInfo.emoji}</span>
-            <div>
-              <p className="text-sm font-semibold text-foreground">{dayMasterChar} {dayMasterInfo.element}</p>
-              <p className="text-xs text-muted-foreground">{dayMasterInfo.korean}</p>
+        {character && (
+          <div className="border-t border-border/30 pt-4">
+            <p className="text-[10px] text-muted-foreground mb-3 text-center uppercase tracking-wider">Your Day Master (일간)</p>
+            <div className="flex flex-col items-center">
+              {/* Character Image */}
+              <div className="relative w-28 h-28 mb-3">
+                <Image
+                  src={character.imagePath}
+                  alt={`${dayMasterKorean} character`}
+                  fill
+                  className="object-contain drop-shadow-lg"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/images/characters-collection.png'
+                  }}
+                />
+              </div>
+              {/* Name */}
+              <p className={`text-lg font-bold mb-0.5 ${character.color}`}>
+                {character.stemHanja} {dayMasterKorean}{character.element}
+              </p>
+              {/* Theme Title */}
+              <p className="text-sm font-semibold text-foreground/90 mb-1">{character.themeTitle}</p>
+              {/* Keywords */}
+              <div className="flex flex-wrap justify-center gap-1.5 mb-3">
+                {character.keywords.map((kw, i) => (
+                  <span key={i} className="text-[10px] px-2 py-0.5 bg-white/10 rounded-full text-white/70">
+                    #{kw}
+                  </span>
+                ))}
+              </div>
+              {/* One-liner quote */}
+              <p className="text-xs text-muted-foreground italic text-center px-4">
+                &ldquo;{quote}&rdquo;
+              </p>
             </div>
           </div>
-        </div>
+        )}
       </div>
+
+      {/* Major Fortune Periods (대운) */}
+      {daewoon.length > 0 && (
+        <div className="bg-card border border-border rounded-xl p-4 mb-6 shadow-lg shadow-primary/5">
+          <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-3 text-center">Major Fortune Periods (대운)</h2>
+          <div className="flex flex-col gap-1.5">
+            {daewoon
+              .filter(d => d.startAge < 100)
+              .map((d, i) => (
+                <div key={i} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-background/50">
+                  <span className="text-[10px] text-muted-foreground w-20 flex-shrink-0">
+                    {Math.round(d.startAge)}세 ~ {Math.min(Math.round(d.endAge), 100)}세
+                  </span>
+                  <span className="text-sm font-bold text-foreground tracking-wider">
+                    {d.fullName || `${d.stem}${d.branch}`}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground ml-auto">
+                    {d.stem}{d.branch}
+                  </span>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
 
       {/* Progress Bar */}
       {completedSections < sections.length && (

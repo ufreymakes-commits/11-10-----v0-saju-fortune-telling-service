@@ -487,7 +487,7 @@ export function calcGilseong(
   const cheonul: string[] = []
   const taegeuk: string[] = []
   
-  // 천을귀인 (연주 또는 시주에만 나타남 - 일간 기준)
+  // 천을귀인 (연��� 또는 시주에만 나타남 - 일간 기준)
   const cheonulTargets = CHEONUL_MAP[dayStem] || []
   
   if (yearBranch && cheonulTargets.includes(yearBranch)) {
@@ -1787,15 +1787,7 @@ export function calcDaeyun(
   const isYangYear = yangStems.includes(yearStem)
   const isForward = (gender === 'male' && isYangYear) || (gender === 'female' && !isYangYear)
   
-  console.log('[v0] calcDaeyun debug:', { 
-    birthDate: birthDate.toISOString(), 
-    gender, 
-    yearStem, 
-    isYangYear, 
-    isForward,
-    monthStem,
-    monthBranch
-  })
+
 
   // 절기 데이터 - 월 경계 절기 (입춘, 경칩, 청명, 입하, 망종, 소서, 입추, 백로, 한로, 입동, 대설, 소한)
   // 대운 계산에서는 다음/이전 절기까지의 시간을 사용함
@@ -1862,9 +1854,12 @@ export function calcDaeyun(
     if (IPJEOL_MAP[y]) {
       IPJEOL_MAP[y].forEach(j => allJeolgi.push({ date: j.date, name: j.name }))
     } else {
-      // 기본값: 입춘(2월 4일), 동지(12월 21일)
-      allJeolgi.push({ date: new Date(y, 1, 4, 0, 0), name: "입춘" })
-      allJeolgi.push({ date: new Date(y, 11, 21, 0, 0), name: "동지" })
+      // 기본값: 절기를 약 30일 간격으로 12개 추가 (입춘부터)
+      const monthlyJeolgiNames = ["소한","입춘","경칩","청명","입하","망종","소서","입추","백로","한로","입동","대설"]
+      const monthlyJeolgiDates = [5, 4, 6, 5, 6, 6, 7, 7, 8, 8, 7, 7] // 대략적인 날짜
+      monthlyJeolgiNames.forEach((name, idx) => {
+        allJeolgi.push({ date: new Date(y, idx, monthlyJeolgiDates[idx], 0, 0), name })
+      })
     }
   }
   allJeolgi.sort((a, b) => a.date.getTime() - b.date.getTime())
@@ -1891,7 +1886,8 @@ export function calcDaeyun(
   }
 
   let startAge = Math.round(diffHours / 72)
-  if (startAge === 0) startAge = 1  // 최소 1세 보장
+  if (startAge === 0) startAge = 1   // 최소 1세 보장
+  if (startAge > 9) startAge = startAge % 10 || 1  // 10세 이상이면 비정상 — 1자리수로 클램핑
 
   // 60간지 계산을 인덱스 기반으로 (천간 10개 x 지지 12개가 최소공배수 60에서 만남)
   // 갑자(0) → 을축(1) → 병���(2) → ... → 계해(59)

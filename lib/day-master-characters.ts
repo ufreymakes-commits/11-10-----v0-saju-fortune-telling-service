@@ -19,10 +19,10 @@ export const DAY_MASTER_CHARACTERS: Record<string, DayMasterCharacter> = {
     stemHanja: "甲",
     element: "목",
     yinYang: "양",
-    imagePath: "/images/characters/gabmok.png",  // 추후 이미지 추가
-    themeTitle: "The Pioneer Tree",
-    themeDescription: "A towering tree reaching for the sky",
-    keywords: ["Leadership", "Growth", "Ambition"],
+    imagePath: "/images/characters/gabmok.png",
+    themeTitle: "The Pioneer",
+    themeDescription: "Yang wood — bold, driven, born to lead",
+    keywords: ["Bold", "Driven", "Leader"],
     color: "text-green-500"
   },
   "을": {
@@ -31,9 +31,9 @@ export const DAY_MASTER_CHARACTERS: Record<string, DayMasterCharacter> = {
     element: "목",
     yinYang: "음",
     imagePath: "/images/characters/eulmok.png",
-    themeTitle: "The Flexible Vine",
-    themeDescription: "A graceful vine that bends but never breaks",
-    keywords: ["Adaptability", "Creativity", "Resilience"],
+    themeTitle: "The Adapter",
+    themeDescription: "Yin wood — flexible, resilient, always finds a way",
+    keywords: ["Flexible", "Resilient", "Creative"],
     color: "text-emerald-400"
   },
   "병": {
@@ -42,9 +42,9 @@ export const DAY_MASTER_CHARACTERS: Record<string, DayMasterCharacter> = {
     element: "화",
     yinYang: "양",
     imagePath: "/images/characters/byeonghwa.png",
-    themeTitle: "The Radiant Sun",
-    themeDescription: "A brilliant sun illuminating all paths",
-    keywords: ["Passion", "Energy", "Charisma"],
+    themeTitle: "The Energizer",
+    themeDescription: "Yang fire — bright, radiant, lights up every room",
+    keywords: ["Bright", "Radiant", "Charismatic"],
     color: "text-orange-500"
   },
   "정": {
@@ -53,9 +53,9 @@ export const DAY_MASTER_CHARACTERS: Record<string, DayMasterCharacter> = {
     element: "화",
     yinYang: "음",
     imagePath: "/images/characters/jeonghwa.png",
-    themeTitle: "The Gentle Flame",
-    themeDescription: "A warm candlelight guiding the way",
-    keywords: ["Warmth", "Insight", "Dedication"],
+    themeTitle: "The Empath",
+    themeDescription: "Yin fire — warm, gentle, melts hearts without trying",
+    keywords: ["Warm", "Gentle", "Empathetic"],
     color: "text-red-400"
   },
   "무": {
@@ -64,9 +64,9 @@ export const DAY_MASTER_CHARACTERS: Record<string, DayMasterCharacter> = {
     element: "토",
     yinYang: "양",
     imagePath: "/images/characters/muto.png",
-    themeTitle: "The Mighty Mountain",
-    themeDescription: "An immovable mountain of strength",
-    keywords: ["Stability", "Trustworthy", "Grounded"],
+    themeTitle: "The Anchor",
+    themeDescription: "Yang earth — steady, solid, holds everything together",
+    keywords: ["Steady", "Solid", "Reliable"],
     color: "text-amber-600"
   },
   "기": {
@@ -74,10 +74,10 @@ export const DAY_MASTER_CHARACTERS: Record<string, DayMasterCharacter> = {
     stemHanja: "己",
     element: "토",
     yinYang: "음",
-    imagePath: "/images/characters/gito.png",  // 이미 저장됨
-    themeTitle: "The Nurturing Earth",
-    themeDescription: "Fertile soil nurturing all life",
-    keywords: ["Caring", "Supportive", "Harmonious"],
+    imagePath: "/images/characters/gito.png",
+    themeTitle: "The Nurturer",
+    themeDescription: "Yin earth — quiet but capable, grows everything around them",
+    keywords: ["Caring", "Capable", "Harmonious"],
     color: "text-yellow-600"
   },
   "경": {
@@ -86,9 +86,9 @@ export const DAY_MASTER_CHARACTERS: Record<string, DayMasterCharacter> = {
     element: "금",
     yinYang: "양",
     imagePath: "/images/characters/gyeonggeum.png",
-    themeTitle: "The Strong Sword",
-    themeDescription: "A sharp blade cutting through obstacles",
-    keywords: ["Justice", "Decisive", "Courageous"],
+    themeTitle: "The Straight Shooter",
+    themeDescription: "Yang metal — principled, sharp, says it like it is",
+    keywords: ["Principled", "Sharp", "Direct"],
     color: "text-slate-400"
   },
   "신": {
@@ -97,9 +97,9 @@ export const DAY_MASTER_CHARACTERS: Record<string, DayMasterCharacter> = {
     element: "금",
     yinYang: "음",
     imagePath: "/images/characters/singeum.png",
-    themeTitle: "The Precious Jewel",
-    themeDescription: "A refined gem reflecting inner beauty",
-    keywords: ["Perfectionist", "Elegant", "Sensitive"],
+    themeTitle: "The Perfectionist",
+    themeDescription: "Yin metal — precise, aesthetic, refuses to settle",
+    keywords: ["Precise", "Aesthetic", "Refined"],
     color: "text-zinc-300"
   },
   "임": {
@@ -108,9 +108,9 @@ export const DAY_MASTER_CHARACTERS: Record<string, DayMasterCharacter> = {
     element: "수",
     yinYang: "양",
     imagePath: "/images/characters/imsu.png",
-    themeTitle: "The Vast Ocean",
-    themeDescription: "A boundless ocean of wisdom",
-    keywords: ["Wisdom", "Flowing", "Adventurous"],
+    themeTitle: "The Free Spirit",
+    themeDescription: "Yang water — expansive, boundless, flows on its own terms",
+    keywords: ["Expansive", "Adventurous", "Flowing"],
     color: "text-blue-500"
   },
   "계": {
@@ -119,9 +119,9 @@ export const DAY_MASTER_CHARACTERS: Record<string, DayMasterCharacter> = {
     element: "수",
     yinYang: "음",
     imagePath: "/images/characters/gyesu.png",
-    themeTitle: "The Gentle Rain",
-    themeDescription: "A nourishing rain bringing life",
-    keywords: ["Intuitive", "Gentle", "Mysterious"],
+    themeTitle: "The Mind Reader",
+    themeDescription: "Yin water — deep, sensitive, feels everything unsaid",
+    keywords: ["Intuitive", "Deep", "Sensitive"],
     color: "text-cyan-400"
   }
 }
