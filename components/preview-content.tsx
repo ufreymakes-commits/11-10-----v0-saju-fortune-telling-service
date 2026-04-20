@@ -68,6 +68,7 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
         
         if (!response.ok) {
           const errorText = await response.text()
+          console.error('[v0] generate-free failed:', response.status, errorText)
           const errorMsg = response.status === 429 
             ? 'Daily limit reached. Please try again tomorrow.' 
             : `Error: ${response.status} - ${errorText}`
