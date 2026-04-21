@@ -18,12 +18,13 @@ interface PreviewData {
   teaserFacts: Fact[]
   submission: {
     name: string
-    birthDate: string
-    birthTime: string | null
-    gender: string
-    calendar: string
+    birthDate?: string
+    birthTime?: string | null
+    gender?: string
+    calendar?: string
     sajuData: SajuData
   }
+  allSajuDataSentToGemini?: Record<string, unknown>
 }
 
 // Day Master (일간) emoji mapping
@@ -60,7 +61,7 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
   useEffect(() => {
     async function fetchPreview() {
       try {
-        const response = await fetch('/api/generate-free', {
+        const response = await fetch('/api/generate-gemini', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ submissionId })
@@ -68,7 +69,7 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
         
         if (!response.ok) {
           const errorText = await response.text()
-          console.error('[v0] generate-free failed:', response.status, errorText)
+          console.error('[v0] generate-gemini failed:', response.status, errorText)
           const errorMsg = response.status === 429 
             ? 'Daily limit reached. Please try again tomorrow.' 
             : `Error: ${response.status} - ${errorText}`
@@ -304,6 +305,20 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
         </div>
         <p className="text-[10px] text-muted-foreground mt-1">4.9/5 from 2,000+ reviews</p>
       </div>
+
+      {/* Gemini에 보내는 실제 데이터 100% 투명 공개 (개발 검수용) */}
+      {data?.allSajuDataSentToGemini && (
+        <div className="mt-8 bg-slate-900 border border-cyan-500/30 rounded-xl p-4 text-xs">
+          <h3 className="text-cyan-400 font-bold mb-3 text-sm">
+            [DEV] Gemini에 보내는 실제 데이터 100% 투명 공개
+          </h3>
+          <div className="bg-black/50 rounded-lg p-3 overflow-x-auto max-h-[400px] overflow-y-auto">
+            <pre className="text-green-400 font-mono text-[10px] whitespace-pre-wrap">
+              {JSON.stringify(data.allSajuDataSentToGemini, null, 2)}
+            </pre>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
