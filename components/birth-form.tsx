@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,12 +22,62 @@ interface FormErrors {
   birthCountry?: string
   gender?: string
   referralSource?: string
+  dailyLimit?: string
+}
+
+// Helper function to check daily limit (2 free reports per day)
+const DAILY_LIMIT = 2
+const STORAGE_KEY = 'sajume_daily_reports'
+
+function getDailyReportCount(): { count: number; date: string } {
+  if (typeof window === 'undefined') return { count: 0, date: '' }
+  
+  const stored = localStorage.getItem(STORAGE_KEY)
+  if (!stored) return { count: 0, date: '' }
+  
+  try {
+    const data = JSON.parse(stored)
+    const today = new Date().toISOString().split('T')[0]
+    
+    // Reset count if it's a new day
+    if (data.date !== today) {
+      return { count: 0, date: today }
+    }
+    
+    return data
+  } catch {
+    return { count: 0, date: '' }
+  }
+}
+
+function incrementDailyReportCount(): void {
+  if (typeof window === 'undefined') return
+  
+  const today = new Date().toISOString().split('T')[0]
+  const current = getDailyReportCount()
+  
+  const newCount = current.date === today ? current.count + 1 : 1
+  
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    count: newCount,
+    date: today
+  }))
 }
 
 export function BirthForm() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
+  const [dailyLimitReached, setDailyLimitReached] = useState(false)
+  
+  // Check daily limit on mount
+  useEffect(() => {
+    const { count, date } = getDailyReportCount()
+    const today = new Date().toISOString().split('T')[0]
+    if (date === today && count >= DAILY_LIMIT) {
+      setDailyLimitReached(true)
+    }
+  }, [])
   
   const [formData, setFormData] = useState({
     name: '',
@@ -77,6 +127,15 @@ export function BirthForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    // Check daily limit before proceeding
+    const { count, date } = getDailyReportCount()
+    const today = new Date().toISOString().split('T')[0]
+    if (date === today && count >= DAILY_LIMIT) {
+      setDailyLimitReached(true)
+      setErrors({ dailyLimit: 'You have exceeded the maximum daily usage. Please try again tomorrow :)' })
+      return
+    }
+    
     if (!validateForm()) return
     
     setIsLoading(true)
@@ -91,6 +150,9 @@ export function BirthForm() {
       if (!response.ok) {
         throw new Error('Failed to submit')
       }
+      
+      // Increment daily count on successful submission
+      incrementDailyReportCount()
       
       const { submissionId } = await response.json()
       router.push(`/preview/${submissionId}`)
@@ -317,11 +379,20 @@ export function BirthForm() {
           {errors.referralSource && <FieldError>{errors.referralSource}</FieldError>}
         </Field>
 
+        {/* Daily Limit Error */}
+        {(dailyLimitReached || errors.dailyLimit) && (
+          <div className="bg-red-100 border border-red-300 rounded-lg p-3 text-center">
+            <p className="text-sm text-red-700 font-medium">
+              You have exceeded the maximum daily usage. Please try again tomorrow :)
+            </p>
+          </div>
+        )}
+
         {/* Submit Button */}
         <Button 
           type="submit" 
-          disabled={isLoading}
-          className="w-full bg-primary text-white hover:bg-primary/90 h-12 text-lg font-semibold rounded-full shadow-lg shadow-primary/30 mt-4"
+          disabled={isLoading || dailyLimitReached}
+          className="w-full bg-primary text-white hover:bg-primary/90 h-12 text-lg font-semibold rounded-full shadow-lg shadow-primary/30 mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <>

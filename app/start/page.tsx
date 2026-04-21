@@ -48,6 +48,16 @@ export default function StartPage() {
         <p className="mt-6 text-xs text-muted-foreground text-center max-w-sm">
           Your information is used solely to calculate your birth chart and will not be shared with third parties.
         </p>
+        
+        {/* Footer */}
+        <div className="mt-8 text-center">
+          <p className="text-[10px] text-muted-foreground/70">
+            All rights reserved by Sajume.
+          </p>
+          <p className="text-[10px] text-muted-foreground/50">
+            Payment issues / Operation inquiries: hello@sajume.com
+          </p>
+        </div>
       </div>
     </main>
   )

@@ -374,6 +374,12 @@ export function ReportContent({ submission }: ReportContentProps) {
           <br />
           For entertainment purposes only.
         </p>
+        <p className="mt-4 text-[10px] text-muted-foreground/70">
+          All rights reserved by Sajume.
+        </p>
+        <p className="text-[10px] text-muted-foreground/50">
+          Payment issues / Operation inquiries: hello@sajume.com
+        </p>
       </div>
 
       {/* Fixed Share Button - bottom right */}
