@@ -9,17 +9,34 @@ import { DayMasterCard } from '@/components/day-master-card'
 import type { Fact, SajuData } from '@/lib/types'
 import { LockIcon, Share2Icon } from 'lucide-react'
 
-// Preview page reviews data
+// Preview page reviews data with names and countries
 const PREVIEW_REVIEWS = [
-  { id: 1, text: "I really enjoyed reading this Saju packet. The fact-based format made it feel engaging, personal, and easy to connect with. I began highlighting the points that felt accurate, but quickly realized I had highlighted almost every page.", date: "Apr 10, 02:26 PM" },
-  { id: 2, text: "It really resonates with me and it helps to give me a sense of direction. It also acts as a reassurance for me when I start overthinking and feeling overwhelmed.", date: "Mar 30, 12:06 AM" },
-  { id: 3, text: "Like others have said, it is scarily accurate. It also gave me some clarity and confirmation that I am where I'm supposed to be right now. There's also some great advice that I'll definitely follow.", date: "Mar 21, 06:03 AM" },
-  { id: 4, text: "This was great insight. I definitely felt some feeling were validated.", date: "Apr 1, 08:52 AM" },
-  { id: 5, text: "All past things were predicted on point like exact year and what happened. Future prediction are reasonable too except my career. But still, thank you so much!", date: "Mar 31, 05:15 AM" },
-  { id: 6, text: "When I started reading the 99 Facts, most of them were unbelievably true to me. It's good to know what my past has been based on the charts and what the current and future look like.", date: "Apr 1, 03:23 AM" },
-  { id: 7, text: "It was scary accurate on so many things. But now it makes me really think about my future much more now because it was truly hit on a few things I have been thinking about for months.", date: "Mar 31, 08:02 AM" },
-  { id: 8, text: "I tried the sample 9 facts before purchasing the full report and that alone blew my mind. It's made me curious to try the full in depth report because of how scarily accurate it was.", date: "Mar 27, 02:35 PM" },
-  { id: 9, text: "The report was absolutely spot on. I will definitely book a forecasting reading asap cause the 99 report was very accurate so now I am curious about what it holds for my future.", date: "Mar 31, 07:58 PM" },
+  { id: 1, text: "I received the free 9 Facts First, due to worry that this was going to be a bit like a scam. Once I read through the 9 facts, I was intrigued and purchased the 99 Report. I'm glad I did. There's so much in here and I felt called out, lol. I really was shocked at how accurately it read me.", name: "Emily W", country: "NY, US", flag: "🇺🇸", date: "Apr 16, 01:01 AM" },
+  { id: 2, text: "It really resonates with me and it helps to give me a sense of direction. It also acts as a reassurance for me when I start overthinking and feeling overwhelmed.", name: "Sim Yun Rou", country: "SG", flag: "🇸🇬", date: "Mar 30, 12:06 AM" },
+  { id: 3, text: "Like others have said, it is scarily accurate. It also gave me some clarity and confirmation that I am where I'm supposed to be right now. There's also some great advice that I'll definitely follow.", name: "Hannah", country: "LA, US", flag: "🇺🇸", date: "Mar 21, 06:03 AM" },
+  { id: 4, text: "This was great insight. I definitely felt some feeling were validated.", name: "Jessica", country: "Chicago, US", flag: "🇺🇸", date: "Apr 1, 08:52 AM" },
+  { id: 5, text: "All past things were predicted on point like exact year and what happened. Future prediction are reasonable too except my career. But still, thank you so much!", name: "Pranjali Patil", country: "Mumbai", flag: "🇮🇳", date: "Mar 31, 05:15 AM" },
+  { id: 6, text: "When I started reading the 99 Facts, most of them were unbelievably true to me. It's good to know what my past has been based on the charts and what the current and future look like.", name: "Tao Mon Lae", country: "MM", flag: "🇲🇲", date: "Apr 1, 03:23 AM" },
+  { id: 7, text: "It was scary accurate on so many things. But now it makes me really think about my future much more now because it was truly hit on a few things I have been thinking about for months.", name: "Meng", country: "Chicago, US", flag: "🇺🇸", date: "Mar 31, 08:02 AM" },
+  { id: 8, text: "I tried the sample 9 facts before purchasing the full report and that alone blew my mind. It's made me curious to try the full in depth report because of how scarily accurate it was.", name: "Alyssa", country: "LA, US", flag: "🇺🇸", date: "Mar 27, 02:35 PM" },
+  { id: 9, text: "The report was absolutely spot on. I will definitely book a forecasting reading asap cause the 99 report was very accurate so now I am curious about what it holds for my future.", name: "Simona", country: "IT", flag: "🇮🇹", date: "Mar 31, 07:58 PM" },
+  { id: 10, text: "The report came quickly and was surprisingly accurate. It covered internal emotional struggles that have been recurring throughout my life. It also gave insight into some career confusion and even suggested relocation areas I was already considering. Overall it was a fun and enjoyable read.", name: "Anonymous", country: "US", flag: "🇺🇸", date: "Mar 18, 12:48 PM" },
+  { id: 11, text: "This is scarily true. I was shocked because the timelines actually matched what happened in my life before. This is amazing, best impulsive buying I had in years.", name: "Anonymous", country: "US", flag: "🇺🇸", date: "Mar 6, 04:33 AM" },
+  { id: 12, text: "I love it!!! This is eeriely true, and I was shocked reading the report", name: "Anonymous", country: "US", flag: "🇺🇸", date: "Mar 6, 04:45 AM" },
+  { id: 13, text: "I did this on a whim and received the full report within 30 min. It was eerily accurate, just as advertised. I've been to multiple different fortune tellers and not one of them has given me actual timelines. Sajume was able to accurately pinpoint the year which key events had happened in my past. How!! Sajume also listed out which upcoming years will be important too. If you're on the fence, I definitely recommend getting a report.", name: "Anonymous", country: "US", flag: "🇺🇸", date: "Mar 18, 10:26 PM" },
+  { id: 14, text: "The 99 facts premium version is the real deal - I got it at the discounted price, but I wouldn't mind purchasing it again at its original price if I knew I would be getting such detailed information of my saju!", name: "Anonymous", country: "US", flag: "🇺🇸", date: "Mar 4, 10:34 PM" },
+  { id: 15, text: "I loved it! It's very precise.", name: "Anonymous", country: "US", flag: "🇺🇸", date: "Mar 4, 03:48 AM" },
+  { id: 16, text: "so accurate!", name: "Anonymous", country: "US", flag: "🇺🇸", date: "Feb 16, 01:36 AM" },
+  { id: 17, text: "The reports brought up a lot that I pushed aside. Made me more introspective of how I want to move forward.", name: "Anonymous", country: "US", flag: "🇺🇸", date: "Mar 20, 02:07 PM" },
+  { id: 18, text: "The 99 Facts report was concise and exactly what I needed. I would highly recommend it.", name: "Anonymous", country: "US", flag: "🇺🇸", date: "Mar 4, 10:47 PM" },
+  { id: 19, text: "Wow almost every single point of the 99 facts was spot on. Will be purchasing more reports in the future.", name: "Anonymous", country: "US", flag: "🇺🇸", date: "Mar 20, 01:06 PM" },
+  { id: 20, text: "Excellent Reading 10/10. A good reading is a reading that will make you read again and again. I have read it multiple times and have found it really accurate as though someone has been seeing me through. It gives hope and gives awareness of who you are. 10/10 would recommend to anyone looking for clarity. The team is extremely friendly and responsive if you face any problems or difficulties in getting the report.", name: "Anonymous", country: "US", flag: "🇺🇸", date: "Feb 24, 09:37 PM" },
+  { id: 21, text: "Great report!", name: "Anonymous", country: "US", flag: "🇺🇸", date: "Mar 20, 05:39 PM" },
+  { id: 22, text: "This was extremely helpful and insightful. If you're going to purchase a detailed reading, I highly recommend choosing the Premium option. It really helped me understand myself better. I'm grateful to the people who created this site, and I strongly recommend it to others!", name: "Anonymous", country: "US", flag: "🇺🇸", date: "Jan 31, 03:42 PM" },
+  { id: 23, text: "wow so accurate", name: "Anonymous", country: "US", flag: "🇺🇸", date: "Feb 16, 01:40 AM" },
+  { id: 24, text: "Heavily inspired and insightful. It feels accurate to who I am, what my current trajectory looks like, and what I look forward to. It feels heavy to be seen. So many things to reflect on and think about.", name: "Anonymous", country: "US", flag: "🇺🇸", date: "Jan 3, 04:43 PM" },
+  { id: 25, text: "It's crazy how accurate the facts are. Just with the first 9 facts, I got goosebumps with the accuracy!!", name: "Anonymous", country: "US", flag: "🇺🇸", date: "Mar 18, 11:01 PM" },
+  { id: 26, text: "The report felt really accurate and had lots of interesting insights. I would highly recommend this to anyone curious about it.", name: "Anonymous", country: "US", flag: "🇺🇸", date: "Mar 31, 08:37 PM" },
 ]
 
 interface PreviewContentProps {
@@ -306,7 +323,20 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
               </p>
             </div>
           </div>
+          
+          {/* ...99 facts indicator */}
+          <div className="text-center py-3">
+            <span className="text-muted-foreground text-sm tracking-widest">. . . 99 facts</span>
+          </div>
         </div>
+      </div>
+
+      {/* CTA intro text - outside the card */}
+      <div className="text-center mb-4">
+        <p className="text-sm text-foreground/80 leading-relaxed">
+          Shall we dive into the details?<br />
+          Check out <span className="font-bold">how to supercharge your luck<br />in just one minute</span> with the full report below.
+        </p>
       </div>
 
       {/* CTA Section */}
@@ -319,10 +349,6 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
             className="object-contain"
           />
         </div>
-        
-        <p className="text-xs text-foreground/70 mb-3">
-          Shall we dive into the details? Check out how to supercharge your luck in just one minute with the full report below.
-        </p>
         
         <h3 className="text-lg font-semibold text-gradient mb-0">
           Unlock All 99 Facts
@@ -364,13 +390,30 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
         <p className="text-[10px] text-muted-foreground">4.9/5 from 100% genuine reviews</p>
       </div>
 
+      {/* Reviews Section Header */}
+      <div className="mt-8 text-center mb-4">
+        <p className="text-base font-semibold text-foreground">If these reviews are fake,</p>
+        <p className="text-base font-semibold text-foreground">we will stop running our service 😎</p>
+      </div>
+
       {/* Reviews Section - PC: 3 columns, Mobile: slider */}
-      <div className="mt-8">
+      <div>
         <div className="hidden md:grid md:grid-cols-3 gap-3">
           {PREVIEW_REVIEWS.map((review) => (
             <div key={review.id} className="bg-card border border-border rounded-lg p-3">
+              {/* 5 Yellow Stars */}
+              <div className="flex gap-0.5 mb-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <svg key={star} className="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
               <p className="text-xs text-foreground/80 leading-relaxed mb-2">{review.text}</p>
-              <p className="text-[10px] text-muted-foreground">{review.date}</p>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-foreground/70 font-medium">{review.name} {review.flag}</span>
+                <span className="text-[10px] text-muted-foreground">{review.date}</span>
+              </div>
             </div>
           ))}
         </div>
@@ -378,8 +421,19 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
           <div className="flex gap-3 w-max">
             {PREVIEW_REVIEWS.map((review) => (
               <div key={review.id} className="bg-card border border-border rounded-lg p-3 w-72 flex-shrink-0">
+                {/* 5 Yellow Stars */}
+                <div className="flex gap-0.5 mb-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <svg key={star} className="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
                 <p className="text-xs text-foreground/80 leading-relaxed mb-2">{review.text}</p>
-                <p className="text-[10px] text-muted-foreground">{review.date}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-foreground/70 font-medium">{review.name} {review.flag}</span>
+                  <span className="text-[10px] text-muted-foreground">{review.date}</span>
+                </div>
               </div>
             ))}
           </div>
@@ -388,7 +442,12 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
 
       {/* Personal Luck Bracelet Card */}
       <div className="mt-8">
-        <p className="text-sm font-semibold text-foreground mb-3 text-center">Your wish is my command, Get your Sajume luck bracelet</p>
+        <p className="text-sm font-semibold text-foreground mb-3 text-center">
+          <span className="italic">&quot;Your wish is my command&quot;</span>
+          <br className="md:hidden" />
+          <span className="hidden md:inline">, </span>
+          Get your Sajume luck bracelet
+        </p>
         <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-amber-500/30 rounded-xl p-5">
           <div className="relative w-full h-32 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center">
             <div className="text-center">
