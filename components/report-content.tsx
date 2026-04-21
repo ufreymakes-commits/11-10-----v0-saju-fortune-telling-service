@@ -11,6 +11,8 @@ import { getDayMasterCharacter } from '@/lib/day-master-characters'
 
 interface ReportContentProps {
   submission: Submission
+  // Pre-loaded from server — if all 4 sections present, no API calls needed
+  cachedSections?: Record<string, Fact[]>
 }
 
 interface SectionData {
@@ -67,16 +69,25 @@ const BRANCH_PRONUNCIATION: Record<string, string> = {
   '午': 'O', '未': 'Mi', '申': 'Sin', '酉': 'Yu', '戌': 'Sul', '亥': 'Hae'
 }
 
-export function ReportContent({ submission }: ReportContentProps) {
+export function ReportContent({ submission, cachedSections = {} }: ReportContentProps) {
+  // If we have server-side cached data for a section, mark it complete immediately
   const [sections, setSections] = useState<SectionData[]>(
-    SECTION_CONFIG.map(config => ({
-      ...config,
-      facts: [],
-      status: 'pending'
-    }))
+    SECTION_CONFIG.map(config => {
+      const cached = cachedSections[config.key]
+      return {
+        ...config,
+        facts: cached ?? [],
+        status: cached ? 'complete' : 'pending'
+      }
+    })
   )
-  const [currentSectionIndex, setCurrentSectionIndex] = useState(0)
-  const [totalFacts, setTotalFacts] = useState(0)
+
+  // Find first section that still needs generation; -1 means all done
+  const firstPending = SECTION_CONFIG.findIndex(c => !cachedSections[c.key])
+  const [currentSectionIndex, setCurrentSectionIndex] = useState(firstPending === -1 ? SECTION_CONFIG.length : firstPending)
+
+  const initialTotal = SECTION_CONFIG.reduce((acc, c) => acc + (cachedSections[c.key]?.length ?? 0), 0)
+  const [totalFacts, setTotalFacts] = useState(initialTotal)
   const [copied, setCopied] = useState(false)
 
   const handleCopyLink = () => {

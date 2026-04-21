@@ -2,7 +2,7 @@ import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { StarsBackground } from '@/components/stars-background'
 import { ReportContent } from '@/components/report-content'
-import type { Submission } from '@/lib/types'
+import type { Submission, Fact } from '@/lib/types'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -35,27 +35,30 @@ export default async function ReportPage({ params }: PageProps) {
   
   const supabase = await createClient()
   
-  // Check if submission exists
-  const { data: submission } = await supabase
-    .from('submissions')
-    .select('*')
-    .eq('id', id)
-    .single()
+  // Fetch submission, payment, and all cached report sections in parallel
+  const [submissionResult, paymentResult, reportsResult] = await Promise.all([
+    supabase.from('submissions').select('*').eq('id', id).single(),
+    supabase.from('payments').select('status').eq('submission_id', id).eq('status', 'completed').single(),
+    supabase.from('reports').select('section_key, facts').eq('submission_id', id).eq('is_free', false)
+  ])
   
-  if (!submission) {
+  if (!submissionResult.data) {
     notFound()
   }
   
-  // Check if payment is completed
-  const { data: payment } = await supabase
-    .from('payments')
-    .select('status')
-    .eq('submission_id', id)
-    .eq('status', 'completed')
-    .single()
-  
-  if (!payment) {
+  if (!paymentResult.data) {
     redirect(`/checkout/${id}`)
+  }
+  
+  // Build pre-loaded facts map keyed by section — if all 4 sections exist,
+  // the client component will render immediately without any API calls.
+  const cachedSections: Record<string, Fact[]> = {}
+  if (reportsResult.data) {
+    for (const row of reportsResult.data) {
+      if (row.section_key && Array.isArray(row.facts)) {
+        cachedSections[row.section_key] = row.facts as Fact[]
+      }
+    }
   }
   
   return (
@@ -63,7 +66,10 @@ export default async function ReportPage({ params }: PageProps) {
       <StarsBackground />
       
       <div className="relative z-10">
-        <ReportContent submission={submission as Submission} />
+        <ReportContent 
+          submission={submissionResult.data as Submission}
+          cachedSections={cachedSections}
+        />
       </div>
     </main>
   )

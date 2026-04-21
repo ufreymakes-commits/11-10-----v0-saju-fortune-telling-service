@@ -368,13 +368,16 @@ export async function POST(request: Request) {
     
     const supabase = await createClient()
     
-    // Verify payment
-    const { data: payment } = await supabase
-      .from('payments')
-      .select('id, status')
-      .eq('submission_id', submissionId)
-      .eq('status', 'completed')
-      .single()
+    // Run payment check, submission fetch, and existing section check in parallel
+    const [paymentResult, submissionResult, existingResult] = await Promise.all([
+      supabase.from('payments').select('id, status').eq('submission_id', submissionId).eq('status', 'completed').single(),
+      supabase.from('submissions').select('*').eq('id', submissionId).single(),
+      supabase.from('reports').select('facts').eq('submission_id', submissionId).eq('section_key', sectionKey).single()
+    ])
+
+    const payment = paymentResult.data
+    const submission = submissionResult.data
+    const existingReport = existingResult.data
     
     if (!payment) {
       return NextResponse.json(
@@ -383,33 +386,19 @@ export async function POST(request: Request) {
       )
     }
     
-    // Get submission data
-    const { data: submission, error: fetchError } = await supabase
-      .from('submissions')
-      .select('*')
-      .eq('id', submissionId)
-      .single()
-    
-    if (fetchError || !submission) {
+    if (!submission) {
       return NextResponse.json(
         { error: 'Submission not found' },
         { status: 404 }
       )
     }
     
-    // Check if section already generated
-    const { data: existingReport } = await supabase
-      .from('reports')
-      .select('facts')
-      .eq('submission_id', submissionId)
-      .eq('section_key', sectionKey)
-      .single()
-    
+    // Cache hit — return immediately, no generation needed
     if (existingReport) {
       return NextResponse.json({ facts: existingReport.facts })
     }
     
-    // Get previous facts for context
+    // Get previous facts for context (only needed when generating)
     const { data: previousReports } = await supabase
       .from('reports')
       .select('facts')
