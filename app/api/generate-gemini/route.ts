@@ -1741,7 +1741,9 @@ How they looked or behaved across childhood, youth, adulthood, and old age.
 
 Introduction(2 sentences): Describe their inborn energy and overall personality. Include a sentence like: "The phrase you probably hear most often from others is: '***'." In the report introduction or personality section, you must provide one warm summary sentence from a positive perspective: "You are a person standing on the footing of [Self (Day Branch)] within the environment of [Stage (Month Branch)]."
 
-Body 1(2 sentences): Detailed analysis of wealth and career. Provide two sentences that define the core theme of their career and financial life. These must be realistic, specific, and address the practical concerns or dreams they are likely to have. Avoid vague generalizations.
+Body 1 (2 sentences): Detailed analysis of wealth and career.
+- Sentence 1 (The Structural Core): Combine Step 1 (Month Branch DNA) and Step 4 (Independence Index). Recommend his/her ideal work format (e.g., large corp, freelance, gov) and at least 3 specific modern roles. 
+- Sentence 2 (The Talent & Aura): Combine Step 3 (Element/Industry) and Step 6 (Shinsal). Explain the specific industry or aura where they would stand out, providing at least 3 specific examples of fields or roles. Use the flow: "Because of your unique energy and details, you can also excel in..."
 
 Body 2(3 sentences): Love, health, and relationships. Provide two sentences about their main themes in love and marriage. These should be highly factual and specific, not ambiguous. You may mention the timing of their first love, but do not reveal the spouse's profession or personality yet(as this is a free report).
 
@@ -1757,7 +1759,10 @@ Before writing the 9 facts, you must analyze the chart in the \`"internal_analys
 1. Identify the Day Master (Essence) vs. Month Branch (Stage).
 2. Identify the Dominant Element / Ten God (What they have too much of).
 3. Identify the Missing Element / Ten God (What drives their subconscious thirst).
-4. Apply Career Rule Step 1 to 8: Define specific, real-world jobs.
+4. Apply Career Rule Step 1 to 8: 
+   - First, determine the base 'Structural Core' (DNA + Independence Index).
+   - Second, determine the 'Talent & Aura' (Element + Shinsal).
+   - Find at least 6 specific modern job/industry keywords in total (3 for each).
 
 STEP 2: DRAFT THE 9 CHILLINGLY ACCURATE FACTS
 Translate the scratchpad analysis into 9 Gen-Z, emotionally resonant, yet hyper-specific English sentences. 
@@ -1765,8 +1770,9 @@ Translate the scratchpad analysis into 9 Gen-Z, emotionally resonant, yet hyper-
 - Rule 1 (The Anchor): Every single fact must be secretly anchored to a specific data point (e.g., a specific clash, a missing element, a Daewoon shift). 
 - Rule 2 (No Cliches): BANNED CONCEPTS -> Do not use vague phrases like "You are a creative soul," "You doubt yourself," or "First love in late teens" unless mathematically proven by the chart. 
 - Rule 3 (Factual Brutality wrapped in Warmth): If their chart says they are rigid, stubborn, and built for bureaucracy (Strong Earth + Jeong-gwan), tell them they are a highly respected systemic anchor, maybe working in civil service or auditing. DO NOT force them to be an independent freelancer. Tell them the truth of their chart.
+- Rule 4 (Dual Career Perspective): In the career-related sentences (Fact #4 or others in Body 1), you must provide two distinct angles: one for the structural "fit" (where they belong) and one for the "talent/vibe" (what they are uniquely good at). Each must be packed with specific industry examples.
 
-BANNED TROPES: Do not use Barnum Effect statements. ABSOLUTELY DO NOT say "You are creative," "You overthink,(like thinking am i enough?)" or "You should do marketing/freelancing" UNLESS specifically triggered by specific saju data he or she has. Trust the Saju data, not general astrology stereotypes.
+BANNED TROPES: Do not use Barnum Effect statements. ABSOLUTELY DO NOT say "You are creative," "You overthink,(like thinking am i enough?)", 2032, first love in late teens.. or "You should do artistic marketing/freelancing" UNLESS specifically triggered by specific saju data he or she has. Trust the Saju data, not general astrology stereotypes.
 
 OUTPUT FORMAT(ONLY JSON):
 \`\`\`json
@@ -1795,27 +1801,185 @@ ADVANCED CUSTOMER SAJU DATA:
 ${JSON.stringify(allSajuData, null, 2)}
 `
 
-    console.log('[v0] Gemini: Calling Gemini 1.5 Pro with System/User separation')
+    // =========================================
+    // LEGACY PROMPT BACKUP (참고용 - 삭제하지 마세요)
+    // 기존 단일 호출 방식의 systemPrompt, userPrompt가 위에 있습니다.
+    // 2-Stage 파이프라인으로 전환 후에도 참고할 수 있도록 보존합니다.
+    // =========================================
+    // 기존 systemPrompt: 1~1700줄 (SAJU_MASTERPIECE_GUIDE 포함)
+    // 기존 userPrompt: 1701~1802줄 (9 facts 생성 요청)
+    // =========================================
 
-    // generateText with Gemini 1.5 Pro
-    const result = await generateText({
+    // =========================================
+    // 2-STAGE PIPELINE: 심화 분석 → 9문장 생성
+    // Stage 1: 8가지 체크포인트 심화 분석 (Deep Analysis)
+    // Stage 2: 분석 결과 기반 9문장 생성 (Final Facts)
+    // =========================================
+    
+    // ===== STAGE 1: 심화 분석 (Deep Analysis) =====
+    // 사용자가 이 프롬프트를 직접 수정할 수 있습니다
+    const stage1SystemPrompt = `You are an expert Saju analyst. Your task is to create a deep psychological and life analysis report based on the provided Saju data.
+
+${SAJU_MASTERPIECE_GUIDE}
+
+Respond ONLY in JSON format.`
+
+    const stage1UserPrompt = `
+===========================================
+[STAGE 1: 8가지 체크포인트 심화 분석]
+===========================================
+
+아래 8가지 체크포인트에 맞춰 이 사주의 '인생 시나리오'를 심화 분석하라.
+절대 뻔한 소리를 하지 말고, 데이터 수치에 근거해 소름 끼칠 정도로 날카로운 심리적/현실적 핵심을 도출하라.
+
+1. 페르소나 충돌 (일간 vs 월지)
+2. 에너지 과부하 (가장 강한 오행/십신)
+3. 사회적 유전자 (격국)
+4. 심리적 갈증 (없는 오행/십신)
+5. 핵심 흉터 (형충/공망/원진)
+6. 숨겨진 무기 (신살/귀인)
+7. 독립성 지수 (신강신약)
+8. 현재 좌표 (대운)
+
+OUTPUT FORMAT (JSON ONLY):
+\`\`\`json
+{
+  "persona_conflict": {
+    "day_master": "...",
+    "month_branch": "...",
+    "analysis": "..."
+  },
+  "energy_overload": {
+    "dominant_element": "...",
+    "dominant_ten_god": "...",
+    "effect": "..."
+  },
+  "social_genes": {
+    "gyeokguk": "...",
+    "career_fit": "..."
+  },
+  "psychological_thirst": {
+    "missing_element": "...",
+    "missing_ten_god": "...",
+    "subconscious_drive": "..."
+  },
+  "core_trauma": {
+    "clashes": "...",
+    "voids": "...",
+    "impact": "..."
+  },
+  "hidden_weapon": {
+    "sinsal": "...",
+    "guiin": "...",
+    "application": "..."
+  },
+  "independence_index": {
+    "singang_sinyak": "...",
+    "percentage": "...",
+    "life_strategy": "..."
+  },
+  "current_coordinate": {
+    "current_daewoon": "...",
+    "key_year": "...",
+    "forecast": "..."
+  }
+}
+\`\`\`
+
+CUSTOMER SAJU DATA:
+${JSON.stringify(allSajuData, null, 2)}
+`
+
+    console.log('[v0] Gemini: ===== STAGE 1: Deep Analysis =====')
+    
+    const stage1Result = await generateText({
       model: 'google/gemini-3-flash',
-      system: systemPrompt,
-      prompt: userPrompt,
-      temperature: 0.8,
-      maxTokens: 3000
+      system: stage1SystemPrompt,
+      prompt: stage1UserPrompt,
+      temperature: 0.7,
+      maxTokens: 2000
     })
 
-    console.log('[v0] Gemini: Response received, parsing...')
+    console.log('[v0] Gemini: Stage 1 response received, parsing...')
 
-    // JSON 파싱
-    const jsonMatch = result.text.match(/```json\n([\s\S]*?)\n```/)
-    if (!jsonMatch) {
-      console.error('[v0] Gemini: JSON not found in response')
-      throw new Error('JSON format not found')
+    // Stage 1 JSON 파싱
+    const stage1JsonMatch = stage1Result.text.match(/```json\n([\s\S]*?)\n```/)
+    if (!stage1JsonMatch) {
+      console.error('[v0] Gemini: Stage 1 JSON not found')
+      throw new Error('Stage 1 JSON format not found')
+    }
+    
+    const deepAnalysis = JSON.parse(stage1JsonMatch[1])
+    console.log('[v0] Gemini: Stage 1 Deep Analysis:', JSON.stringify(deepAnalysis, null, 2))
+
+    // ===== STAGE 2: 9문장 생성 (Final Facts) =====
+    // 사용자가 이 프롬프트를 직접 수정할 수 있습니다
+    const stage2SystemPrompt = `You are writing the final customer-facing report. 
+You have access to a deep psychological analysis that was already completed.
+Your job is to translate this analysis into 9 emotionally resonant, specific facts.
+
+Tone: Gen-Z, warm, grounded, emotionally intelligent.
+Language: English only.
+`
+
+    const stage2UserPrompt = `
+===========================================
+[STAGE 2: 9가지 팩트 생성]
+===========================================
+
+앞서 작성된 '심화 분석 보고서'를 완벽히 숙지하라.
+이제 이 내용을 바탕으로 유저에게 줄 9가지 팩트를 작성하라.
+
+테마: 커리어/연애/인생/건강/위로와 응원
+Gen-Z 미국인이 인생을 살면서 늘 궁금해하거나 고민하는 현실에 대한 9가지 팩트이자 위로와 공감이어야 한다.
+
+4번 커리어 문장은 반드시 '두 가지 양상(구조적 적합성 + 재능적 두각)'을 포함해야 하며,
+모든 문장은 분석 보고서의 깊이를 유지해야 한다.
+
+=== 심화 분석 보고서 ===
+${JSON.stringify(deepAnalysis, null, 2)}
+
+=== 원본 사주 데이터 (참고용) ===
+${JSON.stringify(allSajuData, null, 2)}
+
+OUTPUT FORMAT (JSON ONLY):
+\`\`\`json
+{
+  "facts": [
+    {"id": 1, "title": "[Personality/Energy]", "content": "[2-3 sentences]"},
+    {"id": 2, "title": "[Inner World]", "content": "[2-3 sentences]"},
+    {"id": 3, "title": "[Social Dynamics]", "content": "[2-3 sentences]"},
+    {"id": 4, "title": "[Career Path]", "content": "[2-3 sentences: 구조적 적합성 + 재능적 두각]"},
+    {"id": 5, "title": "[Love & Relationships]", "content": "[2-3 sentences]"},
+    {"id": 6, "title": "[Health & Wellbeing]", "content": "[2-3 sentences]"},
+    {"id": 7, "title": "[Life Turning Points]", "content": "[2-3 sentences with specific years]"},
+    {"id": 8, "title": "[Hidden Strengths]", "content": "[2-3 sentences]"},
+    {"id": 9, "title": "[Words of Comfort]", "content": "[2-3 sentences: 위로와 응원]"}
+  ]
+}
+\`\`\`
+`
+
+    console.log('[v0] Gemini: ===== STAGE 2: Final Facts Generation =====')
+
+    const stage2Result = await generateText({
+      model: 'google/gemini-3-flash',
+      system: stage2SystemPrompt,
+      prompt: stage2UserPrompt,
+      temperature: 0.8,
+      maxTokens: 2500
+    })
+
+    console.log('[v0] Gemini: Stage 2 response received, parsing...')
+
+    // Stage 2 JSON 파싱
+    const stage2JsonMatch = stage2Result.text.match(/```json\n([\s\S]*?)\n```/)
+    if (!stage2JsonMatch) {
+      console.error('[v0] Gemini: Stage 2 JSON not found')
+      throw new Error('Stage 2 JSON format not found')
     }
 
-    const parsed = JSON.parse(jsonMatch[1])
+    const parsed = JSON.parse(stage2JsonMatch[1])
     const facts: Fact[] = parsed.facts.map((f: any) => ({
       id: f.id,
       text: f.content,
