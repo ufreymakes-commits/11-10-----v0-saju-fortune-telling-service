@@ -228,13 +228,99 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Why Sajume Section */}
+      <section className="relative z-10 py-12 px-4">
+        <div className="max-w-4xl mx-auto">
+          <h3 className="text-center text-lg md:text-xl font-semibold text-white/90 mb-2">Why Sajume?</h3>
+          <p className="text-center text-xs text-white/40 mb-8">
+            The only Saju service built by certified professionals with proven results
+          </p>
+          
+          {/* Stats row */}
+          <div className="flex justify-center gap-6 mb-8">
+            <div className="text-center">
+              <p className="text-2xl md:text-3xl font-bold text-gradient">2,765+</p>
+              <p className="text-xs text-white/60">Reports Delivered</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl md:text-3xl font-bold text-gradient">KPEI</p>
+              <p className="text-xs text-white/60">Certified</p>
+            </div>
+          </div>
+          
+          {/* Feature grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* Lifetime Access */}
+            <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/20 rounded-xl p-4 text-center">
+              <div className="relative w-16 h-16 mx-auto mb-3 rounded-lg overflow-hidden blur-[0.5px]">
+                <Image
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1_forever-1NNP1tQ3KBpIrlMwTWhnS21Q6zzQNu.gif"
+                  alt="Lifetime Access"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
+              <h4 className="text-sm font-semibold text-white mb-1">Lifetime Access</h4>
+              <p className="text-xs text-white/60">Your report stays accessible forever</p>
+            </div>
+            
+            {/* Data-Driven Insights */}
+            <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/20 rounded-xl p-4 text-center">
+              <div className="relative w-16 h-16 mx-auto mb-3 rounded-lg overflow-hidden blur-[0.5px]">
+                <Image
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/2_data%20driven-BIiLlcH4KAPKOdw6yY2SWcz0Lv3t2u.gif"
+                  alt="Data-Driven Insights"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
+              <h4 className="text-sm font-semibold text-white mb-1">Data-Driven Insights</h4>
+              <p className="text-xs text-white/60">Powered by traditional Saju algorithms</p>
+            </div>
+            
+            {/* Consistent Results */}
+            <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/20 rounded-xl p-4 text-center">
+              <div className="relative w-16 h-16 mx-auto mb-3 rounded-lg overflow-hidden blur-[0.5px]">
+                <Image
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/3_consistent-kO6Wqniv5HGvNfRvhfBH6xDG3CeFo9.gif"
+                  alt="Consistent Results"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
+              <h4 className="text-sm font-semibold text-white mb-1">Consistent Results</h4>
+              <p className="text-xs text-white/60">Same birth data = Same accurate reading</p>
+            </div>
+            
+            {/* Story-Driven */}
+            <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/20 rounded-xl p-4 text-center">
+              <div className="relative w-16 h-16 mx-auto mb-3 rounded-lg overflow-hidden blur-[0.5px]">
+                <Image
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/4_storydriven-3C1Ix6trdpbPnzpz5FfOYRHYLnNGN7.gif"
+                  alt="Story-Driven Interpretation"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
+              <h4 className="text-sm font-semibold text-white mb-1">Story-Driven</h4>
+              <p className="text-xs text-white/60">Easy-to-understand interpretations</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="relative z-10 py-6 border-t border-white/10">
         <div className="text-center">
           <div className="border border-white/30 rounded-full px-5 py-1.5 text-white/60 text-xs tracking-wider inline-block">
             Sajume
           </div>
-          <p className="mt-3 text-xs text-white/30">Ancient wisdom, modern insights</p>
+          <p className="mt-3 text-xs text-white/30">All rights reserved by Sajume.</p>
+          <p className="mt-1 text-xs text-white/30">Payment issues / Operation inquiries: hello@sajume.com</p>
         </div>
       </footer>
     </main>
