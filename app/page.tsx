@@ -115,10 +115,10 @@ export default function LandingPage() {
       </section>
 
       {/* Reviews Section - Text Based */}
-      <section className="relative z-10 py-12 px-4">
+      <section className="relative z-10 py-16 px-4">
         <div className="max-w-5xl mx-auto">
-          <h3 className="text-center text-lg md:text-xl font-semibold text-white/90 mb-2">100% Genuine Reviews</h3>
-          <div className="flex items-center justify-center gap-1 mb-2">
+          <h3 className="text-center text-2xl md:text-3xl font-semibold text-white/90 mb-2">100% Genuine Reviews</h3>
+          <div className="flex items-center justify-center gap-1 mb-3">
             {Array.from({ length: 5 }).map((_, i) => (
               <svg key={i} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
                 <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
@@ -126,22 +126,27 @@ export default function LandingPage() {
             ))}
             <span className="text-sm text-white/60 ml-2">26+ reviews</span>
           </div>
-          <p className="text-center text-xs text-white/40 mb-6">
-            If these reviews are found to be manipulated or fake, we will stop selling this service.
+          <p className="text-center text-sm text-white/50 mb-6 font-semibold">
+            If these reviews are found to be manipulated or <span className="md:inline">fake, we will stop selling this service.</span>
+            <span className="md:hidden"><br/>fake, we will stop selling this service.</span>
           </p>
           <TextReviewSlider reviews={TEXT_REVIEWS} />
         </div>
       </section>
 
       {/* Products Section */}
-      <section className="relative z-10 py-8 px-4 pb-20">
+      <section className="relative z-10 py-16 px-4 pb-20">
         <div className="max-w-2xl mx-auto">
-          <h3 className="text-center text-lg font-semibold text-white/90 mb-4">Our Products</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <h3 className="text-center text-3xl md:text-4xl font-semibold text-white/90 mb-2">Our Products</h3>
+          <p className="text-center text-sm md:text-base text-white/50 mb-8 leading-relaxed">
+            From ancient Korea eerie fortune telling<br/>to lucky charm bracelets
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* 99 Facts Product */}
             <Link href="/start" className="group">
-              <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/30 rounded-xl p-5 hover:border-purple-400/50 transition-all hover:scale-[1.02]">
-                <div className="relative w-full h-32 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e]">
+              <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/30 rounded-xl p-6 hover:border-purple-400/50 transition-all hover:scale-[1.02]">
+                <h4 className="text-base md:text-lg font-semibold text-white mb-3">99 Facts</h4>
+                <div className="relative w-full h-40 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e]">
                   <Image
                     src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/99facts.png-GQUor5lDB3UZjqnzWfMmGM6jWNHITE.jpeg"
                     alt="99 Facts of your birth chart"
@@ -149,19 +154,19 @@ export default function LandingPage() {
                     className="object-cover"
                   />
                 </div>
-                <h4 className="text-sm font-semibold text-white mb-1">99 Facts</h4>
-                <p className="text-xs text-white/60 mb-3">Deep dive into your complete birth chart with 99 personalized insights.</p>
+                <p className="text-sm text-white/70 mb-3">Deep dive into your complete birth chart with 99 personalized insights.</p>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-purple-300">9 free + 90 premium</span>
-                  <span className="text-sm font-bold text-white">$9.99</span>
+                  <span className="text-lg font-bold text-white">$9.99</span>
                 </div>
               </div>
             </Link>
 
             {/* Personal Luck Bracelet */}
             <div className="group cursor-not-allowed">
-              <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-amber-500/30 rounded-xl p-5 opacity-70">
-                <div className="relative w-full h-32 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center">
+              <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-amber-500/30 rounded-xl p-6 opacity-70">
+                <h4 className="text-base md:text-lg font-semibold text-white mb-3">Personal Luck Bracelet</h4>
+                <div className="relative w-full h-40 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center">
                   <div className="text-center">
                     <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-amber-500/20 flex items-center justify-center">
                       <svg className="w-6 h-6 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -171,19 +176,19 @@ export default function LandingPage() {
                     <span className="text-xs text-white/40">Coming Soon</span>
                   </div>
                 </div>
-                <h4 className="text-sm font-semibold text-white mb-1">Personal Luck Bracelet</h4>
-                <p className="text-xs text-white/60 mb-3">A handcrafted bracelet designed to fill the missing energies in your personal Saju chart and attract good fortune.</p>
+                <p className="text-sm text-white/70 mb-3">A handcrafted bracelet designed to fill the missing energies in your personal Saju chart and attract good fortune.</p>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-amber-300">Personalized to your Saju</span>
-                  <span className="text-sm font-bold text-white/50">$49.99</span>
+                  <span className="text-lg font-bold text-white/50">$49.99</span>
                 </div>
               </div>
             </div>
 
             {/* 2026 Monthly Saju Reading */}
             <div className="group cursor-not-allowed">
-              <div className="bg-gradient-to-br from-blue-900/40 to-purple-900/40 border border-blue-500/30 rounded-xl p-5 opacity-70">
-                <div className="relative w-full h-32 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center">
+              <div className="bg-gradient-to-br from-blue-900/40 to-purple-900/40 border border-blue-500/30 rounded-xl p-6 opacity-70">
+                <h4 className="text-base md:text-lg font-semibold text-white mb-3">2026 Monthly Saju Reading</h4>
+                <div className="relative w-full h-40 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center">
                   <div className="text-center">
                     <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-blue-500/20 flex items-center justify-center">
                       <svg className="w-6 h-6 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -193,11 +198,10 @@ export default function LandingPage() {
                     <span className="text-xs text-white/40">Coming Soon</span>
                   </div>
                 </div>
-                <h4 className="text-sm font-semibold text-white mb-1">2026 Monthly Saju Reading (12 times)</h4>
-                <p className="text-xs text-white/60 mb-3">Monthly personalized Saju readings delivered to you every month throughout 2026.</p>
+                <p className="text-sm text-white/70 mb-3">Monthly personalized Saju readings delivered to you every month throughout 2026.</p>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-blue-300">12 monthly readings</span>
-                  <span className="text-sm font-bold text-white/50">$79</span>
+                  <span className="text-lg font-bold text-white/50">$79</span>
                 </div>
               </div>
             </div>
@@ -206,31 +210,63 @@ export default function LandingPage() {
       </section>
 
       {/* Why Sajume Section */}
-      <section className="relative z-10 py-12 px-4 bg-gradient-to-b from-transparent via-purple-900/10 to-transparent">
-        <div className="max-w-4xl mx-auto">
-          <h3 className="text-center text-lg md:text-xl font-semibold text-white/90 mb-2">Why Sajume?</h3>
-          <p className="text-center text-xs text-white/40 mb-8">
-            The only Saju service built by certified professionals with proven results
-          </p>
+      <section className="relative z-10 py-16 px-4 bg-gradient-to-b from-transparent via-purple-900/10 to-transparent">
+        <div className="max-w-5xl mx-auto">
+          <h3 className="text-center text-3xl md:text-4xl font-semibold text-white/90 mb-12">Why Sajume?</h3>
           
-          {/* Stats row */}
-          <div className="flex justify-center gap-8 mb-10">
-            <div className="text-center">
-              <p className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">2,765+</p>
-              <p className="text-xs text-white/60">Reports Delivered</p>
+          {/* First Row: 2,765+ Reports Delivered */}
+          <div className="mb-12 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div className="order-2 md:order-1">
+              <h4 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent mb-3">2,765+</h4>
+              <p className="text-2xl md:text-3xl font-semibold text-white mb-4">Reports Delivered</p>
+              <p className="text-sm md:text-base text-white/60 leading-relaxed">
+                The world's only saju service that analyzes your chart based on exact global local birth time & delivers a full report in English.
+              </p>
             </div>
-            <div className="text-center">
-              <p className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">KPEI</p>
-              <p className="text-xs text-white/60">Certified</p>
+            <div className="order-1 md:order-2">
+              <div className="rounded-xl overflow-hidden border border-purple-500/30 shadow-2xl">
+                <div style={{ padding: '109.67% 0 0 0', position: 'relative' }}>
+                  <iframe 
+                    src="https://player.vimeo.com/video/1185152795?badge=0&autopause=0&player_id=0&app_id=58479&loop=1&background=1&muted=1" 
+                    frameBorder="0" 
+                    allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" 
+                    referrerPolicy="strict-origin-when-cross-origin" 
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} 
+                    title="Sajume Report Preview"
+                  />
+                </div>
+              </div>
             </div>
           </div>
-          
+
+          {/* Second Row: KPEI Certification */}
+          <div className="mb-12 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div>
+              <div className="relative w-full max-w-md mx-auto">
+                <Image
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Frame%20181-JYZVeyYP4xsdcr9VxKK5LraiF7NjSo.png"
+                  alt="KPEI Certification - Level 1 and Level 2 Myungri Psychology Counselor certificates"
+                  width={600}
+                  height={700}
+                  className="w-full h-auto"
+                />
+              </div>
+            </div>
+            <div>
+              <h4 className="text-3xl md:text-4xl font-bold text-white mb-2">KPEI Certified</h4>
+              <p className="text-lg md:text-xl text-purple-300 mb-3">Myungri Psychology Counselors</p>
+              <p className="text-sm md:text-base text-white/70 leading-relaxed">
+                For a report grounded in structured logic and thoughtful interpretation, our team holds <span className="font-semibold">Level 1 and Level 2</span> certifications.
+              </p>
+            </div>
+          </div>
+
           {/* Feature grid with white icons */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {/* Lifetime Access */}
-            <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/20 rounded-xl p-4 text-center">
-              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/20 rounded-xl p-5 text-center">
+              <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
+                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -239,9 +275,9 @@ export default function LandingPage() {
             </div>
             
             {/* Data-Driven Insights */}
-            <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/20 rounded-xl p-4 text-center">
-              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/20 rounded-xl p-5 text-center">
+              <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
+                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
@@ -250,9 +286,9 @@ export default function LandingPage() {
             </div>
             
             {/* Consistent Results */}
-            <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/20 rounded-xl p-4 text-center">
-              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/20 rounded-xl p-5 text-center">
+              <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
+                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -261,9 +297,9 @@ export default function LandingPage() {
             </div>
             
             {/* Story-Driven */}
-            <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/20 rounded-xl p-4 text-center">
-              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/20 rounded-xl p-5 text-center">
+              <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
+                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
               </div>
@@ -271,36 +307,8 @@ export default function LandingPage() {
               <p className="text-xs text-white/60">Easy-to-understand insights</p>
             </div>
           </div>
-          
-          {/* Video Preview */}
-          <div className="mb-10">
-            <h4 className="text-center text-sm font-medium text-white/70 mb-4">Report Preview</h4>
-            <div className="max-w-sm mx-auto rounded-xl overflow-hidden border border-purple-500/20 shadow-lg shadow-purple-500/10">
-              <div style={{ padding: '109.67% 0 0 0', position: 'relative' }}>
-                <iframe 
-                  src="https://player.vimeo.com/video/1185152795?badge=0&autopause=0&player_id=0&app_id=58479&loop=1&background=1&muted=1" 
-                  frameBorder="0" 
-                  allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" 
-                  referrerPolicy="strict-origin-when-cross-origin" 
-                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} 
-                  title="Sajume Report Preview"
-                />
-              </div>
-            </div>
-          </div>
-          
-          {/* KPEI Certification */}
-          <div className="bg-gradient-to-br from-[#1a1a3e] to-[#2d1f4e] rounded-2xl p-6 md:p-8 border border-purple-500/20">
-            <h4 className="text-center text-lg md:text-xl font-bold text-white mb-1">KPEI Certified</h4>
-            <p className="text-center text-sm md:text-base text-purple-300 mb-2">Myungri Psychology Counselors</p>
-            <p className="text-center text-xs text-white/50 mb-6 max-w-md mx-auto">
-              For a report grounded in structured logic and thoughtful interpretation, our team holds Level 1 and Level 2 certifications.
-            </p>
-            <div className="relative w-full max-w-lg mx-auto">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Frame%20181-JYZVeyYP4xsdcr9VxKK5LraiF7NjSo.png"
-                alt="KPEI Certification - Level 1 and Level 2 Myungri Psychology Counselor certificates"
-                width={600}
+        </div>
+      </section>
                 height={400}
                 className="w-full h-auto rounded-lg"
               />

@@ -208,25 +208,10 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
     <div className="px-4 py-8 max-w-2xl mx-auto">
       {/* Header */}
       <div className="text-center mb-6">
-        <Link href="/" className="inline-block mb-4">
-          <div className="border border-primary/50 rounded-full px-5 py-1.5 text-primary text-xs tracking-wider">
-            Sajume
-          </div>
-        </Link>
-        
-        <div className="relative w-16 h-16 mx-auto mb-3">
-          <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%85%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"
-            alt="Sajume mascot"
-            fill
-            className="object-contain"
-          />
-        </div>
-        
-        <h1 className="text-lg font-semibold mb-1">
+        <h1 className="text-2xl font-semibold mb-2">
           <span className="text-gradient">{submission.name}</span>, here are your first insights
         </h1>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Based on your Saju birth chart
         </p>
       </div>
@@ -372,8 +357,8 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
         </Link>
         
         <p className="mt-3 text-[11px] text-foreground/60 leading-relaxed">
-          If you have no PayPal, Credit card payment is also available.<br />
-          No PayPal account needed — select <span className="font-bold underline">&quot;Pay with a Card&quot;</span> in the PayPal window.
+          <span className="font-semibold">Can I use credit card? I have no Paypal</span><br/>
+          : Yes, it's available. select <span className="font-bold underline">&apos;Pay with a card&apos;</span> in the Paypal window.
         </p>
       </div>
       
