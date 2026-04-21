@@ -68,8 +68,8 @@ export function ReviewSlider({
               key={pageIndex}
               className="w-full flex-shrink-0"
             >
-              {/* 10개씩 2열 그리드 */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
+              {/* PC: 3열 그리드, Mobile: 1열 */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-1.5">
                 {pageReviews.map((review) => (
                   <div 
                     key={review.id} 
