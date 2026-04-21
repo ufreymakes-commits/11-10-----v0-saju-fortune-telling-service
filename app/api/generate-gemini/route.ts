@@ -1249,37 +1249,32 @@ IMPORTANT:
 
 --------------------------------------------------
 
+--------------------------------------------------
+
 STEP 7. Final Output (MANDATORY):
 
-Generate ONE natural sentence that integrates ALL factors.
+Generate EXACTLY TWO distinct sentences based on the following dual-perspective logic. Do not use technical terms like "Jeong-gwan" or "Sik-sin".
 
-STRICT RULES:
+1. [The Structural Core]: 
+Analyze the relationship between "STEP 1 (Month Branch DNA)" and "STEP 4 (Independence Index)". 
+Recommend ONE sentence describing their fundamental work format and three specific roles.
+- Format: "Based on your innate social DNA and work style, you are best suited for [Work Format], particularly in roles like [Role 1], [Role 2], or [Role 3]."
 
-- Do NOT use technical labels (e.g., “Jeongin type”)
-- Use real-world, modern career descriptions only
-- Avoid vague or generic statements
-- Do NOT list multiple unrelated career paths
-
-The sentence MUST include:
-
-1. Industry (field)
-2. Role (what they do)
-3. Work format (employment / freelance / business)
-
-All must be naturally integrated into ONE sentence.
-
-The output MUST feel like:
-→ an observation of a real person’s current situation
-
-It MUST describe:
-→ what they are likely doing now
-→ and the direction they are moving toward
-
-Each output must be unique and NOT follow a fixed template.
+2. [The Talent & Aura]: 
+Analyze the relationship between "STEP 3 (Element/Industry)" and "STEP 6 (Shinsal/Detail Modifiers)". 
+Recommend ONE sentence describing their external talents and three specific industries where they would stand out.
+- Format: "Because your energy flow and unique details (Shinsal) create a specific aura, you can also stand out in fields such as [Industry 1], [Industry 2], or [Industry 3]."
 
 --------------------------------------------------
 
-STEP 8. Apply Daewoon (Luck Cycle):
+STEP 8. Final Consistency Check:
+- Each sentence must include at least 3 specific modern job/industry examples.
+- Use natural, Gen-Z tone and modern career path as defined in the System Prompt.
+- Ensure the two sentences provide a diverse but consistent career map.
+
+--------------------------------------------------
+
+STEP 9. Apply Daewoon (Luck Cycle):
 
 - Do NOT change the core career direction based on Daewoon
 
@@ -1293,6 +1288,8 @@ If Daewoon contradicts the natal structure:
 The final output MUST include:
 → current state
 → future direction
+
+This must be based on his or her saju data.
 
 --------------------------------------------------------------------------------------------------------
 
@@ -1760,7 +1757,7 @@ Before writing the 9 facts, you must analyze the chart in the \`"internal_analys
 1. Identify the Day Master (Essence) vs. Month Branch (Stage).
 2. Identify the Dominant Element / Ten God (What they have too much of).
 3. Identify the Missing Element / Ten God (What drives their subconscious thirst).
-4. Apply Career Rule Step 1 to 8: Define specific, real-world jobs (e.g., If strong Metal + Jeonggwan -> Law enforcement, Tax accountant, Military. NEVER say "marketing" unless Wood/Fire + Sanggwan is dominant).
+4. Apply Career Rule Step 1 to 8: Define specific, real-world jobs.
 
 STEP 2: DRAFT THE 9 CHILLINGLY ACCURATE FACTS
 Translate the scratchpad analysis into 9 Gen-Z, emotionally resonant, yet hyper-specific English sentences. 
