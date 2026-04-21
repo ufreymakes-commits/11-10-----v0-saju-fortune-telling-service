@@ -4,27 +4,29 @@ import { StarsBackground } from '@/components/stars-background'
 import { Marquee } from '@/components/marquee'
 import { ReviewSlider } from '@/components/review-slider'
 
-// 페이지별 리뷰 배열 (각 배열 = 1페이지)
+// 페이지별 리뷰 배열 (각 배열 = 1페이지, PC에서 3열 그리드)
 const REVIEW_PAGES = [
-  // Page 1 - 3개 리뷰
+  // Page 1 - 6개 리뷰
   [
-    { id: 1, src: "/images/reviews/review-01.png", alt: "Page 1, Review 1" },
-    { id: 2, src: "/images/reviews/review-02.png", alt: "Page 1, Review 2" },
-    { id: 3, src: "/images/reviews/review-03.png", alt: "Page 1, Review 3" },
+    { id: 1, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.19.09-Bp9SmuaiNYajTuXobSEGXJhsATmyY9.png", alt: "Review - I received the free 9 Facts First" },
+    { id: 2, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.20.14-w4XR1fNZh51jSOB0267UDC8fdAs2h3.png", alt: "Review - I really enjoyed reading this Saju packet" },
+    { id: 3, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.20.25-JjxUJS5nYLVIBNnQznFGJm6dcwwl4p.png", alt: "Review - This was great insight" },
+    { id: 4, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.20.35-AX0uK54stwTlXs6aT2c7xEueV82gDb.png", alt: "Review - When I started reading the 99 Facts" },
+    { id: 5, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.20.44-Ez4OEJdwT3nDZQjJ6GiNWxATkkC7cK.png", alt: "Review - Amazing report" },
+    { id: 6, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.20.56-ZFGgGGhXd8sxuCEuw130bhMU07w4B6.png", alt: "Review - The report felt really accurate" },
   ],
-  // Page 2 - 4개 리뷰
+  // Page 2 - 6개 리뷰
   [
-    { id: 4, src: "/images/reviews/review-04.png", alt: "Page 2, Review 1" },
-    { id: 5, src: "/images/reviews/review-05.png", alt: "Page 2, Review 2" },
-    { id: 6, src: "/images/reviews/review-06.png", alt: "Page 2, Review 3" },
-    { id: 7, src: "/images/reviews/review-07.png", alt: "Page 2, Review 4" },
+    { id: 7, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.21.05-eiKTTKuAi6R9bqA121ir7k436ar9YE.png", alt: "Review - The report was absolutely spot on" },
+    { id: 8, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.21.14-3g4bTyZzt9wBvSYBGhTrbRO9ezzMQc.png", alt: "Review - It was scary accurate" },
+    { id: 9, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.21.22-uz2GGWMd97ZBSpq2hJRplOBSh7DD1v.png", alt: "Review - All past things were predicted on point" },
+    { id: 10, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.21.29-lg7pMCb0yB14OXYtDTuwhLW3iUrjGp.png", alt: "Review - It really resonates with me" },
+    { id: 11, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.21.40-8Ps6Wkx1V4pf8acHoQUSPTV9WqyteF.png", alt: "Review - I think it really resonates with me" },
+    { id: 12, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.21.56-dvaLIE1vlN3hNlgNIrIOPjtxVzP5m2.png", alt: "Review - I tried the sample 9 facts" },
   ],
-  // Page 3 - 4개 리뷰
+  // Page 3 - 2개 리뷰
   [
-    { id: 8, src: "/images/reviews/review-08.png", alt: "Page 3, Review 1" },
-    { id: 9, src: "/images/reviews/review-09.png", alt: "Page 3, Review 2" },
-    { id: 10, src: "/images/reviews/review-10.png", alt: "Page 3, Review 3" },
-    { id: 11, src: "/images/reviews/review-11.png", alt: "Page 3, Review 4" },
+    { id: 13, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.22.08-W5qujJPu9grX781jp1Rje0X93ZARwA.png", alt: "Review - Like others have said, it is scarily accurate" },
   ],
 ]
 
