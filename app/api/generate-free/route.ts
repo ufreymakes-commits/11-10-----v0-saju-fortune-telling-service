@@ -3,7 +3,7 @@ import { generateText } from 'ai'
 import { createClient } from '@/lib/supabase/server'
 import type { SajuData, Fact } from '@/lib/types'
 import { headers } from 'next/headers'
-import { SAJU_MASTERPIECE_GUIDE } from '@/lib/saju/masterpiece'
+// import { SAJU_MASTERPIECE_GUIDE } from '@/lib/saju/masterpiece' // 필요시 다시 활성화
 
 /**
  * Single-Shot Generation: 
@@ -1641,106 +1641,111 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
       hapChungAdjustmentDetails: saju_data.hapChungAdjustmentDetails || saju_data.elementAdjustmentHistory || []
     }
 
-    console.log('[v0] ===== FINAL COMPLETE CUSTOMER DATA SENT TO GPT =====')
-    console.log('[v0]', JSON.stringify(allSajuData, null, 2))
-    console.log('[v0] =====================================================')
+    // =========================================
+    // STAGE 1 USER PROMPT: 사용자가 직접 수정
+    // =========================================
+    const stage1UserPrompt = `위 사주 데이터를 기반으로 8가지 체크포인트에 맞춰 심화 분석하라.
 
-    const userPrompt = `Now, generate a total of 9 chillingly insightful sentences for him or her — the kind of sentences someone would want to share with a friend because they're just that on point.Sentences that make them truly feel like, 'Wow, this is tailored to my personal Saju chart, rather than being a generic one for everyone. This captures every detail of my Saju all at once.
+OUTPUT FORMAT (JSON ONLY):
+\`\`\`json
+{
+  "persona_conflict": { "day_master": "", "month_branch": "", "analysis": "" },
+  "energy_overload": { "dominant_element": "", "dominant_ten_god": "", "effect": "" },
+  "social_genes": { "gyeokguk": "", "career_fit": "" },
+  "psychological_thirst": { "missing_element": "", "missing_ten_god": "", "subconscious_drive": "" },
+  "core_trauma": { "clashes": "", "voids": "", "impact": "" },
+  "hidden_weapon": { "sinsal": "", "guiin": "", "application": "" },
+  "independence_index": { "singang_sinyak": "", "percentage": "", "life_strategy": "" },
+  "current_coordinate": { "current_daewoon": "", "key_year": "", "forecast": "" }
+}
+\`\`\``
 
-Before writing the 9 sentences, silently read and internalize the full allSajuData. Treat every value — 12운성, 공망, 형, 원진, 천간합, 삼합, 길성, 조후용신, 신강신약 percentage — as background intelligence that shapes how you see this person's life. You do not need to mention any of these terms. You do not need to explain them. Just let them inform the specificity of what you write, the way a doctor reads lab results before speaking to a patient — the results never appear in the conversation, but they make every observation more precise. The 9 sentences should feel like they could only have been written for this exact chart, not because they reference Saju structure, but because they describe a life too accurately to be generic.
+    // =========================================
+    // STAGE 2 SYSTEM PROMPT: 사용자가 직접 수정
+    // =========================================
+    const stage2SystemPrompt = `You are writing the final customer-facing Saju report.
+You have access to a deep psychological analysis. Translate it into 9 emotionally resonant, chart-specific facts.
+Tone: Gen-Z, warm, grounded, emotionally intelligent. Language: English only.`
 
-Each sentence must feel realistic, specific, and emotionally resonant, as if it could have truly happened in their life.Make each line count.
+    // =========================================
+    // STAGE 2 USER PROMPT: 사용자가 직접 수정
+    // =========================================
+    const stage2UserPrompt = `앞서 작성된 심화 분석 보고서를 바탕으로 9가지 팩트를 작성하라.
 
-Please include years(e.g., "in 2017", "by 2032") wherever possible to enhance realism.This year is 2026 just in case to know.
-
-Focus on uncovering aspects like:
-
-What kind of job they are likely doing now(guess a few jobs with the career rule step 1 to 8),
-
-Whether they're working in a company, for the government, running their own business, freelancing, or unemployed,
-
-    When their first love happened, and when they got married or will get married or they don't want to get married,
-
-What kind of person they married(age difference, looks, personality, job),
-
-    What their family dynamics are like(relationship with parents or siblings),
-
-What they will be doing in the future(very specific),
-
-    If they have any health issues, what would be the likely cause,
-
-      Which region or country would bring them better fortune,
-
-        What inner thoughts they've repeated often throughout life,
-
-          What others have told them frequently,
-
-            How they looked or behaved across childhood, youth, adulthood, and old age.
-
-🧱 Formatting Rules(Critical)
-
-⚠️ Count down every sentence from 1 to 9.
-
-🚫 Only use English.Do not include Korean, Chinese, or any other languages.
-
-🧠 Sentences must be detailed, clear, and insightful; avoid being overly short or vague.Writing just two clear compact sentences for every nine is sufficient.Please provide each numbered point with an average of 50 characters.
-
-💥 Make each sentence emotionally piercing or deeply accurate, as if you truly know them.
-
-✍️ Report Structure:
-
-  Introduction(2 sentences): Describe their inborn energy and overall personality.Include a sentence like: "The phrase you probably hear most often from others is: '***'." In the report introduction or personality section, you must provide one warm summary sentence from a positive perspective: "You are a person standing on the footing of [Self (Day Branch)] within the environment of [Stage (Month Branch)]."
-
-  Body 1(2 sentences): Detailed analysis of wealth and career.Provide two sentences that define the core theme of their career and financial life.These must be realistic, specific, and address the practical concerns or dreams they are likely to have.Avoid vague generalizations.
-
-    Body 2(3 sentences): Love, health, and relationships.Provide two sentences about their main themes in love and marriage.These should be highly factual and specific, not ambiguous.You may mention the timing of their first love, but do not reveal the spouse's profession or personality yet(as this is a free report).
-
-      Conclusion(2 sentences): Advice for improving fortune and future direction. (But don't spoil the exact luck element yet as it will appear on another premium report ) Identify a specific theme that might be causing them inner struggle. Offer two sentences of realistic yet touching comfort. If they are someone better suited for living abroad rather than their home country, provide encouragement for that path. Alternatively, if they have a painful past, offer sincere consolation.
-
-OUTPUT FORMAT(ONLY JSON):
+OUTPUT FORMAT (JSON ONLY):
 \`\`\`json
 {
   "facts": [
-    {"id": 1, "title": "[Title 1]", "content": "[2-3 sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
-    {"id": 2, "title": "[Title 2]", "content": "[2-3 sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
-    {"id": 3, "title": "[Title 3]", "content": "[2-3 sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
-    {"id": 4, "title": "[Career/Social]", "content": "[2-3 sentences: industry+role] ⟦pointer1⟧ ⟦pointer2⟧"},
-    {"id": 5, "title": "[Title 5]", "content": "[2-3 sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
-    {"id": 6, "title": "[Title 6]", "content": "[2-3 sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
-    {"id": 7, "title": "[Title 7]", "content": "[2-3 sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
-    {"id": 8, "title": "[Title 8]", "content": "[2-3 sentences] ⟦pointer1⟧ ⟦pointer2⟧"},
-    {"id": 9, "title": "[Title 9]", "content": "[2-3 sentences: hero's journey] ⟦pointer1⟧ ⟦pointer2⟧"}
+    {"id": 1, "title": "[Personality]", "content": "[2-3 sentences]"},
+    {"id": 2, "title": "[Inner World]", "content": "[2-3 sentences]"},
+    {"id": 3, "title": "[Social Dynamics]", "content": "[2-3 sentences]"},
+    {"id": 4, "title": "[Career Path]", "content": "[2-3 sentences]"},
+    {"id": 5, "title": "[Love & Relationships]", "content": "[2-3 sentences]"},
+    {"id": 6, "title": "[Health]", "content": "[2-3 sentences]"},
+    {"id": 7, "title": "[Life Turning Points]", "content": "[2-3 sentences with specific years]"},
+    {"id": 8, "title": "[Hidden Strengths]", "content": "[2-3 sentences]"},
+    {"id": 9, "title": "[Words of Comfort]", "content": "[2-3 sentences]"}
   ]
 }
-\`\`\`
+\`\`\``
 
-ADVANCED CUSTOMER SAJU DATA:
-${JSON.stringify(allSajuData, null, 2)}`
+    // =========================================
+    // STAGE 1: 심화 분석
+    // =========================================
+    console.log('[v0] generate-free: Stage 1 시작')
 
-    console.log('[v0] Calling GPT with System/User separation')
-
-    // generateText with System prompt
-    // 모델 변경: gpt-4o-mini → gemini-3-flash
-    // 이유: gpt-4o-mini가 긴 프롬프트 뒷부분(실제 데이터)을 무시하고 기본 패턴(creative/marketing)으로 답변
-    // gemini-3-flash는 긴 컨텍스트 처리 능력이 우수하고 지시 따르기 능력이 강함
-    const result = await generateText({
+    const stage1Result = await generateText({
       model: 'google/gemini-3-flash',
       system: systemPrompt,
-      prompt: userPrompt,
-      temperature: 0.8,
-      maxTokens: 3000
+      prompt: `${stage1UserPrompt}
+
+CUSTOMER SAJU DATA:
+${JSON.stringify(allSajuData, null, 2)}`,
+      temperature: 0.7,
+      maxTokens: 2000
     })
 
-    console.log('[v0] GPT response received, parsing...')
+    console.log('[v0] generate-free: Stage 1 완료, 파싱 중...')
 
-    // JSON 파싱
-    const jsonMatch = result.text.match(/```json\n([\s\S]*?)\n```/)
-    if (!jsonMatch) {
-      console.error('[v0] JSON not found in response')
-      throw new Error('JSON format not found')
+    const stage1JsonMatch = stage1Result.text.match(/```json\n([\s\S]*?)\n```/)
+    if (!stage1JsonMatch) {
+      console.error('[v0] generate-free: Stage 1 JSON 파싱 실패')
+      console.error('[v0] Stage 1 raw output:', stage1Result.text.slice(0, 500))
+      throw new Error('Stage 1 JSON format not found')
     }
 
-    const parsed = JSON.parse(jsonMatch[1])
+    const deepAnalysis = JSON.parse(stage1JsonMatch[1])
+    console.log('[v0] generate-free: Stage 1 분석 완료')
+
+    // =========================================
+    // STAGE 2: 9문장 생성
+    // =========================================
+    console.log('[v0] generate-free: Stage 2 시작')
+
+    const stage2Result = await generateText({
+      model: 'google/gemini-3-flash',
+      system: stage2SystemPrompt,
+      prompt: `${stage2UserPrompt}
+
+=== 심화 분석 보고서 ===
+${JSON.stringify(deepAnalysis, null, 2)}
+
+=== 원본 사주 데이터 (참고용) ===
+${JSON.stringify(allSajuData, null, 2)}`,
+      temperature: 0.8,
+      maxTokens: 2500
+    })
+
+    console.log('[v0] generate-free: Stage 2 완료, 파싱 중...')
+
+    const stage2JsonMatch = stage2Result.text.match(/```json\n([\s\S]*?)\n```/)
+    if (!stage2JsonMatch) {
+      console.error('[v0] generate-free: Stage 2 JSON 파싱 실패')
+      console.error('[v0] Stage 2 raw output:', stage2Result.text.slice(0, 500))
+      throw new Error('Stage 2 JSON format not found')
+    }
+
+    const parsed = JSON.parse(stage2JsonMatch[1])
     const facts: Fact[] = parsed.facts.map((f: any) => ({
       id: f.id,
       text: f.content,
@@ -1748,15 +1753,8 @@ ${JSON.stringify(allSajuData, null, 2)}`
       title: f.title
     }))
 
-    console.log(`[v0] Generated ${facts.length} facts`)
-    console.log('[v0] ===== COMPLETE SAJU DATA SENT TO GPT =====')
-    console.log(JSON.stringify(allSajuData, null, 2))
-    console.log('[v0] =============================================')
+    console.log(`[v0] generate-free: ${facts.length}개 팩트 생성 완료`)
 
-    // 프론트엔드가 기대하는 형식으로 응답 준비
-    // freeFacts: 9개 무료 인사이트
-    // teaserFacts: 티저 (빈 배열, 유료 서비스에서 사용)
-    // submission: 고객 정보 + 사주 데이터 + allSajuData (검증용)
     return NextResponse.json({
       freeFacts: facts,
       teaserFacts: [],
@@ -1767,8 +1765,7 @@ ${JSON.stringify(allSajuData, null, 2)}`
         gender,
         calendar,
         sajuData: saju_data
-      },
-      allSajuDataSentToGPT: allSajuData
+      }
     })
   } catch (error) {
     console.error('[v0] Error:', error)
