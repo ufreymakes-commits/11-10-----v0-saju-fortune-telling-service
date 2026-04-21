@@ -2,59 +2,36 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { StarsBackground } from '@/components/stars-background'
 import { Marquee } from '@/components/marquee'
-import { ReviewSlider } from '@/components/review-slider'
+import { TextReviewSlider } from '@/components/text-review-slider'
 
-// 페이지별 리뷰 배열 (각 배열 = 1페이지, PC에서 3열 그리드)
-const REVIEW_PAGES = [
-  // Page 1 - 6개 리뷰
-  [
-    { id: 1, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.19.09-Bp9SmuaiNYajTuXobSEGXJhsATmyY9.png", alt: "Review - I received the free 9 Facts First" },
-    { id: 2, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.20.14-w4XR1fNZh51jSOB0267UDC8fdAs2h3.png", alt: "Review - I really enjoyed reading this Saju packet" },
-    { id: 3, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.20.25-JjxUJS5nYLVIBNnQznFGJm6dcwwl4p.png", alt: "Review - This was great insight" },
-    { id: 4, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.20.35-AX0uK54stwTlXs6aT2c7xEueV82gDb.png", alt: "Review - When I started reading the 99 Facts" },
-    { id: 5, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.20.44-Ez4OEJdwT3nDZQjJ6GiNWxATkkC7cK.png", alt: "Review - Amazing report" },
-    { id: 6, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.20.56-ZFGgGGhXd8sxuCEuw130bhMU07w4B6.png", alt: "Review - The report felt really accurate" },
-  ],
-  // Page 2 - 6개 리뷰
-  [
-    { id: 7, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.21.05-eiKTTKuAi6R9bqA121ir7k436ar9YE.png", alt: "Review - The report was absolutely spot on" },
-    { id: 8, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.21.14-3g4bTyZzt9wBvSYBGhTrbRO9ezzMQc.png", alt: "Review - It was scary accurate" },
-    { id: 9, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.21.22-uz2GGWMd97ZBSpq2hJRplOBSh7DD1v.png", alt: "Review - All past things were predicted on point" },
-    { id: 10, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.21.29-lg7pMCb0yB14OXYtDTuwhLW3iUrjGp.png", alt: "Review - It really resonates with me" },
-    { id: 11, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.21.40-8Ps6Wkx1V4pf8acHoQUSPTV9WqyteF.png", alt: "Review - I think it really resonates with me" },
-    { id: 12, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.21.56-dvaLIE1vlN3hNlgNIrIOPjtxVzP5m2.png", alt: "Review - I tried the sample 9 facts" },
-  ],
-  // Page 3 - 6개 리뷰
-  [
-    { id: 13, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.22.08-W5qujJPu9grX781jp1Rje0X93ZARwA.png", alt: "Review - Like others have said, it is scarily accurate" },
-    { id: 14, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.22.17-GZDf1D43Zlo2EvIb4UzsoIwHGQPD1K.png", alt: "Review - Great report!" },
-    { id: 15, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.22.25-LWnj8GpJfxbU53r2vBaSjl8zBpibF6.png", alt: "Review - The reports brought up a lot" },
-    { id: 16, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.22.33-QTieUXwXXFI7yAS7z7ao3z49srZwTl.png", alt: "Review - Wow almost every single point" },
-    { id: 17, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.22.42-LJUFaEnbiBKAuOIJjcHlXuSedM45Na.png", alt: "Review - Wow spot on will purchase more" },
-    { id: 18, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.22.50-2kil2lLdb86xLD1Wq59yXBNKvChry4.png", alt: "Review - It's crazy how accurate the facts are" },
-  ],
-  // Page 4 - 6개 리뷰
-  [
-    { id: 19, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.23.03-YAWoPAYsBCSrBJUljNLhHOY9X9jWMY.png", alt: "Review - I did this on a whim" },
-    { id: 20, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.23.14-egBjjJ74WAfFoibCamX6J29TdxqZMq.png", alt: "Review - The report came quickly and was surprisingly accurate" },
-    { id: 21, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.23.21-1e1GcAf0QNmi2rMP6eKnNGKKVeq8x7.png", alt: "Review - I love it! This is eeriely true" },
-    { id: 22, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.23.30-5XWpbp6qBAwG3hXofUXKXowAVDOGm1.png", alt: "Review - This is scarily true" },
-    { id: 23, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.23.38-VaKc863K7StlqwkGeke05H8j96wkOy.png", alt: "Review - The 99 Facts report was concise" },
-    { id: 24, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.23.47-JcjxlB6CaAiVyxkIFaRDNBA4x3QraS.png", alt: "Review - The 99 facts premium version is the real deal" },
-  ],
-  // Page 5 - 6개 리뷰
-  [
-    { id: 25, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.24.02-R9EVGolDbu1WWbi0QmDwcWpFDlSfMI.png", alt: "Review - I loved it! It's very precise" },
-    { id: 26, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.24.10-hFTjxHfNYLpIedIlD5vbgZF14f7zm1.png", alt: "Review - wow so accurate" },
-    { id: 27, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.24.22-isUARZLqMUJmQYTEu6KRjZo3UHjtqz.png", alt: "Review - so accurate!" },
-    { id: 28, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.24.53-pMvexiOcUFeobEmt7Lt46wNAxVHArD.png", alt: "Review - Excellent Reading 10/10" },
-    { id: 29, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.25.03-X0vyjYoU8T3xab8n3N2e3hl2ogHoFY.png", alt: "Review - This was extremely helpful and insightful" },
-    { id: 30, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.25.11-LvlSwVR3RWLvmydgbZQk5WnZcEWSQR.png", alt: "Review - Heavily inspired and insightful" },
-  ],
-  // Page 6 - 1개 리뷰
-  [
-    { id: 31, src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202026-04-19%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%204.25.19-zqJAUwohbNmjxjT6tSfXu2iCVZNcoh.png", alt: "Review - The way you explain the trait & challenge" },
-  ],
+// 텍스트 기반 리뷰 데이터 (preview-content와 동일)
+const TEXT_REVIEWS = [
+  { id: 1, text: "I received the free 9 Facts First, due to worry that this was going to be a bit like a scam. Once I read through the 9 facts, I was intrigued and purchased the 99 Report. I'm glad I did. There's so much in here and I felt called out, lol. I really was shocked at how accurately it read me.", name: "Emily W", country: "NY", flag: "🇺🇸", date: "Apr 16, 2026" },
+  { id: 2, text: "I really enjoyed reading this Saju packet. The fact-based format made it feel engaging, personal, and easy to connect with. I began highlighting the points that felt accurate, but quickly realized I had highlighted almost every page.", name: "Hannah", country: "LA", flag: "🇺🇸", date: "Apr 10, 2026" },
+  { id: 3, text: "This was great insight. I definitely felt some feeling were validated.", name: "Jessica", country: "Chicago", flag: "🇺🇸", date: "Apr 1, 2026" },
+  { id: 4, text: "When I started reading the 99 Facts, most of them were unbelievably true to me. It's good to know what my past has been based on the charts and what the current and future look like.", name: "Tao Mon Lae", country: "", flag: "🇲🇲", date: "Apr 1, 2026" },
+  { id: 5, text: "Amazing report!! Good for giving a few things and getting some insights into yourself and into the future. Would highly recommend for anyone interested in SJPJ", name: "Charlotte", country: "", flag: "🇬🇧", date: "Mar 31, 2026" },
+  { id: 6, text: "The report felt really accurate and had lots of interesting insights. I would highly recommend this to anyone curious about it.", name: "Charlotte", country: "", flag: "🇬🇧", date: "Mar 31, 2026" },
+  { id: 7, text: "The report was absolutely spot on. I will definitely book a forecasting reading asap cause the 99 report was very accurate so now I am curious about what it holds for my future.", name: "Simona", country: "", flag: "🇮🇹", date: "Mar 31, 2026" },
+  { id: 8, text: "It was scary accurate on so many things. But now it makes me really think about my future much more now because it was truly hit on a few things I have been thinking about for months.", name: "Meng", country: "Chicago", flag: "🇺🇸", date: "Mar 31, 2026" },
+  { id: 9, text: "All past things were predicted on point like exact year and what happened. Future prediction are reasonable too except my career. But still, thank you so much", name: "Pranjali Patil", country: "", flag: "🇮🇳", date: "Mar 31, 2026" },
+  { id: 10, text: "it really resonates with me and it helps to give me a sense of direction. it also acts as a reassurance for me when i start overthinking and feeling overwhelmed", name: "Sim Yun Rou", country: "", flag: "🇸🇬", date: "Mar 30, 2026" },
+  { id: 11, text: "I tried the sample 9 facts before purchasing the full report and that alone blew my mind. It's made me curious to try the full in depth report because of how scarily accurate it was.", name: "Alyssa", country: "LA", flag: "🇺🇸", date: "Mar 27, 2026" },
+  { id: 12, text: "Like others have said, it is scarily accurate. It also gave me some clarity and confirmation that I am where I'm supposed to be right now. There's also some great advice that I'll definitely follow.", name: "Hannah", country: "LA", flag: "🇺🇸", date: "Mar 21, 2026" },
+  { id: 13, text: "Great report!", name: "Nom", country: "", flag: "🇻🇳", date: "Mar 20, 2026" },
+  { id: 14, text: "The reports brought up a lot that I pushed aside. Made me more introspective of how I want to move forward.", name: "Esther", country: "NY", flag: "🇺🇸", date: "Mar 20, 2026" },
+  { id: 15, text: "Wow almost every single point of the 99 facts was spot on. Will be purchasing more reports in the future.", name: "Nicko", country: "", flag: "🇮🇷", date: "Mar 20, 2026" },
+  { id: 16, text: "It's crazy how accurate the facts are. Just with the first 9 facts, I got goosebumps with the accuracy!!", name: "Yin May Thinn", country: "", flag: "🇲🇲", date: "Mar 18, 2026" },
+  { id: 17, text: "I did this on a whim and received the full report within 30 min. It was eerily accurate, just as advertised. I've been to multiple different fortune tellers and not one of them has given me actual timelines.", name: "Yvonne", country: "LA", flag: "🇺🇸", date: "Mar 18, 2026" },
+  { id: 18, text: "The report came quickly and was surprisingly accurate. It covered internal emotional struggles that have been recurring throughout my life.", name: "JazzaRay", country: "NY", flag: "🇺🇸", date: "Mar 18, 2026" },
+  { id: 19, text: "I love it!!! This is eeriely true, and I was shocked reading the report", name: "Nhi", country: "", flag: "🇻🇳", date: "Mar 6, 2026" },
+  { id: 20, text: "This is scarily true. I was shocked because the timelines actually matched what happened in my life before. This is amazing, best impulsive buying I had in years.", name: "Nhi Tran", country: "", flag: "🇻🇳", date: "Mar 6, 2026" },
+  { id: 21, text: "The 99 Facts report was concise and exactly what I needed. I would highly recommend it.", name: "Simon", country: "LA", flag: "🇺🇸", date: "Mar 4, 2026" },
+  { id: 22, text: "The 99 facts premium version is the real deal - I got it at the discounted price, but I wouldn't mind purchasing it again at its original price.", name: "Natalie", country: "", flag: "🇸🇬", date: "Mar 4, 2026" },
+  { id: 23, text: "I loved it! It's very precise.", name: "Cecilia Mamani", country: "", flag: "🇨🇱", date: "Mar 4, 2026" },
+  { id: 24, text: "wow so accurate", name: "anannya", country: "", flag: "🇮🇳", date: "Feb 16, 2026" },
+  { id: 25, text: "so accurate!", name: "anannya", country: "", flag: "🇮🇳", date: "Feb 16, 2026" },
+  { id: 26, text: "This was extremely helpful and insightful. If you're going to purchase a detailed reading, I highly recommend choosing the Premium option. It really helped me understand myself better.", name: "Anonymous", country: "", flag: "🇺🇸", date: "Jan 31, 2026" },
 ]
 
 export default function LandingPage() {
@@ -137,9 +114,9 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Reviews Section */}
+      {/* Reviews Section - Text Based */}
       <section className="relative z-10 py-12 px-4">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <h3 className="text-center text-lg md:text-xl font-semibold text-white/90 mb-2">100% Genuine Reviews</h3>
           <div className="flex items-center justify-center gap-1 mb-2">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -152,7 +129,7 @@ export default function LandingPage() {
           <p className="text-center text-xs text-white/40 mb-6">
             If these reviews are found to be manipulated or fake, we will stop selling this service.
           </p>
-          <ReviewSlider pages={REVIEW_PAGES} />
+          <TextReviewSlider reviews={TEXT_REVIEWS} />
         </div>
       </section>
 
@@ -229,7 +206,7 @@ export default function LandingPage() {
       </section>
 
       {/* Why Sajume Section */}
-      <section className="relative z-10 py-12 px-4">
+      <section className="relative z-10 py-12 px-4 bg-gradient-to-b from-transparent via-purple-900/10 to-transparent">
         <div className="max-w-4xl mx-auto">
           <h3 className="text-center text-lg md:text-xl font-semibold text-white/90 mb-2">Why Sajume?</h3>
           <p className="text-center text-xs text-white/40 mb-8">
@@ -237,29 +214,25 @@ export default function LandingPage() {
           </p>
           
           {/* Stats row */}
-          <div className="flex justify-center gap-6 mb-8">
+          <div className="flex justify-center gap-8 mb-10">
             <div className="text-center">
-              <p className="text-2xl md:text-3xl font-bold text-gradient">2,765+</p>
+              <p className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">2,765+</p>
               <p className="text-xs text-white/60">Reports Delivered</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl md:text-3xl font-bold text-gradient">KPEI</p>
+              <p className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">KPEI</p>
               <p className="text-xs text-white/60">Certified</p>
             </div>
           </div>
           
-          {/* Feature grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {/* Feature grid with white icons */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
             {/* Lifetime Access */}
             <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/20 rounded-xl p-4 text-center">
-              <div className="relative w-16 h-16 mx-auto mb-3 rounded-lg overflow-hidden blur-[0.5px]">
-                <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1_forever-1NNP1tQ3KBpIrlMwTWhnS21Q6zzQNu.gif"
-                  alt="Lifetime Access"
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
+              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
               </div>
               <h4 className="text-sm font-semibold text-white mb-1">Lifetime Access</h4>
               <p className="text-xs text-white/60">Your report stays accessible forever</p>
@@ -267,47 +240,70 @@ export default function LandingPage() {
             
             {/* Data-Driven Insights */}
             <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/20 rounded-xl p-4 text-center">
-              <div className="relative w-16 h-16 mx-auto mb-3 rounded-lg overflow-hidden blur-[0.5px]">
-                <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/2_data%20driven-BIiLlcH4KAPKOdw6yY2SWcz0Lv3t2u.gif"
-                  alt="Data-Driven Insights"
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
+              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
               </div>
-              <h4 className="text-sm font-semibold text-white mb-1">Data-Driven Insights</h4>
-              <p className="text-xs text-white/60">Powered by traditional Saju algorithms</p>
+              <h4 className="text-sm font-semibold text-white mb-1">Data-Driven</h4>
+              <p className="text-xs text-white/60">1,000+ charts analyzed</p>
             </div>
             
             {/* Consistent Results */}
             <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/20 rounded-xl p-4 text-center">
-              <div className="relative w-16 h-16 mx-auto mb-3 rounded-lg overflow-hidden blur-[0.5px]">
-                <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/3_consistent-kO6Wqniv5HGvNfRvhfBH6xDG3CeFo9.gif"
-                  alt="Consistent Results"
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
+              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
               </div>
-              <h4 className="text-sm font-semibold text-white mb-1">Consistent Results</h4>
-              <p className="text-xs text-white/60">Same birth data = Same accurate reading</p>
+              <h4 className="text-sm font-semibold text-white mb-1">Consistent</h4>
+              <p className="text-xs text-white/60">Same data = Same reading</p>
             </div>
             
             {/* Story-Driven */}
             <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/20 rounded-xl p-4 text-center">
-              <div className="relative w-16 h-16 mx-auto mb-3 rounded-lg overflow-hidden blur-[0.5px]">
-                <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/4_storydriven-3C1Ix6trdpbPnzpz5FfOYRHYLnNGN7.gif"
-                  alt="Story-Driven Interpretation"
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
+              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
               </div>
               <h4 className="text-sm font-semibold text-white mb-1">Story-Driven</h4>
-              <p className="text-xs text-white/60">Easy-to-understand interpretations</p>
+              <p className="text-xs text-white/60">Easy-to-understand insights</p>
+            </div>
+          </div>
+          
+          {/* Video Preview */}
+          <div className="mb-10">
+            <h4 className="text-center text-sm font-medium text-white/70 mb-4">Report Preview</h4>
+            <div className="max-w-sm mx-auto rounded-xl overflow-hidden border border-purple-500/20 shadow-lg shadow-purple-500/10">
+              <div style={{ padding: '109.67% 0 0 0', position: 'relative' }}>
+                <iframe 
+                  src="https://player.vimeo.com/video/1185152795?badge=0&autopause=0&player_id=0&app_id=58479&loop=1&background=1&muted=1" 
+                  frameBorder="0" 
+                  allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" 
+                  referrerPolicy="strict-origin-when-cross-origin" 
+                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} 
+                  title="Sajume Report Preview"
+                />
+              </div>
+            </div>
+          </div>
+          
+          {/* KPEI Certification */}
+          <div className="bg-gradient-to-br from-[#1a1a3e] to-[#2d1f4e] rounded-2xl p-6 md:p-8 border border-purple-500/20">
+            <h4 className="text-center text-lg md:text-xl font-bold text-white mb-1">KPEI Certified</h4>
+            <p className="text-center text-sm md:text-base text-purple-300 mb-2">Myungri Psychology Counselors</p>
+            <p className="text-center text-xs text-white/50 mb-6 max-w-md mx-auto">
+              For a report grounded in structured logic and thoughtful interpretation, our team holds Level 1 and Level 2 certifications.
+            </p>
+            <div className="relative w-full max-w-lg mx-auto">
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Frame%20181-JYZVeyYP4xsdcr9VxKK5LraiF7NjSo.png"
+                alt="KPEI Certification - Level 1 and Level 2 Myungri Psychology Counselor certificates"
+                width={600}
+                height={400}
+                className="w-full h-auto rounded-lg"
+              />
             </div>
           </div>
         </div>
