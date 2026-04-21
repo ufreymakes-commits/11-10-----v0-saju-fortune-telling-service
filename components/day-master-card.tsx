@@ -73,12 +73,12 @@ export function DayMasterCard({ dayMaster, dayMasterKorean }: DayMasterCardProps
         {character.themeDescription}
       </p>
       
-      {/* Keywords */}
+      {/* Keywords - color matches the day master */}
       <div className="flex flex-wrap justify-center gap-1.5 mb-3">
         {character.keywords.map((keyword, index) => (
           <span 
             key={index}
-            className="text-[10px] px-2 py-0.5 bg-white/10 rounded-full text-white/70"
+            className={`text-[10px] px-2 py-0.5 bg-white/10 rounded-full ${character.color}`}
           >
             #{keyword}
           </span>

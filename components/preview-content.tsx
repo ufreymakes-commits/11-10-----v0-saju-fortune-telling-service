@@ -7,7 +7,20 @@ import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { DayMasterCard } from '@/components/day-master-card'
 import type { Fact, SajuData } from '@/lib/types'
-import { LockIcon } from 'lucide-react'
+import { LockIcon, Share2Icon } from 'lucide-react'
+
+// Preview page reviews data
+const PREVIEW_REVIEWS = [
+  { id: 1, text: "I really enjoyed reading this Saju packet. The fact-based format made it feel engaging, personal, and easy to connect with. I began highlighting the points that felt accurate, but quickly realized I had highlighted almost every page.", date: "Apr 10, 02:26 PM" },
+  { id: 2, text: "It really resonates with me and it helps to give me a sense of direction. It also acts as a reassurance for me when I start overthinking and feeling overwhelmed.", date: "Mar 30, 12:06 AM" },
+  { id: 3, text: "Like others have said, it is scarily accurate. It also gave me some clarity and confirmation that I am where I'm supposed to be right now. There's also some great advice that I'll definitely follow.", date: "Mar 21, 06:03 AM" },
+  { id: 4, text: "This was great insight. I definitely felt some feeling were validated.", date: "Apr 1, 08:52 AM" },
+  { id: 5, text: "All past things were predicted on point like exact year and what happened. Future prediction are reasonable too except my career. But still, thank you so much!", date: "Mar 31, 05:15 AM" },
+  { id: 6, text: "When I started reading the 99 Facts, most of them were unbelievably true to me. It's good to know what my past has been based on the charts and what the current and future look like.", date: "Apr 1, 03:23 AM" },
+  { id: 7, text: "It was scary accurate on so many things. But now it makes me really think about my future much more now because it was truly hit on a few things I have been thinking about for months.", date: "Mar 31, 08:02 AM" },
+  { id: 8, text: "I tried the sample 9 facts before purchasing the full report and that alone blew my mind. It's made me curious to try the full in depth report because of how scarily accurate it was.", date: "Mar 27, 02:35 PM" },
+  { id: 9, text: "The report was absolutely spot on. I will definitely book a forecasting reading asap cause the 99 report was very accurate so now I am curious about what it holds for my future.", date: "Mar 31, 07:58 PM" },
+]
 
 interface PreviewContentProps {
   submissionId: string
@@ -90,24 +103,55 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
     fetchPreview()
   }, [submissionId])
 
+  // Character slider data for loading screen
+  const characters = [
+    { name: 'The Pioneer', image: '/images/characters/gabmok.png' },
+    { name: 'The Adapter', image: '/images/characters/eulmok.png' },
+    { name: 'The Energizer', image: '/images/characters/byeonghwa.png' },
+    { name: 'The Empath', image: '/images/characters/jeonghwa.png' },
+    { name: 'The Anchor', image: '/images/characters/muto.png' },
+    { name: 'The Nurturer', image: '/images/characters/gito.png' },
+    { name: 'The Straight Shooter', image: '/images/characters/gyeonggeum.png' },
+    { name: 'The Perfectionist', image: '/images/characters/singeum.png' },
+    { name: 'The Explorer', image: '/images/characters/imsu.png' },
+    { name: 'The Intuitive', image: '/images/characters/gyesu.png' },
+  ]
+
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen overflow-hidden">
         <div className="text-center max-w-sm px-6">
-          <div className="relative w-72 h-56 mx-auto mb-6">
-            <Image
-              src="/images/characters-collection.png"
-              alt="Sajume 10 day master characters"
-              fill
-              className="object-contain"
-            />
+          {/* Character Slider - 2 rows auto-sliding */}
+          <div className="mb-6 overflow-hidden">
+            {/* Row 1 - slides right */}
+            <div className="flex animate-slide-right mb-2">
+              {[...characters, ...characters].map((char, i) => (
+                <div key={`r1-${i}`} className="flex-shrink-0 w-20 mx-1 text-center">
+                  <div className="relative w-16 h-16 mx-auto mb-1">
+                    <Image src={char.image} alt={char.name} fill className="object-contain" />
+                  </div>
+                  <p className="text-[9px] text-foreground/70 truncate">{char.name}</p>
+                </div>
+              ))}
+            </div>
+            {/* Row 2 - slides left */}
+            <div className="flex animate-slide-left">
+              {[...characters.slice(5), ...characters.slice(0, 5), ...characters.slice(5), ...characters.slice(0, 5)].map((char, i) => (
+                <div key={`r2-${i}`} className="flex-shrink-0 w-20 mx-1 text-center">
+                  <div className="relative w-16 h-16 mx-auto mb-1">
+                    <Image src={char.image} alt={char.name} fill className="object-contain" />
+                  </div>
+                  <p className="text-[9px] text-foreground/70 truncate">{char.name}</p>
+                </div>
+              ))}
+            </div>
           </div>
+          
           <h2 className="text-lg font-semibold text-foreground mb-2">
             Your Main Character is stepping in...
           </h2>
           <div className="flex items-center justify-center gap-2 mb-3">
             <Spinner className="w-5 h-5" />
-            <span className="text-2xl">⏳</span>
           </div>
           <p className="text-sm text-foreground/70">
             Don&apos;t close the window!<br />
@@ -225,7 +269,7 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
         </div>
       </div>
 
-      {/* Teaser Facts (Masked) */}
+      {/* Teaser Facts 10, 11, 12 with blur */}
       <div className="mb-6">
         <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
           <span className="text-foreground/50">Hidden Insights</span>
@@ -233,22 +277,35 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
         </h2>
         
         <div className="space-y-2">
-          {teaserFacts.map((fact, index) => (
-            <div 
-              key={fact.id}
-              className="relative bg-muted border border-border rounded-lg p-3 overflow-hidden"
-            >
-              <div className="flex gap-2">
-                <span className="text-muted-foreground font-bold text-sm">{10 + index}</span>
-                <p className="text-foreground/30 text-xs leading-relaxed blur-[6px] select-none">
-                  {fact.text}
-                </p>
-              </div>
-              <div className="absolute inset-0 flex items-center justify-center bg-background/20">
-                <LockIcon className="w-4 h-4 text-muted-foreground" />
-              </div>
+          {/* Fact 10 */}
+          <div className="relative bg-muted border border-border rounded-lg p-3 overflow-hidden">
+            <div className="flex gap-2">
+              <span className="text-muted-foreground font-bold text-sm">10</span>
+              <p className="text-foreground/90 text-xs leading-relaxed">
+                {submission.name}, The main theme of your 2026 is <span className="blur-[5px] select-none bg-primary/20 px-2">hidden content</span>. Congratulations! But be careful of <span className="blur-[5px] select-none bg-primary/20 px-2">something</span>, as <span className="blur-[5px] select-none bg-primary/20 px-2">reason here</span> doesn&apos;t fit well with your lifestyle.
+              </p>
             </div>
-          ))}
+          </div>
+          
+          {/* Fact 11 */}
+          <div className="relative bg-muted border border-border rounded-lg p-3 overflow-hidden">
+            <div className="flex gap-2">
+              <span className="text-muted-foreground font-bold text-sm">11</span>
+              <p className="text-foreground/90 text-xs leading-relaxed">
+                The period from 20<span className="blur-[5px] select-none bg-primary/20 px-1">xx</span> to 20<span className="blur-[5px] select-none bg-primary/20 px-1">xx</span> is the best time to meet your spouse. Your spouse will probably be in charge of <span className="blur-[5px] select-none bg-primary/20 px-2">role here</span> and work as a <span className="blur-[5px] select-none bg-primary/20 px-2">job title</span>.
+              </p>
+            </div>
+          </div>
+          
+          {/* Fact 12 */}
+          <div className="relative bg-muted border border-border rounded-lg p-3 overflow-hidden">
+            <div className="flex gap-2">
+              <span className="text-muted-foreground font-bold text-sm">12</span>
+              <p className="text-foreground/90 text-xs leading-relaxed">
+                Hey, {submission.name}! Are you actually ready to be rich? How about looking at it from this angle?
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -263,19 +320,20 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
           />
         </div>
         
+        <p className="text-xs text-foreground/70 mb-3">
+          Shall we dive into the details? Check out how to supercharge your luck in just one minute with the full report below.
+        </p>
+        
         <h3 className="text-lg font-semibold text-gradient mb-0">
           Unlock All 99 Facts
         </h3>
         <p className="text-sm font-medium text-foreground/80 mb-2">
           Full Report
         </p>
-        <p className="text-xs text-foreground/70 mb-3">
-          Discover deep insights about your personality, career path, love life, and future destiny
-        </p>
         
         <div className="flex items-center justify-center gap-2 mb-3">
           <span className="text-muted-foreground line-through text-xs">$19.99</span>
-          <span className="text-xl font-bold text-secondary">$9.99</span>
+          <span className="text-xl font-bold bg-gradient-to-r from-purple-500 to-fuchsia-500 bg-clip-text text-transparent">$9.99</span>
         </div>
         
         <Link href={`/checkout/${submissionId}`}>
@@ -295,30 +353,75 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
       
       {/* Social Proof */}
       <div className="mt-6 text-center">
-        <p className="text-xs text-muted-foreground mb-1">Trusted by thousands</p>
-        <div className="flex justify-center gap-0.5">
+        <div className="flex justify-center gap-0.5 mb-1">
           {[1, 2, 3, 4, 5].map((star) => (
             <svg key={star} className="w-4 h-4 text-secondary" fill="currentColor" viewBox="0 0 20 20">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
           ))}
         </div>
-        <p className="text-[10px] text-muted-foreground mt-1">4.9/5 from 2,000+ reviews</p>
+        <p className="text-xs text-muted-foreground">2,875 users got their reports</p>
+        <p className="text-[10px] text-muted-foreground">4.9/5 from 100% genuine reviews</p>
       </div>
 
-      {/* Gemini에 보내는 실제 데이터 100% 투명 공개 (개발 검수용) */}
-      {data?.allSajuDataSentToGemini && (
-        <div className="mt-8 bg-slate-900 border border-cyan-500/30 rounded-xl p-4 text-xs">
-          <h3 className="text-cyan-400 font-bold mb-3 text-sm">
-            [DEV] Gemini에 보내는 실제 데이터 100% 투명 공개
-          </h3>
-          <div className="bg-black/50 rounded-lg p-3 overflow-x-auto max-h-[400px] overflow-y-auto">
-            <pre className="text-green-400 font-mono text-[10px] whitespace-pre-wrap">
-              {JSON.stringify(data.allSajuDataSentToGemini, null, 2)}
-            </pre>
+      {/* Reviews Section - PC: 3 columns, Mobile: slider */}
+      <div className="mt-8">
+        <div className="hidden md:grid md:grid-cols-3 gap-3">
+          {PREVIEW_REVIEWS.map((review) => (
+            <div key={review.id} className="bg-card border border-border rounded-lg p-3">
+              <p className="text-xs text-foreground/80 leading-relaxed mb-2">{review.text}</p>
+              <p className="text-[10px] text-muted-foreground">{review.date}</p>
+            </div>
+          ))}
+        </div>
+        <div className="md:hidden overflow-x-auto pb-2">
+          <div className="flex gap-3 w-max">
+            {PREVIEW_REVIEWS.map((review) => (
+              <div key={review.id} className="bg-card border border-border rounded-lg p-3 w-72 flex-shrink-0">
+                <p className="text-xs text-foreground/80 leading-relaxed mb-2">{review.text}</p>
+                <p className="text-[10px] text-muted-foreground">{review.date}</p>
+              </div>
+            ))}
           </div>
         </div>
-      )}
+      </div>
+
+      {/* Personal Luck Bracelet Card */}
+      <div className="mt-8">
+        <p className="text-sm font-semibold text-foreground mb-3 text-center">Your wish is my command, Get your Sajume luck bracelet</p>
+        <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-amber-500/30 rounded-xl p-5">
+          <div className="relative w-full h-32 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center">
+            <div className="text-center">
+              <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-amber-500/20 flex items-center justify-center">
+                <svg className="w-6 h-6 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3C7 3 3 7 3 12s4 9 9 9 9-4 9-9-4-9-9-9zm0 0v18M3 12h18" />
+                </svg>
+              </div>
+              <span className="text-xs text-white/40">Coming Soon</span>
+            </div>
+          </div>
+          <h4 className="text-sm font-semibold text-white mb-1">Personal Luck Bracelet</h4>
+          <p className="text-xs text-white/60 mb-3">A handcrafted bracelet designed to fill the missing energies in your personal Saju chart and attract good fortune.</p>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-amber-300">Personalized to your Saju</span>
+            <span className="text-sm font-bold text-white/50">$49.99</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Share Button - Fixed bottom right */}
+      <button
+        onClick={() => {
+          navigator.clipboard.writeText(window.location.href)
+          alert('Link copied to clipboard!')
+        }}
+        className="fixed bottom-6 right-6 z-50 bg-primary text-primary-foreground w-12 h-12 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
+        aria-label="Share this page"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+        </svg>
+      </button>
     </div>
   )
 }
