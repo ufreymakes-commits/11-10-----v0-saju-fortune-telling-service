@@ -1720,8 +1720,11 @@ ${JSON.stringify(allSajuData, null, 2)}`
     console.log('[v0] Calling GPT with System/User separation')
 
     // generateText with System prompt
+    // 모델 변경: gpt-4o-mini → gemini-3-flash
+    // 이유: gpt-4o-mini가 긴 프롬프트 뒷부분(실제 데이터)을 무시하고 기본 패턴(creative/marketing)으로 답변
+    // gemini-3-flash는 긴 컨텍스트 처리 능력이 우수하고 지시 따르기 능력이 강함
     const result = await generateText({
-      model: 'openai/gpt-4o-mini',
+      model: 'google/gemini-3-flash',
       system: systemPrompt,
       prompt: userPrompt,
       temperature: 0.8,
