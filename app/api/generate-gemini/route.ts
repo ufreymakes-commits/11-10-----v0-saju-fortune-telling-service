@@ -3,7 +3,8 @@ import { generateText } from 'ai'
 import { createClient } from '@/lib/supabase/server'
 import type { SajuData, Fact } from '@/lib/types'
 import { headers } from 'next/headers'
-import { SAJU_MASTERPIECE_GUIDE } from '@/lib/saju/masterpiece'
+// SAJU_MASTERPIECE_GUIDE 연결 해제됨 - 필요시 다시 import 가능
+// import { SAJU_MASTERPIECE_GUIDE } from '@/lib/saju/masterpiece'
 
 /**
  * Gemini 3 Flash 사주 분석 API
@@ -3293,8 +3294,6 @@ FYI
 2028년: 무신(戊申)년
 2029년: 기유(己酉)년
 2030년: 경술(庚戌)년
-
-${SAJU_MASTERPIECE_GUIDE}
 
 Respond ONLY in JSON format.`
 
