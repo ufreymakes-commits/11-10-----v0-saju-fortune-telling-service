@@ -1455,7 +1455,7 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
 59. 기토 - 정인 : Seeks comfort in knowledge. Draws emotional security from study.
 60. 기토 - 편인 : Relies on inner processing to restore energy. Needs quiet solitude to recharge and reflect.
 61. 경금 - 비견 : Sharp self-pride and willpower. Like steel, refuses to bend in self-conviction.
-62. 경금 - 겁재 : Bold challenger of structure. Clashes with peers, cuts through indecision.
+62. 경금 - 겁��� : Bold challenger of structure. Clashes with peers, cuts through indecision.
 63. 경금 - 식신 : Productive with clarity and rules. Applies logic to yield results with precision.
 64. 경금 - 상관 : Strong speech, potentially critical. Cuts with words — brilliant or biting.
 65. 경금 - 정재 : Manages finance with decisiveness. Prefers practical, measurable outcomes.
@@ -3187,7 +3187,7 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
 34. 정화 - 상관 : Expresses inner light, may overreact emotionally. Can be sharp and emotional when misunderstood.
 35. 정화 - 정재 : Softly manages finances with care. Uses warmth to support and provide.
 36. 정화 - 편재 : Attracts wealth through emotional intuition. Knows where to shine to gain favor.
-37. 정화 - 정관 : Quiet leadership grounded in trust. Lights the way gently for others.
+37. ��화 - 정관 : Quiet leadership grounded in trust. Lights the way gently for others.
 38. 정화 - 편관 : Experiences pressure emotionally but adapts. May flicker under stress, but finds flow.
 39. 정화 - 정인 : Deep attachment to knowledge and warmth. Seeks heart-centered wisdom.
 40. 정화 - 편인 : Quiet thinker with spiritual depth. Inner fire burns slow, focused on the invisible.
@@ -3365,6 +3365,11 @@ ${JSON.stringify(allSajuData, null, 2)}
 `
 
     console.log('[v0] Gemini: ===== STAGE 1: Deep Analysis =====')
+    console.log('[v0] Gemini: allSajuData.gyeokguk =', allSajuData.gyeokguk)
+    console.log('[v0] Gemini: allSajuData.strength_analysis =', JSON.stringify(allSajuData.strength_analysis))
+    console.log('[v0] Gemini: allSajuData.ten_gods_summary =', JSON.stringify(allSajuData.ten_gods_summary))
+    console.log('[v0] Gemini: stage1SystemPrompt length =', stage1SystemPrompt.length, 'chars')
+    console.log('[v0] Gemini: stage1UserPrompt length =', stage1UserPrompt.length, 'chars')
 
     const stage1Result = await generateText({
       model: 'google/gemini-3-flash',
@@ -3384,7 +3389,10 @@ ${JSON.stringify(allSajuData, null, 2)}
     }
 
     const deepAnalysis = JSON.parse(stage1JsonMatch[1])
-    console.log('[v0] Gemini: Stage 1 Deep Analysis:', JSON.stringify(deepAnalysis, null, 2))
+    console.log('[v0] Gemini: ===== STAGE 1 OUTPUT =====')
+    console.log('[v0] Gemini: social_genes.career_fit =', deepAnalysis.social_genes?.career_fit)
+    console.log('[v0] Gemini: independence_index =', JSON.stringify(deepAnalysis.independence_index))
+    console.log('[v0] Gemini: Full Stage 1 Output:', JSON.stringify(deepAnalysis, null, 2))
 
     // ===== STAGE 2: 9문장 생성 (Final Facts) =====
     // 사용자가 이 프롬프트를 직접 수정할 수 있습니다
