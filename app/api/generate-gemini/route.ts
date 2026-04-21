@@ -1966,7 +1966,7 @@ Anchor principle from classical rule: "Yongshin is primarily sought from the Mon
 
 Classification approach based on the Month Branch's Ten Gods "power zone"
 
-Assumption of considering the Month Branch's primary hidden stem (Jeonggi, 正氣) and rooting (geun, 根)
+Assumption of considering the Month Branch's primary hidden stem (Jeonggi, 正氣) and rooting (geun, ��)
 
 Example structure labels: Companion structure, Output structure, Wealth structure, Power structure, Resource structure (비견격, 식신격, 재격, 관격, 인수격, etc.)
 
@@ -3292,9 +3292,9 @@ FYI
 2027년: 정미(丁未)년
 2028년: 무신(戊申)년
 2029년: 기유(己酉)년
-2030년: 경술(庚戌)년`
+2030년: 경술(庚戌)년
 
-${ SAJU_MASTERPIECE_GUIDE }
+${SAJU_MASTERPIECE_GUIDE}
 
 Respond ONLY in JSON format.`
 
@@ -3403,7 +3403,7 @@ Language: English only.
 ===========================================
 
 앞서 작성된 '심화 분석 보고서'를 완벽하게 씹어먹고 숙지하라.
-이제 이 내용을 바탕으로 유저에게 줄 9가지 팩트를 기깔나게 작성하라. 너의 실력을 보여줘 Gemini.
+이제 이 내용을 바탕으로 유저에게 줄 9가지 ���트를 기깔나게 작성하라. 너의 실력을 보여줘 Gemini.
 
 테마: 커리어/연애/인생/건강/위로와 응원
 Gen-Z 미국인이 인생을 살면서 늘 궁금해하거나 고민하는 현실에 대한 9가지 팩트이자 위로와 공감이어야 한다. 글을 읽자마자 이렇게 느껴야 한다. '뭐야? 나에 대해서 어떻게 알았지? 이거 뭐야 완전 eerie 하네. 근데 또 엄청 위로가 되고 내 지난 날의 괴로움과 고통에 대해서 누구보다 정확하게 어루만져줘서 눈물이 나려하네. 응원을 받았어. 이 서비스 정말 감동적이다.'
