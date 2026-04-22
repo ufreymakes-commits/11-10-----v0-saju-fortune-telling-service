@@ -1,0 +1,71 @@
+import { notFound, redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import { StarsBackground } from '@/components/stars-background'
+import { PaidReportContent } from '@/components/paid-report-content'
+import type { Submission } from '@/lib/types'
+
+interface PageProps {
+  params: Promise<{ id: string }>
+}
+
+export async function generateMetadata({ params }: PageProps) {
+  const { id } = await params
+  const supabase = await createClient()
+  
+  const { data } = await supabase
+    .from('submissions')
+    .select('name')
+    .eq('id', id)
+    .single()
+  
+  return {
+    title: data ? `${data.name}'s Full 99 Facts Report - Sajume` : 'Full Report - Sajume',
+    description: 'Your complete 99 facts saju birth chart analysis'
+  }
+}
+
+export default async function PaidReportPage({ params }: PageProps) {
+  const { id } = await params
+  
+  // Validate UUID format
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  if (!uuidRegex.test(id)) {
+    notFound()
+  }
+  
+  const supabase = await createClient()
+  
+  // Check payment status and fetch data in parallel
+  const [submissionResult, paymentResult, paidReportResult] = await Promise.all([
+    supabase.from('submissions').select('*').eq('id', id).single(),
+    supabase.from('payments').select('*').eq('submission_id', id).eq('status', 'completed').single(),
+    supabase.from('reports').select('*').eq('submission_id', id).eq('is_free', false).single()
+  ])
+  
+  if (!submissionResult.data) {
+    notFound()
+  }
+  
+  // Payment must be completed to view paid report
+  if (!paymentResult.data) {
+    redirect(`/checkout/${id}`)
+  }
+  
+  // If paid report doesn't exist yet, redirect to generate it
+  if (!paidReportResult.data) {
+    redirect(`/report/${id}?generate_paid=true`)
+  }
+  
+  return (
+    <main className="min-h-screen bg-mystical relative overflow-hidden">
+      <StarsBackground />
+      
+      <div className="relative z-10">
+        <PaidReportContent 
+          submission={submissionResult.data as Submission}
+          paidReport={paidReportResult.data}
+        />
+      </div>
+    </main>
+  )
+}

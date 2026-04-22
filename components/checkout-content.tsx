@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -13,9 +14,33 @@ interface CheckoutContentProps {
 }
 
 export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
+  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [paypalUrl, setPaypalUrl] = useState<string | null>(null)
+
+  // Handle PayPal callback - called after user approves payment
+  const handlePayPalCallback = async (token: string) => {
+    try {
+      const response = await fetch('/api/paypal/capture-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: token })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Payment capture failed')
+      }
+
+      // Redirect to paid report page
+      router.push(`/report/${data.submissionId}/paid`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Payment verification failed')
+      setIsLoading(false)
+    }
+  }
 
   const handlePayPalCheckout = async () => {
     setIsLoading(true)
@@ -35,15 +60,12 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
         throw new Error(data.error || 'Failed to create order')
       }
       
+      // Store orderId in session for callback
+      sessionStorage.setItem('paypal_order_id', data.id)
+      
       // Redirect to PayPal
       if (data.approvalUrl) {
-        // Try redirect first
         window.location.href = data.approvalUrl
-        // If redirect is blocked, show the link after a delay
-        setTimeout(() => {
-          setPaypalUrl(data.approvalUrl)
-          setIsLoading(false)
-        }, 2000)
       } else {
         throw new Error('No approval URL received')
       }
@@ -52,6 +74,16 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
       setIsLoading(false)
     }
   }
+
+  // Check for PayPal callback on mount
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const token = params.get('token')
+    
+    if (token) {
+      handlePayPalCallback(token)
+    }
+  }, [])
 
   return (
     <div className="px-4 py-8 max-w-lg mx-auto">
