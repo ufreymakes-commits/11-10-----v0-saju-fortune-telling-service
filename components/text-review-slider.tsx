@@ -20,29 +20,44 @@ export function TextReviewSlider({ reviews }: TextReviewSliderProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const mobileScrollRef = useRef<HTMLDivElement>(null)
 
-  // PC Auto-scroll effect
+  // PC Auto-scroll effect for both rows
   useEffect(() => {
-    const container = scrollRef.current
-    if (!container || isPaused) return
+    const container1 = scrollRef.current
+    const container2 = mobileScrollRef.current
+    
+    if (!container1 || !container2 || isPaused) return
 
-    const scrollSpeed = 1 // pixels per frame
+    const scrollSpeed1 = 1 // pixels per frame - Row 1
+    const scrollSpeed2 = 0.5 // pixels per frame - Row 2 (slower)
     let animationId: number
-    let currentScroll = 0
+    let currentScroll1 = 0
+    let currentScroll2 = 0
 
     const scroll = () => {
-      if (container && !isPaused) {
-        currentScroll += scrollSpeed
-        container.scrollLeft = currentScroll
+      if (container1 && !isPaused) {
+        currentScroll1 += scrollSpeed1
+        container1.scrollLeft = currentScroll1
         
-        // Get the width of one full row set (original + duplicate)
-        const rowWidth = container.scrollWidth / 2
+        const rowWidth1 = container1.scrollWidth / 2
         
-        // Reset when reached halfway (after first duplicate)
-        if (currentScroll >= rowWidth) {
-          currentScroll = 0
-          container.scrollLeft = 0
+        if (currentScroll1 >= rowWidth1) {
+          currentScroll1 = 0
+          container1.scrollLeft = 0
         }
       }
+
+      if (container2 && !isPaused) {
+        currentScroll2 += scrollSpeed2
+        container2.scrollLeft = currentScroll2
+        
+        const rowWidth2 = container2.scrollWidth / 2
+        
+        if (currentScroll2 >= rowWidth2) {
+          currentScroll2 = 0
+          container2.scrollLeft = 0
+        }
+      }
+
       animationId = requestAnimationFrame(scroll)
     }
 

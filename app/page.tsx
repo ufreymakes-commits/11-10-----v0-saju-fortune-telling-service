@@ -127,8 +127,7 @@ export default function LandingPage() {
             <span className="text-sm text-white/60 ml-2">26+ reviews</span>
           </div>
           <p className="text-center text-sm text-white/50 mb-6 font-semibold">
-            If these reviews are found to be manipulated or <span className="md:inline">fake, we will stop selling this service.</span>
-            <span className="md:hidden"><br/>fake, we will stop selling this service.</span>
+            If these reviews are found to be manipulated or fake, we will stop selling this service.
           </p>
           <TextReviewSlider reviews={TEXT_REVIEWS} />
         </div>
@@ -212,13 +211,16 @@ export default function LandingPage() {
       {/* Why Sajume Section */}
       <section className="relative z-10 py-16 px-4 bg-gradient-to-b from-transparent via-purple-900/10 to-transparent">
         <div className="max-w-5xl mx-auto">
-          <h3 className="text-center text-3xl md:text-4xl font-semibold text-white/90 mb-12">Why Sajume?</h3>
+          <h3 className="text-center text-3xl md:text-4xl font-semibold text-white/90 mb-2">Why Sajume?</h3>
+          <p className="text-center text-sm md:text-base text-white/50 mb-12">
+            No more stress from wrong AI answers.<br/>Let sajume's certified expertise ease your mind.
+          </p>
           
           {/* First Row: 2,765+ Reports Delivered */}
           <div className="mb-12 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div className="order-2 md:order-1">
-              <h4 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent mb-3">2,765+</h4>
-              <p className="text-2xl md:text-3xl font-semibold text-white mb-4">Reports Delivered</p>
+              <h4 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent mb-3">2,765+</h4>
+              <p className="text-2xl md:text-2xl font-semibold text-white mb-4">Reports Delivered</p>
               <p className="text-sm md:text-base text-white/60 leading-relaxed">
                 The world's only saju service that analyzes your chart based on exact global local birth time & delivers a full report in English.
               </p>
@@ -241,20 +243,18 @@ export default function LandingPage() {
 
           {/* Second Row: KPEI Certification */}
           <div className="mb-12 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            <div>
-              <div className="relative w-full max-w-md mx-auto">
-                <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Frame%20181-JYZVeyYP4xsdcr9VxKK5LraiF7NjSo.png"
-                  alt="KPEI Certification - Level 1 and Level 2 Myungri Psychology Counselor certificates"
-                  width={600}
-                  height={700}
-                  className="w-full h-auto"
-                />
+            <div className="flex items-center justify-center md:justify-start">
+              <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/20 rounded-xl p-8 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/10 flex items-center justify-center">
+                  <svg className="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                  </svg>
+                </div>
+                <h4 className="text-2xl md:text-3xl font-bold text-white mb-1">KPEI Certified</h4>
+                <p className="text-base md:text-lg bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent font-semibold">Myungri Psychology Counselors</p>
               </div>
             </div>
             <div>
-              <h4 className="text-3xl md:text-4xl font-bold text-white mb-2">KPEI Certified</h4>
-              <p className="text-lg md:text-xl text-purple-300 mb-3">Myungri Psychology Counselors</p>
               <p className="text-sm md:text-base text-white/70 leading-relaxed">
                 For a report grounded in structured logic and thoughtful interpretation, our team holds <span className="font-semibold">Level 1 and Level 2</span> certifications.
               </p>
@@ -262,7 +262,9 @@ export default function LandingPage() {
           </div>
 
           {/* Feature grid with white icons */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="mb-10">
+            <h4 className="text-center text-base md:text-lg font-semibold text-white/80 mb-6">No.1 Global Saju, Feel the difference</h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {/* Lifetime Access */}
             <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/20 rounded-xl p-5 text-center">
               <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-white/10 flex items-center justify-center">
