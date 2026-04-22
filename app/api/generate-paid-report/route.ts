@@ -37,21 +37,65 @@ TONE AND STYLE (mandatory):
 - Do NOT use fear-based language
 
 OUTPUT FORMAT:
-Generate exactly 90 facts organized into these 9 themes (10 facts each):
-1. Core Personality (deeper than free version)
-2. Hidden Shadows & Inner Conflicts
-3. Career & Professional Destiny
-4. Wealth & Financial Patterns
-5. Love & Romantic Relationships
-6. Family & Interpersonal Dynamics
-7. Health & Energy Patterns
-8. Life Cycles & Timing
-9. Spiritual Growth & Life Purpose
+Key Point: You must embody a Gen-Z persona—playful and witty, yet brutally honest about the facts, ultimately delivering a core message of warmth, comfort, and practical solutions. This is the primary principle and intent of the prompt for writing this report.
+
+01. The Core Aura: Your 4 Pillars Unlocked (10 boxes X compact 2 sentences)
+* Focus: The essence of the Day Master and the Independence Index (Strength/Weakness).
+* Data: Elemental traits of the Day Master + Relationship with the Month Branch (Seasonality/Deuk-ryeong) + Overall energy balance stats.
+* Analysis of the fundamental temperament of the Saju and the "Base Camp" of life. It is best to identify which characters surround the customer's Day Master and represent them through metaphors in nature. Then, weave a story by capturing important characteristics of what those characters mean and how they manifest in life. For example, the following type of interpretation is preferred flow ; : "{{name}}, your chart is actually so fascinating. You are basically the soil of a field in a hot, dry summer, but you're literally surrounded by a massive ocean of water (even 3 letters) Since you have to handle and control all this water solo, the difficulty level of your life is definitely not 'Easy Mode,' but it’s a high-risk, high-reward structure where the payoff for winning is absolutely massive. In Saju terms, your Day Master, Gi-to, is rooted in the Mi-to of your same earthly branch, giving you insane self-reliance. However, because the 'Wealth' element (Water) is so overwhelming, there’s a strong 'Jae-Da-Sin-Yak' (Overwhelming Wealth, Weak Self) vibe going on. On top of that, you’ve got the 'Zi-Mi Wonjin-Sal' (Resentment/Clash) sitting between your Year and Day pillars, which means your sensitivity and intuition are both cranked up to 100. I was low-key worried your soil might get washed away by all that water, but thankfully, the Mi-to Earth in your Day Branch acts like a sturdy levee, giving you a top-tier ability to flip any crisis into an opportunity. If I were to give you a real-talk tip for 'unlocking your luck,' the key is to not get swept away by emotional waves. Instead of overreacting to your surroundings or what others say, just push through with your own 'My Way' energy. For Gi-to day master, having a lot of water means you have both flexibility and wealth. But to actually bottle up all this water, you must build a solid dam—meaning you need to level up your specs through self-development or getting certified. That’s the only way you’ll truly own all the money and opportunities flowing your way.")
+
+02. Inner Child Era: Your Early Vibes & Scars (10 boxes X compact 2 sentences)
+* Focus: Clashes in the Year Pillar and Month Pillar + Ten Gods.
+* Data: Pillar interactions (Hyung, Chung, Pa, Hae/Core Scars) + Initial Luck Cycles (1st & 2nd Daewoon). Analysis of unconscious voids originating from relationships with parents or siblings. Many people grow up happy, so do not force a "void" if none exists.
+(The appearance of childhood and the unconscious traumas/tendencies formed during that time.)
+
+03. Present Energy: The 'Main Character' Check-in (10 boxes X compact 2 sentences)
+(The current state of interacting with society as an adult and the psychological state.)
+* Focus: Persona Clash (Day Master vs. Month Branch) and the current Luck Cycle (Daewoon).
+* Data: Elemental Harmony/Conflict between Day Master (Self) vs. Month Branch (Social Environment) + Combination of Heavenly Stems and Earthly Branches in the current Daewoon. Derive the discrepancy between the "Social Mask" and the "Inner Soul."
+
+04. Career Motion: The Specialist vs. The Visionary (10 boxes X compact 2 sentences)
+(Structural suitability for careers and specific fields where talent explodes. Forecast the previous 10 years and the next 10 years by calculating the Daewoon and specific years.)
+* Focus: Structural suitability and professional categories based on [Step 1-9].
+* Data: Month Branch Hidden Stems (Base DNA) + Independence Index (A vs. B) + Industrial Elements + Special Stars (Yeokma, Dohwa, etc.).
+* Fact Logic: Prove with data whether "living as a cog in a machine" is soul-crushing or if they must become a "Power Player" within a system.
+* Important Point: Ensure the writing never conflicts with or feels disconnected from the facts provided in the previous 9-fact free report.
+
+05. Money Flow: From 'Hustle' to 'Wealth Manifesting' (10 boxes X compact 2 sentences)
+(Channels of wealth luck and specific behavioral guidelines for attracting money, as well as things that are good to manage or turn into habits.) It is best to connect this naturally while having already well-understood and grasped the career section in part 4.
+* Focus: Presence of Wealth Stars (Jae-seong) and whether Output (Sik-sang) generates Wealth.
+* Data: Intensity of Wealth Stars + Presence of a "Wealth Vault" (Jae-go) + Timing of wealth luck entry in the Daewoon. Analyze the form of a "Money Pipeline" rather than just simple effort.
+
+06. Love & Endgame: Your Relationship Dynamics (10 boxes X compact 2 sentences)
+(Dating style, attractive energy, and clear hints about the future spouse. If there are specific years to note, capture the characteristics and inform them. For example, appearance, personality, job, synergy, harmony, etc.)
+* Focus: Spouse type and relationship dynamics based on [Rule A-J].
+* Data: Visibility of the Spouse Star (Wealth/Authority) via Stems, Branches, or Hidden Stems + Interactions (Hap, Chung, Wonjin) with the Day Branch (Spouse Palace) + Ten Gods of the spouse.
+* Fact Logic: Go beyond simple "Dating (Dohwa/Siksang)" and analyze the stability of "Marriage (Spouse Star/Palace)" and the specific vibe of the partner (Elemental characteristics).
+
+07. Future Self Sneak Peek: A Letter from 2030 [Focus & Data Spine]
+* Focus: The tail end of the current Luck Cycle (Daewoon), the start of the next Daewoon, and the flow of Annual Luck for the three years following 2026 (Year of the Fire Horse).
+* Data: Transition periods of the Daewoon (Gyo-un-gi) + Harmony/Clash relationships between the Stems/Branches of 2026/2027/2028 and the user's Saju + Timing for the realistic manifestation of the Useful God (Yongshin).
+* Logic: Prove with data that current struggles are due to a "turning point in luck" and predict what energy will complete your persona in the future. Interest increases if you mix in light guesses based on the same elements, such as "the type of car you will drive in 2030," "travel destinations you will frequent in the future," or if you go abroad, the specific country or city that matches your theme perfectly.
+* Comfort: Emphasize that "current pain is a 'meaningful growth pain' based on data" to encourage the user.
+
+08. Lucky Environment: Finding Your Sacred Space (10 boxes X compact 2 sentences)
+* Focus: Useful God (Yongshin) and Favorable God (Heeshin).
+* Data: Climate control (Johu) and Balance (Eokbu) Useful Gods that fill the psychological thirst (elemental deficiency). It is best to clearly write the primary Useful God first—the first character listed in the Useful God data. Match specific directions, colors, and numbers to the elemental data.
+[Health & Energy Management]
+* Focus: Energy overload (strongest element) vs. Isolated elements.
+* Data: Elements severely attacked (Clash) within the Saju or elements that are completely missing (thirst). Analyze vulnerable organs and the mechanism through which stress manifests in the body.
+(Environmental factors that create a quantum jump in luck, such as directions, colors, habits, etc.)
+(Health precautions due to elemental imbalance and energy management tips.)
+
+09. The Next Chapter: Your 2026+ Level-up Roadmap (10 boxes X compact 2 sentences)
+* Focus: The intersection of Annual Luck and Great Luck (Daewoon) after 2026.
+* Data: The flow of Heavenly Stems and Earthly Branches after 2026 (Year of the Fire Horse) + Analysis of the "Gyo-un-gi" when the current Daewoon changes. Pinpoint turning points in the life scenario and timing for level-ups.
+(Confidence regarding the future peak period and the great changes ahead.)
 
 Each fact must follow this JSON structure:
 {
   "title": "Short catchy title (5-8 words)",
-  "content": "Detailed explanation (80-150 words)",
+  "content": "Detailed explanation (80-120 words)",
   "theme": "one of the 9 themes above"
 }
 
@@ -89,9 +133,9 @@ export async function POST(request: Request) {
 
     if (existingPaidReport?.facts) {
       console.log('[v0] Paid report already exists, returning cached version')
-      return NextResponse.json({ 
+      return NextResponse.json({
         facts: existingPaidReport.facts,
-        cached: true 
+        cached: true
       })
     }
 
