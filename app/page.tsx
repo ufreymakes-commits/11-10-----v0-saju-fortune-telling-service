@@ -309,13 +309,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-                height={400}
-                className="w-full h-auto rounded-lg"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Footer */}
       <footer className="relative z-10 py-6 border-t border-white/10">
