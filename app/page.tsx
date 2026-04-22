@@ -79,36 +79,61 @@ export default function LandingPage() {
             of your birth chart
           </h2>
           
-          <div className="inline-block bg-purple-600/80 text-white px-4 py-1 rounded-sm text-xs mb-8">
+          <div className="inline-block bg-purple-600/80 text-white px-4 py-1 rounded-sm text-xs md:text-sm mb-8">
             {"K-astrology 'Saju' based"}
           </div>
           
-          {/* Mascot */}
-          <div className="relative w-44 h-44 mx-auto mb-6 animate-float">
-            <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%85%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"
-              alt="Sajume mascot - a cute pink nine-tailed fox holding a crystal ball"
-              fill
-              className="object-contain drop-shadow-2xl"
-              priority
-            />
+          {/* Mascot with V-formation background characters */}
+          <div className="relative w-72 h-52 md:w-80 md:h-60 mx-auto mb-6">
+            {/* Background characters - Left side (far to close) */}
+            <div className="absolute left-0 top-4 md:top-6 w-12 h-12 md:w-14 md:h-14 opacity-20">
+              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/singeum-KgmDCqcBvR8APXhwb5m5GXfMfY0Hw2.png" alt="Singeum" fill className="object-contain" />
+            </div>
+            <div className="absolute left-8 md:left-10 top-10 md:top-12 w-14 h-14 md:w-16 md:h-16 opacity-30">
+              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gyesu-9Sit6yryy2XFeyDddE5QQu6AwopXY1.png" alt="Gyesu" fill className="object-contain" />
+            </div>
+            <div className="absolute left-16 md:left-20 top-16 md:top-20 w-16 h-16 md:w-20 md:h-20 opacity-40">
+              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gabmok-bkPkfmlicV7xsuBn9ZSdEYzkjRYxon.png" alt="Gabmok" fill className="object-contain" />
+            </div>
+            
+            {/* Background characters - Right side (far to close) */}
+            <div className="absolute right-0 top-4 md:top-6 w-12 h-12 md:w-14 md:h-14 opacity-20">
+              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/muto-EykGx1vMIHPJWNwdVHLOIvigykkhkg.png" alt="Muto" fill className="object-contain" />
+            </div>
+            <div className="absolute right-8 md:right-10 top-10 md:top-12 w-14 h-14 md:w-16 md:h-16 opacity-30">
+              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/imsu-3qFTUgKapaaAtc0RJrJb0KyoFDpgd5.png" alt="Imsu" fill className="object-contain" />
+            </div>
+            <div className="absolute right-16 md:right-20 top-16 md:top-20 w-16 h-16 md:w-20 md:h-20 opacity-40">
+              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/jeonghwa-vkeepvUQw7mtyztMYpGrZfM890lT9h.png" alt="Jeonghwa" fill className="object-contain" />
+            </div>
+            
+            {/* Main mascot - center front */}
+            <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-44 h-44 md:w-48 md:h-48 animate-float z-10">
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%85%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"
+                alt="Sajume mascot - a cute pink nine-tailed fox holding a crystal ball"
+                fill
+                className="object-contain drop-shadow-2xl"
+                priority
+              />
+            </div>
           </div>
           
-          <p className="text-sm text-white/60 mb-6 max-w-sm mx-auto leading-relaxed">
+          <p className="text-sm md:text-base text-white/60 mb-6 max-w-sm mx-auto leading-relaxed">
             Discover the secrets hidden in your birth chart through ancient Korean Saju astrology.
           </p>
           
           <Link 
             href="/start"
-            className="inline-flex items-center gap-2 bg-pink-400 text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-pink-500 transition-all hover:scale-105 shadow-lg shadow-pink-500/30"
+            className="inline-flex items-center gap-2 bg-pink-400 text-white px-6 py-2.5 rounded-full text-sm md:text-base font-semibold hover:bg-pink-500 transition-all hover:scale-105 shadow-lg shadow-pink-500/30"
           >
-            Discover Your Destiny
+            Get 9 Facts For Free (1 min)
             <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
               <path d="M7 4L13 10L7 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </Link>
           
-          <p className="mt-4 text-xs text-white/40">
+          <p className="mt-4 text-xs md:text-sm text-white/40">
             9 facts free | Full report $9.99
           </p>
         </div>
@@ -241,21 +266,23 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Second Row: KPEI Certification */}
+          {/* Second Row: KPEI Certification - Image on left, text on right (mirrored from above) */}
           <div className="mb-12 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            <div className="flex items-center justify-center md:justify-start">
-              <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/20 rounded-xl p-8 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/10 flex items-center justify-center">
-                  <svg className="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                  </svg>
-                </div>
-                <h4 className="text-2xl md:text-3xl font-bold text-white mb-1">KPEI Certified</h4>
-                <p className="text-base md:text-lg bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent font-semibold">Myungri Psychology Counselors</p>
+            <div className="order-1">
+              <div className="relative w-full max-w-md mx-auto">
+                <Image
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Frame%20181-cfTMJ2cXy3zGAdmW4sf31fboZo7apa.png"
+                  alt="KPEI Certification - Level 1 and Level 2 Myungri Psychology Counselor certificates"
+                  width={600}
+                  height={700}
+                  className="w-full h-auto rounded-xl"
+                />
               </div>
             </div>
-            <div>
-              <p className="text-sm md:text-base text-white/70 leading-relaxed">
+            <div className="order-2">
+              <h4 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent mb-3">KPEI Certified</h4>
+              <p className="text-2xl md:text-2xl font-semibold text-white mb-4">Myungri Psychology Counselors</p>
+              <p className="text-sm md:text-base text-white/60 leading-relaxed">
                 For a report grounded in structured logic and thoughtful interpretation, our team holds <span className="font-semibold">Level 1 and Level 2</span> certifications.
               </p>
             </div>
@@ -263,7 +290,7 @@ export default function LandingPage() {
 
           {/* Feature grid with white icons */}
           <div className="mb-10">
-            <h4 className="text-center text-base md:text-lg font-semibold text-white/80 mb-6">No.1 Global Saju, Feel the difference</h4>
+            <h4 className="text-center text-base md:text-lg font-semibold text-white/80 mb-6">No.1 Global Saju,<br className="md:hidden" /> Feel the difference</h4>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {/* Lifetime Access */}
               <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/20 rounded-xl p-5 text-center">

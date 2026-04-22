@@ -17,23 +17,21 @@ interface TextReviewSliderProps {
 
 export function TextReviewSlider({ reviews }: TextReviewSliderProps) {
   const [isPaused, setIsPaused] = useState(false)
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const mobileScrollRef = useRef<HTMLDivElement>(null)
+  const pcRow1Ref = useRef<HTMLDivElement>(null)
+  const pcRow2Ref = useRef<HTMLDivElement>(null)
 
   // PC Auto-scroll effect for both rows
   useEffect(() => {
-    const container1 = scrollRef.current
-    const container2 = mobileScrollRef.current
-    
-    if (!container1 || !container2 || isPaused) return
-
     const scrollSpeed1 = 1 // pixels per frame - Row 1
-    const scrollSpeed2 = 0.5 // pixels per frame - Row 2 (slower)
+    const scrollSpeed2 = 0.6 // pixels per frame - Row 2 (slower)
     let animationId: number
     let currentScroll1 = 0
     let currentScroll2 = 0
 
     const scroll = () => {
+      const container1 = pcRow1Ref.current
+      const container2 = pcRow2Ref.current
+      
       if (container1 && !isPaused) {
         currentScroll1 += scrollSpeed1
         container1.scrollLeft = currentScroll1
@@ -123,7 +121,7 @@ export function TextReviewSlider({ reviews }: TextReviewSliderProps) {
         <div className="space-y-3 pb-4">
           {/* Row 1 - PC */}
           <div 
-            ref={scrollRef}
+            ref={pcRow1Ref}
             className="overflow-x-hidden"
           >
             <div className="flex gap-3" style={{ width: 'max-content' }}>
@@ -135,7 +133,7 @@ export function TextReviewSlider({ reviews }: TextReviewSliderProps) {
           
           {/* Row 2 - PC */}
           <div 
-            ref={mobileScrollRef}
+            ref={pcRow2Ref}
             className="overflow-x-hidden"
           >
             <div className="flex gap-3" style={{ width: 'max-content' }}>
