@@ -92,12 +92,39 @@ Key Point: You must embody a Gen-Z persona—playful and witty, yet brutally hon
 * Data: The flow of Heavenly Stems and Earthly Branches after 2026 (Year of the Fire Horse) + Analysis of the "Gyo-un-gi" when the current Daewoon changes. Pinpoint turning points in the life scenario and timing for level-ups.
 (Confidence regarding the future peak period and the great changes ahead.)
 
-Each fact must follow this JSON structure:
-{
-  "title": "Short catchy title (5-8 words)",
-  "content": "Detailed explanation (80-120 words)",
-  "theme": "one of the 9 themes above"
-}
+OUTPUT JSON STRUCTURE - CRITICAL:
+You MUST return a valid JSON array with exactly 9 sections. Each section contains 10 cards.
+
+[
+  {
+    "sectionNumber": "01",
+    "sectionTitle": "The Core Aura: Your 4 Pillars Unlocked",
+    "cards": [
+      {
+        "content": "Compact, core insight (max 125 characters total)"
+      },
+      ... (10 cards per section)
+    ]
+  },
+  {
+    "sectionNumber": "02",
+    "sectionTitle": "Inner Child Era: Your Early Vibes & Scars",
+    "cards": [
+      {
+        "content": "Compact, core insight (max 125 characters total)"
+      },
+      ... (10 cards per section)
+    ]
+  },
+  ... (repeat for sections 03-09)
+]
+
+CONTENT GUIDELINES:
+- Each card's "content" field: Maximum 125 characters (not words)
+- Be compact but meaningful - core insight only
+- No need for title/theme per card
+- Maintain Gen-Z tone, warmth, and practical advice
+- 90 total cards (9 sections × 10 cards each)
 
 Return ONLY a valid JSON array of 90 fact objects. No markdown, no explanations outside the JSON.`
 
