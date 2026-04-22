@@ -166,8 +166,8 @@ export default function LandingPage() {
             From ancient Korea eerie fortune telling<br/>to lucky charm bracelets
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* 99 Facts Product */}
-            <Link href="/start" className="group">
+            {/* 99 Facts Product - Full width on PC first row */}
+            <Link href="/start" className="group md:col-span-2 lg:col-span-1">
               <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/30 rounded-xl p-6 hover:border-purple-400/50 transition-all hover:scale-[1.02]">
                 <h4 className="text-base md:text-lg font-semibold text-white mb-3">99 Facts</h4>
                 <div className="relative w-full h-40 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e]">
@@ -186,8 +186,8 @@ export default function LandingPage() {
               </div>
             </Link>
 
-            {/* Personal Luck Bracelet */}
-            <div className="group cursor-not-allowed">
+            {/* Personal Luck Bracelet - Second row left on PC */}
+            <div className="group cursor-not-allowed md:col-span-1">
               <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-amber-500/30 rounded-xl p-6 opacity-70">
                 <h4 className="text-base md:text-lg font-semibold text-white mb-3">Personal Luck Bracelet</h4>
                 <div className="relative w-full h-40 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center">
@@ -208,8 +208,8 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* 2026 Monthly Saju Reading */}
-            <div className="group cursor-not-allowed">
+            {/* 2026 Monthly Saju Reading - Second row right on PC */}
+            <div className="group cursor-not-allowed md:col-span-1">
               <div className="bg-gradient-to-br from-blue-900/40 to-purple-900/40 border border-blue-500/30 rounded-xl p-6 opacity-70">
                 <h4 className="text-base md:text-lg font-semibold text-white mb-3">2026 Monthly Saju Reading</h4>
                 <div className="relative w-full h-40 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center">
@@ -290,7 +290,7 @@ export default function LandingPage() {
 
           {/* Feature grid with white icons */}
           <div className="mb-10">
-            <h4 className="text-center text-base md:text-lg font-semibold text-white/80 mb-6">No.1 Global Saju,<br className="md:hidden" /> Feel the difference</h4>
+            <h4 className="text-center text-2xl md:text-3xl font-semibold text-white/80 mb-6">No.1 Global Saju,<br className="md:hidden" /> Feel the difference</h4>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {/* Lifetime Access */}
               <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/20 rounded-xl p-5 text-center">
