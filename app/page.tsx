@@ -154,7 +154,7 @@ export default function LandingPage() {
           <p className="text-center text-sm text-white/50 mb-3 font-semibold">
             If these reviews are found to be manipulated or fake, we will stop selling this service.
           </p>
-          <p className="text-center text-xs md:text-sm text-white/40 mb-6">
+          <p className="text-center text-xs md:text-sm font-bold text-yellow-300 mb-6">
             #Shocked #Eerie #Encouraged
           </p>
           <TextReviewSlider reviews={TEXT_REVIEWS} />
