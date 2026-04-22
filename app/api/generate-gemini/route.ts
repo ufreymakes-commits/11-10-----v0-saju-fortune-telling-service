@@ -1455,7 +1455,7 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
 59. 기토 - 정인 : Seeks comfort in knowledge. Draws emotional security from study.
 60. 기토 - 편인 : Relies on inner processing to restore energy. Needs quiet solitude to recharge and reflect.
 61. 경금 - 비견 : Sharp self-pride and willpower. Like steel, refuses to bend in self-conviction.
-62. 경금 - 겁����� : Bold challenger of structure. Clashes with peers, cuts through indecision.
+62. 경금 - 겁������� : Bold challenger of structure. Clashes with peers, cuts through indecision.
 63. 경금 - 식신 : Productive with clarity and rules. Applies logic to yield results with precision.
 64. 경금 - 상관 : Strong speech, potentially critical. Cuts with words — brilliant or biting.
 65. 경금 - 정재 : Manages finance with decisiveness. Prefers practical, measurable outcomes.
@@ -2561,14 +2561,46 @@ OUTPUT FORMAT (JSON ONLY):
     }))
 
     console.log(`[v0] Gemini: Generated ${facts.length} facts`)
-    console.log('[v0] Gemini: ===== COMPLETE SAJU DATA SENT TO GEMINI 1.5 PRO =====')
-    console.log(JSON.stringify(allSajuData, null, 2))
-    console.log('[v0] Gemini: ====================================================')
+
+    // ===== DB에 무료 레포트 저장 (유료 레포트 생성 시 context로 사용) =====
+    if (body.submissionId) {
+      const supabase = await createClient()
+      
+      // 1500자 해설 역할을 하는 deepAnalysis를 문자열로 저장
+      const contextInterpretation = JSON.stringify(deepAnalysis)
+      
+      // 기존 무료 레포트가 있으면 업데이트, 없으면 삽입
+      const { data: existingReport } = await supabase
+        .from('reports')
+        .select('id')
+        .eq('submission_id', body.submissionId)
+        .eq('is_free', true)
+        .single()
+      
+      if (existingReport) {
+        await supabase
+          .from('reports')
+          .update({
+            facts: facts,
+            context_interpretation: contextInterpretation,
+          })
+          .eq('id', existingReport.id)
+        console.log('[v0] Gemini: Updated existing free report in DB')
+      } else {
+        await supabase
+          .from('reports')
+          .insert({
+            submission_id: body.submissionId,
+            section_key: 'free',
+            facts: facts,
+            context_interpretation: contextInterpretation,
+            is_free: true,
+          })
+        console.log('[v0] Gemini: Saved new free report to DB')
+      }
+    }
 
     // 프론트엔드가 기대하는 형식으로 응답 준비
-    // freeFacts: 9개 무료 인사이트
-    // teaserFacts: 티저 (빈 배열, 유료 서비스에서 사용)
-    // submission: 고객 정보 + 사주 데이터 + allSajuData (검증용)
     return NextResponse.json({
       freeFacts: facts,
       teaserFacts: [],
