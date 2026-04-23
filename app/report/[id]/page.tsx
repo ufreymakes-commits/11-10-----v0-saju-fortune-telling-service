@@ -35,30 +35,39 @@ export default async function ReportPage({ params }: PageProps) {
   
   const supabase = await createClient()
   
-  // Fetch submission, payment, and all cached report sections in parallel
+  // Fetch submission, payment, and all cached report sections (both free and paid) in parallel
   const [submissionResult, paymentResult, reportsResult] = await Promise.all([
     supabase.from('submissions').select('*').eq('id', id).single(),
     supabase.from('payments').select('status').eq('submission_id', id).eq('status', 'completed').single(),
-    supabase.from('reports').select('section_key, facts').eq('submission_id', id).eq('is_free', false)
+    supabase.from('reports').select('section_key, facts, is_free').eq('submission_id', id)
   ])
   
   if (!submissionResult.data) {
     notFound()
   }
   
-  if (!paymentResult.data) {
-    redirect(`/checkout/${id}`)
-  }
+  // Check if this is a paid report request (URL = /report/[id] and payment exists)
+  const hasPaidAccess = !!paymentResult.data
   
-  // Build pre-loaded facts map keyed by section — if all 4 sections exist,
-  // the client component will render immediately without any API calls.
+  // Build pre-loaded facts map — if all 4 sections exist, render immediately without API calls
   const cachedSections: Record<string, Fact[]> = {}
   if (reportsResult.data) {
     for (const row of reportsResult.data) {
       if (row.section_key && Array.isArray(row.facts)) {
-        cachedSections[row.section_key] = row.facts as Fact[]
+        // For free reports: load free sections (is_free = true)
+        // For paid reports: load paid sections (is_free = false)
+        if (hasPaidAccess && !row.is_free) {
+          cachedSections[row.section_key] = row.facts as Fact[]
+        } else if (!hasPaidAccess && row.is_free) {
+          cachedSections[row.section_key] = row.facts as Fact[]
+        }
       }
     }
+  }
+  
+  // If no payment and has no free cached sections, redirect to free report
+  if (!hasPaidAccess && Object.keys(cachedSections).length === 0) {
+    // User can view the page but will need to generate on client
   }
   
   return (
