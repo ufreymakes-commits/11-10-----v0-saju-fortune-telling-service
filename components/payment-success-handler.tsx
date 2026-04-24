@@ -19,7 +19,7 @@ export function PaymentSuccessHandler({ submissionId, orderId }: PaymentSuccessH
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    async function capturePayment() {
+    async function captureAndGenerate() {
       if (!orderId) {
         setStatus('error')
         setError('Missing payment information')
@@ -28,54 +28,48 @@ export function PaymentSuccessHandler({ submissionId, orderId }: PaymentSuccessH
 
       try {
         // Step 1: Capture payment
-        const response = await fetch('/api/paypal/capture-order', {
+        const captureResponse = await fetch('/api/paypal/capture-order', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ orderId })
         })
 
-        const data = await response.json()
+        const captureData = await captureResponse.json()
 
-        if (!response.ok || !data.success) {
-          throw new Error(data.error || 'Payment capture failed')
+        if (!captureResponse.ok || !captureData.success) {
+          throw new Error(captureData.error || 'Payment capture failed')
         }
 
-        // Generation is already triggered server-side in capture-order API
-        // Just show generating UI and poll DB every 5s until paid_full exists
+        // Step 2: Show generating UI
         setStatus('generating')
+
+        // Step 3: Call generate-paid-report and await the response (same as preview-content.tsx)
+        const generateResponse = await fetch('/api/generate-paid-report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ submissionId })
+        })
+
+        if (!generateResponse.ok) {
+          const errorText = await generateResponse.text()
+          console.error('[v0] generate-paid-report failed:', generateResponse.status, errorText)
+          throw new Error(`Report generation failed: ${generateResponse.status}`)
+        }
+
+        // Step 4: Done - redirect to paid page
+        setStatus('success')
+        setTimeout(() => {
+          router.push(`/report/${submissionId}/paid`)
+        }, 1000)
+
       } catch (err) {
         setStatus('error')
-        setError(err instanceof Error ? err.message : 'Payment failed')
+        setError(err instanceof Error ? err.message : 'Something went wrong')
       }
     }
 
-    capturePayment()
-  }, [orderId, submissionId])
-
-  // Poll DB every 5 seconds while generating
-  useEffect(() => {
-    if (status !== 'generating') return
-
-    const pollInterval = setInterval(async () => {
-      try {
-        const response = await fetch(`/api/check-paid-report?submissionId=${submissionId}`)
-        if (response.ok) {
-          const data = await response.json()
-          if (data.facts && Array.isArray(data.facts) && data.facts.length > 0) {
-            clearInterval(pollInterval)
-            setStatus('success')
-            setTimeout(() => {
-              router.push(`/report/${submissionId}/paid`)
-            }, 1000)
-          }
-        }
-      } catch (err) {
-        console.error('[v0] Polling error:', err)
-      }
-    }, 5000)
-
-    return () => clearInterval(pollInterval)
-  }, [status, submissionId, router])
+    captureAndGenerate()
+  }, [orderId, submissionId, router])
 
   if (status === 'processing') {
     return (

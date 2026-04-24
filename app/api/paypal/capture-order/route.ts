@@ -93,23 +93,7 @@ export async function POST(request: Request) {
       console.error('[v0] Payment update error:', updateError)
     }
 
-    const submissionId = payment?.submission_id
-
-    // Trigger paid report generation in background (don't await - takes up to 2 mins)
-    if (submissionId) {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
-        (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
-      
-      fetch(`${baseUrl}/api/generate-paid-report`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ submissionId })
-      }).catch(err => console.error('[v0] Failed to trigger report generation:', err))
-      
-      console.log('[v0] Report generation triggered for submission:', submissionId)
-    }
-
-    return NextResponse.json({ success: true, submissionId })
+    return NextResponse.json({ success: true, submissionId: payment?.submission_id })
   } catch (error) {
     console.error('[v0] PayPal capture error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
