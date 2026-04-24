@@ -99,20 +99,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Submission not found' }, { status: 404 })
     }
 
-    // 4. 무료 레포트 조회 (9개 사실 + 1500자 해설)
-    const { data: freeReport, error: freeReportError } = await supabase
+    // 4. 무료 레포트 조회 (여러 섹션 rows로 저장되어 있음)
+    const { data: freeReports, error: freeReportError } = await supabase
       .from('reports')
       .select('facts, context_interpretation')
       .eq('submission_id', submissionId)
       .eq('is_free', true)
-      .single()
 
-    if (freeReportError || !freeReport) {
+    if (freeReportError || !freeReports || freeReports.length === 0) {
       return NextResponse.json({ error: 'Free report not found. Please generate free report first.' }, { status: 404 })
     }
 
-    const freeFacts = freeReport.facts as Fact[]
-    const contextInterpretation = freeReport.context_interpretation || ''
+    // 여러 섹션의 facts를 하나로 합치기
+    const freeFacts = freeReports.flatMap(r => Array.isArray(r.facts) ? r.facts : []) as Fact[]
+    const contextInterpretation = freeReports.find(r => r.context_interpretation)?.context_interpretation || ''
+
+    console.log(`[v0] Found ${freeReports.length} free report sections, total ${freeFacts.length} free facts`)
 
     console.log(`[v0] Generating 90 paid facts for ${submission.name}`)
     console.log('[v0] Context injection summary:')
