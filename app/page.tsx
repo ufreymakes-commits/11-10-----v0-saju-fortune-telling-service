@@ -84,34 +84,36 @@ export default function LandingPage() {
           </div>
           
           {/* Characters in V-formation behind main mascot */}
-          <div className="relative w-40 md:w-48 h-40 md:h-48 mx-auto mb-4 flex items-center justify-center">
-            {/* Background characters - positioned BEHIND and overlapping with main */}
-            {/* Left outer - Eulmok (green) */}
-            <div className="absolute w-16 h-16 md:w-20 md:h-20 z-0" style={{ left: '0%', top: '10%' }}>
+          <div className="relative w-80 md:w-96 h-48 md:h-56 mx-auto mb-4 flex items-center justify-center overflow-visible">
+            {/* Left outer - Eulmok (green) - back layer */}
+            <div className="absolute w-12 h-12 md:w-16 md:h-16 z-0" style={{ left: '5%', top: '35%' }}>
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/eulmok-311z2CoqsXicrNLz220oq3Nb7q1aRl.png" alt="Eulmok" fill className="object-contain" />
             </div>
-            {/* Left inner - Gyesu (purple) */}
-            <div className="absolute w-20 h-20 md:w-24 md:h-24 z-0" style={{ left: '12%', top: '20%' }}>
+            
+            {/* Left inner - Gyesu (purple) - back layer */}
+            <div className="absolute w-16 h-16 md:w-20 md:h-20 z-0" style={{ left: '15%', top: '40%' }}>
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gyesu-8YTx4VfcXnNEPPK54QUH0AbfH7oLO3.png" alt="Gyesu" fill className="object-contain" />
-            </div>
-            {/* Right inner - Gyeonggeum (gray) */}
-            <div className="absolute w-20 h-20 md:w-24 md:h-24 z-0" style={{ right: '12%', top: '20%' }}>
-              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gyeonggeum-C2Pu1PvGYI22q3evrb6Ynel484URPj.png" alt="Gyeonggeum" fill className="object-contain" />
-            </div>
-            {/* Right outer - Byeonghwa (orange) */}
-            <div className="absolute w-16 h-16 md:w-20 md:h-20 z-0" style={{ right: '0%', top: '10%' }}>
-              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/byeonghwa-nwRyjkGV7yuO4EC9wCYlt8Chx6jhyC.png" alt="Byeonghwa" fill className="object-contain" />
             </div>
             
             {/* Main mascot - Pink (center front, floating) */}
-            <div className="relative w-32 h-32 md:w-40 md:h-40 z-10 animate-float">
+            <div className="absolute w-32 h-32 md:w-44 md:h-44 z-10 animate-float" style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%85%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"
-                alt="Sajume mascot - pink nine-tailed fox"
+                alt="Sajume mascot"
                 fill
                 className="object-contain drop-shadow-2xl"
                 priority
               />
+            </div>
+            
+            {/* Right inner - Gyeonggeum (gray) - back layer */}
+            <div className="absolute w-16 h-16 md:w-20 md:h-20 z-0" style={{ right: '15%', top: '40%' }}>
+              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gyeonggeum-C2Pu1PvGYI22q3evrb6Ynel484URPj.png" alt="Gyeonggeum" fill className="object-contain" />
+            </div>
+            
+            {/* Right outer - Byeonghwa (orange) - back layer */}
+            <div className="absolute w-12 h-12 md:w-16 md:h-16 z-0" style={{ right: '5%', top: '35%' }}>
+              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/byeonghwa-nwRyjkGV7yuO4EC9wCYlt8Chx6jhyC.png" alt="Byeonghwa" fill className="object-contain" />
             </div>
           </div>
           
