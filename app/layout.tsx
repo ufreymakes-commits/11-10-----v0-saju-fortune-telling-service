@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Poppins, Geist_Mono } from 'next/font/google'
+import { Poppins, Geist_Mono, Montserrat } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { NavSidebar } from '@/components/nav-sidebar'
 import './globals.css'
@@ -8,6 +8,12 @@ const poppins = Poppins({
   subsets: ["latin"],
   weight: ['300', '400', '500', '600', '700'],
   variable: '--font-poppins'
+})
+
+const montserrat = Montserrat({ 
+  subsets: ["latin"],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-montserrat'
 })
 
 const geistMono = Geist_Mono({ 
@@ -65,7 +71,7 @@ export default function RootLayout({
         <meta property="og:url" content="https://v0-saju-fortune-telling-service.vercel.app" />
         <script async src="https://tally.so/widgets/embed.js"></script>
       </head>
-      <body className={`${poppins.variable} ${geistMono.variable} font-sans antialiased`} suppressHydrationWarning>
+      <body className={`${poppins.variable} ${montserrat.variable} ${geistMono.variable} font-sans antialiased`} suppressHydrationWarning>
         <NavSidebar />
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}

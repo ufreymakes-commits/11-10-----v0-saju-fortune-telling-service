@@ -72,14 +72,14 @@ export default function LandingPage() {
         
         {/* Main content */}
         <div className="text-center max-w-2xl mx-auto mt-12">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-2">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-2 font-montserrat">
             <span className="bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">99 Facts</span>
           </h1>
-          <h2 className="text-lg md:text-2xl lg:text-3xl text-white/80 mb-6">
+          <h2 className="text-lg md:text-2xl lg:text-3xl text-white/80 mb-6 font-montserrat">
             of your birth chart
           </h2>
           
-          <div className="inline-block bg-purple-600/80 text-white px-5 py-2 rounded-sm text-sm md:text-lg mb-8">
+          <div className="inline-block bg-purple-600/80 text-white px-5 py-2 rounded-sm text-sm md:text-lg mb-8 font-montserrat font-semibold">
             {"K-Saju: The Next Gen Fortune Telling"}
           </div>
           
