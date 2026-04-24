@@ -54,12 +54,17 @@ export async function POST(request: Request) {
     }
     
     if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
-      console.error('[v0] PayPal credentials not configured')
+      console.error('[v0] PayPal credentials not configured: CLIENT_ID=%s, SECRET=%s', 
+        PAYPAL_CLIENT_ID ? 'SET' : 'MISSING', 
+        PAYPAL_CLIENT_SECRET ? 'SET' : 'MISSING')
       return NextResponse.json(
         { error: 'Payment system not configured' },
         { status: 500 }
       )
     }
+    
+    console.log('[v0] PayPal API URL:', PAYPAL_API_URL)
+    console.log('[v0] PayPal mode:', process.env.PAYPAL_MODE || 'live')
     
     const supabase = await createClient()
     
@@ -71,6 +76,7 @@ export async function POST(request: Request) {
       .single()
     
     if (fetchError || !submission) {
+      console.error('[v0] Submission not found:', submissionId, fetchError)
       return NextResponse.json(
         { error: 'Submission not found' },
         { status: 404 }
@@ -78,7 +84,40 @@ export async function POST(request: Request) {
     }
     
     // Get PayPal access token
+    console.log('[v0] Requesting PayPal access token...')
     const accessToken = await getPayPalAccessToken()
+    
+    if (!accessToken) {
+      console.error('[v0] Failed to get PayPal access token')
+      return NextResponse.json(
+        { error: 'Failed to authenticate with PayPal' },
+        { status: 500 }
+      )
+    }
+    
+    console.log('[v0] Access token received, creating order...')
+    
+    const baseUrl = getBaseUrl(request)
+    const orderPayload = {
+      intent: 'CAPTURE',
+      purchase_units: [{
+        reference_id: submissionId,
+        description: `Sajume 99 Facts Birth Chart Report for ${submission.name}`,
+        amount: {
+          currency_code: 'USD',
+          value: '9.99'
+        }
+      }],
+      application_context: {
+        brand_name: 'Sajume',
+        landing_page: 'NO_PREFERENCE',
+        user_action: 'PAY_NOW',
+        return_url: `${baseUrl}/checkout/${submissionId}/success`,
+        cancel_url: `${baseUrl}/checkout/${submissionId}`
+      }
+    }
+    
+    console.log('[v0] PayPal order payload:', JSON.stringify(orderPayload, null, 2))
     
     // Create PayPal order
     const orderResponse = await fetch(`${PAYPAL_API_URL}/v2/checkout/orders`, {
@@ -87,32 +126,32 @@ export async function POST(request: Request) {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        intent: 'CAPTURE',
-        purchase_units: [{
-          reference_id: submissionId,
-          description: `Sajume 99 Facts Birth Chart Report for ${submission.name}`,
-          amount: {
-            currency_code: 'USD',
-            value: '9.99'
-          }
-        }],
-        application_context: {
-          brand_name: 'Sajume',
-          landing_page: 'NO_PREFERENCE',
-          user_action: 'PAY_NOW',
-          return_url: `${getBaseUrl(request)}/checkout/${submissionId}/success`,
-          cancel_url: `${getBaseUrl(request)}/checkout/${submissionId}`
-        }
-      })
+      body: JSON.stringify(orderPayload)
     })
     
     const orderData = await orderResponse.json()
     
+    console.log('[v0] PayPal response status:', orderResponse.status)
+    console.log('[v0] PayPal response data:', JSON.stringify(orderData, null, 2))
+    
     if (!orderResponse.ok) {
-      console.error('[v0] PayPal order creation failed:', orderData)
+      console.error('[v0] PayPal order creation failed:', {
+        status: orderResponse.status,
+        data: orderData
+      })
       return NextResponse.json(
-        { error: 'Failed to create payment order' },
+        { 
+          error: 'Failed to create payment order',
+          details: orderData.message || orderData.details?.[0]?.issue || 'Unknown error'
+        },
+        { status: 500 }
+      )
+    }
+    
+    if (!orderData.id) {
+      console.error('[v0] No order ID in response:', orderData)
+      return NextResponse.json(
+        { error: 'Invalid response from PayPal' },
         { status: 500 }
       )
     }
@@ -131,8 +170,8 @@ export async function POST(request: Request) {
     // Find approval URL
     const approvalUrl = orderData.links.find((link: { rel: string }) => link.rel === 'approve')?.href
     
+    console.log('[v0] PayPal order created successfully:', orderData.id)
     console.log('[v0] PayPal approval URL:', approvalUrl)
-    console.log('[v0] PayPal order created:', orderData.id)
     
     return NextResponse.json({
       id: orderData.id,
@@ -142,7 +181,10 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('[v0] PayPal create order error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { 
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
     )
   }

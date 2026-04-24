@@ -169,19 +169,20 @@ export default function LandingPage() {
             From ancient Korea eerie fortune telling<br/>to lucky charm bracelets
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* 99 Facts Product - Full width on PC first row */}
-            <Link href="/start" className="group md:col-span-2 lg:col-span-1">
-              <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/30 rounded-xl p-6 hover:border-purple-400/50 transition-all hover:scale-[1.02]">
+            {/* 99 Facts Product - First row, full width on PC too */}
+            <Link href="/start" className="group md:col-span-1">
+              <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/30 rounded-xl p-6 hover:border-purple-400/50 transition-all hover:scale-[1.02] h-full flex flex-col">
                 <h4 className="text-base md:text-lg font-semibold text-white mb-3">99 Facts</h4>
-                <div className="relative w-full h-40 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e]">
+                <div className="relative w-full mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center flex-shrink-0" style={{ aspectRatio: '800/533' }}>
                   <Image
                     src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/99facts.png-GQUor5lDB3UZjqnzWfMmGM6jWNHITE.jpeg"
                     alt="99 Facts of your birth chart"
-                    fill
-                    className="object-cover"
+                    width={800}
+                    height={533}
+                    className="w-full h-full object-cover object-center"
                   />
                 </div>
-                <p className="text-sm text-white/70 mb-3">Deep dive into your complete birth chart with 99 personalized insights.</p>
+                <p className="text-sm text-white/70 mb-3 flex-grow">Deep dive into your complete birth chart with 99 personalized insights.</p>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-purple-300">9 free + 90 premium</span>
                   <span className="text-lg font-bold text-white">$9.99</span>
