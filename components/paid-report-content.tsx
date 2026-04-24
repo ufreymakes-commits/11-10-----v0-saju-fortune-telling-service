@@ -12,71 +12,47 @@ interface PaidReportContentProps {
 
 export function PaidReportContent({ submission, paidReport }: PaidReportContentProps) {
   const router = useRouter()
-  // Start in generating state if no paidReport
-  const [isGenerating, setIsGenerating] = useState(!paidReport?.facts)
-  const [sections, setSections] = useState<any[]>(paidReport?.facts || [])
-  const [generationStarted, setGenerationStarted] = useState(false)
+  const [sections, setSections] = useState<any[]>(
+    paidReport?.facts && Array.isArray(paidReport.facts) ? paidReport.facts : []
+  )
+  const [isPolling, setIsPolling] = useState(
+    !paidReport?.facts || !Array.isArray(paidReport.facts) || paidReport.facts.length === 0
+  )
 
   useEffect(() => {
-    // If report data exists, parse and display it
-    if (paidReport?.facts && Array.isArray(paidReport.facts)) {
-      setSections(paidReport.facts)
-      setIsGenerating(false)
-    } else if (!paidReport?.facts && !generationStarted) {
-      // Trigger paid report generation if not exists (only once)
-      setGenerationStarted(true)
-      generatePaidReport()
-    }
-  }, [paidReport, generationStarted])
+    // Already have data, no need to poll
+    if (sections.length > 0) return
 
-  async function generatePaidReport() {
-    setIsGenerating(true)
-    try {
-      const response = await fetch('/api/generate-paid-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          submissionId: submission.id
-        })
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to generate paid report')
+    // Poll DB every 5 seconds until paid_full record appears
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/check-paid-report?submissionId=${submission.id}`)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.facts && Array.isArray(data.facts) && data.facts.length > 0) {
+            setSections(data.facts)
+            setIsPolling(false)
+            clearInterval(pollInterval)
+          }
+        }
+      } catch (err) {
+        console.error('[v0] Polling error:', err)
       }
+    }, 5000)
 
-      const data = await response.json()
-      
-      // Handle both array format and object format with facts property
-      const facts = Array.isArray(data) ? data : (data.facts || [])
-      setSections(facts)
-      
-      console.log('[v0] Paid report generated successfully:', facts.length, 'sections')
-    } catch (error) {
-      console.error('[v0] Error generating paid report:', error)
-      // Show error in UI instead of failing silently
-      setSections([{
-        sectionNumber: '0',
-        sectionTitle: 'Error Loading Report',
-        cards: [{
-          content: `There was an error generating your report. Please refresh the page or contact support if the problem persists.`
-        }]
-      }])
-    } finally {
-      setIsGenerating(false)
-    }
-  }
+    return () => clearInterval(pollInterval)
+  }, [submission.id, sections.length])
 
-  if (isGenerating || sections.length === 0) {
+  if (isPolling || sections.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center max-w-md px-4">
           <Spinner className="mx-auto mb-6 w-12 h-12" />
           <h2 className="text-2xl font-bold text-white mb-4">Generating Your 99 Facts</h2>
           <p className="text-white/60 text-lg mb-2">Our AI is analyzing your complete birth chart...</p>
-          <p className="text-white/40 text-sm">This takes less than 2 minutes. Please don&apos;t refresh.</p>
+          <p className="text-white/40 text-sm">This takes less than 2 minutes. Please don&apos;t close this page.</p>
           <div className="mt-8 bg-white/5 rounded-lg p-4">
-            <p className="text-white/50 text-xs">Tip: Your personalized 99 facts report covers personality, career, relationships, health, and destiny insights based on Korean Saju astrology.</p>
+            <p className="text-white/50 text-xs">Your personalized 99 facts report covers personality, career, relationships, health, and destiny insights based on Korean Saju astrology.</p>
           </div>
         </div>
       </div>

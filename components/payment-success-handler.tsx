@@ -40,25 +40,17 @@ export function PaymentSuccessHandler({ submissionId, orderId }: PaymentSuccessH
           throw new Error(data.error || 'Payment capture failed')
         }
 
-        // Step 2: Generate paid report (this takes up to 2 minutes)
-        setStatus('generating')
-        
-        const reportResponse = await fetch('/api/generate-paid-report', {
+        // Step 2: Fire-and-forget - don't await, Gemini takes up to 2 mins
+        // paid page will poll DB until paid_full record appears
+        fetch('/api/generate-paid-report', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ submissionId })
-        })
-
-        const reportData = await reportResponse.json()
-
-        if (!reportResponse.ok) {
-          console.error('Report generation failed:', reportData)
-          // Still redirect even if generation fails - they can retry on the page
-        }
+        }).catch(err => console.error('[v0] Report generation error:', err))
 
         setStatus('success')
         
-        // Redirect to paid report page
+        // Redirect immediately - paid page handles the waiting
         setTimeout(() => {
           router.push(`/report/${submissionId}/paid`)
         }, 1500)
