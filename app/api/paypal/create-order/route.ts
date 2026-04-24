@@ -13,19 +13,42 @@ const PAYPAL_API_URL = USE_SANDBOX
   : 'https://api-m.paypal.com'
 
 async function getPayPalAccessToken() {
+  console.log('[v0] PayPal auth - Client ID exists:', !!PAYPAL_CLIENT_ID)
+  console.log('[v0] PayPal auth - Client Secret exists:', !!PAYPAL_CLIENT_SECRET)
+  console.log('[v0] PayPal auth - API URL:', PAYPAL_API_URL)
+  
+  if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
+    console.error('[v0] PayPal credentials missing!')
+    return null
+  }
+  
   const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`).toString('base64')
   
-  const response = await fetch(`${PAYPAL_API_URL}/v1/oauth2/token`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Basic ${auth}`,
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    body: 'grant_type=client_credentials'
-  })
-  
-  const data = await response.json()
-  return data.access_token
+  try {
+    const response = await fetch(`${PAYPAL_API_URL}/v1/oauth2/token`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${auth}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: 'grant_type=client_credentials'
+    })
+    
+    const data = await response.json()
+    
+    console.log('[v0] PayPal auth response status:', response.status)
+    
+    if (!response.ok) {
+      console.error('[v0] PayPal auth failed:', data)
+      return null
+    }
+    
+    console.log('[v0] PayPal access token received:', data.access_token ? 'YES' : 'NO')
+    return data.access_token
+  } catch (error) {
+    console.error('[v0] PayPal auth error:', error)
+    return null
+  }
 }
 
 function getBaseUrl(request: Request): string {
