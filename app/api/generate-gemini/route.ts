@@ -59,8 +59,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing saju_data' }, { status: 400 })
     }
 
-    // Check rate limit - skip for owner (박유리)
-    if (name !== '박유리') {
+    // Get admin key from request (optional)
+    const adminKey = body.admin_key
+    const ADMIN_KEY = process.env.ADMIN_KEY || 'sajume-admin-key-2024'
+
+    // Check rate limit - skip if valid admin key is provided
+    if (adminKey !== ADMIN_KEY) {
       const supabase = await createClient()
       const today = new Date().toISOString().split('T')[0]
       const { count, error: countError } = await supabase
@@ -77,6 +81,8 @@ export async function POST(request: Request) {
           { status: 429 }
         )
       }
+    } else {
+      console.log('[v0] Gemini: Admin key valid - bypassing rate limit')
     }
 
     console.log(`[v0] Gemini: Generating 9 facts for ${name}`)
@@ -448,7 +454,7 @@ Three-Harmony groups (三合) completing a full elemental "bureau" (方局), max
 
 Shen–Zi–Chen = Water group (水局)
 
-Hai–Mao–Wei = Wood group (木局)
+Hai–Mao–Wei = Wood group (��局)
 
 Yin–Wu–Xu = Fire group (火局)
 

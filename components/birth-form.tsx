@@ -67,18 +67,30 @@ function incrementDailyReportCount(): void {
 export function BirthForm() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [dailyLimitReached, setDailyLimitReached] = useState(false)
+  const [adminKey, setAdminKey] = useState<string | null>(null)
   const [errors, setErrors] = useState<FormErrors>({})
   const [dailyLimitReached, setDailyLimitReached] = useState(false)
   
+  // Check URL for admin key
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const key = params.get('admin_key')
+    if (key) {
+      setAdminKey(key)
+      console.log('[v0] Admin key detected from URL')
+    }
+  }, [])
+
   // Check daily limit on mount
   useEffect(() => {
     const { count, date } = getDailyReportCount()
     const today = new Date().toISOString().split('T')[0]
-    // Skip limit check for owner (박유리)
-    if (date === today && count >= DAILY_LIMIT && formData.name !== '박유리') {
+    // Skip limit check if admin key is present
+    if (date === today && count >= DAILY_LIMIT && !adminKey) {
       setDailyLimitReached(true)
     }
-  }, [])
+  }, [adminKey])
   
   const [formData, setFormData] = useState({
     name: '',
@@ -131,8 +143,8 @@ export function BirthForm() {
   // Check daily limit before proceeding
   const { count, date } = getDailyReportCount()
   const today = new Date().toISOString().split('T')[0]
-  // Skip limit check for owner (박유리)
-  if (date === today && count >= DAILY_LIMIT && formData.name !== '박유리') {
+  // Skip limit check if admin key is present
+  if (date === today && count >= DAILY_LIMIT && !adminKey) {
     setDailyLimitReached(true)
     setErrors({ dailyLimit: 'You have exceeded the maximum daily usage. Please try again tomorrow :)' })
     return

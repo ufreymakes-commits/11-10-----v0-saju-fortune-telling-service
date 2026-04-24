@@ -87,14 +87,30 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
   const [data, setData] = useState<PreviewData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [adminKey, setAdminKey] = useState<string | null>(null)
+
+  // Get admin key from URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const key = params.get('admin_key')
+    if (key) {
+      setAdminKey(key)
+      console.log('[v0] Admin key detected')
+    }
+  }, [])
 
   useEffect(() => {
     async function fetchPreview() {
       try {
+        const body: any = { submissionId }
+        if (adminKey) {
+          body.admin_key = adminKey
+        }
+        
         const response = await fetch('/api/generate-gemini', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ submissionId })
+          body: JSON.stringify(body)
         })
         
         if (!response.ok) {
@@ -118,7 +134,7 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
     }
     
     fetchPreview()
-  }, [submissionId])
+  }, [submissionId, adminKey])
 
   // Character slider data for loading screen
   const characters = [
