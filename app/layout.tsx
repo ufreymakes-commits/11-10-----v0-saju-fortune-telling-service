@@ -33,10 +33,10 @@ export const metadata: Metadata = {
     siteName: 'Sajume',
     images: [
       {
-        url: '/og-image.png',
+        url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Thenextgenpng-haDUszHNXdaOgdcbh4xKKBXTU1PJl5.png',
         width: 1200,
         height: 630,
-        alt: 'Sajume - Korean Saju Astrology - The new fortune telling era',
+        alt: 'K-Saju - The Next Gen Fortune Telling',
       },
     ],
   },
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Sajume - 99 Facts Your Birth Chart Speaks to You',
     description: 'Discover the secrets of your destiny through Korean Saju astrology.',
-    images: ['/og-image.png'],
+    images: ['https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Thenextgenpng-haDUszHNXdaOgdcbh4xKKBXTU1PJl5.png'],
   },
 }
 
@@ -62,11 +62,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta property="og:image" content="/og-image.png" />
+        <meta property="og:image" content="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Thenextgenpng-haDUszHNXdaOgdcbh4xKKBXTU1PJl5.png" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:image:type" content="image/png" />
-        <meta name="twitter:image" content="/og-image.png" />
+        <meta name="twitter:image" content="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Thenextgenpng-haDUszHNXdaOgdcbh4xKKBXTU1PJl5.png" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta property="og:url" content="https://v0-saju-fortune-telling-service.vercel.app" />
         <script async src="https://tally.so/widgets/embed.js"></script>
