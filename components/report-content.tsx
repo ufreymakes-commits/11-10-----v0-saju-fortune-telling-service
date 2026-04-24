@@ -253,7 +253,8 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
 
       {/* Five Elements Score Table */}
       <div className="bg-card border border-border rounded-xl p-4 mb-6 shadow-lg shadow-primary/5">
-        <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-3 text-center">Your Five Elements Balance (120 points)</h2>
+        <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-2 text-center">Your Five Elements Balance</h2>
+        <p className="text-[10px] text-muted-foreground/60 text-center mb-3">Based on 8 characters (4 pillars x 2), with weighted scoring on Month Branch. Excludes hidden stems.</p>
         <div className="space-y-2">
           {Object.entries(sajuData.elementBalance || {}).map(([element, score]) => {
             const elementColors: Record<string, string> = {
@@ -361,15 +362,20 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
       {completedSections === sections.length && (
         <div className="mt-6">
           <button 
-            data-tally-open="wQJNpR" 
+            data-tally-open="0QekJy" 
             data-tally-layout="modal" 
-            data-tally-emoji-text="🎁" 
-            data-tally-emoji-animation="tada"
+            data-tally-emoji-text="👋" 
+            data-tally-emoji-animation="wave"
             className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-semibold rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg shadow-purple-500/20"
           >
             Submit a Review &amp; Get 100% Free Coupon<br />
             <span className="text-xs font-normal opacity-80">for my family or friend</span>
           </button>
+          <div className="mt-4 p-4 bg-green-900/30 border border-green-500/30 rounded-xl text-center">
+            <p className="text-xs text-green-300 mb-2">After submitting your review, use this coupon code:</p>
+            <p className="text-lg font-bold text-green-400 font-mono tracking-wider">ZZKGC9XKN2CR</p>
+            <p className="text-[10px] text-green-300/60 mt-1">100% discount for one friend or family member</p>
+          </div>
         </div>
       )}
 

@@ -69,7 +69,7 @@ export function DayMasterCard({ dayMaster, dayMasterKorean }: DayMasterCardProps
       </p>
       
       {/* Theme Description */}
-      <p className="text-xs text-muted-foreground/80 mb-2">
+      <p className="text-xs text-muted-foreground/80 mb-2 text-center">
         {character.themeDescription}
       </p>
       
