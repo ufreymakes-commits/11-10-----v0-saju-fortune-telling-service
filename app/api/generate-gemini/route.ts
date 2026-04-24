@@ -2466,11 +2466,27 @@ ${JSON.stringify(allSajuData, null, 2)}
     })
 
     console.log('[v0] Gemini: Stage 1 response received, parsing...')
+    console.log('[v0] Gemini: Raw response length:', stage1Result.text.length)
 
-    // Stage 1 JSON 파싱
-    const stage1JsonMatch = stage1Result.text.match(/```json\n([\s\S]*?)\n```/)
+    // Stage 1 JSON 파싱 (더 유연한 형식 지원)
+    let stage1JsonMatch = stage1Result.text.match(/```json\n([\s\S]*?)\n```/)
+    
+    // 첫 번째 시도 실패시 다른 형식 시도
     if (!stage1JsonMatch) {
-      console.error('[v0] Gemini: Stage 1 JSON not found')
+      // 형식2: ```json ... ``` (줄바꿈 없음)
+      stage1JsonMatch = stage1Result.text.match(/```json([\s\S]*?)```/)
+    }
+    
+    if (!stage1JsonMatch) {
+      // 형식3: { ... } 직접 매칭
+      const directJsonMatch = stage1Result.text.match(/(\{[\s\S]*\})/)
+      if (directJsonMatch) {
+        stage1JsonMatch = [null, directJsonMatch[1]]
+      }
+    }
+    
+    if (!stage1JsonMatch) {
+      console.error('[v0] Gemini: Stage 1 raw response:', stage1Result.text)
       throw new Error('Stage 1 JSON format not found')
     }
 
@@ -2601,11 +2617,27 @@ OUTPUT FORMAT (JSON ONLY):
     })
 
     console.log('[v0] Gemini: Stage 2 response received, parsing...')
+    console.log('[v0] Gemini: Raw response length:', stage2Result.text.length)
 
-    // Stage 2 JSON 파싱
-    const stage2JsonMatch = stage2Result.text.match(/```json\n([\s\S]*?)\n```/)
+    // Stage 2 JSON 파싱 (더 유연한 형식 지원)
+    let stage2JsonMatch = stage2Result.text.match(/```json\n([\s\S]*?)\n```/)
+    
+    // 첫 번째 시도 실패시 다른 형식 시도
     if (!stage2JsonMatch) {
-      console.error('[v0] Gemini: Stage 2 JSON not found')
+      // 형식2: ```json ... ``` (줄바꿈 없음)
+      stage2JsonMatch = stage2Result.text.match(/```json([\s\S]*?)```/)
+    }
+    
+    if (!stage2JsonMatch) {
+      // 형식3: { ... } 직접 매칭
+      const directJsonMatch = stage2Result.text.match(/(\{[\s\S]*\})/)
+      if (directJsonMatch) {
+        stage2JsonMatch = [null, directJsonMatch[1]]
+      }
+    }
+    
+    if (!stage2JsonMatch) {
+      console.error('[v0] Gemini: Stage 2 raw response:', stage2Result.text)
       throw new Error('Stage 2 JSON format not found')
     }
 
