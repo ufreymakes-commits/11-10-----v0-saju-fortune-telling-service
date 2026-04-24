@@ -350,7 +350,18 @@ export default function LandingPage() {
             Sajume
           </div>
           <p className="mt-3 text-xs text-white/30">All rights reserved by Sajume.</p>
-          <p className="mt-1 text-xs text-white/30">Payment issues / Operation inquiries: hello@sajume.com</p>
+          <div className="mt-4 flex flex-col items-center gap-3">
+            <button 
+              data-tally-open="681NVP" 
+              data-tally-layout="modal" 
+              data-tally-emoji-text="👋" 
+              data-tally-emoji-animation="wave"
+              className="px-4 py-2 bg-white/10 border border-white/20 text-white text-xs font-semibold rounded hover:bg-white/20 hover:border-white/40 transition-all"
+            >
+              Can I help you with the issue?
+            </button>
+            <p className="text-xs text-white/30">Business: hello@sajume.com</p>
+          </div>
         </div>
       </footer>
     </main>

@@ -458,9 +458,20 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
         <p className="text-[10px] text-muted-foreground/70">
           All rights reserved by Sajume.
         </p>
-        <p className="text-[10px] text-muted-foreground/50">
-          Payment issues / Operation inquiries: hello@sajume.com
-        </p>
+        <div className="mt-4 flex flex-col items-center gap-3">
+          <button 
+            data-tally-open="681NVP" 
+            data-tally-layout="modal" 
+            data-tally-emoji-text="👋" 
+            data-tally-emoji-animation="wave"
+            className="px-4 py-2 bg-primary/20 border border-primary/40 text-foreground text-xs font-semibold rounded hover:bg-primary/30 hover:border-primary/60 transition-all"
+          >
+            Can I help you with the issue?
+          </button>
+          <p className="text-[10px] text-muted-foreground/50">
+            Business: hello@sajume.com
+          </p>
+        </div>
       </div>
 
       {/* Share Button - Fixed bottom right */}
