@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     siteName: 'Sajume',
     images: [
       {
-        url: '/images/og-image.png',
+        url: 'https://v0-saju-fortune-telling-service.vercel.app/images/og-image.png',
         width: 1200,
         height: 630,
         alt: 'Sajume - Korean Saju Astrology',
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Sajume - 99 Facts Your Birth Chart Speaks to You',
     description: 'Discover the secrets of your destiny through Korean Saju astrology.',
-    images: ['/images/og-image.png'],
+    images: ['https://v0-saju-fortune-telling-service.vercel.app/images/og-image.png'],
   },
 }
 
