@@ -56,6 +56,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta property="og:image" content="https://v0-saju-fortune-telling-service.vercel.app/images/og-image.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:type" content="image/png" />
+        <meta name="twitter:image" content="https://v0-saju-fortune-telling-service.vercel.app/images/og-image.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta property="og:url" content="https://v0-saju-fortune-telling-service.vercel.app" />
         <script async src="https://tally.so/widgets/embed.js"></script>
       </head>
       <body className={`${poppins.variable} ${geistMono.variable} font-sans antialiased`} suppressHydrationWarning>

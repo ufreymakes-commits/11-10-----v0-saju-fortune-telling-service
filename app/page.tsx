@@ -191,9 +191,9 @@ export default function LandingPage() {
 
             {/* Signature Saju Elemental Bracelet - Second row left on PC */}
             <div className="group cursor-not-allowed md:col-span-1">
-              <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-amber-500/30 rounded-xl p-6 opacity-70">
+              <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-amber-500/30 rounded-xl p-6 opacity-70 h-full flex flex-col">
                 <h4 className="text-base md:text-lg font-semibold text-white mb-3">Signature Saju Elemental Bracelet</h4>
-                <div className="relative w-full h-40 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center">
+                <div className="relative w-full h-40 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center flex-shrink-0">
                   <Image
                     src="/images/luck-bracelet.png"
                     alt="Signature Saju Elemental Bracelet"
@@ -202,7 +202,7 @@ export default function LandingPage() {
                     className="object-cover object-center"
                   />
                 </div>
-                <p className="text-sm text-white/70 mb-3">A signature bracelet designed to fill the missing energies in your personal Saju chart and attract good fortune.</p>
+                <p className="text-sm text-white/70 mb-3 flex-grow">A signature bracelet designed to fill the missing energies in your personal Saju chart and attract good fortune.</p>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-amber-300">Personalized to your Saju</span>
                   <span className="text-lg font-bold text-white/50">$38</span>
@@ -210,11 +210,11 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Relationship Compatibility - Second row middle on PC (moved from third row) */}
+            {/* Relationship Compatibility - Second row middle on PC */}
             <div className="group cursor-not-allowed md:col-span-1">
-              <div className="bg-gradient-to-br from-pink-900/40 to-rose-900/40 border border-pink-500/30 rounded-xl p-6 opacity-70">
+              <div className="bg-gradient-to-br from-pink-900/40 to-rose-900/40 border border-pink-500/30 rounded-xl p-6 opacity-70 h-full flex flex-col">
                 <h4 className="text-base md:text-lg font-semibold text-white mb-3">Relationship Compatibility</h4>
-                <div className="relative w-full h-40 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center">
+                <div className="relative w-full h-40 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center flex-shrink-0">
                   <div className="text-center">
                     <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-pink-500/20 flex items-center justify-center">
                       <svg className="w-6 h-6 text-pink-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -224,7 +224,7 @@ export default function LandingPage() {
                     <span className="text-xs text-white/40">Coming Soon</span>
                   </div>
                 </div>
-                <p className="text-sm text-white/70 mb-3">The Art of Saju Compatibility: Are You Meant to Be?</p>
+                <p className="text-sm text-white/70 mb-3 flex-grow">The Art of Saju Compatibility: Are You Meant to Be?</p>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-pink-300">Discover your match</span>
                   <span className="text-lg font-bold text-white/50">$15</span>
@@ -234,9 +234,9 @@ export default function LandingPage() {
 
             {/* 12 months Saju Reading - Second row right on PC */}
             <div className="group cursor-not-allowed md:col-span-1">
-              <div className="bg-gradient-to-br from-blue-900/40 to-purple-900/40 border border-blue-500/30 rounded-xl p-6 opacity-70">
+              <div className="bg-gradient-to-br from-blue-900/40 to-purple-900/40 border border-blue-500/30 rounded-xl p-6 opacity-70 h-full flex flex-col">
                 <h4 className="text-base md:text-lg font-semibold text-white mb-3">12 months Saju Reading</h4>
-                <div className="relative w-full h-40 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center">
+                <div className="relative w-full h-40 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center flex-shrink-0">
                   <div className="text-center">
                     <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-blue-500/20 flex items-center justify-center">
                       <svg className="w-6 h-6 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -246,7 +246,7 @@ export default function LandingPage() {
                     <span className="text-xs text-white/40">Coming Soon</span>
                   </div>
                 </div>
-                <p className="text-sm text-white/70 mb-3">Monthly personalized Saju readings delivered to you every month throughout 2026.</p>
+                <p className="text-sm text-white/70 mb-3 flex-grow">Monthly personalized Saju readings delivered to you every month throughout 2026.</p>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-blue-300">12 monthly readings</span>
                   <span className="text-lg font-bold text-white/50">$79</span>
