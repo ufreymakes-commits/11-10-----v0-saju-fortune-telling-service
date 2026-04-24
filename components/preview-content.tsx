@@ -87,46 +87,20 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
   const [data, setData] = useState<PreviewData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [adminKey, setAdminKey] = useState<string | null>(null)
-
-  // Get admin key from localStorage (or URL if provided)
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const key = params.get('admin_key')
-    if (key) {
-      localStorage.setItem('admin_key', key)
-      setAdminKey(key)
-      console.log('[v0] Admin key saved to localStorage')
-    } else {
-      const savedKey = localStorage.getItem('admin_key')
-      if (savedKey) {
-        setAdminKey(savedKey)
-        console.log('[v0] Admin key loaded from localStorage')
-      }
-    }
-  }, [])
 
   useEffect(() => {
     async function fetchPreview() {
       try {
-        const body: any = { submissionId }
-        if (adminKey) {
-          body.admin_key = adminKey
-        }
-        
         const response = await fetch('/api/generate-gemini', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
+          body: JSON.stringify({ submissionId })
         })
         
         if (!response.ok) {
           const errorText = await response.text()
           console.error('[v0] generate-gemini failed:', response.status, errorText)
-          const errorMsg = response.status === 429 
-            ? 'Daily limit reached. Please try again tomorrow.' 
-            : `Error: ${response.status} - ${errorText}`
-          throw new Error(errorMsg)
+          throw new Error(`Error: ${response.status} - ${errorText}`)
         }
         
         const result = await response.json()
@@ -141,7 +115,7 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
     }
     
     fetchPreview()
-  }, [submissionId, adminKey])
+  }, [submissionId])
 
   // Character slider data for loading screen
   const characters = [

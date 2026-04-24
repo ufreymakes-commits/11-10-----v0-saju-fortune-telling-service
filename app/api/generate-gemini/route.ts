@@ -59,32 +59,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing saju_data' }, { status: 400 })
     }
 
-    // Get admin key from request (optional)
-    const adminKey = body.admin_key
-    const ADMIN_KEY = process.env.ADMIN_KEY || 'sajume-admin-key-2024'
-
-    // Check rate limit - skip if valid admin key is provided
-    if (adminKey !== ADMIN_KEY) {
-      const supabase = await createClient()
-      const today = new Date().toISOString().split('T')[0]
-      const { count, error: countError } = await supabase
-        .from('submissions')
-        .select('*', { count: 'exact', head: true })
-        .eq('name', name)
-        .gte('created_at', `${today}T00:00:00`)
-        .lt('created_at', `${today}T23:59:59`)
-
-      if (!countError && count !== null && count >= 2) {
-        console.log(`[v0] Gemini: Rate limit exceeded for ${name} (${count} reports today)`)
-        return NextResponse.json(
-          { error: 'You have exceeded the maximum daily usage. Please try again tomorrow :)' },
-          { status: 429 }
-        )
-      }
-    } else {
-      console.log('[v0] Gemini: Admin key valid - bypassing rate limit')
-    }
-
     console.log(`[v0] Gemini: Generating 9 facts for ${name}`)
 
     // ===== SYSTEM PROMPT (고정: 마스터피스 가이드 + 역할 정의) =====
@@ -1129,7 +1103,7 @@ IMPORTANT:
 Reference (Ten Gods → Career Meaning):
 
 Jeonggwan → structured organizations, government, law, administration, stable careers  
-Pyeongwan → competitive environments, pressure-based roles, military, police, performance-driven systems  
+Pyeongwan �� competitive environments, pressure-based roles, military, police, performance-driven systems  
 
 Jeongjae → stable income, corporate roles, financial management  
 Pyeonjae → business, sales, trade, investment, fast money flow  

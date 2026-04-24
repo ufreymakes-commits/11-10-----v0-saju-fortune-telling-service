@@ -67,37 +67,7 @@ function incrementDailyReportCount(): void {
 export function BirthForm() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-  const [dailyLimitReached, setDailyLimitReached] = useState(false)
-  const [adminKey, setAdminKey] = useState<string | null>(null)
   const [errors, setErrors] = useState<FormErrors>({})
-  
-  // Check URL for admin key on mount and save to localStorage
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const key = params.get('admin_key')
-    if (key) {
-      localStorage.setItem('admin_key', key)
-      setAdminKey(key)
-      console.log('[v0] Admin key saved to localStorage')
-    } else {
-      // Try to get admin key from localStorage
-      const savedKey = localStorage.getItem('admin_key')
-      if (savedKey) {
-        setAdminKey(savedKey)
-        console.log('[v0] Admin key loaded from localStorage')
-      }
-    }
-  }, [])
-
-  // Check daily limit on mount
-  useEffect(() => {
-    const { count, date } = getDailyReportCount()
-    const today = new Date().toISOString().split('T')[0]
-    // Skip limit check if admin key is present
-    if (date === today && count >= DAILY_LIMIT && !adminKey) {
-      setDailyLimitReached(true)
-    }
-  }, [adminKey])
   
   const [formData, setFormData] = useState({
     name: '',
@@ -147,16 +117,6 @@ export function BirthForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-  // Check daily limit before proceeding
-  const { count, date } = getDailyReportCount()
-  const today = new Date().toISOString().split('T')[0]
-  // Skip limit check if admin key is present
-  if (date === today && count >= DAILY_LIMIT && !adminKey) {
-    setDailyLimitReached(true)
-    setErrors({ dailyLimit: 'You have exceeded the maximum daily usage. Please try again tomorrow :)' })
-    return
-  }
-    
     if (!validateForm()) return
     
     setIsLoading(true)
@@ -171,9 +131,6 @@ export function BirthForm() {
       if (!response.ok) {
         throw new Error('Failed to submit')
       }
-      
-      // Increment daily count on successful submission
-      incrementDailyReportCount()
       
       const { submissionId } = await response.json()
       router.push(`/preview/${submissionId}`)
@@ -400,19 +357,10 @@ export function BirthForm() {
           {errors.referralSource && <FieldError>{errors.referralSource}</FieldError>}
         </Field>
 
-        {/* Daily Limit Error */}
-        {(dailyLimitReached || errors.dailyLimit) && (
-          <div className="bg-red-100 border border-red-300 rounded-lg p-3 text-center">
-            <p className="text-sm text-red-700 font-medium">
-              You have exceeded the maximum daily usage. Please try again tomorrow :)
-            </p>
-          </div>
-        )}
-
         {/* Submit Button */}
         <Button 
           type="submit" 
-          disabled={isLoading || dailyLimitReached}
+          disabled={isLoading}
           className="w-full bg-primary text-white hover:bg-primary/90 h-12 text-lg font-semibold rounded-full shadow-lg shadow-primary/30 mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
