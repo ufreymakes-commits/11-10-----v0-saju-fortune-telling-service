@@ -1115,7 +1115,7 @@ Jeongin → education, research, counseling, academia, theory, certification-bas
 Pyeonin → psychology, philosophy, strategy, analysis, unconventional knowledge  
 
 Bigyeon → self-employment, freelance, independent expertise  
-Geopjae �� competition, sales, trading, network-driven income  
+Geopjae ��� competition, sales, trading, network-driven income  
 
 --------------------------------------------------
 
@@ -1455,7 +1455,7 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
 59. 기토 - 정인 : Seeks comfort in knowledge. Draws emotional security from study.
 60. 기토 - 편인 : Relies on inner processing to restore energy. Needs quiet solitude to recharge and reflect.
 61. 경금 - 비견 : Sharp self-pride and willpower. Like steel, refuses to bend in self-conviction.
-62. �������� - 겁����������� : Bold challenger of structure. Clashes with peers, cuts through indecision.
+62. ���������� - 겁����������� : Bold challenger of structure. Clashes with peers, cuts through indecision.
 63. 경금 - 식신 : Productive with clarity and rules. Applies logic to yield results with precision.
 64. 경금 - 상관 : Strong speech, potentially critical. Cuts with words — brilliant or biting.
 65. 경금 - 정재 : Manages finance with decisiveness. Prefers practical, measurable outcomes.
@@ -2495,9 +2495,9 @@ Language: English only.
     // 생년월일에서 계절 파악해서 조후 정도 판단
     const month = parseInt(birth_date.split('-')[1])
     const isBalancedSeason = [3, 4, 9, 10].includes(month) // 봄/가을
-
+    
     let selectedYongsin = 'your lucky element'
-
+    
     if (isBalancedSeason && saju_data.eokbuYongsin) {
       // 조후가 원만하면 억부용신 선택
       selectedYongsin = saju_data.eokbuYongsin
@@ -2511,7 +2511,7 @@ Language: English only.
       // 그 다음 억부용신
       selectedYongsin = saju_data.eokbuYongsin
     }
-
+    
     // 한글 글자를 오행으로 변환
     const hanja2Element: Record<string, string> = {
       '甲': 'Wood', '乙': 'Wood',
@@ -2520,14 +2520,29 @@ Language: English only.
       '庚': 'Metal', '辛': 'Metal',
       '壬': 'Water', '癸': 'Water'
     }
-
-    let yongsinElement = selectedYongsin
-    if (hanja2Element[selectedYongsin]) {
-      yongsinElement = hanja2Element[selectedYongsin]
-      console.log(`[v0] Gemini: Converted yongsin ${selectedYongsin} to ${yongsinElement}`)
+    
+    // selectedYongsin에서 첫 번째 요소만 추출 (예: "Water > Wood" → "Water")
+    let firstElement = selectedYongsin
+    if (selectedYongsin.includes('>')) {
+      // "Water > Wood" 형식에서 첫 번째만 추출
+      firstElement = selectedYongsin.split('>')[0].trim()
+    } else if (selectedYongsin.includes('(')) {
+      // "水(인성)" 형식에서 한글 부분 제거
+      firstElement = selectedYongsin.split('(')[0].trim()
+    }
+    
+    // 한글 글자를 영어 오행명칭으로 변환
+    let yongsinElement = firstElement
+    if (hanja2Element[firstElement]) {
+      yongsinElement = hanja2Element[firstElement]
+      console.log(`[v0] Gemini: Converted yongsin ${firstElement} to ${yongsinElement}`)
+    } else if (!['Water', 'Fire', 'Wood', 'Metal', 'Earth', 'your lucky element'].includes(yongsinElement)) {
+      // 혹시 다른 형식이면 기본값 사용
+      yongsinElement = 'your lucky element'
+      console.log(`[v0] Gemini: Unknown yongsin format, using default`)
     }
 
-    console.log(`[v0] Gemini: Selected yongsin: ${yongsinElement} (balanced season: ${isBalancedSeason})`)
+    console.log(`[v0] Gemini: Final yongsinElement: ${yongsinElement} (balanced season: ${isBalancedSeason})`)
 
     const stage2UserPrompt = `
 ===========================================
