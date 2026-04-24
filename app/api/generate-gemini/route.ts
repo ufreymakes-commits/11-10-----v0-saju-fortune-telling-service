@@ -2665,14 +2665,19 @@ OUTPUT FORMAT (JSON ONLY):
         }
       }
 
-      console.log('[v0] Gemini: Saved free report to DB (3 sections)')
+      // yongsinElement를 submission의 saju_data에도 저장 (캐시 로드 시 사용)
+      await supabase
+        .from('submissions')
+        .update({
+          saju_data: {
+            ...saju_data,
+            yongsin: yongsinElement  // 변환된 오행명칭 저장
+          }
+        })
+        .eq('id', body.submissionId)
+      
+      console.log('[v0] Gemini: Saved free report to DB (3 sections) with yongsinElement:', yongsinElement)
     }
-
-    // 프론트엔드가 기대하는 형식으로 응답 준비
-    // yongsin을 간단한 문자열로 변환 (preview에서 직접 접근하기 위해)
-    const yongsinString = saju_data.yongsin?.johu
-      ? saju_data.yongsin.johu
-      : (saju_data.yongsin?.eokbu || 'your lucky element')
 
     return NextResponse.json({
       freeFacts: facts,

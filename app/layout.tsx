@@ -25,11 +25,20 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     siteName: 'Sajume',
+    images: [
+      {
+        url: '/images/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Sajume - Korean Saju Astrology',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Sajume - 99 Facts Your Birth Chart Speaks to You',
     description: 'Discover the secrets of your destiny through Korean Saju astrology.',
+    images: ['/images/og-image.png'],
   },
 }
 

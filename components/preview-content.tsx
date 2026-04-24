@@ -83,12 +83,24 @@ const BRANCH_PRONUNCIATION: Record<string, string> = {
   '午': 'O', '未': 'Mi', '申': 'Sin', '酉': 'Yu', '戌': 'Sul', '亥': 'Hae'
 }
 
-export function PreviewContent({ submissionId }: PreviewContentProps) {
-  const [data, setData] = useState<PreviewData | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+interface PreviewContentPropsWithCache {
+  submissionId: string
+  cachedData?: PreviewData | null
+}
+
+export function PreviewContent({ submissionId, cachedData }: PreviewContentPropsWithCache) {
+  const [data, setData] = useState<PreviewData | null>(cachedData || null)
+  const [isLoading, setIsLoading] = useState(!cachedData)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    // If we have cached data, skip API call
+    if (cachedData) {
+      setData(cachedData)
+      setIsLoading(false)
+      return
+    }
+    
     async function fetchPreview() {
       try {
         const response = await fetch('/api/generate-gemini', {
@@ -115,7 +127,7 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
     }
     
     fetchPreview()
-  }, [submissionId])
+  }, [submissionId, cachedData])
 
   // Character slider data for loading screen
   const characters = [
@@ -432,11 +444,11 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
               className="object-cover object-center"
             />
           </div>
-          <h4 className="text-sm font-semibold text-white mb-1">Personal Luck Bracelet</h4>
-          <p className="text-xs text-white/60 mb-3">Get your Sajume luck bracelet</p>
+          <h4 className="text-sm font-semibold text-white mb-1">Signature Saju Elemental Bracelet</h4>
+          <p className="text-xs text-white/60 mb-3">A signature bracelet designed to fill the missing energies in your personal Saju chart and attract good fortune.</p>
           <div className="flex items-center justify-between">
             <span className="text-xs text-amber-300">Personalized to your Saju</span>
-            <span className="text-sm font-bold text-white/50">$49.99</span>
+            <span className="text-sm font-bold text-white/50">$38</span>
           </div>
         </div>
       </div>

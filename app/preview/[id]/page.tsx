@@ -36,15 +36,40 @@ export default async function PreviewPage({ params }: PageProps) {
   
   const supabase = await createClient()
   
-  // Check if submission exists
-  const { data: submission } = await supabase
-    .from('submissions')
-    .select('id, name')
-    .eq('id', id)
-    .single()
+  // Check if submission exists and fetch cached free reports
+  const [submissionResult, reportsResult] = await Promise.all([
+    supabase.from('submissions').select('*').eq('id', id).single(),
+    supabase.from('reports').select('section_key, facts, context_interpretation').eq('submission_id', id).eq('is_free', true)
+  ])
   
-  if (!submission) {
+  if (!submissionResult.data) {
     notFound()
+  }
+  
+  const submission = submissionResult.data
+  
+  // Build cached data if available (for shared links)
+  let cachedPreviewData = null
+  if (reportsResult.data && reportsResult.data.length > 0) {
+    // Combine all cached free facts
+    const allFacts: any[] = []
+    for (const row of reportsResult.data) {
+      if (Array.isArray(row.facts)) {
+        allFacts.push(...row.facts)
+      }
+    }
+    
+    if (allFacts.length > 0) {
+      // Build the preview data from cache
+      cachedPreviewData = {
+        freeFacts: allFacts,
+        teaserFacts: [],
+        submission: {
+          name: submission.name,
+          sajuData: submission.saju_data || {}
+        }
+      }
+    }
   }
   
   return (
@@ -60,7 +85,7 @@ export default async function PreviewPage({ params }: PageProps) {
             </div>
           </div>
         }>
-          <PreviewContent submissionId={id} />
+          <PreviewContent submissionId={id} cachedData={cachedPreviewData} />
         </Suspense>
       </div>
     </main>
