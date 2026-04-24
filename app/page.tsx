@@ -80,7 +80,7 @@ export default function LandingPage() {
           </h2>
           
           <div className="inline-block bg-purple-600/80 text-white px-4 py-1 rounded-sm text-xs md:text-sm mb-8">
-            {"K-astrology 'Saju' based"}
+            {"K-Saju: The Next Gen Fortune Telling"}
           </div>
           
           {/* Mascot with V-formation background characters */}
@@ -380,7 +380,7 @@ export default function LandingPage() {
               data-tally-emoji-animation="wave"
               className="px-4 py-2 bg-white/10 border border-white/20 text-white text-xs font-semibold rounded hover:bg-white/20 hover:border-white/40 transition-all"
             >
-              Can I help you with the issue?
+              May I help you with the issue?
             </button>
             <p className="text-xs text-white/30">Business: hello@sajume.com</p>
           </div>

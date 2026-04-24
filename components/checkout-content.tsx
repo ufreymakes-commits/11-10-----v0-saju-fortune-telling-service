@@ -219,32 +219,6 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
         <span>Secure payment powered by PayPal</span>
       </div>
 
-      {/* Personal Luck Bracelet Card */}
-      <div className="mt-8">
-        <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-amber-500/30 rounded-xl p-5 opacity-80">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/30">Coming Soon</span>
-          </div>
-          <div className="flex items-start gap-4">
-            <div className="w-14 h-14 rounded-lg bg-[#1a1a2e] flex-shrink-0 flex items-center justify-center">
-              <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center">
-                <svg className="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3C7 3 3 7 3 12s4 9 9 9 9-4 9-9-4-9-9-9zm0 0v18M3 12h18" />
-                </svg>
-              </div>
-            </div>
-            <div className="flex-1">
-              <h4 className="text-sm font-semibold text-white mb-1">Personal Luck Bracelet</h4>
-              <p className="text-xs text-white/60 mb-2">A handcrafted bracelet designed to fill the missing energies in your personal Saju chart and attract good fortune.</p>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-amber-300">Personalized to your Saju</span>
-                <span className="text-sm font-bold text-white/50">$49.99</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Back Link */}
       <div className="text-center mt-6">
         <Link 

@@ -174,28 +174,10 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
 
   return (
     <div className="px-4 py-8 max-w-3xl mx-auto">
-      {/* Header */}
+      {/* Header - minimal */}
       <div className="text-center mb-6">
-        <Link href="/" className="inline-block mb-4">
-          <div className="border border-primary/50 rounded-full px-5 py-1.5 text-primary text-xs tracking-wider">
-            Sajume
-          </div>
-        </Link>
-        
-        <div className="relative w-20 h-20 mx-auto mb-3">
-          <Image
-            src="/images/characters-collection.png"
-            alt="Sajume characters"
-            fill
-            className="object-contain"
-          />
-        </div>
-        
-        <h1 className="text-xl font-semibold mb-1">
-          <span className="text-gradient">{submission.name}&apos;s 99 Facts</span>
-        </h1>
         <p className="text-xs text-muted-foreground">
-          Your complete Saju birth chart report
+          {submission.name}&apos;s personalized Saju report
         </p>
       </div>
 
@@ -269,24 +251,40 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
         </div>
       </div>
 
-      {/* Major Fortune Periods (대운) */}
-      {daewoon.length > 0 && (
-        <div className="bg-card border border-border rounded-xl p-4 mb-6 shadow-lg shadow-primary/5">
-          <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-3 text-center">Major Fortune Periods (대운)</h2>
-          <div className="flex flex-col gap-1.5">
-            {daewoon.map((d, i) => (
-              <div key={i} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-background/50">
-                <span className="text-[10px] text-muted-foreground w-20 flex-shrink-0">
-                  {d.startAge}세 ~ {d.endAge}세
-                </span>
-                <span className="text-sm font-bold text-foreground tracking-wider">
-                  {d.fullName}
-                </span>
+      {/* Five Elements Score Table */}
+      <div className="bg-card border border-border rounded-xl p-4 mb-6 shadow-lg shadow-primary/5">
+        <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-3 text-center">Your Five Elements Balance (120 points)</h2>
+        <div className="space-y-2">
+          {Object.entries(sajuData.elementBalance || {}).map(([element, score]) => {
+            const elementColors: Record<string, string> = {
+              Wood: 'bg-green-500',
+              Fire: 'bg-red-500',
+              Earth: 'bg-yellow-600',
+              Metal: 'bg-gray-400',
+              Water: 'bg-blue-500'
+            }
+            const maxScore = 120
+            const percentage = (Number(score) / maxScore) * 100
+            return (
+              <div key={element} className="flex items-center gap-3">
+                <span className="text-xs text-foreground w-12 flex-shrink-0">{element}</span>
+                <div className="flex-1 h-4 bg-background/50 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full ${elementColors[element] || 'bg-primary'} transition-all duration-500`}
+                    style={{ width: `${percentage}%` }}
+                  />
+                </div>
+                <span className="text-xs text-muted-foreground w-8 text-right">{score}</span>
               </div>
-            ))}
-          </div>
+            )
+          })}
         </div>
-      )}
+        {/* Yongsin Display */}
+        <div className="mt-4 pt-3 border-t border-border/30 text-center">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Your Lucky Element (Yongsin)</p>
+          <p className="text-lg font-bold text-gradient">{sajuData.yongsin || sajuData.luckyElement || 'Water'}</p>
+        </div>
+      </div>
 
       {/* Progress Bar */}
       {completedSections < sections.length && (
@@ -359,29 +357,71 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
         ))}
       </div>
 
-      {/* Completion Message */}
+      {/* Review Button for Free Coupon */}
       {completedSections === sections.length && (
-        <div className="mt-6 text-center bg-card border border-primary/40 rounded-xl p-5 shadow-lg shadow-primary/10">
-          <div className="relative w-16 h-16 mx-auto mb-3">
-            <Image
-              src="/images/characters-collection.png"
-              alt="Sajume characters"
-              fill
-              className="object-contain"
-            />
+        <div className="mt-6">
+          <button 
+            data-tally-open="wQJNpR" 
+            data-tally-layout="modal" 
+            data-tally-emoji-text="🎁" 
+            data-tally-emoji-animation="tada"
+            className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-semibold rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg shadow-purple-500/20"
+          >
+            Submit a Review &amp; Get 100% Free Coupon<br />
+            <span className="text-xs font-normal opacity-80">for my family or friend</span>
+          </button>
+        </div>
+      )}
+
+      {/* Product Cards */}
+      {completedSections === sections.length && (
+        <div className="mt-8">
+          <h3 className="text-sm font-semibold text-foreground mb-4 text-center">More from Sajume</h3>
+          <div className="space-y-4">
+            {/* Signature Saju Elemental Bracelet */}
+            <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-amber-500/30 rounded-xl p-4 opacity-70">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/30">Coming Soon</span>
+              </div>
+              <h4 className="text-sm font-semibold text-white mb-1">Signature Saju Elemental Bracelet</h4>
+              <p className="text-xs text-white/60 mb-2">A bracelet designed to fill the missing energies in your Saju chart.</p>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-amber-300">Personalized to your Saju</span>
+                <span className="text-sm font-bold text-white/50">$38</span>
+              </div>
+            </div>
+
+            {/* Saju Compatibility */}
+            <div className="bg-gradient-to-br from-pink-900/40 to-rose-900/40 border border-pink-500/30 rounded-xl p-4 opacity-70">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[10px] bg-pink-500/20 text-pink-300 px-2 py-0.5 rounded-full border border-pink-500/30">Coming Soon</span>
+              </div>
+              <h4 className="text-sm font-semibold text-white mb-1">Saju Compatibility</h4>
+              <p className="text-xs text-white/60 mb-2">Deep dive into your relationship dynamics and love compatibility.</p>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-pink-300">Compare two birth charts</span>
+                <span className="text-sm font-bold text-white/50">$12</span>
+              </div>
+            </div>
+
+            {/* 12-Month Fortune Subscription */}
+            <div className="bg-gradient-to-br from-blue-900/40 to-indigo-900/40 border border-blue-500/30 rounded-xl p-4 opacity-70">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full border border-blue-500/30">Coming Soon</span>
+              </div>
+              <h4 className="text-sm font-semibold text-white mb-1">12-Month Fortune Subscription</h4>
+              <p className="text-xs text-white/60 mb-2">Monthly personalized fortune readings based on your Saju chart.</p>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-blue-300">Delivered monthly</span>
+                <span className="text-sm font-bold text-white/50">$3.99/mo</span>
+              </div>
+            </div>
           </div>
-          <h3 className="text-base font-semibold text-gradient mb-1">Your Report is Complete!</h3>
-          <p className="text-xs text-foreground/70 mb-2">
-            Thank you for exploring your destiny with Sajume, {submission.name}
-          </p>
-          <p className="text-[10px] text-muted-foreground">
-            Total: {totalFacts} personalized facts about your birth chart
-          </p>
         </div>
       )}
 
       {/* Footer */}
-      <div className="mt-6 text-center">
+      <div className="mt-8 text-center">
         <p className="text-[10px] text-muted-foreground">
           This report is generated based on Korean Saju (Four Pillars) astrology.
           <br />
@@ -398,7 +438,7 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
             data-tally-emoji-animation="wave"
             className="px-4 py-2 bg-primary/20 border border-primary/40 text-foreground text-xs font-semibold rounded hover:bg-primary/30 hover:border-primary/60 transition-all"
           >
-            Can I help you with the issue?
+            May I help you with the issue?
           </button>
           <p className="text-[10px] text-muted-foreground/50">
             Business: hello@sajume.com
@@ -419,7 +459,7 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
         ) : (
           <>
             <LinkIcon className="w-3.5 h-3.5 text-primary" />
-            <span>URL 공유하기</span>
+            <span>Share</span>
           </>
         )}
       </button>

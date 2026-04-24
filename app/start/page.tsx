@@ -45,8 +45,8 @@ export default function StartPage() {
         </div>
         
         {/* Info */}
-        <p className="mt-6 text-xs text-muted-foreground text-center max-w-sm">
-          Your information is used solely to calculate your birth chart and will not be shared with third parties.
+        <p className="mt-6 text-[10px] text-muted-foreground/70 text-center max-w-sm leading-relaxed">
+          Your information is used solely to calculate your birth chart and will not be shared with third parties. By continuing, you agree to our privacy policy and receiving our Saju tips newsletter. Secure &amp; Easy unsubscribe anytime.
         </p>
         
         {/* Footer */}
@@ -62,7 +62,7 @@ export default function StartPage() {
               data-tally-emoji-animation="wave"
               className="px-4 py-2 bg-primary/20 border border-primary/40 text-foreground text-xs font-semibold rounded hover:bg-primary/30 hover:border-primary/60 transition-all"
             >
-              Can I help you with the issue?
+              May I help you with the issue?
             </button>
             <p className="text-[10px] text-muted-foreground/50">
               Business: hello@sajume.com

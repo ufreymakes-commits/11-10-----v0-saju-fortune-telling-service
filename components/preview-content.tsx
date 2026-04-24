@@ -466,7 +466,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
             data-tally-emoji-animation="wave"
             className="px-4 py-2 bg-primary/20 border border-primary/40 text-foreground text-xs font-semibold rounded hover:bg-primary/30 hover:border-primary/60 transition-all"
           >
-            Can I help you with the issue?
+            May I help you with the issue?
           </button>
           <p className="text-[10px] text-muted-foreground/50">
             Business: hello@sajume.com
