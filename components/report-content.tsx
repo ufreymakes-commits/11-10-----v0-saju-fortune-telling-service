@@ -201,7 +201,9 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
 
       {/* Four Pillars Card */}
       <div className="bg-card border border-border rounded-xl p-4 mb-6 shadow-lg shadow-primary/5">
-        <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-3 text-center">Your Four Pillars</h2>
+        <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-3 text-center">
+          <span className="text-gradient font-semibold">{submission.name}&apos;s</span> Four Pillars
+        </h2>
         
         {/* Pillars Grid - Left to Right: Hour, Day, Month, Year */}
         <div className="grid grid-cols-4 gap-2 text-center mb-4">

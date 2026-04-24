@@ -208,17 +208,12 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
     <div className="px-4 py-8 max-w-2xl mx-auto">
       {/* Header */}
       <div className="text-center mb-6">
-        <h1 className="text-2xl font-semibold mb-2">
-          <span className="text-gradient">{submission.name}</span>, here are your first insights
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Based on your Saju birth chart
-        </p>
-      </div>
 
       {/* Four Pillars Card */}
       <div className="bg-card border border-border rounded-xl p-4 mb-6 shadow-lg shadow-primary/5">
-        <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-3 text-center">Your Four Pillars</h2>
+        <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-3 text-center">
+          <span className="text-gradient font-semibold">{submission.name}&apos;s</span> Four Pillars
+        </h2>
         
         <div className="grid grid-cols-4 gap-2 text-center mb-4">
           {pillars.map(({ label, labelKr, pillar }) => (
@@ -427,11 +422,11 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
 
       {/* Personal Luck Bracelet Card */}
       <div className="mt-8">
-        <p className="text-sm font-semibold text-foreground mb-3 text-center">
-          <span className="italic">&quot;Your wish is my command&quot;</span>
-          <br className="md:hidden" />
-          <span className="hidden md:inline">, </span>
-          Get your Sajume luck bracelet
+        <p className="text-sm font-semibold text-foreground mb-2 text-center">
+          <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">&quot;Your wish is my command&quot;</span>
+        </p>
+        <p className="text-xs text-muted-foreground text-center mb-4">
+          Did you know that among Fire, Water, Wood, Metal, and Earth, the closer you stay to <span className="font-semibold text-foreground">{submission.sajuData.yongsin || 'your lucky element'}</span>, the luckier you become?
         </p>
         <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-amber-500/30 rounded-xl p-5">
           <div className="relative w-full h-32 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center">
@@ -445,7 +440,7 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
             </div>
           </div>
           <h4 className="text-sm font-semibold text-white mb-1">Personal Luck Bracelet</h4>
-          <p className="text-xs text-white/60 mb-3">A handcrafted bracelet designed to fill the missing energies in your personal Saju chart and attract good fortune.</p>
+          <p className="text-xs text-white/60 mb-3">Get your Sajume luck bracelet</p>
           <div className="flex items-center justify-between">
             <span className="text-xs text-amber-300">Personalized to your Saju</span>
             <span className="text-sm font-bold text-white/50">$49.99</span>
