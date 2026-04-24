@@ -1115,7 +1115,7 @@ Jeongin → education, research, counseling, academia, theory, certification-bas
 Pyeonin → psychology, philosophy, strategy, analysis, unconventional knowledge  
 
 Bigyeon → self-employment, freelance, independent expertise  
-Geopjae → competition, sales, trading, network-driven income  
+Geopjae �� competition, sales, trading, network-driven income  
 
 --------------------------------------------------
 
@@ -1455,7 +1455,7 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
 59. 기토 - 정인 : Seeks comfort in knowledge. Draws emotional security from study.
 60. 기토 - 편인 : Relies on inner processing to restore energy. Needs quiet solitude to recharge and reflect.
 61. 경금 - 비견 : Sharp self-pride and willpower. Like steel, refuses to bend in self-conviction.
-62. 경금 - 겁����������� : Bold challenger of structure. Clashes with peers, cuts through indecision.
+62. 경��� - 겁����������� : Bold challenger of structure. Clashes with peers, cuts through indecision.
 63. 경금 - 식신 : Productive with clarity and rules. Applies logic to yield results with precision.
 64. 경금 - 상관 : Strong speech, potentially critical. Cuts with words — brilliant or biting.
 65. 경금 - 정재 : Manages finance with decisiveness. Prefers practical, measurable outcomes.
@@ -2490,6 +2490,45 @@ Tone: Gen-Z tone (ex. No cap · It's giving · Hits different · Glow up ·  Mai
 Language: English only.
 `
 
+    // ===== Yongsin 처리 로직 =====
+    // 조후 정도에 따라 조후용신 또는 억부용신 선택
+    // 생년월일에서 계절 파악해서 조후 정도 판단
+    const month = parseInt(submission.birthDate.split('-')[1])
+    const isBalancedSeason = [3, 4, 9, 10].includes(month) // 봄/가을
+    
+    let selectedYongsin = 'your lucky element'
+    
+    if (isBalancedSeason && saju_data.eokbuYongsin) {
+      // 조후가 원만하면 억부용신 선택
+      selectedYongsin = saju_data.eokbuYongsin
+    } else if (!isBalancedSeason && saju_data.johuYongsin) {
+      // 조후가 심각하면 조후용신 선택
+      selectedYongsin = saju_data.johuYongsin
+    } else if (saju_data.johuYongsin) {
+      // 기본적으로 조후용신이 있으면 선택
+      selectedYongsin = saju_data.johuYongsin
+    } else if (saju_data.eokbuYongsin) {
+      // 그 다음 억부용신
+      selectedYongsin = saju_data.eokbuYongsin
+    }
+    
+    // 한글 글자를 오행으로 변환
+    const hanja2Element: Record<string, string> = {
+      '甲': 'Wood', '乙': 'Wood',
+      '丙': 'Fire', '丁': 'Fire',
+      '戊': 'Earth', '己': 'Earth',
+      '庚': 'Metal', '辛': 'Metal',
+      '壬': 'Water', '癸': 'Water'
+    }
+    
+    let yongsinElement = selectedYongsin
+    if (hanja2Element[selectedYongsin]) {
+      yongsinElement = hanja2Element[selectedYongsin]
+      console.log(`[v0] Gemini: Converted yongsin ${selectedYongsin} to ${yongsinElement}`)
+    }
+
+    console.log(`[v0] Gemini: Selected yongsin: ${yongsinElement} (balanced season: ${isBalancedSeason})`)
+
     const stage2UserPrompt = `
 ===========================================
 [STAGE 2: 9가지 팩트 생성]
@@ -2504,14 +2543,14 @@ IMPORTANT: Use the customer's name (${name}) ONLY in the FIRST sentence (id: 1) 
 Example: "Hey ${name}, ..." for the first fact, and "${name}, remember that..." for the last fact.
 
 테마: 커리어/연애/인생/건강/위로와 응원
-Gen-Z 미국인이 인생을 살면서 늘 궁금해하거나 고민하는 삶의 현상으로 보이는 현실에 대한 9가지 팩트이자 위로와 공감이어야 한다. 글을 읽자마자 이렇게 느껴야 한다. '뭐야? 나에 대해서 어떻게 알았지? 이거 뭐야 완전 eerie 하네. 근데 또 엄청 위로가 되고 내 지난 날의 괴로움과 고통에 대해서 누구보다 정확하게 어루만져줘서 눈물이 나려하네. 응원을 받았어. 이 서비스 정말 감동적이다.'
+Gen-Z 미국인이 인생을 살면서 늘 궁���해하거나 고민하는 삶의 현상으로 보이는 현실에 대한 9가지 팩트이자 위로와 공감이어야 한다. 글을 읽자마자 이렇게 느껴야 한다. '뭐야? 나에 대해서 어떻게 알았지? 이거 뭐야 완전 eerie 하네. 근데 또 엄청 위로가 되고 내 지난 날의 괴로움과 고통에 대해서 누구보다 정확하게 어루만져줘서 눈물이 나려하네. 응원을 받았어. 이 서비스 정말 감동적이다.'
 
 특히 4번 커리어 문장 관련해서는 반드시 '두 가지 양상(구조적 적합성 + 재능적 두각)'을 포함해야 하며,
 모든 문장은 분석 보고서의 엄청나게 예리한 뾰족함과 깊이를 유지해야 한다.
 
-8번 문장은 모든 사람에게 반드시 이렇게 동일한 포맷의 문장이 나가야 한다. "Did you know that among Fire, Water, Wood, Metal, and Earth, the closer you stay to ${yongsin} , the luckier you become?"
+8번 문장은 모든 사람에게 반드시 이렇게 동일한 포맷의 문장이 나가야 한다. "Did you know that among Fire, Water, Wood, Metal, and Earth, the closer you stay to ${yongsinElement} , the luckier you become?"
 
-이 때 용신의 경우, 사주에 조후(추위/더위) 문제가 심각하다면, 반드시 조후용신의 오행을 ${yongsin}에 넣을 것. 조후가 원만하다면(봄/가을생 등), 억부용신의 오행을 ${yongsin}에 넣을 것. 만약 조후용신이 '병(丙)'이나 '사(巳)'처럼 글자로 되어 있다면, 이를 오행(Fire, Water, Wood, Metal, Earth) 명칭으로 매핑해서 변환해서 넣을 것.
+이 때 용신의 경우, 사주에 조후(추위/더위) 문제가 심각하다면, 반드시 조후용신의 오행을 ${yongsinElement}에 넣을 것. 조후가 원만하다면(봄/가을생 등), 억부용신의 오행을 ${yongsinElement}에 넣을 것. 만약 조후용신이 '병(丙)'이나 '사(巳)'처럼 글자로 되어 있다면, 이를 오행(Fire, Water, Wood, Metal, Earth) 명칭으로 매핑해서 변환해서 넣을 것.
 
 === 심화 분석 보고서 ===
 ${JSON.stringify(deepAnalysis, null, 2)}
