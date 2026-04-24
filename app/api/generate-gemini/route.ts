@@ -2461,7 +2461,7 @@ ${JSON.stringify(allSajuData, null, 2)}
       model: 'google/gemini-3-flash',
       system: stage1SystemPrompt,
       prompt: stage1UserPrompt,
-      temperature: 0.7,
+      temperature: 0,
       maxTokens: 2000
     })
 
@@ -2596,7 +2596,7 @@ OUTPUT FORMAT (JSON ONLY):
       model: 'google/gemini-3-flash',
       system: stage2SystemPrompt,
       prompt: stage2UserPrompt,
-      temperature: 0.8,
+      temperature: 0,
       maxTokens: 2500
     })
 
