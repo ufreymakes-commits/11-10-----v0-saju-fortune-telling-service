@@ -13,6 +13,14 @@ const NAV_LINKS = [
   { label: 'Paid Reports', href: '/my-reports' },
 ]
 
+const handleReportIssue = () => {
+  // Tally popup 트리거
+  const element = document.querySelector('[data-tally-open="681NVP"]') as any
+  if (element) {
+    element.click()
+  }
+}
+
 export function NavSidebar() {
   const [open, setOpen] = useState(false)
   const [user, setUser] = useState<User | null>(null)
@@ -118,6 +126,18 @@ export function NavSidebar() {
               </Link>
             )
           })}
+          
+          {/* Report Issue Button */}
+          <button
+            onClick={() => {
+              const btn = document.querySelector('[data-tally-open="681NVP"]') as any
+              if (btn) btn.click()
+              setOpen(false)
+            }}
+            className="w-full text-left flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/8 transition-colors mt-2"
+          >
+            Report Issue
+          </button>
         </nav>
 
         {/* Auth section at bottom */}

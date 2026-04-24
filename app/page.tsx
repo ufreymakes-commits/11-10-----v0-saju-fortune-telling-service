@@ -194,14 +194,13 @@ export default function LandingPage() {
               <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-amber-500/30 rounded-xl p-6 opacity-70">
                 <h4 className="text-base md:text-lg font-semibold text-white mb-3">Personal Luck Bracelet</h4>
                 <div className="relative w-full h-40 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-amber-500/20 flex items-center justify-center">
-                      <svg className="w-6 h-6 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3C7 3 3 7 3 12s4 9 9 9 9-4 9-9-4-9-9-9zm0 0v18M3 12h18" />
-                      </svg>
-                    </div>
-                    <span className="text-xs text-white/40">Coming Soon</span>
-                  </div>
+                  <Image
+                    src="/images/luck-bracelet.png"
+                    alt="Signature Saju Elemental Bracelet"
+                    width={300}
+                    height={200}
+                    className="object-cover object-center"
+                  />
                 </div>
                 <p className="text-sm text-white/70 mb-3">A handcrafted bracelet designed to fill the missing energies in your personal Saju chart and attract good fortune.</p>
                 <div className="flex items-center justify-between">

@@ -169,26 +169,8 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
           </div>
           <p className="text-sm text-foreground/70 mb-6">
             Don&apos;t close the window!<br />
-            We&apos;ll be done in less than a minute.
+            We&apos;ll be done in less than 2 mins.
           </p>
-          
-          {/* Footer */}
-          <div className="mt-8 pt-6 border-t border-border text-center">
-            <div className="flex flex-col items-center gap-3">
-              <button 
-                data-tally-open="681NVP" 
-                data-tally-layout="modal" 
-                data-tally-emoji-text="👋" 
-                data-tally-emoji-animation="wave"
-                className="px-4 py-2 bg-primary/20 border border-primary/40 text-foreground text-xs font-semibold rounded hover:bg-primary/30 hover:border-primary/60 transition-all"
-              >
-                Can I help you with the issue?
-              </button>
-              <p className="text-[10px] text-muted-foreground/50">
-                Business: hello@sajume.com
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     )
@@ -433,7 +415,7 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
 
       {/* Personal Luck Bracelet Card */}
       <div className="mt-8">
-        <p className="text-sm font-semibold text-foreground mb-2 text-center">
+        <p className="text-lg font-semibold text-foreground mb-2 text-center">
           <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">&quot;Your wish is my command&quot;</span>
         </p>
         <p className="text-sm text-muted-foreground text-center mb-4 leading-relaxed">
@@ -441,15 +423,14 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
           <span className="md:inline"> the closer you stay to <span className="font-semibold text-foreground">{submission.sajuData?.yongsin || 'your lucky element'}</span>, the luckier you become?</span>
         </p>
         <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-amber-500/30 rounded-xl p-5">
-          <div className="relative w-full h-32 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center">
-            <div className="text-center">
-              <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-amber-500/20 flex items-center justify-center">
-                <svg className="w-6 h-6 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3C7 3 3 7 3 12s4 9 9 9 9-4 9-9-4-9-9-9zm0 0v18M3 12h18" />
-                </svg>
-              </div>
-              <span className="text-xs text-white/40">Coming Soon</span>
-            </div>
+          <div className="relative w-full h-48 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center">
+            <Image
+              src="/images/luck-bracelet.png"
+              alt="Signature Saju Elemental Bracelet"
+              width={400}
+              height={300}
+              className="object-cover object-center"
+            />
           </div>
           <h4 className="text-sm font-semibold text-white mb-1">Personal Luck Bracelet</h4>
           <p className="text-xs text-white/60 mb-3">Get your Sajume luck bracelet</p>
