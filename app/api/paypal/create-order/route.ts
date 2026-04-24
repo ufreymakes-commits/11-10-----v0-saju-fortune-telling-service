@@ -1,14 +1,10 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-// Live mode by default. Set PAYPAL_MODE=sandbox to use sandbox credentials
+// Live mode by default. Set PAYPAL_MODE=sandbox to use sandbox
 const USE_SANDBOX = process.env.PAYPAL_MODE === 'sandbox'
-const PAYPAL_CLIENT_ID = USE_SANDBOX 
-  ? process.env.paypalclientidSandbox 
-  : process.env.PAYPAL_CLIENT_ID
-const PAYPAL_CLIENT_SECRET = USE_SANDBOX 
-  ? process.env.paypalsecretkeySandbox 
-  : process.env.PAYPAL_CLIENT_SECRET
+const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID
+const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET
 const PAYPAL_API_URL = USE_SANDBOX
   ? 'https://api-m.sandbox.paypal.com'
   : 'https://api-m.paypal.com'
