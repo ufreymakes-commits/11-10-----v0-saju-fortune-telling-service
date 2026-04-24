@@ -72,7 +72,7 @@ export default function LandingPage() {
             of your birth chart
           </h2>
           
-          <div className="inline-block bg-purple-600/80 text-white px-5 py-2 rounded-sm text-xs md:text-sm lg:text-lg mb-4 font-montserrat font-semibold">
+          <div className="inline-block bg-purple-600/80 text-white px-5 py-2 rounded-sm text-xs md:text-sm lg:text-lg mb-7 font-montserrat font-semibold">
             {"K-Saju: The Next Gen Fortune Telling"}
           </div>
           
