@@ -250,7 +250,7 @@ export default function LandingPage() {
       </section>
 
       {/* Why Sajume Section */}
-      <section className="relative z-10 py-16 px-4 bg-gradient-to-b from-transparent via-purple-900/10 to-transparent">
+      <section className="relative z-10 py-24 px-4 bg-gradient-to-b from-transparent via-purple-900/10 to-transparent">
         <div className="max-w-5xl mx-auto">
           <h3 className="text-center text-3xl md:text-4xl font-semibold text-white/90 mb-2">Why Sajume?</h3>
           <p className="text-center text-sm md:text-base text-white/50 mb-12">
