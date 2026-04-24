@@ -56,8 +56,14 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
       
       const data = await response.json()
       
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create order')
+      console.log('[v0] PayPal create-order response:', data)
+      
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to create payment order')
+      }
+      
+      if (!data.id) {
+        throw new Error('No order ID received from PayPal')
       }
       
       // Store orderId in session for callback
@@ -65,12 +71,15 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
       
       // Redirect to PayPal
       if (data.approvalUrl) {
+        console.log('[v0] Redirecting to PayPal:', data.approvalUrl)
         window.location.href = data.approvalUrl
       } else {
-        throw new Error('No approval URL received')
+        throw new Error('No approval URL received from PayPal')
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong')
+      const errorMsg = err instanceof Error ? err.message : 'Something went wrong'
+      console.error('[v0] PayPal checkout error:', errorMsg, err)
+      setError(errorMsg)
       setIsLoading(false)
     }
   }

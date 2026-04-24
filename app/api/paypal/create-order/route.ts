@@ -132,10 +132,12 @@ export async function POST(request: Request) {
     const approvalUrl = orderData.links.find((link: { rel: string }) => link.rel === 'approve')?.href
     
     console.log('[v0] PayPal approval URL:', approvalUrl)
+    console.log('[v0] PayPal order created:', orderData.id)
     
     return NextResponse.json({
-      orderId: orderData.id,
-      approvalUrl
+      id: orderData.id,
+      approvalUrl,
+      success: true
     })
   } catch (error) {
     console.error('[v0] PayPal create order error:', error)
