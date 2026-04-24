@@ -37,7 +37,7 @@ export default async function ReportPage({ params }: PageProps) {
   
   // Fetch submission, payment, and all cached report sections (both free and paid) in parallel
   const [submissionResult, paymentResult, reportsResult] = await Promise.all([
-    supabase.from('submissions').select('*').eq('id', id).single(),
+    supabase.from('submissions').select('*, saju_data').eq('id', id).single(),
     supabase.from('payments').select('status').eq('submission_id', id).eq('status', 'completed').single(),
     supabase.from('reports').select('section_key, facts, is_free').eq('submission_id', id)
   ])
