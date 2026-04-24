@@ -71,13 +71,21 @@ export function BirthForm() {
   const [adminKey, setAdminKey] = useState<string | null>(null)
   const [errors, setErrors] = useState<FormErrors>({})
   
-  // Check URL for admin key
+  // Check URL for admin key on mount and save to localStorage
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const key = params.get('admin_key')
     if (key) {
+      localStorage.setItem('admin_key', key)
       setAdminKey(key)
-      console.log('[v0] Admin key detected from URL')
+      console.log('[v0] Admin key saved to localStorage')
+    } else {
+      // Try to get admin key from localStorage
+      const savedKey = localStorage.getItem('admin_key')
+      if (savedKey) {
+        setAdminKey(savedKey)
+        console.log('[v0] Admin key loaded from localStorage')
+      }
     }
   }, [])
 

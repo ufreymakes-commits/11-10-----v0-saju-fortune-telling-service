@@ -89,13 +89,20 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
   const [error, setError] = useState<string | null>(null)
   const [adminKey, setAdminKey] = useState<string | null>(null)
 
-  // Get admin key from URL
+  // Get admin key from localStorage (or URL if provided)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const key = params.get('admin_key')
     if (key) {
+      localStorage.setItem('admin_key', key)
       setAdminKey(key)
-      console.log('[v0] Admin key detected')
+      console.log('[v0] Admin key saved to localStorage')
+    } else {
+      const savedKey = localStorage.getItem('admin_key')
+      if (savedKey) {
+        setAdminKey(savedKey)
+        console.log('[v0] Admin key loaded from localStorage')
+      }
     }
   }, [])
 
