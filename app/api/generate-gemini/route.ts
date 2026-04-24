@@ -59,6 +59,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing saju_data' }, { status: 400 })
     }
 
+    // Check rate limit - skip for owner (박유리)
+    if (name !== '박유리') {
+      const supabase = await createClient()
+      const today = new Date().toISOString().split('T')[0]
+      const { count, error: countError } = await supabase
+        .from('submissions')
+        .select('*', { count: 'exact', head: true })
+        .eq('name', name)
+        .gte('created_at', `${today}T00:00:00`)
+        .lt('created_at', `${today}T23:59:59`)
+
+      if (!countError && count !== null && count >= 2) {
+        console.log(`[v0] Gemini: Rate limit exceeded for ${name} (${count} reports today)`)
+        return NextResponse.json(
+          { error: 'You have exceeded the maximum daily usage. Please try again tomorrow :)' },
+          { status: 429 }
+        )
+      }
+    }
+
     console.log(`[v0] Gemini: Generating 9 facts for ${name}`)
 
     // ===== SYSTEM PROMPT (고정: 마스터피스 가이드 + 역할 정의) =====
@@ -1394,7 +1414,7 @@ For example:
 
 Format: [Day Master] – [Ten God] – [One-line Interpretation]
 
-1. 갑목 - 비견 : Competes with peers through upright will and directness. As a tall tree, Gapmok competes by standing firm and growing higher, never bending easily.
+1. 갑목 - 비�� : Competes with peers through upright will and directness. As a tall tree, Gapmok competes by standing firm and growing higher, never bending easily.
 2. 갑목 - 겁재 : Challenges authority with assertive independence. When others try to control, Gapmok resists with rooted strength and pride.
 3. 갑목 - 식신 : Expresses ideas boldly with productive focus. Like a tree producing fruit, expression is a form of contribution and pride.
 4. 갑목 - 상관 : Pursues freedom of speech, sometimes rebellious. Growth becomes wild vine energy when suppressed — can challenge authority.
@@ -1455,7 +1475,7 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
 59. 기토 - 정인 : Seeks comfort in knowledge. Draws emotional security from study.
 60. 기토 - 편인 : Relies on inner processing to restore energy. Needs quiet solitude to recharge and reflect.
 61. 경금 - 비견 : Sharp self-pride and willpower. Like steel, refuses to bend in self-conviction.
-62. 경금 - 겁��������� : Bold challenger of structure. Clashes with peers, cuts through indecision.
+62. 경금 - 겁����������� : Bold challenger of structure. Clashes with peers, cuts through indecision.
 63. 경금 - 식신 : Productive with clarity and rules. Applies logic to yield results with precision.
 64. 경금 - 상관 : Strong speech, potentially critical. Cuts with words — brilliant or biting.
 65. 경금 - 정재 : Manages finance with decisiveness. Prefers practical, measurable outcomes.
