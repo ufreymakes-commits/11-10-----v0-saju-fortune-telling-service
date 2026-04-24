@@ -84,14 +84,19 @@ export default function LandingPage() {
           </div>
           
           {/* Characters in V-formation behind main mascot */}
-          <div className="relative w-80 md:w-96 h-52 md:h-64 mx-auto mb-4">
+          <div className="relative w-full md:w-full h-52 md:h-64 mx-auto mb-4">
+            {/* Left outermost - Singeum (white) */}
+            <div className="absolute w-10 h-10 md:w-14 md:h-14 z-0" style={{ left: '2%', top: '10%' }}>
+              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/singeum-H2AGiONZHmmSe0bTHuI5RwpGTfJAHG.png" alt="Singeum" fill className="object-contain" />
+            </div>
+            
             {/* Left outer - Eulmok (green) - top left */}
-            <div className="absolute w-12 h-12 md:w-16 md:h-16 z-0" style={{ left: '8%', top: '15%' }}>
+            <div className="absolute w-12 h-12 md:w-16 md:h-16 z-0" style={{ left: '12%', top: '15%' }}>
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/eulmok-311z2CoqsXicrNLz220oq3Nb7q1aRl.png" alt="Eulmok" fill className="object-contain" />
             </div>
             
             {/* Left inner - Gyesu (purple) - upper left, closer to center */}
-            <div className="absolute w-16 h-16 md:w-20 md:h-20 z-0" style={{ left: '22%', top: '25%' }}>
+            <div className="absolute w-16 h-16 md:w-20 md:h-20 z-0" style={{ left: '26%', top: '25%' }}>
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gyesu-8YTx4VfcXnNEPPK54QUH0AbfH7oLO3.png" alt="Gyesu" fill className="object-contain" />
             </div>
             
@@ -107,13 +112,18 @@ export default function LandingPage() {
             </div>
             
             {/* Right inner - Gyeonggeum (gray) - upper right, closer to center */}
-            <div className="absolute w-16 h-16 md:w-20 md:h-20 z-0" style={{ right: '22%', top: '25%' }}>
+            <div className="absolute w-16 h-16 md:w-20 md:h-20 z-0" style={{ right: '26%', top: '25%' }}>
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gyeonggeum-C2Pu1PvGYI22q3evrb6Ynel484URPj.png" alt="Gyeonggeum" fill className="object-contain" />
             </div>
             
             {/* Right outer - Byeonghwa (orange) - top right */}
-            <div className="absolute w-12 h-12 md:w-16 md:h-16 z-0" style={{ right: '8%', top: '15%' }}>
+            <div className="absolute w-12 h-12 md:w-16 md:h-16 z-0" style={{ right: '12%', top: '15%' }}>
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/byeonghwa-nwRyjkGV7yuO4EC9wCYlt8Chx6jhyC.png" alt="Byeonghwa" fill className="object-contain" />
+            </div>
+            
+            {/* Right outermost - Imsu (blue) */}
+            <div className="absolute w-10 h-10 md:w-14 md:h-14 z-0" style={{ right: '2%', top: '10%' }}>
+              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/imsu-GeExqsMOCcAoJA7bRd5981KRzwyLad.png" alt="Imsu" fill className="object-contain" />
             </div>
           </div>
           
