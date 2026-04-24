@@ -33,10 +33,10 @@ export const metadata: Metadata = {
     siteName: 'Sajume',
     images: [
       {
-        url: 'https://v0-saju-fortune-telling-service.vercel.app/images/og-image.png',
+        url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Sajume - Korean Saju Astrology',
+        alt: 'Sajume - Korean Saju Astrology - The new fortune telling era',
       },
     ],
   },
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Sajume - 99 Facts Your Birth Chart Speaks to You',
     description: 'Discover the secrets of your destiny through Korean Saju astrology.',
-    images: ['https://v0-saju-fortune-telling-service.vercel.app/images/og-image.png'],
+    images: ['/og-image.png'],
   },
 }
 
@@ -62,11 +62,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta property="og:image" content="https://v0-saju-fortune-telling-service.vercel.app/images/og-image.png" />
+        <meta property="og:image" content="/og-image.png" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:image:type" content="image/png" />
-        <meta name="twitter:image" content="https://v0-saju-fortune-telling-service.vercel.app/images/og-image.png" />
+        <meta name="twitter:image" content="/og-image.png" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta property="og:url" content="https://v0-saju-fortune-telling-service.vercel.app" />
         <script async src="https://tally.so/widgets/embed.js"></script>
