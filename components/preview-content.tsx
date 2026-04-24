@@ -170,10 +170,28 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
           <div className="flex items-center justify-center gap-2 mb-3">
             <Spinner className="w-5 h-5" />
           </div>
-          <p className="text-sm text-foreground/70">
+          <p className="text-sm text-foreground/70 mb-6">
             Don&apos;t close the window!<br />
             We&apos;ll be done in less than a minute.
           </p>
+          
+          {/* Footer */}
+          <div className="mt-8 pt-6 border-t border-border text-center">
+            <div className="flex flex-col items-center gap-3">
+              <button 
+                data-tally-open="681NVP" 
+                data-tally-layout="modal" 
+                data-tally-emoji-text="👋" 
+                data-tally-emoji-animation="wave"
+                className="px-4 py-2 bg-primary/20 border border-primary/40 text-foreground text-xs font-semibold rounded hover:bg-primary/30 hover:border-primary/60 transition-all"
+              >
+                Can I help you with the issue?
+              </button>
+              <p className="text-[10px] text-muted-foreground/50">
+                Business: hello@sajume.com
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     )
