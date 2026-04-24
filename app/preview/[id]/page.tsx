@@ -38,7 +38,7 @@ export default async function PreviewPage({ params }: PageProps) {
   
   // Check if submission exists and fetch cached free reports
   const [submissionResult, reportsResult] = await Promise.all([
-    supabase.from('submissions').select('*, saju_data').eq('id', id).single(),
+    supabase.from('submissions').select('*').eq('id', id).single(),
     supabase.from('reports').select('section_key, facts, context_interpretation').eq('submission_id', id).eq('is_free', true)
   ])
   
