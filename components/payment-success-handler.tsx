@@ -40,14 +40,8 @@ export function PaymentSuccessHandler({ submissionId, orderId }: PaymentSuccessH
           throw new Error(data.error || 'Payment capture failed')
         }
 
-        // Step 2: Fire-and-forget - Gemini takes up to 2 mins, don't await
-        fetch('/api/generate-paid-report', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ submissionId })
-        }).catch(err => console.error('[v0] Report generation error:', err))
-
-        // Step 3: Show generating UI and poll DB every 5s until paid_full exists
+        // Generation is already triggered server-side in capture-order API
+        // Just show generating UI and poll DB every 5s until paid_full exists
         setStatus('generating')
       } catch (err) {
         setStatus('error')
