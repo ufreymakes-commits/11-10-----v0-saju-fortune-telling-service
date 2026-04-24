@@ -84,18 +84,18 @@ export default function LandingPage() {
           </div>
           
           {/* Characters in V-formation with main mascot floating */}
-          <div className="relative w-56 md:w-72 h-44 md:h-52 mx-auto mb-4">
-            {/* Left outer - Eulmok (green) - V top left */}
-            <div className="absolute left-0 top-0 w-10 h-10 md:w-14 md:h-14 opacity-70">
+          <div className="relative w-48 md:w-64 h-36 md:h-44 mx-auto mb-4">
+            {/* Left outer - Eulmok (green) */}
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-10 h-10 md:w-14 md:h-14 opacity-80 -translate-x-2">
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/eulmok-311z2CoqsXicrNLz220oq3Nb7q1aRl.png" alt="Eulmok" fill className="object-contain" />
             </div>
-            {/* Left inner - Gyesu (purple) - V middle left */}
-            <div className="absolute left-5 md:left-8 top-4 md:top-6 w-12 h-12 md:w-16 md:h-16 opacity-80">
+            {/* Left inner - Gyesu (purple) */}
+            <div className="absolute left-6 md:left-8 top-1/2 -translate-y-1/2 w-12 h-12 md:w-16 md:h-16 opacity-90">
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gyesu-8YTx4VfcXnNEPPK54QUH0AbfH7oLO3.png" alt="Gyesu" fill className="object-contain" />
             </div>
             
-            {/* Main mascot - Pink (center bottom, floating) */}
-            <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-32 h-32 md:w-40 md:h-40 z-10 animate-float">
+            {/* Main mascot - Pink (center, floating) */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 md:w-40 md:h-40 z-10 animate-float">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%85%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"
                 alt="Sajume mascot - pink nine-tailed fox"
@@ -105,12 +105,12 @@ export default function LandingPage() {
               />
             </div>
             
-            {/* Right inner - Gyeonggeum (gray) - V middle right */}
-            <div className="absolute right-5 md:right-8 top-4 md:top-6 w-12 h-12 md:w-16 md:h-16 opacity-80">
+            {/* Right inner - Gyeonggeum (gray) */}
+            <div className="absolute right-6 md:right-8 top-1/2 -translate-y-1/2 w-12 h-12 md:w-16 md:h-16 opacity-90">
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gyeonggeum-C2Pu1PvGYI22q3evrb6Ynel484URPj.png" alt="Gyeonggeum" fill className="object-contain" />
             </div>
-            {/* Right outer - Byeonghwa (orange) - V top right */}
-            <div className="absolute right-0 top-0 w-10 h-10 md:w-14 md:h-14 opacity-70">
+            {/* Right outer - Byeonghwa (orange) */}
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-10 h-10 md:w-14 md:h-14 opacity-80 translate-x-2">
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/byeonghwa-nwRyjkGV7yuO4EC9wCYlt8Chx6jhyC.png" alt="Byeonghwa" fill className="object-contain" />
             </div>
           </div>
