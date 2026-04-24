@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { StarsBackground } from '@/components/stars-background'
 import { PreviewContent } from '@/components/preview-content'
 import { Spinner } from '@/components/ui/spinner'
+import { sharedOpenGraph, sharedTwitter } from '@/lib/metadata'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -19,9 +20,12 @@ export async function generateMetadata({ params }: PageProps) {
     .eq('id', id)
     .single()
   
+  const title = data ? `${data.name}'s Birth Chart Preview - Sajume` : 'Preview - Sajume'
   return {
-    title: data ? `${data.name}'s Birth Chart Preview - Sajume` : 'Preview - Sajume',
-    description: 'Discover what your birth chart reveals about your destiny'
+    title,
+    description: 'Discover what your birth chart reveals about your destiny',
+    openGraph: { ...sharedOpenGraph, title },
+    twitter: { ...sharedTwitter, title },
   }
 }
 

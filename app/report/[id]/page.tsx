@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { StarsBackground } from '@/components/stars-background'
 import { ReportContent } from '@/components/report-content'
 import type { Submission, Fact } from '@/lib/types'
+import { sharedOpenGraph, sharedTwitter } from '@/lib/metadata'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -18,9 +19,12 @@ export async function generateMetadata({ params }: PageProps) {
     .eq('id', id)
     .single()
   
+  const title = data ? `${data.name}'s 99 Facts - Sajume` : 'Your Report - Sajume'
   return {
-    title: data ? `${data.name}'s 99 Facts - Sajume` : 'Your Report - Sajume',
-    description: 'Your complete 99 facts birth chart report'
+    title,
+    description: 'Your complete 99 facts birth chart report',
+    openGraph: { ...sharedOpenGraph, title },
+    twitter: { ...sharedTwitter, title },
   }
 }
 

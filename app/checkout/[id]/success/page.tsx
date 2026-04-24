@@ -10,9 +10,13 @@ interface PageProps {
   searchParams: Promise<{ token?: string; PayerID?: string }>
 }
 
+import { sharedOpenGraph, sharedTwitter } from '@/lib/metadata'
+
 export const metadata = {
   title: 'Payment Processing - Sajume',
-  description: 'Processing your payment...'
+  description: 'Processing your payment...',
+  openGraph: { ...sharedOpenGraph, title: 'Payment Processing - Sajume' },
+  twitter: { ...sharedTwitter, title: 'Payment Processing - Sajume' },
 }
 
 export default async function CheckoutSuccessPage({ params, searchParams }: PageProps) {

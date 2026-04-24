@@ -3,9 +3,13 @@ import Link from 'next/link'
 import { StarsBackground } from '@/components/stars-background'
 import { BirthForm } from '@/components/birth-form'
 
+import { sharedOpenGraph, sharedTwitter } from '@/lib/metadata'
+
 export const metadata = {
   title: 'Enter Your Birth Info - Sajume',
-  description: 'Enter your birth information to discover 99 facts about your destiny through Korean Saju astrology.'
+  description: 'Enter your birth information to discover 99 facts about your destiny through Korean Saju astrology.',
+  openGraph: { ...sharedOpenGraph, title: 'Enter Your Birth Info - Sajume' },
+  twitter: { ...sharedTwitter, title: 'Enter Your Birth Info - Sajume' },
 }
 
 export default function StartPage() {

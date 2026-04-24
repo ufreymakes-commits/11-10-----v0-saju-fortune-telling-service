@@ -2,10 +2,13 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { sharedOpenGraph, sharedTwitter } from '@/lib/metadata'
 
 export const metadata: Metadata = {
   title: 'My Reports | Sajume',
   description: 'View all your paid Saju reading reports.',
+  openGraph: { ...sharedOpenGraph, title: 'My Reports | Sajume' },
+  twitter: { ...sharedTwitter, title: 'My Reports | Sajume' },
 }
 
 interface Payment {

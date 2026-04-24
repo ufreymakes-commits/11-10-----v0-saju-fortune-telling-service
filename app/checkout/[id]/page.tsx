@@ -7,9 +7,13 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
+import { sharedOpenGraph, sharedTwitter } from '@/lib/metadata'
+
 export const metadata = {
   title: 'Checkout - Sajume',
-  description: 'Complete your purchase to unlock all 99 facts about your birth chart'
+  description: 'Complete your purchase to unlock all 99 facts about your birth chart',
+  openGraph: { ...sharedOpenGraph, title: 'Checkout - Sajume' },
+  twitter: { ...sharedTwitter, title: 'Checkout - Sajume' },
 }
 
 export default async function CheckoutPage({ params }: PageProps) {
