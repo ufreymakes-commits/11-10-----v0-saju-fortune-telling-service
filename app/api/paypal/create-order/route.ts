@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID
-const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET
-// Live API for production credentials
-// Set PAYPAL_MODE=sandbox in env if you want to use sandbox mode
-const PAYPAL_API_URL = process.env.PAYPAL_MODE === 'sandbox'
+// Use Sandbox credentials (paypalclientidSandbox, paypalsecretkeySandbox)
+// Fallback to live credentials if sandbox not available
+const PAYPAL_CLIENT_ID = process.env.paypalclientidSandbox || process.env.PAYPAL_CLIENT_ID
+const PAYPAL_CLIENT_SECRET = process.env.paypalsecretkeySandbox || process.env.PAYPAL_CLIENT_SECRET
+
+// Use Sandbox API when sandbox credentials are available
+const USE_SANDBOX = !!process.env.paypalclientidSandbox
+const PAYPAL_API_URL = USE_SANDBOX
   ? 'https://api-m.sandbox.paypal.com'
   : 'https://api-m.paypal.com'
 
