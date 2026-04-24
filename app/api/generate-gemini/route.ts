@@ -1455,7 +1455,7 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
 59. 기토 - 정인 : Seeks comfort in knowledge. Draws emotional security from study.
 60. 기토 - 편인 : Relies on inner processing to restore energy. Needs quiet solitude to recharge and reflect.
 61. 경금 - 비견 : Sharp self-pride and willpower. Like steel, refuses to bend in self-conviction.
-62. ������ - 겁����������� : Bold challenger of structure. Clashes with peers, cuts through indecision.
+62. �������� - 겁����������� : Bold challenger of structure. Clashes with peers, cuts through indecision.
 63. 경금 - 식신 : Productive with clarity and rules. Applies logic to yield results with precision.
 64. 경금 - 상관 : Strong speech, potentially critical. Cuts with words — brilliant or biting.
 65. 경금 - 정재 : Manages finance with decisiveness. Prefers practical, measurable outcomes.
@@ -2545,8 +2545,7 @@ Example: "Hey ${name}, ..." for the first fact, and "${name}, remember that..." 
 테마: 커리어/연애/인생/건강/위로와 응원
 Gen-Z 미국인이 인생을 살면서 늘 궁금해하거나 고민하는 삶의 현상으로 보이는 현실에 대한 9가지 팩트이자 위로와 공감이어야 한다. 글을 읽자마자 이렇게 느껴야 한다. '뭐야? 나에 대해서 어떻게 알았지? 이거 뭐야 완전 eerie 하네. 근데 또 엄청 위로가 되고 내 지난 날의 괴로움과 고통에 대해서 누구보다 정확하게 어루만져줘서 눈물이 나려하네. 응원을 받았어. 이 서비스 정말 감동적이다.'
 
-특히 4번 커리어 문장 관련해서는 반드시 '두 가지 양상(구조적 적합성 + 재능적 두각)'을 포함해야 하며,
-모든 문장은 분석 보고서의 엄청나게 예리한 뾰족함과 깊이를 유지해야 한다.
+특히 4번 커리어 문장 관련해서는 반드시 '두 가지 양상(구조적 적합성 + 재능적 두각)'을 포함해야 하며 합해서 최소 2개의 예시 커리어 분야가 예시로 나와야해. 모든 문장은 분석 보고서의 엄청나게 예리한 뾰족함과 깊이를 유지해야 한다.
 
 8번 문장은 모든 사람에게 반드시 이렇게 동일한 포맷의 문장이 나가야 한다. "Did you know that among Fire, Water, Wood, Metal, and Earth, the closer you stay to ${yongsinElement} , the luckier you become?"
 
@@ -2667,7 +2666,7 @@ OUTPUT FORMAT (JSON ONLY):
         name,
         sajuData: {
           ...saju_data,
-          yongsin: yongsinString  // 문자열로 변환해서 제공
+          yongsin: yongsinElement  // 변환된 오행명칭 (Water, Fire, Wood, Metal, Earth)
         }
       },
       allSajuDataSentToGemini: allSajuData
