@@ -77,7 +77,7 @@ export default function LandingPage() {
           </div>
           
           {/* Characters in V-formation behind main mascot */}
-          <div className="relative w-64 md:w-80 h-44 md:h-56 mx-auto mb-4">
+          <div className="relative w-64 md:w-80 h-44 md:h-56 mx-auto mb-8">
             {/* Left outer - Eulmok (green) */}
             <div className="absolute w-14 h-14 md:w-18 md:h-18 z-0 opacity-30" style={{ left: '0%', top: '20%' }}>
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/eulmok-311z2CoqsXicrNLz220oq3Nb7q1aRl.png" alt="Eulmok" fill className="object-contain" />
