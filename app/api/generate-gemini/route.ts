@@ -2326,7 +2326,7 @@ For example:
   - 水 = 비겁
   - 木 = 식상
   - 火 = 재성
-  - 土 = 관성
+  - �� = 관성
   - 金 = 인성
 
 癸水 (Gye-su):
@@ -2552,10 +2552,13 @@ Language: English only.
     if (hanja2Element[firstElement]) {
       yongsinElement = hanja2Element[firstElement]
       console.log(`[v0] Gemini: Converted yongsin ${firstElement} to ${yongsinElement}`)
-    } else if (!['Water', 'Fire', 'Wood', 'Metal', 'Earth', 'your lucky element'].includes(yongsinElement)) {
-      // 혹시 다른 형식이면 기본값 사용
-      yongsinElement = 'your lucky element'
-      console.log(`[v0] Gemini: Unknown yongsin format, using default`)
+    } else if (!['Water', 'Fire', 'Wood', 'Metal', 'Earth'].includes(yongsinElement)) {
+      // 알 수 없는 형식이면 element balance에서 가장 부족한 오행을 yongsin으로 사용
+      const elementBalance = sajuData?.elementBalance || {}
+      const elements = ['Water', 'Fire', 'Wood', 'Metal', 'Earth']
+      const weakest = elements.reduce((min, el) => (elementBalance[el.toLowerCase()] || 0) < (elementBalance[min.toLowerCase()] || 0) ? el : min, elements[0])
+      yongsinElement = weakest
+      console.log(`[v0] Gemini: Unknown yongsin format, derived from element balance: ${yongsinElement}`)
     }
 
     console.log(`[v0] Gemini: Final yongsinElement: ${yongsinElement} (balanced season: ${isBalancedSeason})`)
@@ -2619,7 +2622,7 @@ OUTPUT FORMAT (JSON ONLY):
     console.log('[v0] Gemini: Stage 2 response received, parsing...')
     console.log('[v0] Gemini: Raw response length:', stage2Result.text.length)
 
-    // Stage 2 JSON 파싱 (더 유연한 형식 지원)
+    // Stage 2 JSON 파싱 (더 유연한 ���식 지원)
     let stage2JsonMatch = stage2Result.text.match(/```json\n([\s\S]*?)\n```/)
     
     // 첫 번째 시도 실패시 다른 형식 시도

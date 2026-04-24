@@ -283,7 +283,11 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
         {/* Yongsin Display */}
         <div className="mt-4 pt-3 border-t border-border/30 text-center">
           <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Your Lucky Element (Yongsin)</p>
-          <p className="text-lg font-bold text-gradient">{sajuData.yongsin || sajuData.luckyElement || 'Water'}</p>
+          <p className="text-lg font-bold text-gradient">
+            {(['Water','Fire','Wood','Metal','Earth'].includes(sajuData.yongsin) ? sajuData.yongsin : null)
+              || (['Water','Fire','Wood','Metal','Earth'].includes(sajuData.luckyElement) ? sajuData.luckyElement : null)
+              || (() => { const eb = sajuData.elementBalance || {}; const els = ['Water','Fire','Wood','Metal','Earth']; return els.reduce((min,el) => (eb[el.toLowerCase()]||0) < (eb[min.toLowerCase()]||0) ? el : min, els[0]) })()}
+          </p>
         </div>
       </div>
 
