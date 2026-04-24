@@ -2495,9 +2495,9 @@ Language: English only.
     // 생년월일에서 계절 파악해서 조후 정도 판단
     const month = parseInt(birth_date.split('-')[1])
     const isBalancedSeason = [3, 4, 9, 10].includes(month) // 봄/가을
-    
+
     let selectedYongsin = 'your lucky element'
-    
+
     if (isBalancedSeason && saju_data.eokbuYongsin) {
       // 조후가 원만하면 억부용신 선택
       selectedYongsin = saju_data.eokbuYongsin
@@ -2511,7 +2511,7 @@ Language: English only.
       // 그 다음 억부용신
       selectedYongsin = saju_data.eokbuYongsin
     }
-    
+
     // 한글 글자를 오행으로 변환
     const hanja2Element: Record<string, string> = {
       '甲': 'Wood', '乙': 'Wood',
@@ -2520,7 +2520,7 @@ Language: English only.
       '庚': 'Metal', '辛': 'Metal',
       '壬': 'Water', '癸': 'Water'
     }
-    
+
     let yongsinElement = selectedYongsin
     if (hanja2Element[selectedYongsin]) {
       yongsinElement = hanja2Element[selectedYongsin]
@@ -2537,7 +2537,7 @@ Language: English only.
 Customer Name: ${name}
 
 앞서 작성된 '심화 분석 보고서'를 완벽하게 씹어먹고 숙지하라.
-이제 이 내용을 바탕으로 유저에게 줄 9가지 사실을 기깔나게 작성하라. 너의 실력을 보여줘 Gemini. 각 사실은 공백 포함 80자 이내의 영어 문장이여야 한다.
+이제 이 내용을 바탕으로 유저에게 줄 9가지 사실을 기깔나게 작성하라. 너의 실력을 보여줘 Gemini. 각 사실은 공백 포함 200자 이내의 영어 문장이여야 한다.
 
 IMPORTANT: Use the customer's name (${name}) ONLY in the FIRST sentence (id: 1) and the LAST sentence (id: 9) to make it personal. Do NOT use the name in any other sentences.
 Example: "Hey ${name}, ..." for the first fact, and "${name}, remember that..." for the last fact.
@@ -2550,7 +2550,7 @@ Gen-Z 미국인이 인생을 ���면서 늘 궁���해하거나 고민
 
 8번 문장은 모든 사람에게 반드시 이렇게 동일한 포맷의 문장이 나가야 한다. "Did you know that among Fire, Water, Wood, Metal, and Earth, the closer you stay to ${yongsinElement} , the luckier you become?"
 
-이 때 용신의 경우, 사주에 조후(추위/더위) 문제가 심각하다면, 반드시 조후용신의 오행을 ${yongsinElement}에 넣을 것. 조후가 원만하다면(봄/가을생 등), 억부용신의 오행을 ${yongsinElement}에 넣을 것. 만약 조후용신이 '병(丙)'이나 '사(巳)'처럼 글자로 되어 있다면, 이를 오행(Fire, Water, Wood, Metal, Earth) 명칭으로 매핑해서 변환해서 넣을 것.
+이 때 용신의 경우, 사주에 조후(추위/더위) 문제가 심각하다면, 반드시 조후용신의 오행을 ${yongsinElement}에 넣을 것. 조후가 원만하다면(봄/가을생 등), 억부용신의 오행을 ${yongsinElement}에 넣을 것. 만약 조후용신이 '병(丙)'이나 '사(巳)'처럼 글자로 되어 있다면, 이를 오행 영어(Fire, Water, Wood, Metal, Earth) 명칭으로 매핑해서 변환해서 단 1개의 오행 요소만을 넣을 것.
 
 === 심화 분석 보고서 ===
 ${JSON.stringify(deepAnalysis, null, 2)}
@@ -2615,7 +2615,7 @@ OUTPUT FORMAT (JSON ONLY):
       // 9개 사실을 4개 섹션으로 분배 (3개씩)
       const sectionKeys = ['personality', 'career', 'love']
       const factsBySection: Record<string, Fact[]> = {}
-      
+
       sectionKeys.forEach((key, idx) => {
         factsBySection[key] = facts.slice(idx * 3, (idx + 1) * 3)
       })
@@ -2650,16 +2650,16 @@ OUTPUT FORMAT (JSON ONLY):
             })
         }
       }
-      
+
       console.log('[v0] Gemini: Saved free report to DB (3 sections)')
     }
 
     // 프론트엔드가 기대하는 형식으로 응답 준비
     // yongsin을 간단한 문자열로 변환 (preview에서 직접 접근하기 위해)
-    const yongsinString = saju_data.yongsin?.johu 
-      ? saju_data.yongsin.johu 
+    const yongsinString = saju_data.yongsin?.johu
+      ? saju_data.yongsin.johu
       : (saju_data.yongsin?.eokbu || 'your lucky element')
-    
+
     return NextResponse.json({
       freeFacts: facts,
       teaserFacts: [],
