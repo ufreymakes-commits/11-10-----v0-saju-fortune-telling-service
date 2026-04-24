@@ -120,9 +120,7 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
           <div className="pt-6 border-t border-white/10 text-center">
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Your Lucky Element (Yongsin)</p>
             <p className="text-lg font-bold text-gradient">
-              {(['Water','Fire','Wood','Metal','Earth'].includes(submission.saju_data?.yongsin) ? submission.saju_data.yongsin : null)
-                || (['Water','Fire','Wood','Metal','Earth'].includes(submission.saju_data?.luckyElement) ? submission.saju_data.luckyElement : null)
-                || (() => { const eb = submission.saju_data?.elementBalance || {}; const els = ['Water','Fire','Wood','Metal','Earth']; return els.reduce((min,el) => (eb[el.toLowerCase()]||0) < (eb[min.toLowerCase()]||0) ? el : min, els[0]) })()}
+              {(submission.saju_data as any)?.yongsin || (submission.saju_data as any)?.luckyElement || 'Water'}
             </p>
           </div>
         </div>
