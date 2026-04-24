@@ -43,33 +43,55 @@ export function PaymentSuccessHandler({ submissionId, orderId }: PaymentSuccessH
         // Step 2: Show generating UI
         setStatus('generating')
 
-        // Step 3: Call generate-paid-report and await the response (same as preview-content.tsx)
-        const generateResponse = await fetch('/api/generate-paid-report', {
+        // Step 3: Fire generate API - if it times out (500) that's OK, we poll DB below
+        fetch('/api/generate-paid-report', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ submissionId })
+        }).then(async (res) => {
+          if (res.ok) {
+            // Generation completed within timeout - redirect immediately
+            setStatus('success')
+            setTimeout(() => router.push(`/report/${submissionId}/paid`), 1000)
+          }
+          // If not ok (e.g. 500 timeout), polling below will catch the DB write
+        }).catch(() => {
+          // Network error - polling below will handle it
         })
 
-        if (!generateResponse.ok) {
-          const errorText = await generateResponse.text()
-          console.error('[v0] generate-paid-report failed:', generateResponse.status, errorText)
-          throw new Error(`Report generation failed: ${generateResponse.status}`)
-        }
-
-        // Step 4: Done - redirect to paid page
-        setStatus('success')
-        setTimeout(() => {
-          router.push(`/report/${submissionId}/paid`)
-        }, 1000)
-
       } catch (err) {
+        // Only payment capture errors reach here
         setStatus('error')
-        setError(err instanceof Error ? err.message : 'Something went wrong')
+        setError(err instanceof Error ? err.message : 'Payment capture failed')
       }
     }
 
     captureAndGenerate()
   }, [orderId, submissionId, router])
+
+  // Poll DB every 5 seconds while generating - catches cases where Gemini
+  // completes but the API timed out before returning the response
+  useEffect(() => {
+    if (status !== 'generating') return
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/check-paid-report?submissionId=${submissionId}`)
+        if (res.ok) {
+          const data = await res.json()
+          if (data.facts && Array.isArray(data.facts) && data.facts.length > 0) {
+            clearInterval(interval)
+            setStatus('success')
+            setTimeout(() => router.push(`/report/${submissionId}/paid`), 1000)
+          }
+        }
+      } catch {
+        // keep polling
+      }
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [status, submissionId, router])
 
   if (status === 'processing') {
     return (
@@ -124,8 +146,9 @@ export function PaymentSuccessHandler({ submissionId, orderId }: PaymentSuccessH
   return (
     <div className="text-center max-w-md">
       <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-6 mb-4">
-        <h2 className="text-xl font-semibold text-destructive mb-2">Payment Failed</h2>
-        <p className="text-foreground/70">{error}</p>
+        <h2 className="text-xl font-semibold text-destructive mb-2">Payment Capture Failed</h2>
+        <p className="text-foreground/70 text-sm mb-2">{error}</p>
+        <p className="text-foreground/50 text-xs">If you were charged, please contact support. Your payment may still be processing.</p>
       </div>
       <Link href={`/checkout/${submissionId}`}>
         <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
