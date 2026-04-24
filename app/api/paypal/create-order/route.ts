@@ -1,28 +1,37 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-// Live mode by default. Set PAYPAL_MODE=sandbox to use sandbox
-const USE_SANDBOX = process.env.PAYPAL_MODE === 'sandbox'
-const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID
-const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET
-const PAYPAL_API_URL = USE_SANDBOX
-  ? 'https://api-m.sandbox.paypal.com'
-  : 'https://api-m.paypal.com'
+function getPayPalConfig() {
+  const USE_SANDBOX = process.env.PAYPAL_MODE === 'sandbox'
+  const clientId = USE_SANDBOX
+    ? process.env.paypalclientidSandbox
+    : process.env.PAYPAL_CLIENT_ID
+  const clientSecret = USE_SANDBOX
+    ? process.env.paypalsecretkeySandbox
+    : process.env.PAYPAL_CLIENT_SECRET
+  const apiUrl = USE_SANDBOX
+    ? 'https://api-m.sandbox.paypal.com'
+    : 'https://api-m.paypal.com'
+  return { clientId, clientSecret, apiUrl, isSandbox: USE_SANDBOX }
+}
 
 async function getPayPalAccessToken() {
-  console.log('[v0] PayPal auth - Client ID exists:', !!PAYPAL_CLIENT_ID)
-  console.log('[v0] PayPal auth - Client Secret exists:', !!PAYPAL_CLIENT_SECRET)
-  console.log('[v0] PayPal auth - API URL:', PAYPAL_API_URL)
-  
-  if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
+  const { clientId, clientSecret, apiUrl, isSandbox } = getPayPalConfig()
+
+  console.log('[v0] PayPal mode:', isSandbox ? 'sandbox' : 'live')
+  console.log('[v0] PayPal clientId exists:', !!clientId)
+  console.log('[v0] PayPal clientSecret exists:', !!clientSecret)
+  console.log('[v0] PayPal apiUrl:', apiUrl)
+
+  if (!clientId || !clientSecret) {
     console.error('[v0] PayPal credentials missing!')
     return null
   }
-  
-  const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`).toString('base64')
-  
+
+  const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64')
+
   try {
-    const response = await fetch(`${PAYPAL_API_URL}/v1/oauth2/token`, {
+    const response = await fetch(`${apiUrl}/v1/oauth2/token`, {
       method: 'POST',
       headers: {
         'Authorization': `Basic ${auth}`,
@@ -30,18 +39,17 @@ async function getPayPalAccessToken() {
       },
       body: 'grant_type=client_credentials'
     })
-    
+
     const data = await response.json()
-    
     console.log('[v0] PayPal auth response status:', response.status)
-    
+
     if (!response.ok) {
       console.error('[v0] PayPal auth failed:', data)
       return null
     }
-    
+
     console.log('[v0] PayPal access token received:', data.access_token ? 'YES' : 'NO')
-    return data.access_token
+    return data.access_token as string
   } catch (error) {
     console.error('[v0] PayPal auth error:', error)
     return null
@@ -49,15 +57,9 @@ async function getPayPalAccessToken() {
 }
 
 function getBaseUrl(request: Request): string {
-  // Try to get URL from request headers first (works in any environment)
   const host = request.headers.get('host')
   const protocol = request.headers.get('x-forwarded-proto') || 'https'
-  
-  if (host) {
-    return `${protocol}://${host}`
-  }
-  
-  // Fallback to env variable
+  if (host) return `${protocol}://${host}`
   let baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
   if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
     baseUrl = `https://${baseUrl}`
@@ -68,58 +70,39 @@ function getBaseUrl(request: Request): string {
 export async function POST(request: Request) {
   try {
     const { submissionId } = await request.json()
-    
+
     if (!submissionId) {
-      return NextResponse.json(
-        { error: 'Missing submission ID' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Missing submission ID' }, { status: 400 })
     }
-    
-    if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
-      console.error('[v0] PayPal credentials not configured: CLIENT_ID=%s, SECRET=%s', 
-        PAYPAL_CLIENT_ID ? 'SET' : 'MISSING', 
-        PAYPAL_CLIENT_SECRET ? 'SET' : 'MISSING')
-      return NextResponse.json(
-        { error: 'Payment system not configured' },
-        { status: 500 }
-      )
+
+    const { clientId, clientSecret, apiUrl } = getPayPalConfig()
+
+    if (!clientId || !clientSecret) {
+      console.error('[v0] PayPal credentials not configured')
+      return NextResponse.json({ error: 'Payment system not configured' }, { status: 500 })
     }
-    
-    console.log('[v0] PayPal API URL:', PAYPAL_API_URL)
-    console.log('[v0] PayPal mode:', process.env.PAYPAL_MODE || 'live')
-    
+
     const supabase = await createClient()
-    
-    // Verify submission exists
+
     const { data: submission, error: fetchError } = await supabase
       .from('submissions')
       .select('id, name')
       .eq('id', submissionId)
       .single()
-    
+
     if (fetchError || !submission) {
       console.error('[v0] Submission not found:', submissionId, fetchError)
-      return NextResponse.json(
-        { error: 'Submission not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Submission not found' }, { status: 404 })
     }
-    
-    // Get PayPal access token
+
     console.log('[v0] Requesting PayPal access token...')
     const accessToken = await getPayPalAccessToken()
-    
+
     if (!accessToken) {
       console.error('[v0] Failed to get PayPal access token')
-      return NextResponse.json(
-        { error: 'Failed to authenticate with PayPal' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Failed to authenticate with PayPal' }, { status: 500 })
     }
-    
-    console.log('[v0] Access token received, creating order...')
-    
+
     const baseUrl = getBaseUrl(request)
     const orderPayload = {
       intent: 'CAPTURE',
@@ -139,11 +122,8 @@ export async function POST(request: Request) {
         cancel_url: `${baseUrl}/checkout/${submissionId}`
       }
     }
-    
-    console.log('[v0] PayPal order payload:', JSON.stringify(orderPayload, null, 2))
-    
-    // Create PayPal order
-    const orderResponse = await fetch(`${PAYPAL_API_URL}/v2/checkout/orders`, {
+
+    const orderResponse = await fetch(`${apiUrl}/v2/checkout/orders`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -151,63 +131,39 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify(orderPayload)
     })
-    
+
     const orderData = await orderResponse.json()
-    
-    console.log('[v0] PayPal response status:', orderResponse.status)
-    console.log('[v0] PayPal response data:', JSON.stringify(orderData, null, 2))
-    
+    console.log('[v0] PayPal order response status:', orderResponse.status)
+
     if (!orderResponse.ok) {
-      console.error('[v0] PayPal order creation failed:', {
-        status: orderResponse.status,
-        data: orderData
-      })
+      console.error('[v0] PayPal order creation failed:', orderData)
       return NextResponse.json(
-        { 
-          error: 'Failed to create payment order',
-          details: orderData.message || orderData.details?.[0]?.issue || 'Unknown error'
-        },
+        { error: 'Failed to create payment order', details: orderData.message || orderData.details?.[0]?.issue || 'Unknown error' },
         { status: 500 }
       )
     }
-    
+
     if (!orderData.id) {
       console.error('[v0] No order ID in response:', orderData)
-      return NextResponse.json(
-        { error: 'Invalid response from PayPal' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Invalid response from PayPal' }, { status: 500 })
     }
-    
-    // Store pending payment in database
-    await supabase
-      .from('payments')
-      .insert({
-        submission_id: submissionId,
-        paypal_order_id: orderData.id,
-        amount: 9.99,
-        currency: 'USD',
-        status: 'pending'
-      })
-    
-    // Find approval URL
-    const approvalUrl = orderData.links.find((link: { rel: string }) => link.rel === 'approve')?.href
-    
-    console.log('[v0] PayPal order created successfully:', orderData.id)
-    console.log('[v0] PayPal approval URL:', approvalUrl)
-    
-    return NextResponse.json({
-      id: orderData.id,
-      approvalUrl,
-      success: true
+
+    await supabase.from('payments').insert({
+      submission_id: submissionId,
+      paypal_order_id: orderData.id,
+      amount: 9.99,
+      currency: 'USD',
+      status: 'pending'
     })
+
+    const approvalUrl = orderData.links.find((link: { rel: string }) => link.rel === 'approve')?.href
+    console.log('[v0] PayPal order created:', orderData.id, '| approvalUrl:', approvalUrl)
+
+    return NextResponse.json({ id: orderData.id, approvalUrl, success: true })
   } catch (error) {
     console.error('[v0] PayPal create order error:', error)
     return NextResponse.json(
-      { 
-        error: 'Internal server error',
-        details: error instanceof Error ? error.message : String(error)
-      },
+      { error: 'Internal server error', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     )
   }
