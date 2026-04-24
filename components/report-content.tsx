@@ -98,10 +98,10 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
     }
   }
   
-  const sajuData = submission.saju_data as SajuData
+  const sajuData = (submission.saju_data || {}) as SajuData
   
   // Get day master stem - can be Korean (갑) or Hanja (己)
-  const rawStem = sajuData.dayPillar?.stem || '갑'
+  const rawStem = sajuData?.dayPillar?.stem || '갑'
   // Normalize to Korean (if hanja, convert; if already korean, use as-is)
   const dayMasterKorean = HANJA_TO_KOREAN_STEM[rawStem] || rawStem
   const dayMasterHanja = KOREAN_TO_HANJA_STEM[dayMasterKorean] || rawStem
@@ -109,7 +109,7 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
   const quote = DAY_MASTER_QUOTE[dayMasterKorean] || ''
   
   // Daewoon is an array of objects with startAge, endAge, fullName, etc.
-  const daewoon = Array.isArray(sajuData.daewoon) ? sajuData.daewoon : []
+  const daewoon = Array.isArray(sajuData?.daewoon) ? sajuData.daewoon : []
 
   const generateSection = useCallback(async (sectionIndex: number) => {
     const section = SECTION_CONFIG[sectionIndex]
