@@ -86,6 +86,47 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
           <p className="text-white/60 text-lg">Your Full Saju Birth Chart Analysis</p>
         </div>
 
+        {/* Five Elements Balance Section */}
+        <div className="mb-16 bg-gradient-to-br from-purple-900/30 to-pink-900/30 border border-purple-500/20 rounded-2xl p-8">
+          <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-2 text-center">Your Five Elements Balance</h2>
+          <p className="text-[10px] text-muted-foreground/60 text-center mb-6">Based on 8 characters (4 pillars x 2), with weighted scoring on Month Branch. Excludes hidden stems.</p>
+          
+          {/* Element Bars */}
+          <div className="space-y-4 mb-8">
+            {['fire', 'wood', 'earth', 'metal', 'water'].map((element) => {
+              const score = submission.saju_data?.elementBalance?.[element] || 0
+              const percentage = (score / 50) * 100
+              const color = {
+                fire: 'bg-red-500',
+                wood: 'bg-green-500',
+                earth: 'bg-yellow-600',
+                metal: 'bg-gray-400',
+                water: 'bg-blue-500'
+              }[element]
+              
+              return (
+                <div key={element} className="flex items-center gap-4">
+                  <span className="text-xs font-medium text-white/70 w-12 capitalize">{element}</span>
+                  <div className="flex-1 bg-white/10 rounded-full h-2 overflow-hidden">
+                    <div className={`${color} h-full transition-all`} style={{ width: `${percentage}%` }} />
+                  </div>
+                  <span className="text-xs text-white/70 w-8 text-right">{score}</span>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Yongsin Display */}
+          <div className="pt-6 border-t border-white/10 text-center">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Your Lucky Element (Yongsin)</p>
+            <p className="text-lg font-bold text-gradient">
+              {(['Water','Fire','Wood','Metal','Earth'].includes(submission.saju_data?.yongsin) ? submission.saju_data.yongsin : null)
+                || (['Water','Fire','Wood','Metal','Earth'].includes(submission.saju_data?.luckyElement) ? submission.saju_data.luckyElement : null)
+                || (() => { const eb = submission.saju_data?.elementBalance || {}; const els = ['Water','Fire','Wood','Metal','Earth']; return els.reduce((min,el) => (eb[el.toLowerCase()]||0) < (eb[min.toLowerCase()]||0) ? el : min, els[0]) })()}
+            </p>
+          </div>
+        </div>
+
         {/* Sections */}
         <div className="space-y-12">
           {sections.map((section: any, idx: number) => (
