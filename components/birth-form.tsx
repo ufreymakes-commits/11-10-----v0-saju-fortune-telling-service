@@ -70,7 +70,6 @@ export function BirthForm() {
   const [dailyLimitReached, setDailyLimitReached] = useState(false)
   const [adminKey, setAdminKey] = useState<string | null>(null)
   const [errors, setErrors] = useState<FormErrors>({})
-  const [dailyLimitReached, setDailyLimitReached] = useState(false)
   
   // Check URL for admin key
   useEffect(() => {
