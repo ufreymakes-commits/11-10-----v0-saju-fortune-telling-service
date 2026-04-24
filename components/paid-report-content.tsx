@@ -74,7 +74,7 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
           <Spinner className="mx-auto mb-6 w-12 h-12" />
           <h2 className="text-2xl font-bold text-white mb-4">Generating Your 99 Facts</h2>
           <p className="text-white/60 text-lg mb-2">Our AI is analyzing your complete birth chart...</p>
-          <p className="text-white/40 text-sm">This takes 30-60 seconds. Please don&apos;t refresh.</p>
+          <p className="text-white/40 text-sm">This takes less than 2 minutes. Please don&apos;t refresh.</p>
           <div className="mt-8 bg-white/5 rounded-lg p-4">
             <p className="text-white/50 text-xs">Tip: Your personalized 99 facts report covers personality, career, relationships, health, and destiny insights based on Korean Saju astrology.</p>
           </div>
