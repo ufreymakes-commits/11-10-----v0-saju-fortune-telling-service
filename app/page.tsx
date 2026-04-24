@@ -83,39 +83,47 @@ export default function LandingPage() {
             {"K-Saju: The Next Gen Fortune Telling"}
           </div>
           
-          {/* Mascot with V-formation background characters */}
-          <div className="relative w-96 h-64 md:w-full md:h-72 mx-auto mb-6 flex items-center justify-center">
-            {/* Background characters - Left side (far to close) */}
-            <div className="absolute left-0 top-0 md:left-8 w-12 h-12 md:w-16 md:h-16 opacity-25">
+          {/* Characters in a line with floating effect */}
+          <div className="relative w-full h-56 md:h-64 mx-auto mb-6 flex items-center justify-center overflow-hidden">
+            {/* Singeum - Green (far left) */}
+            <div className="absolute w-12 h-12 md:w-16 md:h-16 left-4 md:left-12 animate-float" style={{ animationDelay: '0s' }}>
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/singeum-KgmDCqcBvR8APXhwb5m5GXfMfY0Hw2.png" alt="Singeum" fill className="object-contain" />
             </div>
-            <div className="absolute left-8 top-6 md:left-20 md:top-8 w-14 h-14 md:w-20 md:h-20 opacity-35">
+            
+            {/* Gyesu - Purple (left) */}
+            <div className="absolute w-16 h-16 md:w-20 md:h-20 left-20 md:left-28 animate-float" style={{ animationDelay: '0.2s' }}>
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gyesu-9Sit6yryy2XFeyDddE5QQu6AwopXY1.png" alt="Gyesu" fill className="object-contain" />
             </div>
-            <div className="absolute left-20 top-12 md:left-32 md:top-16 w-16 h-16 md:w-24 md:h-24 opacity-45">
+            
+            {/* Gabmok - Yellow (left-center) */}
+            <div className="absolute w-20 h-20 md:w-28 md:h-28 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-auto md:right-auto md:left-1/3 md:-translate-x-1/2 animate-float" style={{ animationDelay: '0.4s' }}>
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gabmok-bkPkfmlicV7xsuBn9ZSdEYzkjRYxon.png" alt="Gabmok" fill className="object-contain" />
             </div>
             
-            {/* Background characters - Right side (far to close) */}
-            <div className="absolute right-0 top-0 md:right-8 w-12 h-12 md:w-16 md:h-16 opacity-25">
-              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/muto-EykGx1vMIHPJWNwdVHLOIvigykkhkg.png" alt="Muto" fill className="object-contain" />
+            {/* Main Mascot - Pink (center) */}
+            <div className="relative w-40 h-40 md:w-48 md:h-48 animate-float z-10" style={{ animationDelay: '0s' }}>
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%84%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"
+                alt="Sajume mascot"
+                fill
+                className="object-contain drop-shadow-2xl"
+                priority
+              />
             </div>
-            <div className="absolute right-8 top-6 md:right-20 md:top-8 w-14 h-14 md:w-20 md:h-20 opacity-35">
-              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/imsu-3qFTUgKapaaAtc0RJrJb0KyoFDpgd5.png" alt="Imsu" fill className="object-contain" />
-            </div>
-            <div className="absolute right-20 top-12 md:right-32 md:top-16 w-16 h-16 md:w-24 md:h-24 opacity-45">
+            
+            {/* Jeonghwa - Gray (right-center) */}
+            <div className="absolute w-20 h-20 md:w-28 md:h-28 right-1/2 translate-x-1/2 md:translate-x-0 md:right-auto md:right-1/3 md:translate-x-1/2 animate-float" style={{ animationDelay: '0.4s' }}>
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/jeonghwa-vkeepvUQw7mtyztMYpGrZfM890lT9h.png" alt="Jeonghwa" fill className="object-contain" />
             </div>
             
-            {/* Main mascot - center front */}
-            <div className="relative w-40 h-40 md:w-48 md:h-48 z-10">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%85%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"
-                alt="Sajume mascot - a cute pink nine-tailed fox holding a crystal ball"
-                fill
-                className="object-contain drop-shadow-2xl animate-float"
-                priority
-              />
+            {/* Imsu - Blue (right) */}
+            <div className="absolute w-16 h-16 md:w-20 md:h-20 right-20 md:right-28 animate-float" style={{ animationDelay: '0.2s' }}>
+              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/imsu-3qFTUgKapaaAtc0RJrJb0KyoFDpgd5.png" alt="Imsu" fill className="object-contain" />
+            </div>
+            
+            {/* Muto - Orange (far right) */}
+            <div className="absolute w-12 h-12 md:w-16 md:h-16 right-4 md:right-12 animate-float" style={{ animationDelay: '0s' }}>
+              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/muto-EykGx1vMIHPJWNwdVHLOIvigykkhkg.png" alt="Muto" fill className="object-contain" />
             </div>
           </div>
           
@@ -315,7 +323,11 @@ export default function LandingPage() {
 
           {/* Feature grid with white icons */}
           <div className="mb-10">
-            <h4 className="text-center text-2xl md:text-3xl font-semibold text-white/80 mb-6">No.1 Global Saju,<br className="md:hidden" /> Feel the difference</h4>
+            <h4 className="text-center text-2xl md:text-3xl font-semibold text-white/80 mb-6">
+              <span>No.1 Global Saju</span>
+              <span className="block md:inline md:mx-2">/</span>
+              <span className="block md:inline">Feel the difference</span>
+            </h4>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {/* Lifetime Access */}
               <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/20 rounded-xl p-5 text-center">
