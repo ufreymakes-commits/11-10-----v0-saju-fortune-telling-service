@@ -193,13 +193,13 @@ export default function LandingPage() {
             <div className="group cursor-not-allowed md:col-span-1">
               <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-amber-500/30 rounded-xl p-6 opacity-70 h-full flex flex-col">
                 <h4 className="text-base md:text-lg font-semibold text-white mb-3">Signature Saju Elemental Bracelet</h4>
-                <div className="relative w-full h-40 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center flex-shrink-0">
+                <div className="relative w-full mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center flex-shrink-0" style={{ aspectRatio: '800/533' }}>
                   <Image
                     src="/images/luck-bracelet.png"
                     alt="Signature Saju Elemental Bracelet"
-                    width={300}
-                    height={200}
-                    className="object-cover object-center"
+                    width={800}
+                    height={533}
+                    className="w-full h-full object-cover object-center"
                   />
                 </div>
                 <p className="text-sm text-white/70 mb-3 flex-grow">A signature bracelet designed to fill the missing energies in your personal Saju chart and attract good fortune.</p>
