@@ -2511,7 +2511,7 @@ Gen-Z 미국인이 인생을 살면서 늘 궁금해하거나 고민하는 삶�
 
 8번 문장은 모든 사람에게 반드시 이렇게 동일한 포맷의 문장이 나가야 한다. "Did you know that among Fire, Water, Wood, Metal, and Earth, the closer you stay to {{yongsin}} , the luckier you become?"
 
-이 때 용신의 경우, 사주에 조후(추위/더위) 문제가 심각하다면, 반드시 조후용신의 오행을 {{yongsin}}에 넣을 것. 조후가 원만하다면(봄/가을생 등), 억부용신의 오행을 {{yongsin}}에 넣을 것. 만약 조후용신이 '병(丙)'이나 '사(巳)'처럼 글자로 되어 있다면, 이를 오행(Fire, Water, Wood, Metal, Earth) 명칭으로 변환해서 넣을 것.
+이 때 용신의 경우, 사주에 조후(추위/더위) 문제가 심각하다면, 반드시 조후용신의 오행을 {{yongsin}}에 넣을 것. 조후가 원만하다면(봄/가을생 등), 억부용신의 오행을 {{yongsin}}에 넣을 것. 만약 조후용신이 '병(丙)'이나 '사(巳)'처럼 글자로 되어 있다면, 이를 오행(Fire, Water, Wood, Metal, Earth) 명칭으로 매핑해서 변환해서 넣을 것.
 
 === 심화 분석 보고서 ===
 ${JSON.stringify(deepAnalysis, null, 2)}
