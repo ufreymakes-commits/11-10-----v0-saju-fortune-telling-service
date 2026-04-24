@@ -284,9 +284,9 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
         <div className="mt-4 pt-3 border-t border-border/30 text-center">
           <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Your Lucky Element (Yongsin)</p>
           <p className="text-lg font-bold text-gradient">
-            {(['Water','Fire','Wood','Metal','Earth'].includes(sajuData.yongsin) ? sajuData.yongsin : null)
-              || (['Water','Fire','Wood','Metal','Earth'].includes(sajuData.luckyElement) ? sajuData.luckyElement : null)
-              || (() => { const eb = sajuData.elementBalance || {}; const els = ['Water','Fire','Wood','Metal','Earth']; return els.reduce((min,el) => (eb[el.toLowerCase()]||0) < (eb[min.toLowerCase()]||0) ? el : min, els[0]) })()}
+            {(['Water','Fire','Wood','Metal','Earth'].includes((submission.saju_data as any)?.yongsin) ? (submission.saju_data as any).yongsin : null)
+              || (['Water','Fire','Wood','Metal','Earth'].includes((submission.saju_data as any)?.luckyElement) ? (submission.saju_data as any).luckyElement : null)
+              || (() => { const eb = (submission.saju_data as any)?.elementBalance || {}; const els = ['Water','Fire','Wood','Metal','Earth']; return els.reduce((min,el) => (eb[el.toLowerCase()]||0) < (eb[min.toLowerCase()]||0) ? el : min, els[0]) })()}
           </p>
         </div>
       </div>
