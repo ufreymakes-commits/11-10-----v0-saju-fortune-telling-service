@@ -1,9 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Submission } from '@/lib/types'
-import { Spinner } from '@/components/ui/spinner'
 
 interface PaidReportContentProps {
   submission: Submission
@@ -12,52 +10,7 @@ interface PaidReportContentProps {
 
 export function PaidReportContent({ submission, paidReport }: PaidReportContentProps) {
   const router = useRouter()
-  const [sections, setSections] = useState<any[]>(
-    paidReport?.facts && Array.isArray(paidReport.facts) ? paidReport.facts : []
-  )
-  const [isPolling, setIsPolling] = useState(
-    !paidReport?.facts || !Array.isArray(paidReport.facts) || paidReport.facts.length === 0
-  )
-
-  useEffect(() => {
-    // Already have data, no need to poll
-    if (sections.length > 0) return
-
-    // Poll DB every 5 seconds until paid_full record appears
-    const pollInterval = setInterval(async () => {
-      try {
-        const response = await fetch(`/api/check-paid-report?submissionId=${submission.id}`)
-        if (response.ok) {
-          const data = await response.json()
-          if (data.facts && Array.isArray(data.facts) && data.facts.length > 0) {
-            setSections(data.facts)
-            setIsPolling(false)
-            clearInterval(pollInterval)
-          }
-        }
-      } catch (err) {
-        console.error('[v0] Polling error:', err)
-      }
-    }, 5000)
-
-    return () => clearInterval(pollInterval)
-  }, [submission.id, sections.length])
-
-  if (isPolling || sections.length === 0) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center max-w-md px-4">
-          <Spinner className="mx-auto mb-6 w-12 h-12" />
-          <h2 className="text-2xl font-bold text-white mb-4">Generating Your 99 Facts</h2>
-          <p className="text-white/60 text-lg mb-2">Our AI is analyzing your complete birth chart...</p>
-          <p className="text-white/40 text-sm">This takes less than 2 minutes. Please don&apos;t close this page.</p>
-          <div className="mt-8 bg-white/5 rounded-lg p-4">
-            <p className="text-white/50 text-xs">Your personalized 99 facts report covers personality, career, relationships, health, and destiny insights based on Korean Saju astrology.</p>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  const sections: any[] = paidReport?.facts && Array.isArray(paidReport.facts) ? paidReport.facts : []
 
   return (
     <div className="py-12 px-4 md:px-8">
