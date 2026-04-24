@@ -83,18 +83,37 @@ export default function LandingPage() {
             {"K-Saju: The Next Gen Fortune Telling"}
           </div>
           
-          {/* Characters in a line with floating effect */}
-            <div className="relative w-full h-56 md:h-72 mx-auto mb-4 flex items-center justify-center">
-              <div className="relative w-full h-full animate-float">
-                <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Group%20427318177-LGgUw9NN0BtVlzKCscYDWzgeI0PmKh.png"
-                  alt="Sajume characters - all 5 K-Saju mascots in a line"
-                  fill
-                  className="object-contain"
-                  priority
-                />
-              </div>
+          {/* Characters in V-formation with main mascot floating */}
+          <div className="relative w-full h-48 md:h-64 mx-auto mb-4 flex items-center justify-center">
+            {/* Left outer - Eulmok (green) */}
+            <div className="absolute left-4 md:left-16 lg:left-24 top-0 w-14 h-14 md:w-20 md:h-20 opacity-60">
+              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/eulmok-311z2CoqsXicrNLz220oq3Nb7q1aRl.png" alt="Eulmok" fill className="object-contain" />
             </div>
+            {/* Left inner - Gyesu (purple) */}
+            <div className="absolute left-14 md:left-28 lg:left-40 top-4 md:top-6 w-16 h-16 md:w-24 md:h-24 opacity-70">
+              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gyesu-8YTx4VfcXnNEPPK54QUH0AbfH7oLO3.png" alt="Gyesu" fill className="object-contain" />
+            </div>
+            
+            {/* Main mascot - Pink (center, floating) */}
+            <div className="relative w-36 h-36 md:w-44 md:h-44 z-10 animate-float">
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%85%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"
+                alt="Sajume mascot - pink nine-tailed fox"
+                fill
+                className="object-contain drop-shadow-2xl"
+                priority
+              />
+            </div>
+            
+            {/* Right inner - Gyeonggeum (gray) */}
+            <div className="absolute right-14 md:right-28 lg:right-40 top-4 md:top-6 w-16 h-16 md:w-24 md:h-24 opacity-70">
+              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gyeonggeum-C2Pu1PvGYI22q3evrb6Ynel484URPj.png" alt="Gyeonggeum" fill className="object-contain" />
+            </div>
+            {/* Right outer - Byeonghwa (orange) */}
+            <div className="absolute right-4 md:right-16 lg:right-24 top-0 w-14 h-14 md:w-20 md:h-20 opacity-60">
+              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/byeonghwa-nwRyjkGV7yuO4EC9wCYlt8Chx6jhyC.png" alt="Byeonghwa" fill className="object-contain" />
+            </div>
+          </div>
           
           <p className="text-sm md:text-base text-white/60 mb-3 max-w-sm mx-auto leading-relaxed">
             Discover the secrets hidden in your birth chart through ancient Korean Saju astrology.
