@@ -2509,6 +2509,10 @@ Gen-Z 미국인이 인생을 살면서 늘 궁금해하거나 고민하는 삶�
 특히 4번 커리어 문장 관련해서는 반드시 '두 가지 양상(구조적 적합성 + 재능적 두각)'을 포함해야 하며,
 모든 문장은 분석 보고서의 엄청나게 예리한 뾰족함과 깊이를 유지해야 한다.
 
+8번 문장은 모든 사람에게 반드시 이렇게 동일한 포맷의 문장이 나가야 한다. "Did you know that among Fire, Water, Wood, Metal, and Earth, the closer you stay to {{yongsin}} , the luckier you become?"
+
+이 때 용신의 경우, 사주에 조후(추위/더위) 문제가 심각하다면, 반드시 조후용신의 오행을 {{yongsin}}에 넣을 것. 조후가 원만하다면(봄/가을생 등), 억부용신의 오행을 {{yongsin}}에 넣을 것. 만약 조후용신이 '병(丙)'이나 '사(巳)'처럼 글자로 되어 있다면, 이를 오행(Fire, Water, Wood, Metal, Earth) 명칭으로 변환해서 넣을 것.
+
 === 심화 분석 보고서 ===
 ${JSON.stringify(deepAnalysis, null, 2)}
 
