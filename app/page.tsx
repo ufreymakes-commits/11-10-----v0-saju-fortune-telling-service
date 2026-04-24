@@ -42,14 +42,7 @@ export default function LandingPage() {
       
       <StarsBackground />
       
-      {/* Header Logo */}
-      <header className="relative z-10 pt-6 pb-4">
-        <div className="flex justify-center">
-          <div className="border border-white/30 rounded-full px-5 py-1.5 text-white/80 text-xs tracking-wider">
-            Sajume
-          </div>
-        </div>
-      </header>
+
       
       {/* Hero Section */}
       <section className="relative z-10 flex flex-col items-center px-4 pt-8 pb-16">
@@ -84,24 +77,19 @@ export default function LandingPage() {
           </div>
           
           {/* Characters in V-formation behind main mascot */}
-          <div className="relative w-full md:w-full h-52 md:h-64 mx-auto mb-4">
-            {/* Left outermost - Singeum (white) */}
-            <div className="absolute w-10 h-10 md:w-14 md:h-14 z-0" style={{ left: '2%', top: '10%' }}>
-              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/singeum-H2AGiONZHmmSe0bTHuI5RwpGTfJAHG.png" alt="Singeum" fill className="object-contain" />
-            </div>
-            
-            {/* Left outer - Eulmok (green) - top left */}
-            <div className="absolute w-12 h-12 md:w-16 md:h-16 z-0" style={{ left: '12%', top: '15%' }}>
+          <div className="relative w-64 md:w-80 h-44 md:h-56 mx-auto mb-4">
+            {/* Left outer - Eulmok (green) */}
+            <div className="absolute w-14 h-14 md:w-18 md:h-18 z-0 opacity-30" style={{ left: '0%', top: '20%' }}>
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/eulmok-311z2CoqsXicrNLz220oq3Nb7q1aRl.png" alt="Eulmok" fill className="object-contain" />
             </div>
             
-            {/* Left inner - Gyesu (purple) - upper left, closer to center */}
-            <div className="absolute w-16 h-16 md:w-20 md:h-20 z-0" style={{ left: '26%', top: '25%' }}>
+            {/* Left inner - Gyesu (purple) */}
+            <div className="absolute w-16 h-16 md:w-20 md:h-20 z-0 opacity-40" style={{ left: '15%', top: '30%' }}>
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gyesu-8YTx4VfcXnNEPPK54QUH0AbfH7oLO3.png" alt="Gyesu" fill className="object-contain" />
             </div>
             
-            {/* Main mascot - Pink (center lower, floating) */}
-            <div className="absolute left-1/2 top-2/3 -translate-x-1/2 -translate-y-1/2 w-32 h-32 md:w-44 md:h-44 z-10 animate-float">
+            {/* Main mascot - Pink (center, floating) */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 md:w-44 md:h-44 z-10 animate-float">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%85%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"
                 alt="Sajume mascot"
@@ -111,19 +99,14 @@ export default function LandingPage() {
               />
             </div>
             
-            {/* Right inner - Gyeonggeum (gray) - upper right, closer to center */}
-            <div className="absolute w-16 h-16 md:w-20 md:h-20 z-0" style={{ right: '26%', top: '25%' }}>
+            {/* Right inner - Gyeonggeum (gray) */}
+            <div className="absolute w-16 h-16 md:w-20 md:h-20 z-0 opacity-40" style={{ right: '15%', top: '30%' }}>
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gyeonggeum-C2Pu1PvGYI22q3evrb6Ynel484URPj.png" alt="Gyeonggeum" fill className="object-contain" />
             </div>
             
-            {/* Right outer - Byeonghwa (orange) - top right */}
-            <div className="absolute w-12 h-12 md:w-16 md:h-16 z-0" style={{ right: '12%', top: '15%' }}>
+            {/* Right outer - Byeonghwa (orange) */}
+            <div className="absolute w-14 h-14 md:w-18 md:h-18 z-0 opacity-30" style={{ right: '0%', top: '20%' }}>
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/byeonghwa-nwRyjkGV7yuO4EC9wCYlt8Chx6jhyC.png" alt="Byeonghwa" fill className="object-contain" />
-            </div>
-            
-            {/* Right outermost - Imsu (blue) */}
-            <div className="absolute w-10 h-10 md:w-14 md:h-14 z-0" style={{ right: '2%', top: '10%' }}>
-              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/imsu-GeExqsMOCcAoJA7bRd5981KRzwyLad.png" alt="Imsu" fill className="object-contain" />
             </div>
           </div>
           
@@ -371,6 +354,22 @@ export default function LandingPage() {
                 <h4 className="text-sm font-semibold text-white mb-1">Story-Driven</h4>
                 <p className="text-xs text-white/60">Easy-to-understand insights</p>
               </div>
+            </div>
+            
+            {/* CTA Button */}
+            <div className="mt-8 text-center">
+              <Link 
+                href="/start"
+                className="inline-flex items-center gap-2 bg-pink-400 text-white px-6 py-2.5 rounded-full text-sm md:text-base font-semibold hover:bg-pink-500 transition-all hover:scale-105 shadow-lg shadow-pink-500/30"
+              >
+                Get 9 Facts For Free (1 min)
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                  <path d="M7 4L13 10L7 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </Link>
+              <p className="mt-4 text-xs md:text-sm text-white/40">
+                9 facts free | Full report $9.99
+              </p>
             </div>
           </div>
         </div>
