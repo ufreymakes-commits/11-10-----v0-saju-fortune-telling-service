@@ -108,15 +108,15 @@ DO NOT return fewer cards. The user PAID for 90 facts. Returning less is unaccep
     "sectionTitle": "The Core Aura: Your 4 Pillars Unlocked",
     "cards": [
       { "content": "First insight about their core energy..." },
-      { "content": "Second insight about their personality..." },
-      { "content": "Third insight..." },
-      { "content": "Fourth insight..." },
-      { "content": "Fifth insight..." },
-      { "content": "Sixth insight..." },
-      { "content": "Seventh insight..." },
-      { "content": "Eighth insight..." },
-      { "content": "Ninth insight..." },
-      { "content": "Tenth insight..." }
+      { "content": "" },
+      { "content": "" },
+      { "content": "" },
+      { "content": "" },
+      { "content": "" },
+      { "content": "" },
+      { "content": "" },
+      { "content": "" },
+      { "content": "" }
     ]
   },
   ... (repeat this EXACT structure for all 9 sections, each with EXACTLY 10 cards)
