@@ -422,7 +422,7 @@ export function PreviewContent({ submissionId }: PreviewContentProps) {
           <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">&quot;Your wish is my command&quot;</span>
         </p>
         <p className="text-xs text-muted-foreground text-center mb-4">
-          Did you know that among Fire, Water, Wood, Metal, and Earth, the closer you stay to <span className="font-semibold text-foreground">{submission.sajuData.yongsin || 'your lucky element'}</span>, the luckier you become?
+          Did you know that among Fire, Water, Wood, Metal, and Earth, the closer you stay to <span className="font-semibold text-foreground">{submission.sajuData?.yongsin || 'your lucky element'}</span>, the luckier you become?
         </p>
         <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-amber-500/30 rounded-xl p-5">
           <div className="relative w-full h-32 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center">

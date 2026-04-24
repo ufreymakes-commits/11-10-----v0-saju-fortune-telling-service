@@ -1455,7 +1455,7 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
 59. 기토 - 정인 : Seeks comfort in knowledge. Draws emotional security from study.
 60. 기토 - 편인 : Relies on inner processing to restore energy. Needs quiet solitude to recharge and reflect.
 61. 경금 - 비견 : Sharp self-pride and willpower. Like steel, refuses to bend in self-conviction.
-62. 경금 - 겁������� : Bold challenger of structure. Clashes with peers, cuts through indecision.
+62. 경금 - 겁��������� : Bold challenger of structure. Clashes with peers, cuts through indecision.
 63. 경금 - 식신 : Productive with clarity and rules. Applies logic to yield results with precision.
 64. 경금 - 상관 : Strong speech, potentially critical. Cuts with words — brilliant or biting.
 65. 경금 - 정재 : Manages finance with decisiveness. Prefers practical, measurable outcomes.
@@ -2573,44 +2573,63 @@ OUTPUT FORMAT (JSON ONLY):
       // 1500자 해설 역할을 하는 deepAnalysis를 문자열로 저장
       const contextInterpretation = JSON.stringify(deepAnalysis)
 
-      // 기존 무료 레포트가 있으면 업데이트, 없으면 삽입
-      const { data: existingReport } = await supabase
-        .from('reports')
-        .select('id')
-        .eq('submission_id', body.submissionId)
-        .eq('is_free', true)
-        .single()
+      // 9개 사실을 4개 섹션으로 분배 (3개씩)
+      const sectionKeys = ['personality', 'career', 'love']
+      const factsBySection: Record<string, Fact[]> = {}
+      
+      sectionKeys.forEach((key, idx) => {
+        factsBySection[key] = facts.slice(idx * 3, (idx + 1) * 3)
+      })
 
-      if (existingReport) {
-        await supabase
+      // 각 섹션을 DB에 저장 또는 업데이트
+      for (const [sectionKey, sectionFacts] of Object.entries(factsBySection)) {
+        const { data: existingReport } = await supabase
           .from('reports')
-          .update({
-            facts: facts,
-            context_interpretation: contextInterpretation,
-          })
-          .eq('id', existingReport.id)
-        console.log('[v0] Gemini: Updated existing free report in DB')
-      } else {
-        await supabase
-          .from('reports')
-          .insert({
-            submission_id: body.submissionId,
-            section_key: 'free',
-            facts: facts,
-            context_interpretation: contextInterpretation,
-            is_free: true,
-          })
-        console.log('[v0] Gemini: Saved new free report to DB')
+          .select('id')
+          .eq('submission_id', body.submissionId)
+          .eq('section_key', sectionKey)
+          .eq('is_free', true)
+          .single()
+
+        if (existingReport) {
+          await supabase
+            .from('reports')
+            .update({
+              facts: sectionFacts,
+              context_interpretation: contextInterpretation,
+            })
+            .eq('id', existingReport.id)
+        } else {
+          await supabase
+            .from('reports')
+            .insert({
+              submission_id: body.submissionId,
+              section_key: sectionKey,
+              facts: sectionFacts,
+              context_interpretation: contextInterpretation,
+              is_free: true,
+            })
+        }
       }
+      
+      console.log('[v0] Gemini: Saved free report to DB (3 sections)')
     }
 
     // 프론트엔드가 기대하는 형식으로 응답 준비
+    // yongsin을 간단한 문자열로 변환 (preview에서 직접 접근하기 위해)
+    const yongsinString = saju_data.yongsin?.johu 
+      ? saju_data.yongsin.johu 
+      : (saju_data.yongsin?.eokbu || 'your lucky element')
+    
     return NextResponse.json({
       freeFacts: facts,
       teaserFacts: [],
       submission: {
         name,
-        sajuData: saju_data
+        sajuData: {
+          ...saju_data,
+          yongsin: yongsinString  // 문자열로 변환해서 제공
+        }
       },
       allSajuDataSentToGemini: allSajuData
     })
