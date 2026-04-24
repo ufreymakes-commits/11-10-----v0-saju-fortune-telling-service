@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -76,7 +76,7 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
   }
 
   // Check for PayPal callback on mount
-  React.useEffect(() => {
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const token = params.get('token')
     
