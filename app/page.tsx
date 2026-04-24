@@ -84,14 +84,14 @@ export default function LandingPage() {
           </div>
           
           {/* Characters in V-formation behind main mascot */}
-          <div className="relative w-80 md:w-96 h-48 md:h-56 mx-auto mb-4 flex items-center justify-center overflow-visible">
+          <div className="relative w-80 md:w-96 h-48 md:h-56 mx-auto mb-4">
             {/* Left outer - Eulmok (green) - back layer */}
-            <div className="absolute w-12 h-12 md:w-16 md:h-16 z-0" style={{ left: '5%', top: '35%' }}>
+            <div className="absolute w-12 h-12 md:w-16 md:h-16 z-0" style={{ left: '16%', top: '50%', transform: 'translateY(-50%)' }}>
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/eulmok-311z2CoqsXicrNLz220oq3Nb7q1aRl.png" alt="Eulmok" fill className="object-contain" />
             </div>
             
             {/* Left inner - Gyesu (purple) - back layer */}
-            <div className="absolute w-16 h-16 md:w-20 md:h-20 z-0" style={{ left: '15%', top: '40%' }}>
+            <div className="absolute w-16 h-16 md:w-20 md:h-20 z-0" style={{ left: '28%', top: '50%', transform: 'translateY(-50%)' }}>
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gyesu-8YTx4VfcXnNEPPK54QUH0AbfH7oLO3.png" alt="Gyesu" fill className="object-contain" />
             </div>
             
@@ -107,12 +107,12 @@ export default function LandingPage() {
             </div>
             
             {/* Right inner - Gyeonggeum (gray) - back layer */}
-            <div className="absolute w-16 h-16 md:w-20 md:h-20 z-0" style={{ right: '15%', top: '40%' }}>
+            <div className="absolute w-16 h-16 md:w-20 md:h-20 z-0" style={{ right: '28%', top: '50%', transform: 'translateY(-50%)' }}>
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gyeonggeum-C2Pu1PvGYI22q3evrb6Ynel484URPj.png" alt="Gyeonggeum" fill className="object-contain" />
             </div>
             
             {/* Right outer - Byeonghwa (orange) - back layer */}
-            <div className="absolute w-12 h-12 md:w-16 md:h-16 z-0" style={{ right: '5%', top: '35%' }}>
+            <div className="absolute w-12 h-12 md:w-16 md:h-16 z-0" style={{ right: '16%', top: '50%', transform: 'translateY(-50%)' }}>
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/byeonghwa-nwRyjkGV7yuO4EC9wCYlt8Chx6jhyC.png" alt="Byeonghwa" fill className="object-contain" />
             </div>
           </div>
