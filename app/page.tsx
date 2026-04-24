@@ -45,7 +45,7 @@ export default function LandingPage() {
 
       
       {/* Hero Section */}
-      <section className="relative z-10 flex flex-col items-center px-4 pt-8 pb-16">
+      <section className="relative z-10 flex flex-col items-center px-4 pt-20 pb-16">
         {/* Sparkle decorations */}
         <div className="absolute top-4 left-1/2 -translate-x-1/2" aria-hidden="true">
           <svg width="50" height="50" viewBox="0 0 80 80" fill="none" className="text-white/60">
