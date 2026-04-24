@@ -120,7 +120,7 @@ You MUST return a valid JSON array with exactly 9 sections. Each section contain
 ]
 
 CONTENT GUIDELINES:
-- Each card's "content" field: Maximum 125 characters (not words)
+- Each card's "content" field: Max 80 characters including spaces
 - Be compact but meaningful - core insight only
 - No need for title/theme per card
 - Maintain Gen-Z tone, warmth, and practical advice
