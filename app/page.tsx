@@ -84,46 +84,15 @@ export default function LandingPage() {
           </div>
           
           {/* Characters in a line with floating effect */}
-          <div className="relative w-full h-56 md:h-64 mx-auto mb-6 flex items-center justify-center overflow-hidden">
-            {/* Singeum - Green (far left) */}
-            <div className="absolute w-12 h-12 md:w-16 md:h-16 left-4 md:left-12 animate-float" style={{ animationDelay: '0s' }}>
-              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/singeum-KgmDCqcBvR8APXhwb5m5GXfMfY0Hw2.png" alt="Singeum" fill className="object-contain" />
-            </div>
-            
-            {/* Gyesu - Purple (left) */}
-            <div className="absolute w-16 h-16 md:w-20 md:h-20 left-20 md:left-28 animate-float" style={{ animationDelay: '0.2s' }}>
-              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gyesu-9Sit6yryy2XFeyDddE5QQu6AwopXY1.png" alt="Gyesu" fill className="object-contain" />
-            </div>
-            
-            {/* Gabmok - Yellow (left-center) */}
-            <div className="absolute w-20 h-20 md:w-28 md:h-28 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-auto md:right-auto md:left-1/3 md:-translate-x-1/2 animate-float" style={{ animationDelay: '0.4s' }}>
-              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gabmok-bkPkfmlicV7xsuBn9ZSdEYzkjRYxon.png" alt="Gabmok" fill className="object-contain" />
-            </div>
-            
-            {/* Main Mascot - Pink (center) */}
-            <div className="relative w-40 h-40 md:w-48 md:h-48 animate-float z-10" style={{ animationDelay: '0s' }}>
+          <div className="relative w-full h-64 md:h-72 mx-auto mb-6 flex items-center justify-center">
+            <div className="relative w-full h-full animate-float">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%84%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"
-                alt="Sajume mascot"
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Group%20427318177-WkCG5qIOf7v29utw3Vix0MMQqVzjoC.png"
+                alt="Sajume characters - all 5 K-Saju mascots in a line"
                 fill
-                className="object-contain drop-shadow-2xl"
+                className="object-contain"
                 priority
               />
-            </div>
-            
-            {/* Jeonghwa - Gray (right-center) */}
-            <div className="absolute w-20 h-20 md:w-28 md:h-28 right-1/2 translate-x-1/2 md:translate-x-0 md:right-auto md:right-1/3 md:translate-x-1/2 animate-float" style={{ animationDelay: '0.4s' }}>
-              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/jeonghwa-vkeepvUQw7mtyztMYpGrZfM890lT9h.png" alt="Jeonghwa" fill className="object-contain" />
-            </div>
-            
-            {/* Imsu - Blue (right) */}
-            <div className="absolute w-16 h-16 md:w-20 md:h-20 right-20 md:right-28 animate-float" style={{ animationDelay: '0.2s' }}>
-              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/imsu-3qFTUgKapaaAtc0RJrJb0KyoFDpgd5.png" alt="Imsu" fill className="object-contain" />
-            </div>
-            
-            {/* Muto - Orange (far right) */}
-            <div className="absolute w-12 h-12 md:w-16 md:h-16 right-4 md:right-12 animate-float" style={{ animationDelay: '0s' }}>
-              <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/muto-EykGx1vMIHPJWNwdVHLOIvigykkhkg.png" alt="Muto" fill className="object-contain" />
             </div>
           </div>
           
