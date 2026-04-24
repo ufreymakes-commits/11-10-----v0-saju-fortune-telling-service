@@ -84,36 +84,36 @@ export default function LandingPage() {
           </div>
           
           {/* Mascot with V-formation background characters */}
-          <div className="relative w-72 h-52 md:w-80 md:h-60 mx-auto mb-6">
+          <div className="relative w-96 h-64 md:w-full md:h-72 mx-auto mb-6 flex items-center justify-center">
             {/* Background characters - Left side (far to close) */}
-            <div className="absolute left-0 top-4 md:top-6 w-12 h-12 md:w-14 md:h-14 opacity-20">
+            <div className="absolute left-0 top-0 md:left-8 w-12 h-12 md:w-16 md:h-16 opacity-25">
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/singeum-KgmDCqcBvR8APXhwb5m5GXfMfY0Hw2.png" alt="Singeum" fill className="object-contain" />
             </div>
-            <div className="absolute left-8 md:left-10 top-10 md:top-12 w-14 h-14 md:w-16 md:h-16 opacity-30">
+            <div className="absolute left-8 top-6 md:left-20 md:top-8 w-14 h-14 md:w-20 md:h-20 opacity-35">
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gyesu-9Sit6yryy2XFeyDddE5QQu6AwopXY1.png" alt="Gyesu" fill className="object-contain" />
             </div>
-            <div className="absolute left-16 md:left-20 top-16 md:top-20 w-16 h-16 md:w-20 md:h-20 opacity-40">
+            <div className="absolute left-20 top-12 md:left-32 md:top-16 w-16 h-16 md:w-24 md:h-24 opacity-45">
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gabmok-bkPkfmlicV7xsuBn9ZSdEYzkjRYxon.png" alt="Gabmok" fill className="object-contain" />
             </div>
             
             {/* Background characters - Right side (far to close) */}
-            <div className="absolute right-0 top-4 md:top-6 w-12 h-12 md:w-14 md:h-14 opacity-20">
+            <div className="absolute right-0 top-0 md:right-8 w-12 h-12 md:w-16 md:h-16 opacity-25">
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/muto-EykGx1vMIHPJWNwdVHLOIvigykkhkg.png" alt="Muto" fill className="object-contain" />
             </div>
-            <div className="absolute right-8 md:right-10 top-10 md:top-12 w-14 h-14 md:w-16 md:h-16 opacity-30">
+            <div className="absolute right-8 top-6 md:right-20 md:top-8 w-14 h-14 md:w-20 md:h-20 opacity-35">
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/imsu-3qFTUgKapaaAtc0RJrJb0KyoFDpgd5.png" alt="Imsu" fill className="object-contain" />
             </div>
-            <div className="absolute right-16 md:right-20 top-16 md:top-20 w-16 h-16 md:w-20 md:h-20 opacity-40">
+            <div className="absolute right-20 top-12 md:right-32 md:top-16 w-16 h-16 md:w-24 md:h-24 opacity-45">
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/jeonghwa-vkeepvUQw7mtyztMYpGrZfM890lT9h.png" alt="Jeonghwa" fill className="object-contain" />
             </div>
             
             {/* Main mascot - center front */}
-            <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-44 h-44 md:w-48 md:h-48 animate-float z-10">
+            <div className="relative w-40 h-40 md:w-48 md:h-48 z-10">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%85%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"
                 alt="Sajume mascot - a cute pink nine-tailed fox holding a crystal ball"
                 fill
-                className="object-contain drop-shadow-2xl"
+                className="object-contain drop-shadow-2xl animate-float"
                 priority
               />
             </div>

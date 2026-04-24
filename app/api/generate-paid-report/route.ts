@@ -226,13 +226,13 @@ Based on all the context above, generate 90 NEW facts that:
 
 Generate the 90 facts now as a JSON array.`
 
-    // 6. Gemini API 호출
+    // 6. Gemini API 호출 (temperature=0 for deterministic output)
     const { text: rawResponse } = await generateText({
       model: 'google/gemini-2.5-flash-preview-05-20',
       system: PAID_REPORT_SYSTEM_PROMPT,
       prompt: userPrompt,
       maxTokens: 16000,
-      temperature: 0.7,
+      temperature: 0,
     })
 
     // 7. JSON 파싱
