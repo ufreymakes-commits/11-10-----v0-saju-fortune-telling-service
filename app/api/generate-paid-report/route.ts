@@ -198,6 +198,10 @@ export async function POST(request: Request) {
     const contextInterpretation = freeReport.context_interpretation || ''
 
     console.log(`[v0] Generating 90 paid facts for ${submission.name}`)
+    console.log('[v0] Context injection summary:')
+    console.log('[v0] - Saju data fields:', Object.keys(submission.saju_data || {}).length)
+    console.log('[v0] - Context interpretation length:', contextInterpretation.length, 'chars')
+    console.log('[v0] - Free facts count:', freeFacts?.length || 0)
 
     // 5. Gemini에 전체 context 주입
     const userPrompt = `
@@ -226,6 +230,8 @@ Based on all the context above, generate 90 NEW facts that:
 Generate the 90 facts now as a JSON array.`
 
     // 6. Gemini API 호출 (temperature=0 for deterministic output)
+    console.log('[v0] Calling Gemini API...')
+    const startTime = Date.now()
     const { text: rawResponse } = await generateText({
       model: 'google/gemini-2.5-flash-preview-05-20',
       system: PAID_REPORT_SYSTEM_PROMPT,
@@ -233,6 +239,9 @@ Generate the 90 facts now as a JSON array.`
       maxTokens: 16000,
       temperature: 0,
     })
+    const geminiTime = Date.now() - startTime
+    console.log(`[v0] Gemini API completed in ${geminiTime}ms`)
+    console.log('[v0] Response length:', rawResponse.length, 'chars')
 
     // 7. JSON 파싱
     let paidFacts: Fact[] = []
