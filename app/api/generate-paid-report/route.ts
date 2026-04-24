@@ -155,16 +155,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Payment required' }, { status: 403 })
     }
 
-    // 2. 기존 유료 레포트 확인 (이미 생성된 경우 바로 반환)
+    // 2. 기존 유료 레포트 확인 (section_key='paid_full'만 유효한 캐시)
     const { data: existingPaidReport } = await supabase
       .from('reports')
       .select('facts')
       .eq('submission_id', submissionId)
-      .eq('is_free', false)
+      .eq('section_key', 'paid_full')
       .single()
 
-    if (existingPaidReport?.facts) {
-      console.log('[v0] Paid report already exists, returning cached version')
+    if (existingPaidReport?.facts && Array.isArray(existingPaidReport.facts) && existingPaidReport.facts.length > 5) {
+      console.log('[v0] Paid report already exists (paid_full), returning cached version')
       return NextResponse.json({
         facts: existingPaidReport.facts,
         cached: true
