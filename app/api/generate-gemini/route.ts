@@ -2498,7 +2498,7 @@ Language: English only.
 Customer Name: ${name}
 
 앞서 작성된 '심화 분석 보고서'를 완벽하게 씹어먹고 숙지하라.
-이제 이 내용을 바탕으로 유저에게 줄 9가지 사실을 기깔나게 작성하라. 너의 실력을 보여줘 Gemini.
+이제 이 내용을 바탕으로 유저에게 줄 9가지 사실을 기깔나게 작성하라. 너의 실력을 보여줘 Gemini. 각 사실은 공백 포함 80자 이내의 영어 문장이여야 한다.
 
 IMPORTANT: Use the customer's name (${name}) ONLY in the FIRST sentence (id: 1) and the LAST sentence (id: 9) to make it personal. Do NOT use the name in any other sentences.
 Example: "Hey ${name}, ..." for the first fact, and "${name}, remember that..." for the last fact.
@@ -2565,10 +2565,10 @@ OUTPUT FORMAT (JSON ONLY):
     // ===== DB에 무료 레포트 저장 (유료 레포트 생성 시 context로 사용) =====
     if (body.submissionId) {
       const supabase = await createClient()
-      
+
       // 1500자 해설 역할을 하는 deepAnalysis를 문자열로 저장
       const contextInterpretation = JSON.stringify(deepAnalysis)
-      
+
       // 기존 무료 레포트가 있으면 업데이트, 없으면 삽입
       const { data: existingReport } = await supabase
         .from('reports')
@@ -2576,7 +2576,7 @@ OUTPUT FORMAT (JSON ONLY):
         .eq('submission_id', body.submissionId)
         .eq('is_free', true)
         .single()
-      
+
       if (existingReport) {
         await supabase
           .from('reports')
