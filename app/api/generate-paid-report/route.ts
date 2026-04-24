@@ -3,6 +3,9 @@ import { generateText } from 'ai'
 import { createClient } from '@/lib/supabase/server'
 import type { Fact } from '@/lib/types'
 
+// Vercel 서버리스 함수 타임아웃 설정 (Pro: 최대 300초, Hobby: 최대 60초)
+export const maxDuration = 120 // 2분
+
 /**
  * 유료 레포트 생성 API (90개 사실)
  * 
