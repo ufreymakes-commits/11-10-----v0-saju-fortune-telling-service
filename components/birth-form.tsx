@@ -74,7 +74,8 @@ export function BirthForm() {
   useEffect(() => {
     const { count, date } = getDailyReportCount()
     const today = new Date().toISOString().split('T')[0]
-    if (date === today && count >= DAILY_LIMIT) {
+    // Skip limit check for owner (박유리)
+    if (date === today && count >= DAILY_LIMIT && formData.name !== '박유리') {
       setDailyLimitReached(true)
     }
   }, [])
@@ -127,14 +128,15 @@ export function BirthForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Check daily limit before proceeding
-    const { count, date } = getDailyReportCount()
-    const today = new Date().toISOString().split('T')[0]
-    if (date === today && count >= DAILY_LIMIT) {
-      setDailyLimitReached(true)
-      setErrors({ dailyLimit: 'You have exceeded the maximum daily usage. Please try again tomorrow :)' })
-      return
-    }
+  // Check daily limit before proceeding
+  const { count, date } = getDailyReportCount()
+  const today = new Date().toISOString().split('T')[0]
+  // Skip limit check for owner (박유리)
+  if (date === today && count >= DAILY_LIMIT && formData.name !== '박유리') {
+    setDailyLimitReached(true)
+    setErrors({ dailyLimit: 'You have exceeded the maximum daily usage. Please try again tomorrow :)' })
+    return
+  }
     
     if (!validateForm()) return
     
