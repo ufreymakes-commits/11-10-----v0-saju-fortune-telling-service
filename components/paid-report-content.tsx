@@ -12,18 +12,22 @@ interface PaidReportContentProps {
 
 export function PaidReportContent({ submission, paidReport }: PaidReportContentProps) {
   const router = useRouter()
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [sections, setSections] = useState<any[]>([])
+  // Start in generating state if no paidReport
+  const [isGenerating, setIsGenerating] = useState(!paidReport?.facts)
+  const [sections, setSections] = useState<any[]>(paidReport?.facts || [])
+  const [generationStarted, setGenerationStarted] = useState(false)
 
   useEffect(() => {
     // If report data exists, parse and display it
     if (paidReport?.facts && Array.isArray(paidReport.facts)) {
       setSections(paidReport.facts)
-    } else if (!paidReport?.facts) {
-      // Trigger paid report generation if not exists
+      setIsGenerating(false)
+    } else if (!paidReport?.facts && !generationStarted) {
+      // Trigger paid report generation if not exists (only once)
+      setGenerationStarted(true)
       generatePaidReport()
     }
-  }, [paidReport])
+  }, [paidReport, generationStarted])
 
   async function generatePaidReport() {
     setIsGenerating(true)
@@ -63,13 +67,17 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
     }
   }
 
-  if (isGenerating) {
+  if (isGenerating || sections.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Spinner className="mx-auto mb-4" />
-          <p className="text-white/60 text-lg">Generating your complete saju analysis...</p>
-          <p className="text-white/40 text-sm mt-2">This may take a moment</p>
+        <div className="text-center max-w-md px-4">
+          <Spinner className="mx-auto mb-6 w-12 h-12" />
+          <h2 className="text-2xl font-bold text-white mb-4">Generating Your 99 Facts</h2>
+          <p className="text-white/60 text-lg mb-2">Our AI is analyzing your complete birth chart...</p>
+          <p className="text-white/40 text-sm">This takes 30-60 seconds. Please don&apos;t refresh.</p>
+          <div className="mt-8 bg-white/5 rounded-lg p-4">
+            <p className="text-white/50 text-xs">Tip: Your personalized 99 facts report covers personality, career, relationships, health, and destiny insights based on Korean Saju astrology.</p>
+          </div>
         </div>
       </div>
     )

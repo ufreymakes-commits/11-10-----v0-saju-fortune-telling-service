@@ -53,53 +53,8 @@ export default async function PaidReportPage({ params }: PageProps) {
     redirect(`/checkout/${id}`)
   }
   
-  // If paid report doesn't exist yet, generate it now by calling the API
-  let paidReport = paidReportResult.data
-  if (!paidReport) {
-    console.log('[v0] No paid report found, generating via API...')
-    const baseUrl = process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}` 
-      : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
-    
-    try {
-      const response = await fetch(`${baseUrl}/api/generate-paid-report`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ submissionId: id }),
-        cache: 'no-store'
-      })
-      
-      if (response.ok) {
-        const result = await response.json()
-        console.log('[v0] Paid report generated, facts count:', result.facts?.length)
-        // Refetch the paid report from DB
-        const { data: freshReport } = await supabase
-          .from('reports')
-          .select('*')
-          .eq('submission_id', id)
-          .eq('section_key', 'paid_full')
-          .single()
-        paidReport = freshReport
-      } else {
-        console.error('[v0] Failed to generate paid report:', await response.text())
-      }
-    } catch (error) {
-      console.error('[v0] Error generating paid report:', error)
-    }
-  }
-
-  // If still no paid report after generation attempt, show error
-  if (!paidReport) {
-    return (
-      <main className="min-h-screen bg-mystical flex items-center justify-center">
-        <div className="text-center text-white">
-          <h1 className="text-2xl font-bold mb-4">Report Generation In Progress</h1>
-          <p className="text-white/60 mb-4">Your 99 facts report is being generated. This may take up to 60 seconds.</p>
-          <p className="text-white/40 text-sm">Please refresh this page in a moment.</p>
-        </div>
-      </main>
-    )
-  }
+  // paidReport will be null if not generated yet - client component will handle generation
+  const paidReport = paidReportResult.data
   
   return (
     <main className="min-h-screen bg-mystical relative overflow-hidden">
