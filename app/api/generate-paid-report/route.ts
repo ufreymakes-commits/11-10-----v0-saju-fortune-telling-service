@@ -3,8 +3,8 @@ import { generateText } from 'ai'
 import { createClient } from '@/lib/supabase/server'
 import type { Fact } from '@/lib/types'
 
-// Vercel 서버리스 함수 타임아웃 설정 (Pro: 최대 300초, Hobby: 최대 60초)
-export const maxDuration = 120 // 2분
+// Vercel Hobby 플랜 최대 60초
+export const maxDuration = 60
 
 /**
  * 유료 레포트 생성 API (90개 사실)
@@ -238,7 +238,7 @@ Generate the 90 facts now as a JSON array.`
     console.log('[v0] Calling Gemini API...')
     const startTime = Date.now()
     const { text: rawResponse } = await generateText({
-      model: 'google/gemini-2.5-flash-preview-05-20',
+      model: 'google/gemini-2.0-flash',
       system: PAID_REPORT_SYSTEM_PROMPT,
       prompt: userPrompt,
       maxTokens: 16000,
