@@ -1115,7 +1115,7 @@ Jeongin → education, research, counseling, academia, theory, certification-bas
 Pyeonin → psychology, philosophy, strategy, analysis, unconventional knowledge  
 
 Bigyeon → self-employment, freelance, independent expertise  
-Geopjae ��� competition, sales, trading, network-driven income  
+Geopjae ���� competition, sales, trading, network-driven income  
 
 --------------------------------------------------
 
@@ -1328,7 +1328,7 @@ For example:
   - 水 = 관성
   - 木 = 인성
 
-丁火 (Jeong-hwa):
+丁�� (Jeong-hwa):
   - 火 = 비겁
   - 土 = 식상
   - 金 = 재성
@@ -2326,7 +2326,7 @@ For example:
   - 水 = 비겁
   - 木 = 식상
   - 火 = 재성
-  - �� = 관성
+  - ��� = 관성
   - 金 = 인성
 
 癸水 (Gye-su):
@@ -2553,12 +2553,9 @@ Language: English only.
       yongsinElement = hanja2Element[firstElement]
       console.log(`[v0] Gemini: Converted yongsin ${firstElement} to ${yongsinElement}`)
     } else if (!['Water', 'Fire', 'Wood', 'Metal', 'Earth'].includes(yongsinElement)) {
-      // 알 수 없는 형식이면 element balance에서 가장 부족한 오행을 yongsin으로 사용
-      const elementBalance = sajuData?.elementBalance || {}
-      const elements = ['Water', 'Fire', 'Wood', 'Metal', 'Earth']
-      const weakest = elements.reduce((min, el) => (elementBalance[el.toLowerCase()] || 0) < (elementBalance[min.toLowerCase()] || 0) ? el : min, elements[0])
-      yongsinElement = weakest
-      console.log(`[v0] Gemini: Unknown yongsin format, derived from element balance: ${yongsinElement}`)
+      // 알 수 없는 형식이면 기본값 Water 사용
+      yongsinElement = 'Water'
+      console.log(`[v0] Gemini: Unknown yongsin format, using default: Water`)
     }
 
     console.log(`[v0] Gemini: Final yongsinElement: ${yongsinElement} (balanced season: ${isBalancedSeason})`)
