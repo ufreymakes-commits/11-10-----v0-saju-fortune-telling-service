@@ -96,7 +96,7 @@ export default function LandingPage() {
             </div>
             
             {/* Main mascot - Pink (center lower, floating) */}
-            <div className="absolute w-32 h-32 md:w-44 md:h-44 z-10 animate-float" style={{ left: '50%', top: '65%', transform: 'translate(-50%, -50%)' }}>
+            <div className="absolute left-1/2 top-2/3 -translate-x-1/2 -translate-y-1/2 w-32 h-32 md:w-44 md:h-44 z-10 animate-float">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%85%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"
                 alt="Sajume mascot"
@@ -115,7 +115,6 @@ export default function LandingPage() {
             <div className="absolute w-12 h-12 md:w-16 md:h-16 z-0" style={{ right: '8%', top: '15%' }}>
               <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/byeonghwa-nwRyjkGV7yuO4EC9wCYlt8Chx6jhyC.png" alt="Byeonghwa" fill className="object-contain" />
             </div>
-          </div>
           </div>
           
           <p className="text-sm md:text-base text-white/60 mb-3 max-w-sm mx-auto leading-relaxed">
