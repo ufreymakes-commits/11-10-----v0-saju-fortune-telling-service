@@ -79,12 +79,12 @@ export default function LandingPage() {
             of your birth chart
           </h2>
           
-          <div className="inline-block bg-purple-600/80 text-white px-5 py-2 rounded-sm text-sm md:text-lg mb-8 font-montserrat font-semibold">
+          <div className="inline-block bg-purple-600/80 text-white px-5 py-2 rounded-sm text-xs md:text-sm lg:text-lg mb-4 font-montserrat font-semibold">
             {"K-Saju: The Next Gen Fortune Telling"}
           </div>
           
           {/* Characters in a line with floating effect */}
-          <div className="relative w-full h-64 md:h-72 mx-auto mb-6 flex items-center justify-center">
+          <div className="relative w-full h-56 md:h-72 mx-auto mb-4 flex items-center justify-center">
             <div className="relative w-full h-full animate-float">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Group%20427318177-WkCG5qIOf7v29utw3Vix0MMQqVzjoC.png"
@@ -96,7 +96,7 @@ export default function LandingPage() {
             </div>
           </div>
           
-          <p className="text-sm md:text-base text-white/60 mb-6 max-w-sm mx-auto leading-relaxed">
+          <p className="text-sm md:text-base text-white/60 mb-3 max-w-sm mx-auto leading-relaxed">
             Discover the secrets hidden in your birth chart through ancient Korean Saju astrology.
           </p>
           
@@ -292,10 +292,11 @@ export default function LandingPage() {
 
           {/* Feature grid with white icons */}
           <div className="mb-10">
-            <h4 className="text-center text-2xl md:text-3xl font-semibold text-white/80 mb-6">
-              <span>No.1 Global Saju</span>
-              <span className="block md:inline md:mx-2">/</span>
-              <span className="block md:inline">Feel the difference</span>
+            <h4 className="text-center text-lg md:text-3xl font-semibold text-white/80 mb-4">
+              <span className="block">No.1 Global Saju</span>
+              <span className="block md:hidden">/</span>
+              <span className="hidden md:inline md:mx-2">/</span>
+              <span className="block">Feel the difference</span>
             </h4>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {/* Lifetime Access */}
