@@ -332,7 +332,7 @@ export default function LandingPage() {
           </div>
 
           {/* Feature grid with white icons */}
-          <div className="mb-10">
+          <div className="mb-10 mt-14">
             <h4 className="text-center text-3xl md:text-4xl font-semibold text-white/90 mb-2">
               No.1 Global Saju
             </h4>
