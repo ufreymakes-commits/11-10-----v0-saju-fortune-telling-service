@@ -3,20 +3,58 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { CheckCircleIcon, LinkIcon, CheckIcon } from 'lucide-react'
+import { CheckCircleIcon, LinkIcon, CheckIcon, ChevronDownIcon } from 'lucide-react'
 import type { Submission, SajuData } from '@/lib/types'
+import { getDayMasterCharacter } from '@/lib/day-master-characters'
 
 interface PaidReportContentProps {
   submission: Submission
   paidReport: any
 }
 
+const HANJA_TO_KOREAN_STEM: Record<string, string> = {
+  '甲': '갑', '乙': '을', '丙': '병', '丁': '정', '戊': '무',
+  '己': '기', '庚': '경', '辛': '신', '壬': '임', '癸': '계',
+}
+const KOREAN_TO_HANJA_STEM: Record<string, string> = {
+  '갑': '甲', '을': '乙', '병': '丙', '정': '丁', '무': '戊',
+  '기': '己', '경': '庚', '신': '辛', '임': '壬', '계': '癸',
+}
+const DAY_MASTER_QUOTE: Record<string, string> = {
+  '갑': "Just goes for it. The path? I'll make one.",
+  '을': 'Plant me anywhere. I\'ll bloom.',
+  '병': 'The vibe shifts the moment I walk in.',
+  '정': "You'll open up before you even realize it.",
+  '무': "Lean on me. I'm not going anywhere.",
+  '기': 'Somehow everything just gets taken care of.',
+  '경': "Blunt? Sure. But also always right.",
+  '신': "It's not overthinking. It's called having standards.",
+  '임': "Goes wherever life takes them. And it's always interesting.",
+  '계': 'Already knew how you felt before you said a word.',
+}
+
+const elementColors: Record<string, string> = {
+  Wood: 'bg-green-500',
+  Fire: 'bg-red-500',
+  Earth: 'bg-yellow-600',
+  Metal: 'bg-gray-400',
+  Water: 'bg-blue-500',
+}
+const maxScore = 120
+
 export function PaidReportContent({ submission, paidReport }: PaidReportContentProps) {
   const router = useRouter()
   const [copied, setCopied] = useState(false)
+  const [openSections, setOpenSections] = useState<Record<number, boolean>>({})
 
   const sections: any[] = paidReport?.facts && Array.isArray(paidReport.facts) ? paidReport.facts : []
   const sajuData = (submission.saju_data || {}) as SajuData
+
+  const rawStem = sajuData?.dayPillar?.stem || '갑'
+  const dayMasterKorean = HANJA_TO_KOREAN_STEM[rawStem] || rawStem
+  const dayMasterHanja = KOREAN_TO_HANJA_STEM[dayMasterKorean] || rawStem
+  const character = getDayMasterCharacter(dayMasterKorean)
+  const quote = DAY_MASTER_QUOTE[dayMasterKorean] || ''
 
   const handleCopyLink = () => {
     if (typeof window !== 'undefined') {
@@ -26,25 +64,21 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
     }
   }
 
-  const elementColors: Record<string, string> = {
-    Wood: 'bg-green-500',
-    Fire: 'bg-red-500',
-    Earth: 'bg-yellow-600',
-    Metal: 'bg-gray-400',
-    Water: 'bg-blue-500'
+  const toggleSection = (idx: number) => {
+    setOpenSections(prev => ({ ...prev, [idx]: !prev[idx] }))
   }
-  const maxScore = 120
 
   return (
     <div className="px-4 py-8 max-w-3xl mx-auto">
+
       {/* Header */}
       <div className="text-center mb-6">
         <p className="text-xs text-muted-foreground">
-          {submission.name}&apos;s Full 99 Facts Report
+          {submission.name}&apos;s Sajume Full 99 Facts Report
         </p>
       </div>
 
-      {/* Five Elements Balance — same card style as free report */}
+      {/* Five Elements Balance */}
       <div className="bg-card border border-border rounded-xl p-4 mb-6 shadow-lg shadow-primary/5">
         <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-2 text-center">Your Five Elements Balance</h2>
         <p className="text-[10px] text-muted-foreground/60 text-center mb-3">Based on 8 characters (4 pillars x 2), with weighted scoring on Month Branch. Excludes hidden stems.</p>
@@ -73,51 +107,108 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
         </div>
       </div>
 
-      {/* Sections — same card style as free report */}
-      <div className="space-y-6">
-        {sections.map((section: any, sectionIndex: number) => (
-          <div key={sectionIndex} className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
-            {/* Section Header */}
-            <div className="bg-muted border-b border-border px-4 py-3 flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-secondary/20 text-secondary">
-                <CheckCircleIcon className="w-4 h-4" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-sm font-semibold">{section.sectionTitle}</h3>
-              </div>
-              <span className="text-[10px] bg-secondary/20 text-secondary px-2 py-0.5 rounded">
-                {section.cards?.length || 0} facts
-              </span>
+      {/* Day Master Card — horizontal layout */}
+      <div className="bg-card border border-border rounded-xl p-4 mb-6 shadow-lg shadow-primary/5">
+        <p className="text-[10px] text-muted-foreground mb-3 text-center uppercase tracking-wider">Your Day Master (일간)</p>
+        <div className="flex gap-4 items-center">
+          {/* Left: image + name */}
+          <div className="flex flex-col items-center flex-shrink-0 w-24">
+            <div className="relative w-20 h-20 mb-2">
+              <Image
+                src={character?.imagePath || '/images/characters-collection.png'}
+                alt={`${dayMasterKorean} character`}
+                fill
+                className="object-contain drop-shadow-lg"
+                onError={(e) => { (e.target as HTMLImageElement).src = '/images/characters-collection.png' }}
+              />
             </div>
-
-            {/* Cards */}
-            <div className="p-4">
-              <div className="space-y-2">
-                {section.cards && section.cards.map((card: any, cardIdx: number) => {
-                  const globalNum = sectionIndex * 10 + cardIdx + 1
-                  return (
-                    <div
-                      key={cardIdx}
-                      className="flex gap-2 p-2 rounded-lg bg-background/30 hover:bg-background/50 transition-colors"
-                    >
-                      <span className="text-primary font-bold text-xs w-5 flex-shrink-0">
-                        {globalNum}
-                      </span>
-                      <p className="text-foreground/90 text-xs leading-relaxed">{card.content}</p>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
+            <p className={`text-sm font-bold text-center leading-tight ${character?.color || 'text-foreground'}`}>
+              {dayMasterHanja} {dayMasterKorean}
+            </p>
+            <p className="text-[10px] text-muted-foreground text-center">{character?.element || ''}</p>
           </div>
-        ))}
+
+          {/* Right: keywords, description, quote */}
+          <div className="flex-1 min-w-0">
+            {/* Keywords */}
+            {character?.keywords && character.keywords.length > 0 && (
+              <div className="flex flex-wrap gap-1 mb-2">
+                {character.keywords.map((kw: string, i: number) => (
+                  <span key={i} className="text-[10px] px-2 py-0.5 bg-white/10 rounded-full text-white/70">
+                    #{kw}
+                  </span>
+                ))}
+              </div>
+            )}
+            {/* Theme title + description */}
+            <p className="text-xs font-semibold text-foreground/90 mb-1">{character?.themeTitle || 'Day Master'}</p>
+            <p className="text-[11px] text-muted-foreground/80 leading-relaxed mb-2">{character?.themeDescription || ''}</p>
+            {/* Quote */}
+            {quote && (
+              <p className="text-[10px] text-muted-foreground italic">
+                &ldquo;{quote}&rdquo;
+              </p>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Store Products — same style as free report */}
+      {/* Sections with toggle */}
+      <div className="space-y-4">
+        {sections.map((section: any, sectionIndex: number) => {
+          const isOpen = !!openSections[sectionIndex]
+          return (
+            <div key={sectionIndex} className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
+              {/* Section Header */}
+              <div className="bg-muted border-b border-border px-4 py-3 flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-secondary/20 text-secondary">
+                  <CheckCircleIcon className="w-4 h-4" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-semibold">{section.sectionTitle}</h3>
+                </div>
+                {/* Animated toggle chevron */}
+                <button
+                  onClick={() => toggleSection(sectionIndex)}
+                  aria-label={isOpen ? 'Collapse section' : 'Expand section'}
+                  className="p-1.5 rounded-lg hover:bg-background/50 transition-colors"
+                >
+                  <ChevronDownIcon
+                    className={`w-5 h-5 text-muted-foreground transition-transform duration-300 ${isOpen ? 'rotate-180' : ''} animate-bounce`}
+                  />
+                </button>
+              </div>
+
+              {/* Cards — shown when open */}
+              {isOpen && (
+                <div className="p-4">
+                  <div className="space-y-2">
+                    {section.cards && section.cards.map((card: any, cardIdx: number) => {
+                      const globalNum = sectionIndex * 10 + cardIdx + 1
+                      return (
+                        <div
+                          key={cardIdx}
+                          className="flex gap-2 p-2 rounded-lg bg-background/30 hover:bg-background/50 transition-colors"
+                        >
+                          <span className="text-primary font-bold text-xs w-5 flex-shrink-0">{globalNum}</span>
+                          <p className="text-foreground/90 text-xs leading-relaxed">{card.content}</p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Store Products */}
       <div className="mt-8">
         <h3 className="text-sm font-semibold text-foreground mb-4 text-center">More from Sajume</h3>
         <div className="space-y-4">
-          {/* Signature Saju Elemental Bracelet — with image */}
+
+          {/* Signature Saju Elemental Bracelet */}
           <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
             <div className="relative w-full h-48">
               <Image
@@ -132,11 +223,29 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
                 <span className="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/30">Coming Soon</span>
               </div>
               <h4 className="text-sm font-semibold text-foreground mb-1">Signature Saju Elemental Bracelet</h4>
-              <p className="text-xs text-muted-foreground mb-2">A bracelet designed to fill the missing energies in your Saju chart.</p>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-amber-400">Personalized to your Saju</span>
-                <span className="text-sm font-bold text-foreground/60">$38</span>
+              <p className="text-xs text-muted-foreground mb-3">A bracelet designed to fill the missing energies in your Saju chart.</p>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-1.5">
+                  <Image
+                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-5aPYhnVZwmxl0vRRERW2TSIclejU1w.png"
+                    alt="Shopify"
+                    width={16}
+                    height={16}
+                    className="object-contain"
+                  />
+                  <span className="text-[10px] text-muted-foreground">Shop at Sajume Shopify</span>
+                </div>
+                <span className="text-sm font-bold text-foreground">$38</span>
               </div>
+              <button
+                data-tally-open="81JRrr"
+                data-tally-layout="modal"
+                data-tally-emoji-text="👋"
+                data-tally-emoji-animation="wave"
+                className="w-full py-1.5 text-xs font-semibold border border-border rounded-lg hover:bg-background/50 transition-colors text-foreground"
+              >
+                Notice me
+              </button>
             </div>
           </div>
 
@@ -146,11 +255,20 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
               <span className="text-[10px] bg-pink-500/20 text-pink-400 px-2 py-0.5 rounded-full border border-pink-500/30">Coming Soon</span>
             </div>
             <h4 className="text-sm font-semibold text-foreground mb-1">Saju Compatibility</h4>
-            <p className="text-xs text-muted-foreground mb-2">Deep dive into your relationship dynamics and love compatibility.</p>
-            <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground mb-3">Deep dive into your relationship dynamics and love compatibility.</p>
+            <div className="flex items-center justify-between mb-3">
               <span className="text-xs text-pink-400">Compare two birth charts</span>
-              <span className="text-sm font-bold text-foreground/60">$12</span>
+              <span className="text-sm font-bold text-foreground">$12</span>
             </div>
+            <button
+              data-tally-open="81JRrr"
+              data-tally-layout="modal"
+              data-tally-emoji-text="👋"
+              data-tally-emoji-animation="wave"
+              className="w-full py-1.5 text-xs font-semibold border border-border rounded-lg hover:bg-background/50 transition-colors text-foreground"
+            >
+              Notice me
+            </button>
           </div>
 
           {/* 12-Month Fortune Subscription */}
@@ -159,25 +277,32 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
               <span className="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full border border-blue-500/30">Coming Soon</span>
             </div>
             <h4 className="text-sm font-semibold text-foreground mb-1">12-Month Fortune Subscription</h4>
-            <p className="text-xs text-muted-foreground mb-2">Monthly personalized fortune readings based on your Saju chart.</p>
-            <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground mb-3">Monthly personalized fortune readings based on your Saju chart.</p>
+            <div className="flex items-center justify-between mb-3">
               <span className="text-xs text-blue-400">Delivered monthly</span>
-              <span className="text-sm font-bold text-foreground/60">$3.99/mo</span>
+              <span className="text-sm font-bold text-foreground">$6.58/mo</span>
             </div>
+            <button
+              data-tally-open="81JRrr"
+              data-tally-layout="modal"
+              data-tally-emoji-text="👋"
+              data-tally-emoji-animation="wave"
+              className="w-full py-1.5 text-xs font-semibold border border-border rounded-lg hover:bg-background/50 transition-colors text-foreground"
+            >
+              Notice me
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Footer — same as free report */}
+      {/* Footer */}
       <div className="mt-8 text-center">
         <p className="text-[10px] text-muted-foreground">
           This report is generated based on Korean Saju (Four Pillars) astrology.
           <br />
           For entertainment purposes only.
         </p>
-        <p className="mt-4 text-[10px] text-muted-foreground/70">
-          All rights reserved by Sajume.
-        </p>
+        <p className="mt-4 text-[10px] text-muted-foreground/70">All rights reserved by Sajume.</p>
         <div className="mt-4 flex flex-col items-center gap-3">
           <button
             onClick={() => router.push(`/report/${submission.id}`)}
@@ -185,13 +310,11 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
           >
             Back to Free Report
           </button>
-          <p className="text-[10px] text-muted-foreground/50">
-            Business: hello@sajume.com
-          </p>
+          <p className="text-[10px] text-muted-foreground/50">Business: hello@sajume.com</p>
         </div>
       </div>
 
-      {/* Fixed Share Button — same as free report */}
+      {/* Fixed Share Button */}
       <button
         onClick={handleCopyLink}
         className="fixed bottom-6 right-5 z-50 flex items-center gap-2 bg-card border border-primary/40 text-foreground text-xs px-4 py-2.5 rounded-full shadow-lg shadow-primary/20 hover:border-primary/70 hover:bg-primary/10 transition-all"
