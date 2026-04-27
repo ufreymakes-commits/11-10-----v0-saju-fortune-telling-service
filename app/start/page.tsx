@@ -18,13 +18,6 @@ export default function StartPage() {
       <StarsBackground />
       
       <div className="relative z-10 flex flex-col items-center px-4 py-8">
-        {/* Header */}
-        <Link href="/" className="mb-6">
-          <div className="border border-primary/50 rounded-full px-6 py-2 text-primary text-sm tracking-wider hover:border-primary transition-colors">
-            Sajume
-          </div>
-        </Link>
-        
         {/* Mascot */}
         <div className="relative w-32 h-32 mb-4 animate-float">
           <Image

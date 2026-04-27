@@ -277,7 +277,7 @@ export default function LandingPage() {
       </section>
 
       {/* Why Sajume Section */}
-      <section className="relative z-10 py-24 px-4 bg-gradient-to-b from-transparent via-purple-900/10 to-transparent">
+      <section className="relative z-10 py-12 px-4 bg-gradient-to-b from-transparent via-purple-900/10 to-transparent">
         <div className="max-w-5xl mx-auto">
           <h3 className="text-center text-3xl md:text-4xl font-semibold text-white/90 mb-2">Why Sajume?</h3>
           <p className="text-center text-sm md:text-base text-white/50 mb-12">
@@ -333,10 +333,10 @@ export default function LandingPage() {
 
           {/* Feature grid with white icons */}
           <div className="mb-10">
-            <h4 className="text-center text-lg md:text-3xl font-semibold text-white/80 mb-4">
-              <span className="block">No.1 Global Saju</span>
-              <span className="block text-sm md:text-base">Feel the difference</span>
+            <h4 className="text-center text-3xl md:text-4xl font-semibold text-white/90 mb-2">
+              No.1 Global Saju
             </h4>
+            <p className="text-center text-sm md:text-base text-white/50 mb-8">Feel the difference</p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {/* Lifetime Access */}
               <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/20 rounded-xl p-5 text-center">
@@ -384,7 +384,7 @@ export default function LandingPage() {
             </div>
             
             {/* CTA Button */}
-            <div className="mt-8 text-center">
+            <div className="mt-14 text-center">
               <Link 
                 href="/start"
                 className="inline-flex items-center gap-2 bg-pink-400 text-white px-6 py-2.5 rounded-full text-sm md:text-base font-semibold hover:bg-pink-500 transition-all hover:scale-105 shadow-lg shadow-pink-500/30"
