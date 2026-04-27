@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { track } from '@/hooks/use-track'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { 
@@ -120,6 +121,7 @@ export function BirthForm() {
     if (!validateForm()) return
     
     setIsLoading(true)
+    track('form_submit', '/start', { country: formData.country })
     
     try {
       const response = await fetch('/api/submit', {

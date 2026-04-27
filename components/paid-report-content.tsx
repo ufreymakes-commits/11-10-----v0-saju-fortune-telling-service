@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { CheckCircleIcon, LinkIcon, CheckIcon, ChevronDownIcon } from 'lucide-react'
 import type { Submission, SajuData } from '@/lib/types'
 import { getDayMasterCharacter } from '@/lib/day-master-characters'
+import { track } from '@/hooks/use-track'
 
 interface PaidReportContentProps {
   submission: Submission
@@ -56,12 +57,21 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
   const character = getDayMasterCharacter(dayMasterKorean)
   const quote = DAY_MASTER_QUOTE[dayMasterKorean] || ''
 
+  useEffect(() => {
+    track('view_paid_report', '/paid-report')
+  }, [])
+
   const handleCopyLink = () => {
     if (typeof window !== 'undefined') {
       navigator.clipboard.writeText(window.location.href)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
+      track('share_paid_report', '/paid-report')
     }
+  }
+
+  const handleNoticeMeClick = (product: string) => {
+    track('notice_me_click', '/paid-report', { product })
   }
 
   const toggleSection = (idx: number) => {
@@ -242,6 +252,7 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
                 data-tally-layout="modal"
                 data-tally-emoji-text="👋"
                 data-tally-emoji-animation="wave"
+                onClick={() => handleNoticeMeClick('forecasting')}
                 className="w-full py-1.5 text-xs font-semibold border border-border rounded-lg hover:bg-background/50 transition-colors text-foreground"
               >
                 Notice me
@@ -265,6 +276,7 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
               data-tally-layout="modal"
               data-tally-emoji-text="👋"
               data-tally-emoji-animation="wave"
+              onClick={() => handleNoticeMeClick('compatibility')}
               className="w-full py-1.5 text-xs font-semibold border border-border rounded-lg hover:bg-background/50 transition-colors text-foreground"
             >
               Notice me
@@ -287,6 +299,7 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
               data-tally-layout="modal"
               data-tally-emoji-text="👋"
               data-tally-emoji-animation="wave"
+              onClick={() => handleNoticeMeClick('subscription')}
               className="w-full py-1.5 text-xs font-semibold border border-border rounded-lg hover:bg-background/50 transition-colors text-foreground"
             >
               Notice me
