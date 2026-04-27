@@ -252,7 +252,7 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
                 data-tally-layout="modal"
                 data-tally-emoji-text="👋"
                 data-tally-emoji-animation="wave"
-                onClick={() => handleNoticeMeClick('forecasting')}
+                onClick={() => handleNoticeMeClick('bracelet')}
                 className="w-full py-1.5 text-xs font-semibold border border-border rounded-lg hover:bg-background/50 transition-colors text-foreground"
               >
                 Notice me

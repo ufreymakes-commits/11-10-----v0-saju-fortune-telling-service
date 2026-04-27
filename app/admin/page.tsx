@@ -3,10 +3,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 
-const ADMIN_PASSWORD = typeof window !== 'undefined'
-  ? localStorage.getItem('_sajume_admin_pw') || ''
-  : ''
-
 interface Stats {
   counts: Record<string, number>
   daily: Record<string, Record<string, number>>
@@ -24,6 +20,13 @@ interface Stats {
   noticeMeByProduct: Record<string, number>
 }
 
+// 운영비 (월 고정)
+const MONTHLY_OPS_USD = 45 // Vercel Pro $20 + Supabase Pro $25
+// AI Gateway: 결제 1건당 약 $0.024 (유료 레포트 생성 비용)
+const AI_COST_PER_PAID = 0.024
+// PayPal 수수료 제외 순수액
+const NET_PER_SALE = 9.25
+
 function StatCard({ label, value, sub }: { label: string; value: number | string; sub?: string }) {
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-1 shadow-sm">
@@ -40,6 +43,8 @@ export default function AdminPage() {
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [krwRate, setKrwRate] = useState<number | null>(null)
+  const [rateLoading, setRateLoading] = useState(false)
 
   const fetchStats = useCallback(async (password: string) => {
     setLoading(true)
@@ -49,7 +54,7 @@ export default function AdminPage() {
         headers: { 'x-admin-password': password },
       })
       if (res.status === 401) {
-        setError('Wrong password')
+        setError('비밀번호가 틀렸습니다')
         setAuthed(false)
         localStorage.removeItem('_sajume_admin_pw')
         return
@@ -59,13 +64,25 @@ export default function AdminPage() {
       setAuthed(true)
       localStorage.setItem('_sajume_admin_pw', password)
     } catch {
-      setError('Failed to load stats')
+      setError('데이터를 불러오지 못했습니다')
     } finally {
       setLoading(false)
     }
   }, [])
 
-  // Auto-login if password saved
+  const fetchExchangeRate = useCallback(async () => {
+    setRateLoading(true)
+    try {
+      const res = await fetch('https://open.er-api.com/v6/latest/USD')
+      const data = await res.json()
+      setKrwRate(data.rates?.KRW ?? null)
+    } catch {
+      setKrwRate(null)
+    } finally {
+      setRateLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     const saved = localStorage.getItem('_sajume_admin_pw')
     if (saved) {
@@ -73,6 +90,10 @@ export default function AdminPage() {
       fetchStats(saved)
     }
   }, [fetchStats])
+
+  useEffect(() => {
+    if (authed) fetchExchangeRate()
+  }, [authed, fetchExchangeRate])
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
@@ -83,14 +104,14 @@ export default function AdminPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="bg-white border border-gray-200 rounded-2xl p-8 w-full max-w-sm shadow-sm">
-          <h1 className="text-xl font-bold text-gray-900 mb-1">Sajume Admin</h1>
-          <p className="text-sm text-gray-400 mb-6">Enter your admin password to continue.</p>
+          <h1 className="text-xl font-bold text-gray-900 mb-1">Sajume 관리자</h1>
+          <p className="text-sm text-gray-400 mb-6">관리자 비밀번호를 입력하세요.</p>
           <form onSubmit={handleLogin} className="flex flex-col gap-3">
             <input
               type="password"
               value={pw}
               onChange={e => setPw(e.target.value)}
-              placeholder="Password"
+              placeholder="비밀번호"
               className="border border-gray-200 rounded-lg px-4 py-2.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-gray-900"
             />
             {error && <p className="text-xs text-red-500">{error}</p>}
@@ -99,7 +120,7 @@ export default function AdminPage() {
               disabled={loading}
               className="bg-gray-900 text-white rounded-lg py-2.5 text-sm font-semibold hover:bg-gray-700 transition-colors disabled:opacity-50"
             >
-              {loading ? 'Loading...' : 'Enter'}
+              {loading ? '로딩 중...' : '로그인'}
             </button>
           </form>
         </div>
@@ -110,6 +131,20 @@ export default function AdminPage() {
   if (!stats) return null
 
   const c = stats.counts || {}
+  const totalPayments = stats.totalPayments ?? 0
+
+  // 매출 계산 (런칭 후 실제 결제 기준 = payments 테이블 completed 건수)
+  const grossRevenue = totalPayments * 9.99
+  const netRevenue = totalPayments * NET_PER_SALE
+  const aiCost = totalPayments * AI_COST_PER_PAID
+  const netAfterOps = netRevenue - aiCost - MONTHLY_OPS_USD
+  const krwGross = krwRate ? grossRevenue * krwRate : null
+  const krwNet = krwRate ? netAfterOps * krwRate : null
+
+  const formatKRW = (v: number) =>
+    new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW', maximumFractionDigits: 0 }).format(v)
+  const formatUSD = (v: number) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v)
 
   // Build 14-day chart data
   const last14Days = Array.from({ length: 14 }, (_, i) => {
@@ -118,9 +153,8 @@ export default function AdminPage() {
     return d.toISOString().slice(0, 10)
   })
   const chartData = last14Days.map(day => ({
-    date: day.slice(5), // MM-DD
-    submissions: stats.dailySubmissionCounts?.[day] || 0,
-    views: stats.daily?.[day]?.['form_submit'] || 0,
+    date: day.slice(5),
+    제출: stats.dailySubmissionCounts?.[day] || 0,
   }))
 
   return (
@@ -128,21 +162,21 @@ export default function AdminPage() {
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-bold text-gray-900">Sajume Admin</h1>
-          <p className="text-xs text-gray-400">Real-time dashboard</p>
+          <h1 className="text-lg font-bold text-gray-900">Sajume 관리자</h1>
+          <p className="text-xs text-gray-400">실시간 대시보드</p>
         </div>
         <div className="flex items-center gap-3">
           <button
-            onClick={() => fetchStats(pw)}
+            onClick={() => { fetchStats(pw); fetchExchangeRate() }}
             className="text-xs border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors text-gray-600"
           >
-            Refresh
+            새로고침
           </button>
           <button
             onClick={() => { setAuthed(false); localStorage.removeItem('_sajume_admin_pw') }}
             className="text-xs text-gray-400 hover:text-gray-600"
           >
-            Logout
+            로그아웃
           </button>
         </div>
       </div>
@@ -151,61 +185,106 @@ export default function AdminPage() {
 
         {/* Stat Cards */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          <StatCard label="Total Submissions" value={stats.totalSubmissions ?? 0} sub="Form submits" />
-          <StatCard label="Paid Reports" value={stats.paidSubmissions ?? 0} sub="Report generated" />
-          <StatCard label="Payments" value={stats.totalPayments ?? 0} sub="Completed" />
-          <StatCard label="Paid Report Views" value={c['view_paid_report'] ?? 0} sub="Total opens" />
-          <StatCard label="Paid Link Shares" value={c['share_paid_report'] ?? 0} sub="Copy link clicks" />
-          <StatCard label="Notice Me Clicks" value={c['notice_me_click'] ?? 0} sub="Shopify interest" />
+          <StatCard label="총 제출 수" value={stats.totalSubmissions ?? 0} sub="무료 레포트 생성" />
+          <StatCard label="유료 레포트" value={stats.paidSubmissions ?? 0} sub="레포트 발급 완료" />
+          <StatCard label="결제 완료" value={totalPayments} sub="PayPal 결제" />
+          <StatCard label="유료 레포트 열람" value={c['view_paid_report'] ?? 0} sub="페이지 접속" />
+          <StatCard label="링크 공유" value={c['share_paid_report'] ?? 0} sub="링크 복사 클릭" />
+          <StatCard label="관심 클릭 (Notice Me)" value={c['notice_me_click'] ?? 0} sub="전체 관심 표시" />
         </div>
 
-        {/* Notice Me breakdown */}
+        {/* 매출 현황 */}
         <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-gray-700 mb-4">Notice Me — Product Breakdown</h2>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold text-gray-700">매출 현황 <span className="text-xs font-normal text-gray-400">(런칭 후 실제 결제 기준)</span></h2>
+            {rateLoading ? (
+              <span className="text-xs text-gray-400">환율 조회 중...</span>
+            ) : krwRate ? (
+              <span className="text-xs text-gray-400">실시간 환율: 1 USD = {krwRate.toLocaleString('ko-KR')}원</span>
+            ) : (
+              <button onClick={fetchExchangeRate} className="text-xs text-blue-500 hover:underline">환율 불러오기</button>
+            )}
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="border border-gray-100 rounded-lg p-4">
+              <p className="text-xs text-gray-400 mb-1">총 매출액</p>
+              <p className="text-xl font-bold text-gray-900">{formatUSD(grossRevenue)}</p>
+              {krwGross !== null && <p className="text-xs text-blue-500 mt-1">{formatKRW(krwGross)}</p>}
+              <p className="text-[10px] text-gray-300 mt-1">{totalPayments}건 × $9.99</p>
+            </div>
+            <div className="border border-gray-100 rounded-lg p-4">
+              <p className="text-xs text-gray-400 mb-1">PayPal 수수료 제외</p>
+              <p className="text-xl font-bold text-gray-900">{formatUSD(netRevenue)}</p>
+              <p className="text-[10px] text-gray-300 mt-1">{totalPayments}건 × $9.25</p>
+            </div>
+            <div className="border border-gray-100 rounded-lg p-4">
+              <p className="text-xs text-gray-400 mb-1">운영비</p>
+              <p className="text-xl font-bold text-red-500">
+                -{formatUSD(aiCost + MONTHLY_OPS_USD)}
+              </p>
+              <p className="text-[10px] text-gray-300 mt-1">Vercel+Supabase ${MONTHLY_OPS_USD} + AI ${aiCost.toFixed(2)}</p>
+            </div>
+            <div className="border border-green-100 rounded-lg p-4 bg-green-50/50">
+              <p className="text-xs text-gray-400 mb-1">순수익</p>
+              <p className={`text-xl font-bold ${netAfterOps >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                {formatUSD(netAfterOps)}
+              </p>
+              {krwNet !== null && (
+                <p className={`text-xs mt-1 ${netAfterOps >= 0 ? 'text-green-500' : 'text-red-400'}`}>
+                  {formatKRW(krwNet)}
+                </p>
+              )}
+              <p className="text-[10px] text-gray-300 mt-1">수수료·AI·인프라 제외</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Notice Me 제품별 */}
+        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+          <h2 className="text-sm font-semibold text-gray-700 mb-4">관심 표시 (Notice Me) — 제품별</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { key: 'forecasting', label: 'Forecasting Reading' },
-              { key: 'compatibility', label: 'Saju Compatibility' },
-              { key: 'subscription', label: '12-Month Subscription' },
+              { key: 'bracelet', label: '사주 에너지 팔찌' },
+              { key: 'forecasting', label: '운세 리딩' },
+              { key: 'compatibility', label: '사주 궁합' },
+              { key: 'subscription', label: '12개월 구독' },
             ].map(({ key, label }) => (
               <div key={key} className="text-center border border-gray-100 rounded-lg p-4">
                 <p className="text-xs text-gray-400 mb-2">{label}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.noticeMeByProduct?.[key] ?? 0}</p>
-                <p className="text-[10px] text-gray-300 mt-1">clicks</p>
+                <p className="text-[10px] text-gray-300 mt-1">클릭</p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Submissions chart */}
+        {/* 일별 제출 차트 */}
         <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-gray-700 mb-4">Daily Submissions — Last 14 Days</h2>
+          <h2 className="text-sm font-semibold text-gray-700 mb-4">일별 제출 수 — 최근 14일</h2>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#9ca3af' }} />
               <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} allowDecimals={false} />
-              <Tooltip
-                contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb' }}
-              />
-              <Bar dataKey="submissions" fill="#111827" radius={[4, 4, 0, 0]} name="Submissions" />
+              <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb' }} />
+              <Bar dataKey="제출" fill="#111827" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Recent Submissions */}
+        {/* 최근 제출 목록 */}
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100">
-            <h2 className="text-sm font-semibold text-gray-700">Recent Submissions</h2>
+            <h2 className="text-sm font-semibold text-gray-700">최근 제출 목록</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
-                  <th className="text-left px-5 py-3 text-xs text-gray-400 font-medium">Name</th>
-                  <th className="text-left px-5 py-3 text-xs text-gray-400 font-medium">Country</th>
-                  <th className="text-left px-5 py-3 text-xs text-gray-400 font-medium">Date</th>
-                  <th className="text-left px-5 py-3 text-xs text-gray-400 font-medium">Paid</th>
+                  <th className="text-left px-5 py-3 text-xs text-gray-400 font-medium">이름</th>
+                  <th className="text-left px-5 py-3 text-xs text-gray-400 font-medium">국가</th>
+                  <th className="text-left px-5 py-3 text-xs text-gray-400 font-medium">제출일시</th>
+                  <th className="text-left px-5 py-3 text-xs text-gray-400 font-medium">구분</th>
                 </tr>
               </thead>
               <tbody>
@@ -214,15 +293,15 @@ export default function AdminPage() {
                     <td className="px-5 py-3 font-medium text-gray-800">{s.name}</td>
                     <td className="px-5 py-3 text-gray-500">{s.country || '—'}</td>
                     <td className="px-5 py-3 text-gray-400 text-xs">
-                      {new Date(s.created_at).toLocaleString('en-US', {
-                        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                      {new Date(s.created_at).toLocaleString('ko-KR', {
+                        month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
                       })}
                     </td>
                     <td className="px-5 py-3">
                       {s.paid_report_url ? (
-                        <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">Paid</span>
+                        <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">유료</span>
                       ) : (
-                        <span className="text-[10px] bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">Free</span>
+                        <span className="text-[10px] bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">무료</span>
                       )}
                     </td>
                   </tr>
@@ -232,14 +311,14 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* Event counts table */}
+        {/* 전체 이벤트 */}
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100">
-            <h2 className="text-sm font-semibold text-gray-700">All Events (Total)</h2>
+            <h2 className="text-sm font-semibold text-gray-700">전체 이벤트 (누적)</h2>
           </div>
           <div className="divide-y divide-gray-50">
             {Object.entries(c).length === 0 && (
-              <p className="px-5 py-4 text-sm text-gray-400">No events tracked yet. Events appear as users interact with the site.</p>
+              <p className="px-5 py-4 text-sm text-gray-400">아직 기록된 이벤트가 없습니다. 사용자가 사이트를 이용하면 자동으로 쌓입니다.</p>
             )}
             {Object.entries(c)
               .sort((a, b) => b[1] - a[1])
