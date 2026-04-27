@@ -61,6 +61,19 @@ export async function GET(req: NextRequest) {
       monthlyPaidCounts[month] = (monthlyPaidCounts[month] || 0) + 1
     }
 
+    // Payer country breakdown
+    const { data: payerCountryRows } = await supabase
+      .from('payments')
+      .select('payer_country')
+      .eq('status', 'completed')
+      .not('payer_country', 'is', null)
+
+    const payerCountryCounts: Record<string, number> = {}
+    for (const row of payerCountryRows || []) {
+      const code = row.payer_country as string
+      payerCountryCounts[code] = (payerCountryCounts[code] || 0) + 1
+    }
+
     // Notice me per-product breakdown
     const { data: noticeMeEvents } = await supabase
       .from('analytics_events')
@@ -102,6 +115,7 @@ export async function GET(req: NextRequest) {
       dailySubmissionCounts,
       noticeMeByProduct,
       monthlyPaidCounts,
+      payerCountryCounts,
     })
   } catch (e) {
     return NextResponse.json({ error: 'failed' }, { status: 500 })

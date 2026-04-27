@@ -19,6 +19,7 @@ interface Stats {
   dailySubmissionCounts: Record<string, number>
   noticeMeByProduct: Record<string, number>
   monthlyPaidCounts: Record<string, number>
+  payerCountryCounts: Record<string, number>
 }
 
 // 운영비 (월 고정)
@@ -27,6 +28,13 @@ const MONTHLY_OPS_USD = 45 // Vercel Pro $20 + Supabase Pro $25
 const AI_COST_PER_PAID = 0.024
 // PayPal 수수료 제외 순수액
 const NET_PER_SALE = 9.25
+
+// ISO 국가 코드 → 국기 이모지
+function countryFlag(code: string) {
+  return code
+    .toUpperCase()
+    .replace(/./g, c => String.fromCodePoint(127397 + c.charCodeAt(0)))
+}
 
 function StatCard({ label, value, sub }: { label: string; value: number | string; sub?: string }) {
   return (
@@ -192,7 +200,7 @@ export default function AdminPage() {
           <StatCard label="결제 완료" value={totalPayments} sub="PayPal 결제" />
           <StatCard label="링크 공유 - 무료" value={c['share_free_report'] ?? 0} sub="무료 레포트 공유" />
           <StatCard label="링크 공유 - 유료" value={c['share_paid_report'] ?? 0} sub="유료 레포트 공유" />
-          <StatCard label="캡처 감지" value={c['screenshot_detected'] ?? 0} sub="스크린샷 키 입력" />
+          <StatCard label="관심 표시" value={c['notice_me_click'] ?? 0} sub="Notice Me 전체" />
         </div>
 
         {/* 매출 현황 */}
@@ -312,31 +320,42 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* 캡처 감지 */}
-        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-gray-700">캡처 감지</h2>
-            <span className="text-[10px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">유료 레포트 페이지만</span>
+        {/* 결제자 국가별 현황 */}
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-100">
+            <h2 className="text-sm font-semibold text-gray-700">결제자 국가별 현황</h2>
+            <p className="text-xs text-gray-400 mt-0.5">출생 국가가 아닌, PayPal 계정 기준 실제 결제 국가</p>
           </div>
-          <div className="flex items-start gap-6">
-            <div className="text-center flex-shrink-0">
-              <p className="text-3xl font-bold text-gray-900">{c['screenshot_detected'] ?? 0}</p>
-              <p className="text-xs text-gray-400 mt-1">감지 횟수</p>
+          {Object.keys(stats.payerCountryCounts || {}).length === 0 ? (
+            <p className="px-5 py-6 text-sm text-gray-400 text-center">아직 결제 데이터가 없습니다.</p>
+          ) : (
+            <div className="divide-y divide-gray-50">
+              {Object.entries(stats.payerCountryCounts || {})
+                .sort((a, b) => b[1] - a[1])
+                .map(([code, count], i) => {
+                  const total = Object.values(stats.payerCountryCounts).reduce((s, v) => s + v, 0)
+                  const pct = total > 0 ? Math.round((count / total) * 100) : 0
+                  return (
+                    <div key={code} className="px-5 py-3 flex items-center gap-4">
+                      <span className="text-base w-6 text-center">{countryFlag(code)}</span>
+                      <span className="text-sm font-medium text-gray-800 w-12">{code}</span>
+                      <div className="flex-1 bg-gray-100 rounded-full h-1.5">
+                        <div className="bg-gray-800 h-1.5 rounded-full" style={{ width: `${pct}%` }} />
+                      </div>
+                      <span className="text-sm font-bold text-gray-900 w-8 text-right">{count}</span>
+                      <span className="text-xs text-gray-400 w-8 text-right">{pct}%</span>
+                    </div>
+                  )
+                })}
             </div>
-            <div className="text-xs text-gray-400 leading-relaxed space-y-1">
-              <p><span className="font-medium text-gray-600">PC만 감지 가능</span></p>
-              <p>macOS: Cmd+Shift+3 / 4 / 5 &nbsp;·&nbsp; Windows: PrintScreen, Win+Shift+S</p>
-              <p className="text-red-400 font-medium">모바일(iOS/Android) 캡처는 브라우저 정책상 감지 불가 — 운영체제가 키 이벤트를 차단합니다.</p>
-              <p>외부 캡처 앱(CleanShot 등) 및 내장 녹화 도구도 감지 불가.</p>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* 운영비 안내 */}
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-5">
           <h2 className="text-sm font-semibold text-amber-800 mb-2">운영비 연동 안내</h2>
           <p className="text-xs text-amber-700 leading-relaxed">
-            Vercel · Supabase 실제 청구 금액은 각 대시보드에서 확인하세요.
+            Vercel · Supabase 실제 청구 금액은 각 대시보드에�� 확인하세요.
             현재 운영비($45/월)는 고정값으로 계산됩니다. 실제 연동은 각 서비스가 공개 API를 제공하지 않아 자동화가 불가합니다.
             <br />
             <span className="font-medium">Vercel:</span> vercel.com/dashboard → Usage &nbsp;|&nbsp;

@@ -79,11 +79,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Payment capture failed' }, { status: 400 })
     }
 
+    // PayPal 응답에서 결제자 국가 추출
+    const payerCountry =
+      captureData.payer?.address?.country_code ||
+      captureData.purchase_units?.[0]?.shipping?.address?.country_code ||
+      null
+
     const { data: payment, error: updateError } = await supabase
       .from('payments')
       .update({
         status: 'completed',
-        completed_at: new Date().toISOString()
+        completed_at: new Date().toISOString(),
+        payer_country: payerCountry,
       })
       .eq('paypal_order_id', orderId)
       .select('submission_id')
