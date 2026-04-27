@@ -50,7 +50,15 @@ export default function MyReportPage() {
       }
 
       if (data.reports.length === 1) {
-        router.push(data.reports[0].paidReportUrl)
+        const url = data.reports[0].paidReportUrl
+        // paid_report_url이 절대 URL(https://...)로 저장돼 있으므로 pathname만 추출
+        try {
+          const pathname = new URL(url).pathname
+          router.push(pathname)
+        } catch {
+          // 이미 상대경로인 경우
+          router.push(url)
+        }
       } else {
         setResults(data.reports)
       }
@@ -206,16 +214,20 @@ export default function MyReportPage() {
           {results.length > 1 && (
             <div className="mt-6 space-y-3">
               <p className="text-muted-foreground text-sm text-center">Multiple reports found. Select yours:</p>
-              {results.map((r, i) => (
-                <Link key={i} href={r.paidReportUrl}>
+              {results.map((r, i) => {
+              let href = r.paidReportUrl
+              try { href = new URL(r.paidReportUrl).pathname } catch { /* 상대경로 그대로 */ }
+              return (
+                <Link key={i} href={href}>
                   <div className="bg-card border border-border rounded-xl p-4 hover:border-primary/50 transition-colors cursor-pointer">
                     <p className="text-foreground font-medium">{r.name}</p>
                     <p className="text-muted-foreground text-sm">
                       {r.birthDate} &mdash; Generated {new Date(r.createdAt).toLocaleDateString()}
                     </p>
                   </div>
-                </Link>
-              ))}
+                  </Link>
+              )
+            })}
             </div>
           )}
 
