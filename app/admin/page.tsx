@@ -133,10 +133,11 @@ export default function AdminPage() {
   const c = stats.counts || {}
   const totalPayments = stats.totalPayments ?? 0
 
-  // 매출 계산 (런칭 후 실제 결제 기준 = payments 테이블 completed 건수)
-  const grossRevenue = totalPayments * 9.99
-  const netRevenue = totalPayments * NET_PER_SALE
-  const aiCost = totalPayments * AI_COST_PER_PAID
+  // 매출 계산 = 유료 레포트 생성 수 기준 (paid_report_url 있는 submissions)
+  const paidCount = stats.paidSubmissions ?? 0
+  const grossRevenue = paidCount * 9.99
+  const netRevenue = paidCount * NET_PER_SALE
+  const aiCost = paidCount * AI_COST_PER_PAID
   const netAfterOps = netRevenue - aiCost - MONTHLY_OPS_USD
   const krwGross = krwRate ? grossRevenue * krwRate : null
   const krwNet = krwRate ? netAfterOps * krwRate : null
@@ -188,15 +189,15 @@ export default function AdminPage() {
           <StatCard label="총 제출 수" value={stats.totalSubmissions ?? 0} sub="무료 레포트 생성" />
           <StatCard label="유료 레포트" value={stats.paidSubmissions ?? 0} sub="레포트 발급 완료" />
           <StatCard label="결제 완료" value={totalPayments} sub="PayPal 결제" />
-          <StatCard label="유료 레포트 열람" value={c['view_paid_report'] ?? 0} sub="페이지 접속" />
-          <StatCard label="링크 공유" value={c['share_paid_report'] ?? 0} sub="링크 복사 클릭" />
-          <StatCard label="관심 클릭 (Notice Me)" value={c['notice_me_click'] ?? 0} sub="전체 관심 표시" />
+          <StatCard label="링크 공유 - 무료" value={c['share_free_report'] ?? 0} sub="무료 레포트 공유" />
+          <StatCard label="링크 공유 - 유료" value={c['share_paid_report'] ?? 0} sub="유료 레포트 공유" />
+          <StatCard label="캡처 감지" value={c['screenshot_detected'] ?? 0} sub="스크린샷 키 입력" />
         </div>
 
         {/* 매출 현황 */}
         <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-gray-700">매출 현황 <span className="text-xs font-normal text-gray-400">(런칭 후 실제 결제 기준)</span></h2>
+            <h2 className="text-sm font-semibold text-gray-700">매출 현황 <span className="text-xs font-normal text-gray-400">(유료 레포트 생성 수 기준)</span></h2>
             {rateLoading ? (
               <span className="text-xs text-gray-400">환율 조회 중...</span>
             ) : krwRate ? (
@@ -210,12 +211,12 @@ export default function AdminPage() {
               <p className="text-xs text-gray-400 mb-1">총 매출액</p>
               <p className="text-xl font-bold text-gray-900">{formatUSD(grossRevenue)}</p>
               {krwGross !== null && <p className="text-xs text-blue-500 mt-1">{formatKRW(krwGross)}</p>}
-              <p className="text-[10px] text-gray-300 mt-1">{totalPayments}건 × $9.99</p>
+              <p className="text-[10px] text-gray-300 mt-1">{paidCount}건 × $9.99</p>
             </div>
             <div className="border border-gray-100 rounded-lg p-4">
               <p className="text-xs text-gray-400 mb-1">PayPal 수수료 제외</p>
               <p className="text-xl font-bold text-gray-900">{formatUSD(netRevenue)}</p>
-              <p className="text-[10px] text-gray-300 mt-1">{totalPayments}건 × $9.25</p>
+              <p className="text-[10px] text-gray-300 mt-1">{paidCount}건 × $9.25</p>
             </div>
             <div className="border border-gray-100 rounded-lg p-4">
               <p className="text-xs text-gray-400 mb-1">운영비</p>
@@ -242,10 +243,9 @@ export default function AdminPage() {
         {/* Notice Me 제품별 */}
         <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-gray-700 mb-4">관심 표시 (Notice Me) — 제품별</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             {[
               { key: 'bracelet', label: '사주 에너지 팔찌' },
-              { key: 'forecasting', label: '운세 리딩' },
               { key: 'compatibility', label: '사주 궁합' },
               { key: 'subscription', label: '12개월 구독' },
             ].map(({ key, label }) => (
@@ -256,6 +256,36 @@ export default function AdminPage() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* 캡처 감지 */}
+        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-gray-700">캡처 감지</h2>
+            <span className="text-[10px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">유료 레포트 페이지만</span>
+          </div>
+          <div className="flex items-center gap-6">
+            <div className="text-center">
+              <p className="text-3xl font-bold text-gray-900">{c['screenshot_detected'] ?? 0}</p>
+              <p className="text-xs text-gray-400 mt-1">총 감지 횟수</p>
+            </div>
+            <p className="text-xs text-gray-400 leading-relaxed">
+              macOS: Cmd+Shift+3/4/5 · Windows: PrintScreen / Win+Shift+S<br />
+              브라우저 키보드 이벤트 기반 감지. 외부 캡처 툴은 감지 불가.
+            </p>
+          </div>
+        </div>
+
+        {/* 운영비 안내 */}
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-5">
+          <h2 className="text-sm font-semibold text-amber-800 mb-2">운영비 연동 안내</h2>
+          <p className="text-xs text-amber-700 leading-relaxed">
+            Vercel · Supabase 실제 청구 금액은 각 대시보드에서 확인하세요.
+            현재 운영비($45/월)는 고정값으로 계산됩니다. 실제 연동은 각 서비스가 공개 API를 제공하지 않아 자동화가 불가합니다.
+            <br />
+            <span className="font-medium">Vercel:</span> vercel.com/dashboard → Usage &nbsp;|&nbsp;
+            <span className="font-medium">Supabase:</span> supabase.com → Project → Settings → Billing
+          </p>
         </div>
 
         {/* 일별 제출 차트 */}

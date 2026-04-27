@@ -7,6 +7,7 @@ import { CheckCircleIcon, LinkIcon, CheckIcon, ChevronDownIcon } from 'lucide-re
 import type { Submission, SajuData } from '@/lib/types'
 import { getDayMasterCharacter } from '@/lib/day-master-characters'
 import { track } from '@/hooks/use-track'
+import { useScreenshotDetect } from '@/hooks/use-screenshot-detect'
 
 interface PaidReportContentProps {
   submission: Submission
@@ -47,6 +48,8 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
   const router = useRouter()
   const [copied, setCopied] = useState(false)
   const [openSections, setOpenSections] = useState<Record<number, boolean>>({})
+
+  useScreenshotDetect('/paid-report')
 
   const sections: any[] = paidReport?.facts && Array.isArray(paidReport.facts) ? paidReport.facts : []
   const sajuData = (submission.saju_data || {}) as SajuData

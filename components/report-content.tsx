@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress'
 import type { Submission, Fact, SajuData } from '@/lib/types'
 import { CheckCircleIcon, SparklesIcon, BriefcaseIcon, HeartIcon, CompassIcon, LinkIcon, CheckIcon } from 'lucide-react'
 import { getDayMasterCharacter } from '@/lib/day-master-characters'
+import { track } from '@/hooks/use-track'
 
 interface ReportContentProps {
   submission: Submission
@@ -95,6 +96,7 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
       navigator.clipboard.writeText(window.location.href)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
+      track('share_free_report', '/report')
     }
   }
   
