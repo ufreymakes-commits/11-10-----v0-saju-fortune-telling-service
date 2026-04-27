@@ -18,6 +18,7 @@ interface Stats {
   }[]
   dailySubmissionCounts: Record<string, number>
   noticeMeByProduct: Record<string, number>
+  monthlyPaidCounts: Record<string, number>
 }
 
 // 운영비 (월 고정)
@@ -240,6 +241,59 @@ export default function AdminPage() {
           </div>
         </div>
 
+        {/* 월별 매출 */}
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-100">
+            <h2 className="text-sm font-semibold text-gray-700">월별 유료 레포트 발급 현황</h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-100">
+                  <th className="text-left px-5 py-3 text-xs text-gray-400 font-medium">월</th>
+                  <th className="text-right px-5 py-3 text-xs text-gray-400 font-medium">발급 수</th>
+                  <th className="text-right px-5 py-3 text-xs text-gray-400 font-medium">총 매출</th>
+                  <th className="text-right px-5 py-3 text-xs text-gray-400 font-medium">순수익 (수수료+AI 제외)</th>
+                  <th className="text-right px-5 py-3 text-xs text-gray-400 font-medium">한화 순수익</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.keys(stats.monthlyPaidCounts || {}).length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-5 py-6 text-center text-sm text-gray-400">아직 데이터가 없습니다.</td>
+                  </tr>
+                ) : (
+                  Object.entries(stats.monthlyPaidCounts || {})
+                    .sort((a, b) => b[0].localeCompare(a[0]))
+                    .map(([month, count], i) => {
+                      const gross = count * 9.99
+                      const net = count * NET_PER_SALE - count * AI_COST_PER_PAID - MONTHLY_OPS_USD
+                      const krw = krwRate ? net * krwRate : null
+                      const [y, m] = month.split('-')
+                      const label = `${y}년 ${parseInt(m)}월`
+                      return (
+                        <tr key={month} className={`border-b border-gray-50 ${i % 2 === 0 ? '' : 'bg-gray-50/50'}`}>
+                          <td className="px-5 py-3 font-medium text-gray-800">{label}</td>
+                          <td className="px-5 py-3 text-right text-gray-700">{count}건</td>
+                          <td className="px-5 py-3 text-right text-gray-700">{formatUSD(gross)}</td>
+                          <td className={`px-5 py-3 text-right font-semibold ${net >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                            {formatUSD(net)}
+                          </td>
+                          <td className={`px-5 py-3 text-right text-xs ${net >= 0 ? 'text-green-500' : 'text-red-400'}`}>
+                            {krw !== null ? formatKRW(krw) : '—'}
+                          </td>
+                        </tr>
+                      )
+                    })
+                )}
+              </tbody>
+            </table>
+          </div>
+          <div className="px-5 py-3 bg-gray-50 border-t border-gray-100">
+            <p className="text-[10px] text-gray-400">순수익 = (건수 × $9.25) - AI 비용 (건당 $0.024) - 인프라 고정비 ($45/월). 월 첫 건부터 인프라 비용 차감.</p>
+          </div>
+        </div>
+
         {/* Notice Me 제품별 */}
         <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-gray-700 mb-4">관심 표시 (Notice Me) — 제품별</h2>
@@ -264,15 +318,17 @@ export default function AdminPage() {
             <h2 className="text-sm font-semibold text-gray-700">캡처 감지</h2>
             <span className="text-[10px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">유료 레포트 페이지만</span>
           </div>
-          <div className="flex items-center gap-6">
-            <div className="text-center">
+          <div className="flex items-start gap-6">
+            <div className="text-center flex-shrink-0">
               <p className="text-3xl font-bold text-gray-900">{c['screenshot_detected'] ?? 0}</p>
-              <p className="text-xs text-gray-400 mt-1">총 감지 횟수</p>
+              <p className="text-xs text-gray-400 mt-1">감지 횟수</p>
             </div>
-            <p className="text-xs text-gray-400 leading-relaxed">
-              macOS: Cmd+Shift+3/4/5 · Windows: PrintScreen / Win+Shift+S<br />
-              브라우저 키보드 이벤트 기반 감지. 외부 캡처 툴은 감지 불가.
-            </p>
+            <div className="text-xs text-gray-400 leading-relaxed space-y-1">
+              <p><span className="font-medium text-gray-600">PC만 감지 가능</span></p>
+              <p>macOS: Cmd+Shift+3 / 4 / 5 &nbsp;·&nbsp; Windows: PrintScreen, Win+Shift+S</p>
+              <p className="text-red-400 font-medium">모바일(iOS/Android) 캡처는 브라우저 정책상 감지 불가 — 운영체제가 키 이벤트를 차단합니다.</p>
+              <p>외부 캡처 앱(CleanShot 등) 및 내장 녹화 도구도 감지 불가.</p>
+            </div>
           </div>
         </div>
 

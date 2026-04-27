@@ -47,6 +47,20 @@ export async function GET(req: NextRequest) {
       .select('*', { count: 'exact', head: true })
       .eq('status', 'completed')
 
+    // Monthly paid report counts (last 12 months)
+    const { data: monthlyRaw } = await supabase
+      .from('submissions')
+      .select('created_at')
+      .not('paid_report_url', 'is', null)
+      .gte('created_at', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString())
+      .order('created_at', { ascending: true })
+
+    const monthlyPaidCounts: Record<string, number> = {}
+    for (const row of monthlyRaw || []) {
+      const month = (row.created_at as string).slice(0, 7)
+      monthlyPaidCounts[month] = (monthlyPaidCounts[month] || 0) + 1
+    }
+
     // Notice me per-product breakdown
     const { data: noticeMeEvents } = await supabase
       .from('analytics_events')
@@ -87,6 +101,7 @@ export async function GET(req: NextRequest) {
       recentSubmissions,
       dailySubmissionCounts,
       noticeMeByProduct,
+      monthlyPaidCounts,
     })
   } catch (e) {
     return NextResponse.json({ error: 'failed' }, { status: 500 })
