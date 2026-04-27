@@ -6,35 +6,43 @@ import { useRouter } from 'next/navigation'
 import { StarsBackground } from '@/components/stars-background'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Field, FieldLabel } from '@/components/ui/field'
+import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Spinner } from '@/components/ui/spinner'
+import { COUNTRIES } from '@/lib/types'
 
 export default function MyReportPage() {
   const router = useRouter()
   const [name, setName] = useState('')
   const [birthDate, setBirthDate] = useState('')
-  const [birthTime, setBirthTime] = useState('')
+  const [birthTime, setBirthTime] = useState({ hour: '', minute: '', period: '' })
   const [country, setCountry] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [results, setResults] = useState<any[]>([])
-  const [searched, setSearched] = useState(false)
+
+  const birthTimeString = birthTime.hour && birthTime.minute && birthTime.period
+    ? `${birthTime.hour}:${birthTime.minute} ${birthTime.period}`
+    : ''
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError(null)
     setResults([])
-    setSearched(false)
 
     try {
       const res = await fetch('/api/lookup-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, birthDate, birthTime: birthTime || undefined, country: country || undefined }),
+        body: JSON.stringify({
+          name,
+          birthDate,
+          country: country || undefined,
+          birthTime: birthTimeString || undefined,
+        }),
       })
       const data = await res.json()
-
-      setSearched(true)
 
       if (!res.ok || !data.found) {
         setError(data.message || 'No paid report found. Please check your information and try again.')
@@ -42,7 +50,6 @@ export default function MyReportPage() {
       }
 
       if (data.reports.length === 1) {
-        // 하나면 바로 이동
         router.push(data.reports[0].paidReportUrl)
       } else {
         setResults(data.reports)
@@ -59,7 +66,6 @@ export default function MyReportPage() {
       <StarsBackground />
 
       <div className="relative z-10 flex flex-col items-center px-4 py-12">
-        {/* Logo */}
         <Link href="/" className="mb-10">
           <div className="border border-primary/50 rounded-full px-6 py-2 text-primary text-sm tracking-wider hover:border-primary transition-colors">
             Sajume
@@ -74,54 +80,126 @@ export default function MyReportPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSearch} className="bg-card border border-border rounded-2xl p-6 space-y-4">
-            <Field>
-              <FieldLabel>Full Name</FieldLabel>
-              <Input
-                value={name}
-                onChange={e => setName(e.target.value)}
-                placeholder="e.g. Minji Kim"
-                required
-              />
-            </Field>
+          <form onSubmit={handleSearch} className="bg-white border border-primary/20 rounded-2xl p-6 md:p-8 shadow-xl">
+            <FieldGroup className="gap-5">
 
-            <Field>
-              <FieldLabel>Date of Birth</FieldLabel>
-              <Input
-                type="date"
-                value={birthDate}
-                onChange={e => setBirthDate(e.target.value)}
-                required
-              />
-            </Field>
+              {/* Name */}
+              <Field>
+                <FieldLabel htmlFor="name" className="text-gray-800 font-medium">Your Name</FieldLabel>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  placeholder="e.g. Jenny Kim"
+                  required
+                  className="bg-white border-gray-300 focus:border-primary text-gray-900 placeholder:text-purple-300"
+                />
+              </Field>
 
-            <Field>
-              <FieldLabel>Time of Birth <span className="text-muted-foreground/60 text-xs">(optional)</span></FieldLabel>
-              <Input
-                type="time"
-                value={birthTime}
-                onChange={e => setBirthTime(e.target.value)}
-              />
-            </Field>
+              {/* Birth Date - YYYY-MM-DD same as BirthForm */}
+              <Field>
+                <FieldLabel htmlFor="birthDate" className="text-gray-800 font-medium">Birth Date</FieldLabel>
+                <Input
+                  id="birthDate"
+                  type="text"
+                  placeholder="YYYY-MM-DD"
+                  value={birthDate}
+                  onChange={e => {
+                    let value = e.target.value.replace(/[^0-9-]/g, '')
+                    if (value.length === 4 && !value.includes('-')) value = value + '-'
+                    else if (value.length === 7 && value.charAt(4) === '-' && value.indexOf('-', 5) === -1) value = value + '-'
+                    if (value.length <= 10) setBirthDate(value)
+                  }}
+                  required
+                  className="bg-white border-gray-300 focus:border-primary text-gray-900 placeholder:text-purple-300"
+                />
+              </Field>
 
-            <Field>
-              <FieldLabel>Country <span className="text-muted-foreground/60 text-xs">(optional)</span></FieldLabel>
-              <Input
-                value={country}
-                onChange={e => setCountry(e.target.value)}
-                placeholder="e.g. South Korea"
-              />
-            </Field>
+              {/* Birth Country - same dropdown as BirthForm */}
+              <Field>
+                <FieldLabel className="text-gray-800 font-medium">Birth Country</FieldLabel>
+                <Select value={country} onValueChange={setCountry}>
+                  <SelectTrigger className="w-full bg-white border-gray-300 focus:border-primary text-gray-900 data-[placeholder]:text-purple-300">
+                    <SelectValue placeholder="Select your birth country" />
+                  </SelectTrigger>
+                  <SelectContent
+                    className="bg-white max-h-[40vh] overflow-y-auto"
+                    position="popper"
+                    sideOffset={4}
+                    onPointerDownOutside={e => {
+                      const target = e.target as HTMLElement
+                      if (target.closest('[data-radix-select-viewport]')) e.preventDefault()
+                    }}
+                    onOpenAutoFocus={e => e.preventDefault()}
+                  >
+                    <div className="py-1">
+                      {COUNTRIES.map(c => (
+                        <SelectItem key={c.value} value={c.value} className="text-gray-900 py-3 cursor-pointer touch-manipulation">
+                          {c.label}
+                        </SelectItem>
+                      ))}
+                    </div>
+                  </SelectContent>
+                </Select>
+              </Field>
 
-            {error && (
-              <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
-                <p className="text-destructive text-sm">{error}</p>
-              </div>
-            )}
+              {/* Birth Time - Hour / Minute / AM PM same as BirthForm */}
+              <Field>
+                <FieldLabel className="text-gray-800 font-medium">
+                  Birth Time <span className="text-gray-400 font-normal">(optional)</span>
+                </FieldLabel>
+                <div className="grid grid-cols-3 gap-2">
+                  <Select value={birthTime.hour} onValueChange={v => setBirthTime(t => ({ ...t, hour: v }))}>
+                    <SelectTrigger className="w-full bg-white border-gray-300 focus:border-primary text-gray-900 data-[placeholder]:text-purple-300">
+                      <SelectValue placeholder="Hour" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white">
+                      {Array.from({ length: 12 }, (_, i) => {
+                        const h = (i + 1).toString().padStart(2, '0')
+                        return <SelectItem key={h} value={h} className="text-gray-900">{h}</SelectItem>
+                      })}
+                    </SelectContent>
+                  </Select>
+                  <Select value={birthTime.minute} onValueChange={v => setBirthTime(t => ({ ...t, minute: v }))}>
+                    <SelectTrigger className="w-full bg-white border-gray-300 focus:border-primary text-gray-900 data-[placeholder]:text-purple-300">
+                      <SelectValue placeholder="Min" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white max-h-[40vh] overflow-y-auto" position="popper" sideOffset={4} onOpenAutoFocus={e => e.preventDefault()}>
+                      <div className="py-1">
+                        {Array.from({ length: 60 }, (_, i) => {
+                          const m = i.toString().padStart(2, '0')
+                          return <SelectItem key={m} value={m} className="text-gray-900 py-2.5 touch-manipulation">{m}</SelectItem>
+                        })}
+                      </div>
+                    </SelectContent>
+                  </Select>
+                  <Select value={birthTime.period} onValueChange={v => setBirthTime(t => ({ ...t, period: v }))}>
+                    <SelectTrigger className="w-full bg-white border-gray-300 focus:border-primary text-gray-900 data-[placeholder]:text-purple-300">
+                      <SelectValue placeholder="AM/PM" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white">
+                      <SelectItem value="AM" className="text-gray-900">AM</SelectItem>
+                      <SelectItem value="PM" className="text-gray-900">PM</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <p className="text-xs text-gray-500 mt-1.5">Birth time is optional and not used as a primary filter.</p>
+              </Field>
 
-            <Button type="submit" disabled={loading} className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90">
-              {loading ? 'Searching...' : 'Find My Report'}
-            </Button>
+              {error && (
+                <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+                  <p className="text-destructive text-sm">{error}</p>
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-primary text-white hover:bg-primary/90 h-12 text-base font-semibold rounded-full shadow-lg shadow-primary/30 mt-2 disabled:opacity-50"
+              >
+                {loading ? <><Spinner className="mr-2" />Searching...</> : 'Find My Report'}
+              </Button>
+            </FieldGroup>
           </form>
 
           {/* Multiple results */}
@@ -142,7 +220,7 @@ export default function MyReportPage() {
           )}
 
           <p className="text-center text-muted-foreground/50 text-xs mt-6">
-            Only reports that have been paid for and generated will appear here.
+            Only paid and generated reports will appear here.
           </p>
         </div>
       </div>
