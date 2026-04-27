@@ -55,6 +55,14 @@ export default function CompanyPage() {
           <h1 className="text-4xl md:text-5xl font-bold text-foreground leading-tight text-balance mb-6">
             The Next Generation of Fortune Telling: Sajume
           </h1>
+          <div className="relative w-full aspect-[1200/630] rounded-2xl overflow-hidden mb-10">
+            <Image
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Thenextgenpng-MFmWPjDoalrvlPgKoNVgfNdDRvW9z1.png"
+              alt="K-Saju - The Next Gen Fortune Telling"
+              fill
+              className="object-cover"
+            />
+          </div>
           <p className="text-muted-foreground text-lg leading-relaxed mb-6">
             Bridging 5,000 Years of Wisdom with Modern Technology — A Clear Guide to Your Life&apos;s Blueprint
           </p>
