@@ -119,8 +119,14 @@ export function NavSidebar() {
         </nav>
 
         {/* Bottom branding */}
-        <div className="px-5 py-5 border-t border-white/10">
+        <div className="px-5 py-5 border-t border-white/10 space-y-2">
           <p className="text-xs text-white/30 text-center">K-Saju · The Next Gen Fortune Telling</p>
+          <p className="text-xs text-white/20 text-center">
+            Business Inquiry:{' '}
+            <a href="mailto:hello@sajume.com" className="text-white/40 hover:text-white/60 transition-colors underline underline-offset-2">
+              hello@sajume.com
+            </a>
+          </p>
         </div>
       </aside>
     </>
