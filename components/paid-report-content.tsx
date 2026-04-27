@@ -134,7 +134,7 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
             {character?.keywords && character.keywords.length > 0 && (
               <div className="flex flex-wrap gap-1 mb-2">
                 {character.keywords.map((kw: string, i: number) => (
-                  <span key={i} className="text-[10px] px-2 py-0.5 bg-white/10 rounded-full text-white/70">
+                  <span key={i} className="text-[10px] px-2 py-0.5 bg-primary/15 rounded-full text-primary font-medium">
                     #{kw}
                   </span>
                 ))}

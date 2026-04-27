@@ -14,7 +14,7 @@ const coreValues = [
   {
     num: '01',
     title: 'A Lifetime Guidebook from a Single Purchase',
-    desc: 'Traditional consultations often fade from memory as time passes. Sajume is not a one-time service; it is a comprehensive 20–30 page report that you can return to whenever life feels heavy or a major decision lies ahead. Own a book that tells the story of your life, forever.',
+    desc: 'Traditional consultations often fade from memory as time passes. Sajume is not a one-time service; it is a comprehensive long report that you can return to whenever life feels heavy or a major decision lies ahead. Own a book that tells the story of your life, forever.',
   },
   {
     num: '02',

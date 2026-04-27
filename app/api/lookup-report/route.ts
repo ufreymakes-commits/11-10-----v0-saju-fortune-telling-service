@@ -11,11 +11,13 @@ export async function POST(request: Request) {
 
     const supabase = await createClient()
 
-    // 1차 시도: 이름 + 생년월일만으로 검색 (최우선)
+    // 1차 시도: 이름 부분 일치 + 생년월일 검색 (이름 중 첫 단어만으로도 검색 가능)
+    const nameTrimmed = name.trim()
+    const firstName = nameTrimmed.split(' ')[0] // "Yuri Park" → "Yuri"
     const { data, error } = await supabase
       .from('submissions')
       .select('id, name, birth_date, paid_report_url, created_at')
-      .ilike('name', name.trim())
+      .ilike('name', `%${firstName}%`)
       .eq('birth_date', birthDate)
       .not('paid_report_url', 'is', null)
       .order('created_at', { ascending: false })
@@ -44,7 +46,7 @@ export async function POST(request: Request) {
       const { data: fallbackData, error: fallbackError } = await supabase
         .from('submissions')
         .select('id, name, birth_date, paid_report_url, created_at')
-        .ilike('name', name.trim())
+        .ilike('name', `%${firstName}%`)
         .eq('birth_date', birthDate)
         .eq('country', country)
         .not('paid_report_url', 'is', null)
