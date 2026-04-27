@@ -79,7 +79,7 @@ export default function CompanyPage() {
           <p className="text-xs uppercase tracking-[0.2em] text-primary/60 mb-6">Founder&apos;s Story &amp; Expertise</p>
 
           {/* Images */}
-          <div className="grid grid-cols-2 gap-4 mb-10">
+          <div className="grid grid-cols-2 gap-4 mb-3">
             <div className="relative aspect-[4/3] rounded-2xl overflow-hidden">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/founder%20image-Y6vZ39gBOBm3lnx1sWQHGHfVa0syux.png"
@@ -97,6 +97,9 @@ export default function CompanyPage() {
               />
             </div>
           </div>
+          <p className="text-xs text-muted-foreground/50 text-center mb-10 tracking-wide">
+            KPEI Certified Myungri Psychology Counselors
+          </p>
 
           <div className="space-y-5 text-muted-foreground leading-relaxed">
             <p>
