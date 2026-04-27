@@ -277,7 +277,20 @@ Generate the 90 facts now as a JSON array.`
 
     if (insertError) {
       console.error('[v0] Failed to save paid report:', insertError)
-      // 저장 실패해도 응답은 반환 (사용자 경험 우선)
+    }
+
+    // submissions 테이블에 paid_report_url 저장
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+    const paidReportUrl = `${baseUrl}/report/${submissionId}/paid`
+
+    const { error: urlUpdateError } = await supabase
+      .from('submissions')
+      .update({ paid_report_url: paidReportUrl })
+      .eq('id', submissionId)
+
+    if (urlUpdateError) {
+      console.error('[v0] Failed to save paid_report_url:', urlUpdateError)
     }
 
     console.log(`[v0] Successfully generated ${paidFacts.length} paid facts for ${submission.name}`)

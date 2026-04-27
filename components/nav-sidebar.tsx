@@ -2,40 +2,18 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
-import type { User } from '@supabase/supabase-js'
+import { usePathname } from 'next/navigation'
 
 const NAV_LINKS = [
   { label: 'Home', href: '/' },
   { label: 'Products', href: '/#products' },
-  { label: 'Company', href: '/#company' },
-  { label: 'Paid Reports', href: '/my-reports' },
+  { label: 'Company', href: '/company' },
+  { label: 'Paid Reports', href: '/my-report' },
 ]
-
-const handleReportIssue = () => {
-  // Tally popup 트리거
-  const element = document.querySelector('[data-tally-open="681NVP"]') as any
-  if (element) {
-    element.click()
-  }
-}
 
 export function NavSidebar() {
   const [open, setOpen] = useState(false)
-  const [user, setUser] = useState<User | null>(null)
   const pathname = usePathname()
-  const router = useRouter()
-
-  useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getUser().then(({ data }) => setUser(data.user))
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
-    return () => listener.subscription.unsubscribe()
-  }, [])
 
   // Close sidebar on route change
   useEffect(() => {
@@ -52,17 +30,19 @@ export function NavSidebar() {
     return () => { document.body.style.overflow = '' }
   }, [open])
 
-  const handleSignOut = async () => {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    setUser(null)
-    router.push('/')
-    setOpen(false)
+  const handleProductsClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // If already on homepage, smooth scroll to #products
+    if (pathname === '/') {
+      e.preventDefault()
+      const el = document.getElementById('products')
+      if (el) el.scrollIntoView({ behavior: 'smooth' })
+      setOpen(false)
+    }
   }
 
   return (
     <>
-      {/* Hamburger button — fixed top-right */}
+      {/* Hamburger button */}
       <button
         onClick={() => setOpen(true)}
         aria-label="Open menu"
@@ -82,14 +62,14 @@ export function NavSidebar() {
         />
       )}
 
-      {/* Sidebar panel — slides in from right, 50% width */}
+      {/* Sidebar panel */}
       <aside
         className={`fixed top-0 right-0 z-50 h-full w-1/2 max-w-xs bg-[#110d1a] border-l border-white/10 shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${
           open ? 'translate-x-0' : 'translate-x-full'
         }`}
         aria-label="Navigation menu"
       >
-        {/* Close button */}
+        {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-white/10">
           <span className="text-sm font-semibold text-white/80 tracking-wide">Menu</span>
           <button
@@ -106,11 +86,14 @@ export function NavSidebar() {
         {/* Nav links */}
         <nav className="flex-1 px-5 py-6 space-y-1">
           {NAV_LINKS.map((link) => {
-            const isActive = link.href === '/' ? pathname === '/' : pathname.startsWith(link.href.split('#')[0]) && link.href !== '/'
+            const isActive = link.href === '/'
+              ? pathname === '/'
+              : pathname.startsWith(link.href.split('#')[0]) && link.href !== '/'
             return (
               <Link
                 key={link.href}
                 href={link.href}
+                onClick={link.href === '/#products' ? handleProductsClick : undefined}
                 className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
                   isActive
                     ? 'bg-primary/20 text-primary'
@@ -118,64 +101,26 @@ export function NavSidebar() {
                 }`}
               >
                 {link.label}
-                {link.label === 'Paid Reports' && !user && (
-                  <span className="ml-auto text-[10px] bg-white/10 text-white/50 px-1.5 py-0.5 rounded">
-                    Login required
-                  </span>
-                )}
               </Link>
             )
           })}
-          
-          {/* Report Issue Button */}
+
+          {/* Report Issue */}
           <button
             onClick={() => {
-              const btn = document.querySelector('[data-tally-open="681NVP"]') as any
+              const btn = document.querySelector('[data-tally-open="681NVP"]') as HTMLElement | null
               if (btn) btn.click()
               setOpen(false)
             }}
-            className="w-full text-left flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/8 transition-colors mt-2"
+            className="w-full text-left flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-white/50 hover:text-white hover:bg-white/8 transition-colors mt-2"
           >
             Report Issue
           </button>
         </nav>
 
-        {/* Auth section at bottom */}
+        {/* Bottom branding */}
         <div className="px-5 py-5 border-t border-white/10">
-          {user ? (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-primary/30 flex items-center justify-center text-xs font-bold text-primary uppercase flex-shrink-0">
-                  {user.email?.[0] ?? 'U'}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-medium text-white truncate">{user.email}</p>
-                  <p className="text-[10px] text-white/40">Signed in</p>
-                </div>
-              </div>
-              <button
-                onClick={handleSignOut}
-                className="w-full text-xs text-white/50 hover:text-white/80 transition-colors text-left px-3 py-2 rounded-lg hover:bg-white/8"
-              >
-                Sign out
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <Link
-                href="/auth/login"
-                className="block w-full text-center text-sm font-medium bg-primary text-primary-foreground py-2.5 rounded-lg hover:opacity-90 transition-opacity"
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/auth/sign-up"
-                className="block w-full text-center text-sm text-white/60 hover:text-white/90 transition-colors py-2"
-              >
-                Create account
-              </Link>
-            </div>
-          )}
+          <p className="text-xs text-white/30 text-center">K-Saju · The Next Gen Fortune Telling</p>
         </div>
       </aside>
     </>
