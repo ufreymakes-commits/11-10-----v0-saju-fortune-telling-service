@@ -12,7 +12,7 @@ import { LockIcon, Share2Icon } from 'lucide-react'
 // Preview page reviews data with names and countries - sorted by most recent first
 const PREVIEW_REVIEWS = [
   // Row 1 (id 0–13)
-  { id: 0,  text: "I started with the free 9 facts first because I was skeptical and was surprised by how accurate the information I got back was, it was almost scary. I ended up getting the 99 facts and everything I been through and am currently going through was mentioned and it gave me a lot of clarity. Thank you so much for this! I've been lost trying to figure out a lot of things and this helped a lot.", name: "Jasmine S.", country: "New York, US", flag: "🇺🇸", date: "Apr 25, 05:15 PM" },
+  { id: 0,  text: "I started with the free 9 facts first because I was skeptical and was surprised by how accurate the information I got back was, it was almost scary. I ended up getting the 99 facts and everything I been through and am currently going through was mentioned and it gave me a lot of clarity. Thank you so much for this! I've been lost trying to figure out a lot of things and this helped a lot.", name: "Jasmine S.", country: "NY, US", flag: "🇺🇸", date: "Apr 25, 2026" },
   { id: 1,  text: "I received the free 9 Facts First, due to worry that this was going to be a bit like a scam. Once I read through the 9 facts, I was intrigued and purchased the 99 Report. I'm glad I did. There's so much in here and I felt called out, lol. I really was shocked at how accurately it read me. A few of the facts are accurate to even now, and I can clearly look back at the past when the facts mentioned specific years. It's uncanny and I'm impressed!", name: "Emily W", country: "NY, US", flag: "🇺🇸", date: "Apr 16, 01:01 AM" },
   { id: 2,  text: "I really enjoyed reading this Saju packet. The fact-based format made it feel engaging, personal, and easy to connect with. I began highlighting the points that felt accurate, but quickly realized I had highlighted almost every page. I would highly recommend this for anyone curious about self-discovery or looking for clarity and encouragement about their life path.", name: "Hannah", country: "LA, US", flag: "🇺🇸", date: "Apr 10, 02:26 PM" },
   { id: 3,  text: "This was great insight. I definitely felt some feeling were validated.", name: "Jessica", country: "Chicago, US", flag: "🇺🇸", date: "Apr 1, 08:52 AM" },
@@ -81,7 +81,7 @@ const STEM_PRONUNCIATION: Record<string, string> = {
 // Branch pronunciations  
 const BRANCH_PRONUNCIATION: Record<string, string> = {
   '子': 'Ja', '丑': 'Chuk', '寅': 'In', '卯': 'Myo', '辰': 'Jin', '巳': 'Sa',
-  '午': 'O', '未': 'Mi', '申': 'Sin', '酉': 'Yu', '戌': 'Sul', '亥': 'Hae'
+  '���': 'O', '未': 'Mi', '申': 'Sin', '酉': 'Yu', '戌': 'Sul', '亥': 'Hae'
 }
 
 interface PreviewContentPropsWithCache {
