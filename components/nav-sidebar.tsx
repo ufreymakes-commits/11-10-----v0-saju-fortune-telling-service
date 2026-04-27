@@ -113,10 +113,11 @@ export function NavSidebar() {
         {/* Nav links */}
         <nav className="flex-1 px-5 py-6 space-y-1">
           {NAV_LINKS.map((link) => {
+            const hasAnchor = link.href.includes('#')
             const hrefPath = link.href.split('#')[0] || '/'
-            const isActive = hrefPath === '/'
-              ? pathname === '/'
-              : pathname === hrefPath || pathname.startsWith(hrefPath + '/')
+            const isActive = !hasAnchor && (
+              hrefPath === '/' ? pathname === '/' : pathname === hrefPath || pathname.startsWith(hrefPath + '/')
+            )
             return (
               <Link
                 key={link.href}
