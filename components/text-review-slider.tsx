@@ -64,14 +64,10 @@ export function TextReviewSlider({ reviews }: TextReviewSliderProps) {
     return () => cancelAnimationFrame(animationId)
   }, [isPaused])
 
-  // Reorder reviews for mobile 2-row layout
-  // Row 1: 1-13 (Emily to Nom)
-  // Row 2: 8 (Meng) to end, then 2-7 (Hannah to Simona)
-  const mobileRow1 = reviews.slice(0, 13) // Emily W to Nom
-  const mobileRow2 = [
-    ...reviews.slice(7, 8),  // Meng (id: 8)
-    ...reviews.slice(8)      // Rest from Pranjali to end
-  ]
+  // Row 1: id 0–13 (Jasmine to Hannah)
+  // Row 2: id 14– (Meng, Sim Yun Rou, Nhi Tran, ...)
+  const mobileRow1 = reviews.slice(0, 14)
+  const mobileRow2 = reviews.slice(14)
 
   const ReviewCard = ({ review }: { review: Review }) => (
     <div className="flex-shrink-0 w-[280px] sm:w-[300px] md:w-[350px] bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-colors">
@@ -125,7 +121,7 @@ export function TextReviewSlider({ reviews }: TextReviewSliderProps) {
             className="overflow-x-hidden"
           >
             <div className="flex gap-3" style={{ width: 'max-content' }}>
-              {[...reviews.slice(0, 13), ...reviews.slice(0, 13)].map((review, idx) => (
+              {[...reviews.slice(0, 14), ...reviews.slice(0, 14)].map((review, idx) => (
                 <ReviewCard key={`pc-r1-${review.id}-${idx}`} review={review} />
               ))}
             </div>
