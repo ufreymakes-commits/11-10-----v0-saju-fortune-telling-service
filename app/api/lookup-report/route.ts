@@ -11,29 +11,21 @@ export async function POST(request: Request) {
 
     const supabase = await createClient()
 
-    // Primary filter: name + birth_date + country (모두 있는 경우)
-    // birthTime은 선택적, 최후순위
-    let query = supabase
+    // 1차 시도: 이름 + 생년월일만으로 검색 (최우선)
+    const { data, error } = await supabase
       .from('submissions')
-      .select('id, name, birth_date, birth_time, country, paid_report_url, created_at')
+      .select('id, name, birth_date, paid_report_url, created_at')
       .ilike('name', name.trim())
       .eq('birth_date', birthDate)
       .not('paid_report_url', 'is', null)
       .order('created_at', { ascending: false })
-
-    // 국가가 있으면 최우선 필터로 추가
-    if (country) {
-      query = query.eq('country', country)
-    }
-
-    const { data, error } = await query.limit(5)
+      .limit(5)
 
     if (error) {
       console.error('[v0] Lookup error:', error)
       return NextResponse.json({ error: 'Database error' }, { status: 500 })
     }
 
-    // 국가 필터로 찾았으면 바로 반환
     if (data && data.length > 0) {
       return NextResponse.json({
         found: true,
@@ -47,13 +39,14 @@ export async function POST(request: Request) {
       })
     }
 
-    // 국가 필터로 못 찾으면 국가 없이 name + birth_date만으로 재시도
+    // 2차 시도: 이름 + 생년월일 + 국가까지 포함
     if (country) {
       const { data: fallbackData, error: fallbackError } = await supabase
         .from('submissions')
-        .select('id, name, birth_date, birth_time, country, paid_report_url, created_at')
+        .select('id, name, birth_date, paid_report_url, created_at')
         .ilike('name', name.trim())
         .eq('birth_date', birthDate)
+        .eq('country', country)
         .not('paid_report_url', 'is', null)
         .order('created_at', { ascending: false })
         .limit(5)
