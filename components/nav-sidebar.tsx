@@ -106,16 +106,13 @@ export function NavSidebar() {
           })}
 
           {/* Report Issue */}
-          <button
-            onClick={() => {
-              const btn = document.querySelector('[data-tally-open="681NVP"]') as HTMLElement | null
-              if (btn) btn.click()
-              setOpen(false)
-            }}
-            className="w-full text-left flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-white/50 hover:text-white hover:bg-white/8 transition-colors mt-2"
+          <a
+            href="#tally-open=681NVP&tally-layout=modal&tally-emoji-text=👋&tally-emoji-animation=wave"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-white/50 hover:text-white hover:bg-white/8 transition-colors mt-2"
           >
             Report Issue
-          </button>
+          </a>
         </nav>
 
         {/* Bottom branding */}

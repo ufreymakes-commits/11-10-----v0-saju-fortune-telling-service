@@ -153,7 +153,7 @@ export default function LandingPage() {
       </section>
 
       {/* Products Section */}
-      <section className="relative z-10 py-16 px-4 pb-20">
+      <section id="products" className="relative z-10 py-16 px-4 pb-20">
         <div className="max-w-2xl mx-auto">
           <h3 className="text-center text-3xl md:text-4xl font-semibold text-white/90 mb-2">Our Products</h3>
           <p className="text-center text-sm md:text-base text-white/50 mb-8 leading-relaxed">
