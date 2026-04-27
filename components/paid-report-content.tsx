@@ -227,7 +227,7 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-1.5">
                   <Image
-                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-5aPYhnVZwmxl0vRRERW2TSIclejU1w.png"
+                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8C%E1%85%A6%E1%84%86%E1%85%A9%E1%86%A8%E1%84%8B%E1%85%B3%E1%86%AF%20%E1%84%8B%E1%85%B5%E1%86%B8%E1%84%85%E1%85%A7%E1%86%A8%E1%84%92%E1%85%A2%E1%84%8C%E1%85%AE%E1%84%89%E1%85%A6%E1%84%8B%E1%85%AD.-rHCZrL3MSmA5XIQcuz0W5A0tHTyxAR.png"
                     alt="Shopify"
                     width={16}
                     height={16}
