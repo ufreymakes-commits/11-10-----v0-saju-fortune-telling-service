@@ -16,8 +16,15 @@ const LOGO_PAGES = ['/', '/company', '/my-report', '/start']
 
 export function NavSidebar() {
   const [open, setOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
   const showLogo = LOGO_PAGES.includes(pathname)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   // Close sidebar on route change
   useEffect(() => {
@@ -46,15 +53,15 @@ export function NavSidebar() {
 
   return (
     <>
-      {/* Top logo bar - fixed, white bg, black logo */}
+      {/* Top logo bar - hides on scroll */}
       {showLogo && (
-        <div className="fixed top-0 left-0 right-0 z-50 h-[56px] bg-white border-b border-black/8 flex items-center justify-center">
+        <div className={`fixed top-0 left-0 right-0 z-50 h-10 bg-white border-b border-black/8 flex items-center justify-center transition-transform duration-300 ${scrolled ? '-translate-y-full' : 'translate-y-0'}`}>
           <Link href="/" aria-label="Sajume home">
             <Image
               src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/SAJUME-KJvcikx26EMhwGAmVSbg5BI7E2wvxQ.png"
               alt="SAJUME"
-              width={96}
-              height={26}
+              width={72}
+              height={20}
               className="object-contain"
               priority
             />
@@ -66,7 +73,7 @@ export function NavSidebar() {
       <button
         onClick={() => setOpen(true)}
         aria-label="Open menu"
-        className="fixed top-[8px] right-4 z-[51] w-10 h-10 flex flex-col items-center justify-center gap-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 hover:bg-black/60 transition-colors"
+        className="fixed top-3 right-4 z-[60] w-10 h-10 flex flex-col items-center justify-center gap-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 hover:bg-black/60 transition-colors"
       >
         <span className="block w-5 h-0.5 bg-white/90 rounded-full" />
         <span className="block w-5 h-0.5 bg-white/90 rounded-full" />

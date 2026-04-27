@@ -36,7 +36,7 @@ const TEXT_REVIEWS = [
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-[#0a0a14] relative overflow-x-hidden pt-14">
+    <main className="min-h-screen bg-[#0a0a14] relative overflow-x-hidden pt-10">
       {/* Marquee Banner */}
       <Marquee />
       
