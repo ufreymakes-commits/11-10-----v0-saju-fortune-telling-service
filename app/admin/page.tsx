@@ -158,13 +158,13 @@ export default function AdminPage() {
   const formatUSD = (v: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v)
 
-  // Build 14-day chart data — free and paid separately
-  const last14Days = Array.from({ length: 14 }, (_, i) => {
+  // Build 30-day chart data — free and paid separately
+  const last30Days = Array.from({ length: 30 }, (_, i) => {
     const d = new Date()
-    d.setDate(d.getDate() - (13 - i))
+    d.setDate(d.getDate() - (29 - i))
     return d.toISOString().slice(0, 10)
   })
-  const chartData = last14Days.map(day => {
+  const chartData = last30Days.map(day => {
     const total = stats.dailySubmissionCounts?.[day] || 0
     const paid = stats.dailyPaidCounts?.[day] || 0
     return {
@@ -173,6 +173,11 @@ export default function AdminPage() {
       유료: paid,
     }
   })
+
+  // 전환율 계산
+  const conversionRate = stats.totalSubmissions && stats.totalSubmissions > 0
+    ? ((stats.paidSubmissions ?? 0) / stats.totalSubmissions * 100).toFixed(1)
+    : '0.0'
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -373,7 +378,12 @@ export default function AdminPage() {
         {/* 일별 제출 차트 */}
         <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-gray-700">일별 제출 수 — 최근 14일</h2>
+            <div className="flex items-center gap-3">
+              <h2 className="text-sm font-semibold text-gray-700">일별 제출 수 — 최근 30일</h2>
+              <span className="text-xs bg-gray-900 text-white px-2 py-0.5 rounded-full font-medium">
+                전환율 {conversionRate}%
+              </span>
+            </div>
             <div className="flex items-center gap-3 text-xs text-gray-400">
               <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-sm bg-gray-200" />무료</span>
               <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-sm bg-gray-900" />유료</span>

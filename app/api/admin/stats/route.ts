@@ -93,11 +93,11 @@ export async function GET(req: NextRequest) {
       .order('created_at', { ascending: false })
       .limit(20)
 
-    // Daily submissions (last 14 days) — free + paid
+    // Daily submissions (last 30 days) — free + paid
     const { data: dailySubmissions } = await supabase
       .from('submissions')
       .select('created_at, paid_report_url')
-      .gte('created_at', new Date(Date.now() - 14 * 86400000).toISOString())
+      .gte('created_at', new Date(Date.now() - 30 * 86400000).toISOString())
 
     const dailySubmissionCounts: Record<string, number> = {}
     const dailyPaidCounts: Record<string, number> = {}

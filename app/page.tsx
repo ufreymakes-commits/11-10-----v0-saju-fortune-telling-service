@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { StarsBackground } from '@/components/stars-background'
 import { Marquee } from '@/components/marquee'
 import { TextReviewSlider } from '@/components/text-review-slider'
+import { NoticeMeButton } from '@/components/notice-me-button'
 
 // 텍스트 기반 리뷰 데이터 (preview-content와 동일)
 const TEXT_REVIEWS = [
@@ -209,12 +210,10 @@ export default function LandingPage() {
                   </div>
                   <span className="text-lg font-bold text-white">$38</span>
                 </div>
-                <a
-                  href="#tally-open=81JRrr&tally-layout=modal&tally-emoji-text=👋&tally-emoji-animation=wave"
+                <NoticeMeButton
+                  product="bracelet"
                   className="w-full text-center py-2 px-4 rounded-lg text-sm font-medium bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/30 hover:border-amber-400/50 transition-all"
-                >
-                  Notice me
-                </a>
+                />
               </div>
             </div>
 
@@ -237,12 +236,10 @@ export default function LandingPage() {
                   <span className="text-xs text-pink-300">Discover your match</span>
                   <span className="text-lg font-bold text-white/50">$15</span>
                 </div>
-                <a
-                  href="#tally-open=81JRrr&tally-layout=modal&tally-emoji-text=👋&tally-emoji-animation=wave"
+                <NoticeMeButton
+                  product="compatibility"
                   className="w-full text-center py-2 px-4 rounded-lg text-sm font-medium bg-pink-500/20 hover:bg-pink-500/30 text-pink-200 border border-pink-500/30 hover:border-pink-400/50 transition-all"
-                >
-                  Notice me
-                </a>
+                />
               </div>
             </div>
 
@@ -265,12 +262,10 @@ export default function LandingPage() {
                   <span className="text-xs text-blue-300">12 monthly readings</span>
                   <span className="text-lg font-bold text-white/50">$79</span>
                 </div>
-                <a
-                  href="#tally-open=81JRrr&tally-layout=modal&tally-emoji-text=👋&tally-emoji-animation=wave"
+                <NoticeMeButton
+                  product="subscription"
                   className="w-full text-center py-2 px-4 rounded-lg text-sm font-medium bg-blue-500/20 hover:bg-blue-500/30 text-blue-200 border border-blue-500/30 hover:border-blue-400/50 transition-all"
-                >
-                  Notice me
-                </a>
+                />
               </div>
             </div>
           </div>
