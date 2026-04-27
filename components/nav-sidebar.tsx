@@ -46,16 +46,16 @@ export function NavSidebar() {
 
   return (
     <>
-      {/* Top logo bar - shown on specific pages only */}
+      {/* Top logo bar - fixed, white bg, black logo */}
       {showLogo && (
-        <div className="fixed top-0 left-0 right-0 z-40 h-[60px] flex items-center justify-center pointer-events-none">
-          <Link href="/" className="pointer-events-auto" aria-label="Sajume home">
+        <div className="fixed top-0 left-0 right-0 z-50 h-[56px] bg-white border-b border-black/8 flex items-center justify-center">
+          <Link href="/" aria-label="Sajume home">
             <Image
               src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/SAJUME-KJvcikx26EMhwGAmVSbg5BI7E2wvxQ.png"
               alt="SAJUME"
-              width={100}
-              height={28}
-              className="object-contain brightness-0 invert opacity-90"
+              width={96}
+              height={26}
+              className="object-contain"
               priority
             />
           </Link>
@@ -66,7 +66,7 @@ export function NavSidebar() {
       <button
         onClick={() => setOpen(true)}
         aria-label="Open menu"
-        className="fixed top-[10px] right-4 z-50 w-10 h-10 flex flex-col items-center justify-center gap-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 hover:bg-black/60 transition-colors"
+        className="fixed top-[8px] right-4 z-[51] w-10 h-10 flex flex-col items-center justify-center gap-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 hover:bg-black/60 transition-colors"
       >
         <span className="block w-5 h-0.5 bg-white/90 rounded-full" />
         <span className="block w-5 h-0.5 bg-white/90 rounded-full" />

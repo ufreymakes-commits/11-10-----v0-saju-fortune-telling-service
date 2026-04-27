@@ -35,7 +35,7 @@ const coreValues = [
 
 export default function CompanyPage() {
   return (
-    <main className="min-h-screen bg-mystical relative overflow-hidden">
+    <main className="min-h-screen bg-mystical relative overflow-hidden pt-14">
       <StarsBackground />
 
       <div className="relative z-10 max-w-2xl mx-auto px-6 py-16">

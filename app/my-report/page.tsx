@@ -62,7 +62,7 @@ export default function MyReportPage() {
   }
 
   return (
-    <main className="min-h-screen bg-mystical relative overflow-hidden">
+    <main className="min-h-screen bg-mystical relative overflow-hidden pt-14">
       <StarsBackground />
 
       <div className="relative z-10 flex flex-col items-center px-4 py-12">
