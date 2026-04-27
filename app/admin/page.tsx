@@ -13,10 +13,12 @@ interface Stats {
     id: string
     name: string
     country: string
+    birth_date: string
     created_at: string
     paid_report_url: string | null
   }[]
   dailySubmissionCounts: Record<string, number>
+  dailyPaidCounts: Record<string, number>
   noticeMeByProduct: Record<string, number>
   monthlyPaidCounts: Record<string, number>
   payerCountryCounts: Record<string, number>
@@ -156,16 +158,21 @@ export default function AdminPage() {
   const formatUSD = (v: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v)
 
-  // Build 14-day chart data
+  // Build 14-day chart data — free and paid separately
   const last14Days = Array.from({ length: 14 }, (_, i) => {
     const d = new Date()
     d.setDate(d.getDate() - (13 - i))
     return d.toISOString().slice(0, 10)
   })
-  const chartData = last14Days.map(day => ({
-    date: day.slice(5),
-    제출: stats.dailySubmissionCounts?.[day] || 0,
-  }))
+  const chartData = last14Days.map(day => {
+    const total = stats.dailySubmissionCounts?.[day] || 0
+    const paid = stats.dailyPaidCounts?.[day] || 0
+    return {
+      date: day.slice(5),
+      무료: total - paid,
+      유료: paid,
+    }
+  })
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -365,52 +372,68 @@ export default function AdminPage() {
 
         {/* 일별 제출 차트 */}
         <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-gray-700 mb-4">일별 제출 수 — 최근 14일</h2>
-          <ResponsiveContainer width="100%" height={200}>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold text-gray-700">일별 제출 수 — 최근 14일</h2>
+            <div className="flex items-center gap-3 text-xs text-gray-400">
+              <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-sm bg-gray-200" />무료</span>
+              <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-sm bg-gray-900" />유료</span>
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={220}>
             <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#9ca3af' }} />
               <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} allowDecimals={false} />
               <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb' }} />
-              <Bar dataKey="제출" fill="#111827" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="무료" stackId="a" fill="#e5e7eb" radius={[0, 0, 0, 0]} />
+              <Bar dataKey="유료" stackId="a" fill="#111827" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
         {/* 최근 제출 목록 */}
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-gray-100">
+          <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-gray-700">최근 제출 목록</h2>
+            <span className="text-xs text-gray-400">최근 20건</span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
                   <th className="text-left px-5 py-3 text-xs text-gray-400 font-medium">이름</th>
-                  <th className="text-left px-5 py-3 text-xs text-gray-400 font-medium">국가</th>
+                  <th className="text-left px-5 py-3 text-xs text-gray-400 font-medium">출생국가</th>
+                  <th className="text-left px-5 py-3 text-xs text-gray-400 font-medium">생년월일</th>
                   <th className="text-left px-5 py-3 text-xs text-gray-400 font-medium">제출일시</th>
                   <th className="text-left px-5 py-3 text-xs text-gray-400 font-medium">구분</th>
                 </tr>
               </thead>
               <tbody>
-                {(stats.recentSubmissions || []).map((s, i) => (
-                  <tr key={s.id} className={`border-b border-gray-50 ${i % 2 === 0 ? '' : 'bg-gray-50/50'}`}>
-                    <td className="px-5 py-3 font-medium text-gray-800">{s.name}</td>
-                    <td className="px-5 py-3 text-gray-500">{s.country || '—'}</td>
-                    <td className="px-5 py-3 text-gray-400 text-xs">
-                      {new Date(s.created_at).toLocaleString('ko-KR', {
-                        month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
-                      })}
-                    </td>
-                    <td className="px-5 py-3">
-                      {s.paid_report_url ? (
-                        <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">유료</span>
-                      ) : (
-                        <span className="text-[10px] bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">무료</span>
-                      )}
-                    </td>
+                {(stats.recentSubmissions || []).length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-5 py-6 text-center text-sm text-gray-400">데이터가 없습니다.</td>
                   </tr>
-                ))}
+                ) : (
+                  (stats.recentSubmissions || []).map((s, i) => (
+                    <tr key={s.id} className={`border-b border-gray-50 ${i % 2 === 0 ? '' : 'bg-gray-50/50'}`}>
+                      <td className="px-5 py-3 font-medium text-gray-800">{s.name}</td>
+                      <td className="px-5 py-3 text-gray-500 text-xs">{s.country || '—'}</td>
+                      <td className="px-5 py-3 text-gray-500 text-xs">{s.birth_date || '—'}</td>
+                      <td className="px-5 py-3 text-gray-400 text-xs">
+                        {new Date(s.created_at).toLocaleString('ko-KR', {
+                          month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+                        })}
+                      </td>
+                      <td className="px-5 py-3">
+                        {s.paid_report_url ? (
+                          <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">유료</span>
+                        ) : (
+                          <span className="text-[10px] bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">무료</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
 import { CheckCircleIcon, LinkIcon, CheckIcon, ChevronDownIcon } from 'lucide-react'
 import type { Submission, SajuData } from '@/lib/types'
 import { getDayMasterCharacter } from '@/lib/day-master-characters'
@@ -45,7 +44,6 @@ const elementColors: Record<string, string> = {
 const maxScore = 120
 
 export function PaidReportContent({ submission, paidReport }: PaidReportContentProps) {
-  const router = useRouter()
   const [copied, setCopied] = useState(false)
   const [openSections, setOpenSections] = useState<Record<number, boolean>>({})
 
@@ -165,6 +163,9 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
           </div>
         </div>
       </div>
+
+      {/* Arrow hint */}
+      <p className="text-center text-[11px] text-muted-foreground/60 mb-2">아래 화살표를 누르면 레포트가 열립니다</p>
 
       {/* Sections with toggle */}
       <div className="space-y-4">
@@ -320,12 +321,6 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
         </p>
         <p className="mt-4 text-[10px] text-muted-foreground/70">All rights reserved by Sajume.</p>
         <div className="mt-4 flex flex-col items-center gap-3">
-          <button
-            onClick={() => router.push(`/report/${submission.id}`)}
-            className="px-4 py-2 bg-primary/10 border border-primary/30 text-foreground text-xs font-semibold rounded hover:bg-primary/20 transition-all"
-          >
-            Back to Free Report
-          </button>
           <p className="text-[10px] text-muted-foreground/50">Business: hello@sajume.com</p>
         </div>
       </div>

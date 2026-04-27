@@ -324,15 +324,44 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
           <h3 className="text-sm font-semibold text-foreground mb-4 text-center">More from Sajume</h3>
           <div className="space-y-4">
             {/* Signature Saju Elemental Bracelet */}
-            <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-amber-500/30 rounded-xl p-4 opacity-70">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/30">Coming Soon</span>
+            <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
+              <div className="relative w-full h-44">
+                <Image
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Frame%20186-4UxuQefWCJ3ecnuEVZjkIyjL94QZBh.png"
+                  alt="Signature Saju Elemental Bracelet"
+                  fill
+                  className="object-cover"
+                />
               </div>
-              <h4 className="text-sm font-semibold text-white mb-1">Signature Saju Elemental Bracelet</h4>
-              <p className="text-xs text-white/60 mb-2">A bracelet designed to fill the missing energies in your Saju chart.</p>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-amber-300">Personalized to your Saju</span>
-                <span className="text-sm font-bold text-white/50">$38</span>
+              <div className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/30">Coming Soon</span>
+                </div>
+                <h4 className="text-sm font-semibold text-foreground mb-1">Signature Saju Elemental Bracelet</h4>
+                <p className="text-xs text-muted-foreground mb-3">A bracelet designed to fill the missing energies in your Saju chart.</p>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-1.5">
+                    <Image
+                      src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8C%E1%85%A6%E1%84%86%E1%85%A9%E1%86%A8%E1%84%8B%E1%85%B3%E1%86%AF%20%E1%84%8B%E1%85%B5%E1%86%B8%E1%84%85%E1%85%A7%E1%86%A8%E1%84%92%E1%85%A2%E1%84%8C%E1%85%AE%E1%84%89%E1%85%A6%E1%84%8B%E1%85%AD.-rHCZrL3MSmA5XIQcuz0W5A0tHTyxAR.png"
+                      alt="Shopify"
+                      width={16}
+                      height={16}
+                      className="object-contain"
+                    />
+                    <span className="text-[10px] text-muted-foreground">Shop at Sajume Shopify</span>
+                  </div>
+                  <span className="text-sm font-bold text-foreground">$38</span>
+                </div>
+                <button
+                  data-tally-open="81JRrr"
+                  data-tally-layout="modal"
+                  data-tally-emoji-text="👋"
+                  data-tally-emoji-animation="wave"
+                  onClick={() => track('notice_me_click', '/report', { product: 'bracelet' })}
+                  className="w-full py-1.5 text-xs font-semibold border border-border rounded-lg hover:bg-background/50 transition-colors text-foreground"
+                >
+                  Notice me
+                </button>
               </div>
             </div>
 

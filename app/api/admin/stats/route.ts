@@ -86,23 +86,27 @@ export async function GET(req: NextRequest) {
       noticeMeByProduct[product] = (noticeMeByProduct[product] || 0) + 1
     }
 
-    // Recent submissions
+    // Recent submissions — include birth_date for display
     const { data: recentSubmissions } = await supabase
       .from('submissions')
-      .select('id, name, country, created_at, paid_report_url')
+      .select('id, name, country, birth_date, created_at, paid_report_url')
       .order('created_at', { ascending: false })
-      .limit(10)
+      .limit(20)
 
-    // Daily submissions (last 14 days)
+    // Daily submissions (last 14 days) — free + paid
     const { data: dailySubmissions } = await supabase
       .from('submissions')
-      .select('created_at')
+      .select('created_at, paid_report_url')
       .gte('created_at', new Date(Date.now() - 14 * 86400000).toISOString())
 
     const dailySubmissionCounts: Record<string, number> = {}
+    const dailyPaidCounts: Record<string, number> = {}
     for (const s of dailySubmissions || []) {
-      const day = s.created_at.slice(0, 10)
+      const day = (s.created_at as string).slice(0, 10)
       dailySubmissionCounts[day] = (dailySubmissionCounts[day] || 0) + 1
+      if (s.paid_report_url) {
+        dailyPaidCounts[day] = (dailyPaidCounts[day] || 0) + 1
+      }
     }
 
     return NextResponse.json({
@@ -113,6 +117,7 @@ export async function GET(req: NextRequest) {
       totalPayments,
       recentSubmissions,
       dailySubmissionCounts,
+      dailyPaidCounts,
       noticeMeByProduct,
       monthlyPaidCounts,
       payerCountryCounts,

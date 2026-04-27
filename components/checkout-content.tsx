@@ -213,8 +213,13 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
         )}
       </Button>
 
+      {/* Credit card notice */}
+      <p className="text-center text-xs text-muted-foreground mt-3">
+        You can use your credit card — no PayPal account needed
+      </p>
+
       {/* Security Badge */}
-      <div className="flex items-center justify-center gap-2 mt-4 text-xs text-muted-foreground">
+      <div className="flex items-center justify-center gap-2 mt-3 text-xs text-muted-foreground">
         <ShieldCheckIcon className="w-4 h-4" />
         <span>Secure payment powered by PayPal</span>
       </div>
