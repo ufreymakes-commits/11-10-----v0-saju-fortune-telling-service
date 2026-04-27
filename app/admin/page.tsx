@@ -21,6 +21,7 @@ interface Stats {
     paid_report_url: string | null
   }[]
   dailySubmissionCounts: Record<string, number>
+  noticeMeByProduct: Record<string, number>
 }
 
 function StatCard({ label, value, sub }: { label: string; value: number | string; sub?: string }) {
@@ -159,23 +160,22 @@ export default function AdminPage() {
         </div>
 
         {/* Notice Me breakdown */}
-        {c['notice_me_click'] > 0 && (
-          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-            <h2 className="text-sm font-semibold text-gray-700 mb-4">Notice Me — Product Breakdown</h2>
-            <div className="grid grid-cols-3 gap-4">
-              {['forecasting', 'compatibility', 'subscription'].map(product => {
-                // Count per product from events — approximate from total for now
-                return (
-                  <div key={product} className="text-center">
-                    <p className="text-xs text-gray-400 capitalize mb-1">{product}</p>
-                    <p className="text-xl font-bold text-gray-900">—</p>
-                    <p className="text-[10px] text-gray-300">See Supabase for detail</p>
-                  </div>
-                )
-              })}
-            </div>
+        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+          <h2 className="text-sm font-semibold text-gray-700 mb-4">Notice Me — Product Breakdown</h2>
+          <div className="grid grid-cols-3 gap-4">
+            {[
+              { key: 'forecasting', label: 'Forecasting Reading' },
+              { key: 'compatibility', label: 'Saju Compatibility' },
+              { key: 'subscription', label: '12-Month Subscription' },
+            ].map(({ key, label }) => (
+              <div key={key} className="text-center border border-gray-100 rounded-lg p-4">
+                <p className="text-xs text-gray-400 mb-2">{label}</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.noticeMeByProduct?.[key] ?? 0}</p>
+                <p className="text-[10px] text-gray-300 mt-1">clicks</p>
+              </div>
+            ))}
           </div>
-        )}
+        </div>
 
         {/* Submissions chart */}
         <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">

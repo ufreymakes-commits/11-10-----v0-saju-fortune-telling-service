@@ -47,6 +47,18 @@ export async function GET(req: NextRequest) {
       .select('*', { count: 'exact', head: true })
       .eq('status', 'completed')
 
+    // Notice me per-product breakdown
+    const { data: noticeMeEvents } = await supabase
+      .from('analytics_events')
+      .select('metadata')
+      .eq('event_type', 'notice_me_click')
+
+    const noticeMeByProduct: Record<string, number> = {}
+    for (const ev of noticeMeEvents || []) {
+      const product = (ev.metadata as { product?: string })?.product || 'unknown'
+      noticeMeByProduct[product] = (noticeMeByProduct[product] || 0) + 1
+    }
+
     // Recent submissions
     const { data: recentSubmissions } = await supabase
       .from('submissions')
@@ -74,6 +86,7 @@ export async function GET(req: NextRequest) {
       totalPayments,
       recentSubmissions,
       dailySubmissionCounts,
+      noticeMeByProduct,
     })
   } catch (e) {
     return NextResponse.json({ error: 'failed' }, { status: 500 })
