@@ -65,7 +65,7 @@ export default function StartPage() {
         </div>
         
         {/* Info */}
-        <p className="mt-6 text-[10px] text-white/25 text-center max-w-sm leading-relaxed">
+        <p className="mt-6 text-[10px] text-white/60 text-center max-w-sm leading-relaxed">
           Your information is used solely to calculate your birth chart and will not be shared with third parties. By continuing, you agree to our privacy policy and receiving our Saju tips newsletter. Secure &amp; Easy unsubscribe anytime.
         </p>
       </div>
