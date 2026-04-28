@@ -274,20 +274,28 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
       </div>
 
       {/* Five Elements Balance — blurred teaser */}
-      <div className="mb-6 bg-card border border-border rounded-xl p-4 shadow-sm">
+      <div className="mb-6 bg-card border border-border rounded-xl p-4 shadow-sm relative">
+        {/* Lock icon centered */}
+        <div className="flex justify-center mb-2">
+          <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
+            <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+        </div>
         <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-3 text-center">Five Elements Balance</h2>
         <div className="space-y-2 blur-sm select-none pointer-events-none">
           {[
-            { label: 'Wood', color: 'bg-green-500', pct: 62 },
-            { label: 'Fire', color: 'bg-red-500', pct: 38 },
-            { label: 'Earth', color: 'bg-yellow-600', pct: 55 },
-            { label: 'Metal', color: 'bg-gray-400', pct: 20 },
-            { label: 'Water', color: 'bg-blue-500', pct: 80 },
-          ].map(({ label, color, pct }) => (
+            { label: 'Wood', pct: 62 },
+            { label: 'Fire', pct: 38 },
+            { label: 'Earth', pct: 55 },
+            { label: 'Metal', pct: 20 },
+            { label: 'Water', pct: 80 },
+          ].map(({ label, pct }) => (
             <div key={label} className="flex items-center gap-3">
               <span className="text-xs text-foreground w-12 flex-shrink-0">{label}</span>
               <div className="flex-1 h-4 bg-background/50 rounded-full overflow-hidden">
-                <div className={`h-full ${color}`} style={{ width: `${pct}%` }} />
+                <div className="h-full bg-purple-600" style={{ width: `${pct}%` }} />
               </div>
               <span className="text-xs text-muted-foreground w-8 text-right">??</span>
             </div>
