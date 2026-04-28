@@ -227,10 +227,13 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
           className="w-full py-4 px-5 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors text-center"
         >
           <p className="text-sm font-semibold text-foreground leading-snug">
-            Submit the review on SNS
+            Submit the review and
           </p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            and get 100% free coupon (for your friend or family)
+          <p className="text-sm font-semibold text-foreground leading-snug">
+            get 100% free coupon
+          </p>
+          <p className="text-[11px] text-muted-foreground mt-1">
+            (for your friend or family)
           </p>
         </button>
       </div>
