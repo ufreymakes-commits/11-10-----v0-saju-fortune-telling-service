@@ -161,6 +161,17 @@ export default function StartPage() {
                 <p className="text-xs text-white/60">Easy-to-understand insights</p>
               </div>
             </div>
+
+            {/* CTA after No.1 cards */}
+            <div className="mt-10 flex justify-center">
+              <Link
+                href="#top"
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-semibold text-base shadow-lg shadow-purple-900/40 hover:from-purple-500 hover:to-fuchsia-500 transition-all hover:scale-105"
+              >
+                Get 9 Facts For Free
+                <span className="text-white/70 font-normal text-sm">(1 min)</span>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
