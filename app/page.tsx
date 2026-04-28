@@ -146,8 +146,7 @@ export default function LandingPage() {
               </svg>
             ))}
           </div>
-          <p className="text-center text-base font-bold text-white/80 mb-1">+2,765 reports sent</p>
-          <p className="text-center text-sm text-white/50 mb-3">Swipe to see 26+ reviews</p>
+          <p className="text-center text-base font-bold text-white/80 mb-3">+2,765 reports sent</p>
           <p className="text-center text-sm text-white/50 mb-3 font-semibold">
             If these reviews are found to be manipulated or fake, we will stop selling this service.
           </p>

@@ -143,7 +143,7 @@ export function TextReviewSlider({ reviews }: TextReviewSliderProps) {
       
       {/* Scroll hint for mobile */}
       <p className="text-center text-xs text-white/30 md:hidden">
-        Swipe to see more reviews
+        Swipe to see 29+ reviews
       </p>
     </div>
   )
