@@ -272,6 +272,29 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
         </div>
       </div>
 
+      {/* Five Elements Balance — blurred teaser */}
+      <div className="mb-6 bg-card border border-border rounded-xl p-4 shadow-sm">
+        <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-3 text-center">Five Elements Balance</h2>
+        <div className="space-y-2 blur-sm select-none pointer-events-none">
+          {[
+            { label: 'Wood', color: 'bg-green-500', pct: 62 },
+            { label: 'Fire', color: 'bg-red-500', pct: 38 },
+            { label: 'Earth', color: 'bg-yellow-600', pct: 55 },
+            { label: 'Metal', color: 'bg-gray-400', pct: 20 },
+            { label: 'Water', color: 'bg-blue-500', pct: 80 },
+          ].map(({ label, color, pct }) => (
+            <div key={label} className="flex items-center gap-3">
+              <span className="text-xs text-foreground w-12 flex-shrink-0">{label}</span>
+              <div className="flex-1 h-4 bg-background/50 rounded-full overflow-hidden">
+                <div className={`h-full ${color}`} style={{ width: `${pct}%` }} />
+              </div>
+              <span className="text-xs text-muted-foreground w-8 text-right">??</span>
+            </div>
+          ))}
+        </div>
+        <p className="text-center text-[10px] text-muted-foreground/50 mt-3">Unlock the full report to see your actual values</p>
+      </div>
+
       {/* Teaser Facts 10, 11, 12 with blur */}
       <div className="mb-6">
         <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
@@ -284,7 +307,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           <div className="relative bg-muted border border-border rounded-lg p-3 overflow-hidden">
             <div className="flex gap-2">
               <span className="text-muted-foreground font-bold text-sm">10</span>
-              <p className="text-foreground/90 text-xs leading-relaxed">
+              <p className="text-foreground/90 text-xs leading-relaxed font-bold">
                 {submission.name}, The main theme of your 2026 is <span className="blur-[5px] select-none bg-primary/20 px-2">hidden content</span>. Congratulations! But be careful of <span className="blur-[5px] select-none bg-primary/20 px-2">something</span>, as <span className="blur-[5px] select-none bg-primary/20 px-2">reason here</span> doesn&apos;t fit well with your lifestyle.
               </p>
             </div>
@@ -294,7 +317,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           <div className="relative bg-muted border border-border rounded-lg p-3 overflow-hidden">
             <div className="flex gap-2">
               <span className="text-muted-foreground font-bold text-sm">11</span>
-              <p className="text-foreground/90 text-xs leading-relaxed">
+              <p className="text-foreground/90 text-xs leading-relaxed font-bold">
                 The period from 20<span className="blur-[5px] select-none bg-primary/20 px-1">xx</span> to 20<span className="blur-[5px] select-none bg-primary/20 px-1">xx</span> is the best time to meet your spouse. Your spouse will probably be in charge of <span className="blur-[5px] select-none bg-primary/20 px-2">role here</span> and work as a <span className="blur-[5px] select-none bg-primary/20 px-2">job title</span>.
               </p>
             </div>
@@ -304,8 +327,8 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           <div className="relative bg-muted border border-border rounded-lg p-3 overflow-hidden">
             <div className="flex gap-2">
               <span className="text-muted-foreground font-bold text-sm">12</span>
-              <p className="text-foreground/90 text-xs leading-relaxed">
-                Hey, {submission.name}! Are you actually ready to be rich? How about looking at it from this angle?
+              <p className="text-foreground/90 text-xs leading-relaxed font-bold">
+                Hey, {submission.name}! Your wealth flow timing and secret talents are already mapped out like <span className="blur-[5px] select-none bg-primary/20 px-3">여기 블러 처리</span> Ready to see your future from this angle?
               </p>
             </div>
           </div>
@@ -320,8 +343,9 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
       {/* CTA intro text - outside the card */}
       <div className="text-center mb-4">
         <p className="text-sm text-foreground/80 leading-relaxed">
-          Shall we dive into the details?<br />
-          Check out <span className="font-bold">how to supercharge your luck<br />in just one minute</span> with the full report below.
+          You build your own path.<br />
+          We just have the <strong>cheat code for your ultimate version</strong>.<br />
+          Ready to see <strong>this strategy report</strong> for your <strong>best-case scenario?</strong>
         </p>
       </div>
 
@@ -342,10 +366,16 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
         <p className="text-sm font-medium text-foreground/80 mb-2">
           Full Report
         </p>
+
+        <p className="text-[10px] text-muted-foreground/70 leading-relaxed mb-3 px-2">
+          Core Aura · Inner Child Era · Present Energy · Career Motion · Money Flow<br />
+          Love &amp; Endgame · Future Self Sneak Peek · Lucky Environment · The Next Chapter
+        </p>
         
         <div className="flex items-center justify-center gap-2 mb-3">
           <span className="text-muted-foreground line-through text-xs">$19.99</span>
           <span className="text-xl font-bold bg-gradient-to-r from-purple-500 to-fuchsia-500 bg-clip-text text-transparent">$9.99</span>
+          <span className="text-[10px] font-bold bg-red-500 text-white px-1.5 py-0.5 rounded-full">50% HOT</span>
         </div>
         
         <Link href={`/checkout/${submissionId}`}>

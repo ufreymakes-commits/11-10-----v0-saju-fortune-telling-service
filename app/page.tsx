@@ -136,14 +136,18 @@ export default function LandingPage() {
       <section className="relative z-10 py-16 px-4">
         <div className="max-w-5xl mx-auto">
           <h3 className="text-center text-2xl md:text-3xl font-semibold text-white/90 mb-2">100% Genuine Reviews</h3>
-          <div className="flex items-center justify-center gap-1 mb-3">
+          <div className="flex items-center justify-center gap-1 mb-1">
+            <svg className="w-4 h-4 text-green-400 fill-current mr-1" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+            </svg>
             {Array.from({ length: 5 }).map((_, i) => (
               <svg key={i} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
                 <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
               </svg>
             ))}
-            <span className="text-sm text-white/60 ml-2">26+ reviews</span>
           </div>
+          <p className="text-center text-base font-bold text-white/80 mb-1">+2,765 reports sent</p>
+          <p className="text-center text-sm text-white/50 mb-3">Swipe to see 26+ reviews</p>
           <p className="text-center text-sm text-white/50 mb-3 font-semibold">
             If these reviews are found to be manipulated or fake, we will stop selling this service.
           </p>

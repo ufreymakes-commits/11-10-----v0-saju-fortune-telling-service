@@ -421,9 +421,11 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
       </div>
 
       {/* Fixed Share Button - bottom right */}
+      <div className="fixed bottom-6 right-5 z-50 flex flex-col items-center gap-1">
+        <span className="text-[9px] text-muted-foreground/60 tracking-wider uppercase">Share</span>
       <button
         onClick={handleCopyLink}
-        className="fixed bottom-6 right-5 z-50 flex items-center gap-2 bg-card border border-primary/40 text-foreground text-xs px-4 py-2.5 rounded-full shadow-lg shadow-primary/20 hover:border-primary/70 hover:bg-primary/10 transition-all"
+        className="flex items-center gap-2 bg-card border border-primary/40 text-foreground text-xs px-4 py-2.5 rounded-full shadow-lg shadow-primary/20 hover:border-primary/70 hover:bg-primary/10 transition-all"
       >
         {copied ? (
           <>
@@ -437,6 +439,7 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
           </>
         )}
       </button>
+      </div>
     </div>
   )
 }
