@@ -19,7 +19,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: 'Invalid coupon code' }, { status: 400 })
   }
 
-  // Check if paid report already exists
+  // Check if this submission already used a coupon (1 use per user)
+  const { data: usageRecord } = await supabase
+    .from('coupon_usage')
+    .select('id')
+    .eq('submission_id', submissionId)
+    .maybeSingle()
+
+  if (usageRecord) {
+    return NextResponse.json(
+      { success: false, error: 'This coupon has already been used for your report' },
+      { status: 400 }
+    )
+  }
+
+  // Check if paid report already exists (e.g. paid via PayPal)
   const { data: existing } = await supabase
     .from('submissions')
     .select('paid_report_url')
@@ -34,6 +48,20 @@ export async function POST(req: NextRequest) {
     } catch {
       return NextResponse.json({ success: true, redirectPath: existing.paid_report_url })
     }
+  }
+
+  // Record coupon usage before triggering generation
+  // submission_id has a UNIQUE constraint so concurrent duplicate requests are also blocked at DB level
+  const { error: insertError } = await supabase
+    .from('coupon_usage')
+    .insert({ coupon_code: code.trim(), submission_id: submissionId })
+
+  if (insertError) {
+    // Unique constraint violation means a concurrent request already claimed it
+    return NextResponse.json(
+      { success: false, error: 'This coupon has already been used for your report' },
+      { status: 400 }
+    )
   }
 
   // No paid report yet — fire-and-forget (same as PayPal flow)
