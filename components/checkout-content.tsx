@@ -141,7 +141,7 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
         </div>
         
         <h1 className="text-2xl md:text-3xl font-bold text-gradient mb-2">
-          Unlock Your Full Report
+          Unlock Your Full Report within 2 mins!
         </h1>
         <p className="text-foreground/70">
           {name}, your complete 99 facts await

@@ -8,6 +8,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { DayMasterCard } from '@/components/day-master-card'
 import type { Fact, SajuData } from '@/lib/types'
 import { LockIcon, Share2Icon } from 'lucide-react'
+import { NoticeMeButton } from '@/components/notice-me-button'
 
 // Preview page reviews data with names and countries - sorted by most recent first
 const PREVIEW_REVIEWS = [
@@ -308,7 +309,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
             <div className="flex gap-2">
               <span className="text-muted-foreground font-bold text-sm">10</span>
               <p className="text-foreground/90 text-xs leading-relaxed font-bold">
-                {submission.name}, The main theme of your 2026 is <span className="blur-[5px] select-none bg-primary/20 px-2">hidden content</span>. Congratulations! But be careful of <span className="blur-[5px] select-none bg-primary/20 px-2">something</span>, as <span className="blur-[5px] select-none bg-primary/20 px-2">reason here</span> doesn&apos;t fit well with your lifestyle.
+                {submission.name}, Congratulations! The main theme of your 2026 is &quot;<span className="blur-[5px] select-none bg-primary/20 px-2">hidden content</span>&quot;. Hmm.. But be careful of <span className="blur-[5px] select-none bg-primary/20 px-2">something</span>, as <span className="blur-[5px] select-none bg-primary/20 px-2">reason here</span> doesn&apos;t fit well with your lifestyle.
               </p>
             </div>
           </div>
@@ -487,10 +488,26 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           </div>
           <h4 className="text-sm font-semibold text-white mb-1">Signature Saju Elemental Bracelet</h4>
           <p className="text-xs text-white/60 mb-3">A signature bracelet designed to fill the missing energies in your personal Saju chart and attract good fortune.</p>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-3">
             <span className="text-xs text-amber-300">Personalized to your Saju</span>
-            <span className="text-sm font-bold text-white/50">$38</span>
+            <span className="text-sm font-bold text-white">$38</span>
           </div>
+          {/* Shopify badge */}
+          <div className="flex items-center gap-1.5 mb-3">
+            <Image
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8C%E1%85%A6%E1%84%86%E1%85%A9%E1%86%A8%E1%84%8B%E1%85%B3%E1%86%AF%20%E1%84%8B%E1%85%B5%E1%86%B8%E1%84%85%E1%85%A7%E1%86%A8%E1%84%92%E1%85%A2%E1%84%8C%E1%85%AE%E1%84%89%E1%85%A6%E1%84%8B%E1%85%AD.-rHCZrL3MSmA5XIQcuz0W5A0tHTyxAR.png"
+              alt="Shopify"
+              width={16}
+              height={16}
+              className="object-contain"
+            />
+            <span className="text-[11px] text-amber-300/80">Shop at Sajume Shopify</span>
+          </div>
+          {/* Notice me button */}
+          <NoticeMeButton
+            product="bracelet"
+            className="w-full text-center py-2.5 px-4 rounded-lg text-sm font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/30 hover:border-amber-400/60 transition-all"
+          />
         </div>
       </div>
 
