@@ -280,7 +280,10 @@ Generate the 90 facts now as a JSON array.`
     }
 
     // submissions 테이블에 paid_report_url 저장
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+    // Always use the canonical production domain so "Find My Report" works reliably.
+    // NEXT_PUBLIC_CANONICAL_URL must be set to https://my.sajume.com in Vercel env vars.
+    const baseUrl = process.env.NEXT_PUBLIC_CANONICAL_URL ||
+      process.env.NEXT_PUBLIC_BASE_URL ||
       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
     const paidReportUrl = `${baseUrl}/report/${submissionId}/paid`
 
