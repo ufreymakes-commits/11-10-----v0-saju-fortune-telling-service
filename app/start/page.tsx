@@ -255,18 +255,18 @@ export default function StartPage() {
       {/* Footer */}
       <footer className="relative z-10 py-6 border-t border-white/10">
         <div className="text-center">
-          <p className="text-[10px] text-white/30">All rights reserved by Sajume.</p>
+          <p className="text-[11px] text-white/60">All rights reserved by Sajume.</p>
           <div className="mt-4 flex flex-col items-center gap-3">
             <button
               data-tally-open="681NVP"
               data-tally-layout="modal"
               data-tally-emoji-text="👋"
               data-tally-emoji-animation="wave"
-              className="px-4 py-2 bg-primary/20 border border-primary/40 text-foreground text-xs font-semibold rounded hover:bg-primary/30 hover:border-primary/60 transition-all"
+              className="px-4 py-2 bg-white/10 border border-white/30 text-white text-xs font-semibold rounded hover:bg-white/20 hover:border-white/50 transition-all"
             >
               May I help you with the issue?
             </button>
-            <p className="text-[10px] text-white/30">Business: hello@sajume.com</p>
+            <p className="text-[11px] text-white/60">Business: hello@sajume.com</p>
           </div>
         </div>
       </footer>
