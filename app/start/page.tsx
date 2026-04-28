@@ -20,7 +20,7 @@ export default function StartPage() {
     <main className="min-h-screen bg-[#0a0a14] relative overflow-x-hidden pt-10">
       <StarsBackground />
       
-      <div className="relative z-10 flex flex-col items-center px-4 py-8">
+      <div id="top" className="relative z-10 flex flex-col items-center px-4 py-8">
         {/* Characters in V-formation */}
         <div className="relative w-64 md:w-80 h-44 md:h-56 mx-auto mb-4">
           {/* Left outer - Eulmok (green) */}
@@ -66,7 +66,7 @@ export default function StartPage() {
         
         {/* Info */}
         <p className="mt-6 text-[10px] text-white/60 text-center max-w-sm leading-relaxed">
-          Your information is used solely to calculate your birth chart and will not be shared with third parties. By continuing, you agree to our privacy policy and receiving our Saju tips newsletter. Secure &amp; Easy unsubscribe anytime.
+          Your information is used solely to calculate your birth chart and will not be shared with third parties. By continuing, you agree to our privacy policy and receiving our Saju tips newsletter.
         </p>
       </div>
 
@@ -174,7 +174,7 @@ export default function StartPage() {
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* 99 Facts */}
-            <Link href="/start" className="group md:col-span-1">
+            <Link href="#top" className="group md:col-span-1">
               <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/30 rounded-xl p-6 hover:border-purple-400/50 transition-all hover:scale-[1.02] h-full flex flex-col">
                 <h4 className="text-base md:text-lg font-semibold text-white mb-3">99 Facts</h4>
                 <div className="relative w-full mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex-shrink-0" style={{ aspectRatio: '800/533' }}>
