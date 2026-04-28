@@ -36,21 +36,41 @@ export default function StartPage() {
       <StarsBackground />
       
       <div className="relative z-10 flex flex-col items-center px-4 py-8">
-        {/* Mascot */}
-        <div className="relative w-32 h-32 mb-4 animate-float">
-          <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%85%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"
-            alt="Sajume mascot"
-            fill
-            className="object-contain"
-          />
+        {/* Characters in V-formation */}
+        <div className="relative w-64 md:w-80 h-44 md:h-56 mx-auto mb-4">
+          {/* Left outer - Eulmok (green) */}
+          <div className="absolute w-14 h-14 md:w-18 md:h-18 z-0 opacity-30" style={{ left: '0%', top: '20%' }}>
+            <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/eulmok-311z2CoqsXicrNLz220oq3Nb7q1aRl.png" alt="Eulmok" fill className="object-contain" />
+          </div>
+          {/* Left inner - Gyesu (purple) */}
+          <div className="absolute w-16 h-16 md:w-20 md:h-20 z-0 opacity-40" style={{ left: '15%', top: '30%' }}>
+            <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gyesu-8YTx4VfcXnNEPPK54QUH0AbfH7oLO3.png" alt="Gyesu" fill className="object-contain" />
+          </div>
+          {/* Main mascot - center, floating */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 md:w-44 md:h-44 z-10 animate-float">
+            <Image
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%85%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"
+              alt="Sajume mascot"
+              fill
+              className="object-contain drop-shadow-2xl"
+              priority
+            />
+          </div>
+          {/* Right inner - Gyeonggeum (gray) */}
+          <div className="absolute w-16 h-16 md:w-20 md:h-20 z-0 opacity-40" style={{ right: '15%', top: '30%' }}>
+            <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gyeonggeum-C2Pu1PvGYI22q3evrb6Ynel484URPj.png" alt="Gyeonggeum" fill className="object-contain" />
+          </div>
+          {/* Right outer - Byeonghwa (orange) */}
+          <div className="absolute w-14 h-14 md:w-18 md:h-18 z-0 opacity-30" style={{ right: '0%', top: '20%' }}>
+            <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/byeonghwa-nwRyjkGV7yuO4EC9wCYlt8Chx6jhyC.png" alt="Byeonghwa" fill className="object-contain" />
+          </div>
         </div>
-        
+
         {/* Title */}
         <h1 className="text-xl font-semibold text-gradient text-center mb-1">
           Enter Your Birth Info
         </h1>
-        <p className="text-sm text-foreground/70 text-center mb-6 max-w-md">
+        <p className="text-sm text-white font-medium text-center mb-6 max-w-md">
           Share your birth details to unlock the secrets hidden in your Saju chart
         </p>
         
