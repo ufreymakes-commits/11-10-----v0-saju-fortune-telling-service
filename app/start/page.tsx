@@ -52,12 +52,9 @@ export default function StartPage() {
         </div>
 
         {/* Title */}
-        <h1 className="text-xl font-semibold text-gradient text-center mb-1">
+        <h1 className="text-xl font-semibold text-gradient text-center mt-1 mb-6">
           Enter Your Birth Info
         </h1>
-        <p className="text-sm text-white font-medium text-center mb-6 max-w-md">
-          Share your birth details to unlock the secrets hidden in your Saju chart
-        </p>
         
         {/* Form Card */}
         <div className="w-full max-w-md bg-white border border-primary/20 rounded-2xl p-6 md:p-8 shadow-xl">
