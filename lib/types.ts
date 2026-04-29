@@ -123,7 +123,7 @@ export interface SajuData {
   }
   
   // 대운
-  daewoon?: Array<{ startAge: number; endAge: number; stem: string; branch: string; fullName?: string }>
+  daewoon?: Array<{ startAge: number; endAge: number; stem: string; branch: string; fullName?: string; tenGod?: string; twelveStar?: string; element?: string }>
   
   // 연운
   yeonwoon?: Array<{ year: number; stem: string; branch: string; fullName?: string }>
