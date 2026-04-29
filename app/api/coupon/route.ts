@@ -36,6 +36,20 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Check how many times this submissionId has used a coupon (max 2)
+  const { count } = await supabase
+    .from('payments')
+    .select('id', { count: 'exact', head: true })
+    .eq('submission_id', submissionId)
+    .like('paypal_order_id', 'COUPON-%')
+
+  if ((count ?? 0) >= 2) {
+    return NextResponse.json(
+      { success: false, error: 'This coupon has already been used twice for your report' },
+      { status: 400 }
+    )
+  }
+
   // No paid report yet — create payment record for coupon (same structure as PayPal)
   const { error: paymentError } = await supabase
     .from('payments')
