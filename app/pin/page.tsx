@@ -25,7 +25,7 @@ export default function PinPage() {
         </div>
 
         <button
-          data-tally-open="81JRrr"
+          data-tally-open="681NVP"
           data-tally-layout="modal"
           data-tally-emoji-text="👋"
           data-tally-emoji-animation="wave"
