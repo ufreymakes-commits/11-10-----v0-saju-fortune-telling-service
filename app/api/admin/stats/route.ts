@@ -35,17 +35,39 @@ export async function GET(req: NextRequest) {
       .from('submissions')
       .select('*', { count: 'exact', head: true })
 
-    // Paid submissions
-    const { count: paidSubmissions } = await supabase
+    // Paid submissions — PayPal only (exclude coupon users)
+    const { data: couponSubmissionIds } = await supabase
+      .from('payments')
+      .select('submission_id')
+      .eq('status', 'completed')
+      .like('paypal_order_id', 'COUPON-%')
+
+    const couponIds = (couponSubmissionIds || []).map((r: { submission_id: string }) => r.submission_id)
+
+    let paidQuery = supabase
       .from('submissions')
       .select('*', { count: 'exact', head: true })
       .not('paid_report_url', 'is', null)
 
-    // Payments
+    if (couponIds.length > 0) {
+      paidQuery = paidQuery.not('id', 'in', `(${couponIds.join(',')})`)
+    }
+
+    const { count: paidSubmissions } = await paidQuery
+
+    // Payments — PayPal only (exclude coupon)
     const { count: totalPayments } = await supabase
       .from('payments')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'completed')
+      .not('paypal_order_id', 'like', 'COUPON-%')
+
+    // Coupon usage count
+    const { count: couponUsageCount } = await supabase
+      .from('payments')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'completed')
+      .like('paypal_order_id', 'COUPON-%')
 
     // Monthly paid report counts (last 12 months)
     const { data: monthlyRaw } = await supabase
@@ -115,6 +137,7 @@ export async function GET(req: NextRequest) {
       totalSubmissions,
       paidSubmissions,
       totalPayments,
+      couponUsageCount,
       recentSubmissions,
       dailySubmissionCounts,
       dailyPaidCounts,

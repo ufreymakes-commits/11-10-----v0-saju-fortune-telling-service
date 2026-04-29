@@ -9,6 +9,7 @@ interface Stats {
   totalSubmissions: number
   paidSubmissions: number
   totalPayments: number
+  couponUsageCount: number
   recentSubmissions: {
     id: string
     name: string
@@ -208,8 +209,9 @@ export default function AdminPage() {
         {/* Stat Cards */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           <StatCard label="총 제출 수" value={stats.totalSubmissions ?? 0} sub="무료 레포트 생성" />
-          <StatCard label="유료 레포트" value={stats.paidSubmissions ?? 0} sub="레포트 발급 완료" />
+          <StatCard label="유료 레포트" value={stats.paidSubmissions ?? 0} sub="PayPal 결제 기준" />
           <StatCard label="결제 완료" value={totalPayments} sub="PayPal 결제" />
+          <StatCard label="쿠폰 사용" value={stats.couponUsageCount ?? 0} sub="무료 쿠폰 사용 횟수" />
           <StatCard label="링크 공유 - 무료" value={c['share_free_report'] ?? 0} sub="무료 레포트 공유" />
           <StatCard label="링크 공유 - 유료" value={c['share_paid_report'] ?? 0} sub="유료 레포트 공유" />
           <StatCard label="관심 표시" value={c['notice_me_click'] ?? 0} sub="Notice Me 전체" />
