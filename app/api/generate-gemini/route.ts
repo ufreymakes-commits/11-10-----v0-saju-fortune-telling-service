@@ -2459,7 +2459,7 @@ ${JSON.stringify(allSajuData, null, 2)}
     console.log('[v0] Gemini: stage1UserPrompt length =', stage1UserPrompt.length, 'chars')
 
     const stage1Result = await generateText({
-      model: 'google/gemini-3-flash',
+      model: 'google/gemini-2.0-flash',
       system: stage1SystemPrompt,
       prompt: stage1UserPrompt,
       temperature: 0,
@@ -2619,7 +2619,7 @@ OUTPUT FORMAT (JSON ONLY):
       system: stage2SystemPrompt,
       prompt: stage2UserPrompt,
       temperature: 0,
-      maxTokens: 4000
+      maxTokens: 2500
     })
 
     console.log('[v0] Gemini: Stage 2 response received, parsing...')
