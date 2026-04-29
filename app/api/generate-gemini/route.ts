@@ -2389,7 +2389,7 @@ Respond ONLY in JSON format.`
 [STAGE 1: 8가지 체크포인트 심화 분석]
 ===========================================
 
-아래 8가지 체크포인트에 맞춰 이 사주의 '인생 시나리오'를 3,500자로 심화 분석하라.
+아래 8가지 체크포인트에 맞춰 이 사주의 '인생 시나리오'를 2,500자로 심화 분석하라.
 절대 뻔한 소리를 하지 말고, 데이터 수치에 근거해 소름 끼칠 정도로 날카로운 심리적/현실적 핵심을 도출하라. 내가 보낸 이 사주 데이터는 이 세상 최고의 신선한 최상급 재료들이다. 너는 세계에서 가장 유명한 미슐랭 1등급 쉐프 같은 사주 데이터 분석가이다. 철저하게 이 데이터들을 가지고 최상의 해석지를 도출해내야 한다. 반드시!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 1. 페르소나 충돌 (일간 vs 월지)
@@ -2471,13 +2471,13 @@ ${JSON.stringify(allSajuData, null, 2)}
 
     // Stage 1 JSON 파싱 (더 유연한 형식 지원)
     let stage1JsonMatch = stage1Result.text.match(/```json\n([\s\S]*?)\n```/)
-    
+
     // 첫 번째 시도 실패시 다른 형식 시도
     if (!stage1JsonMatch) {
       // 형식2: ```json ... ``` (줄바꿈 없음)
       stage1JsonMatch = stage1Result.text.match(/```json([\s\S]*?)```/)
     }
-    
+
     if (!stage1JsonMatch) {
       // 형식3: { ... } 직접 매칭
       const directJsonMatch = stage1Result.text.match(/(\{[\s\S]*\})/)
@@ -2485,7 +2485,7 @@ ${JSON.stringify(allSajuData, null, 2)}
         stage1JsonMatch = [null, directJsonMatch[1]]
       }
     }
-    
+
     if (!stage1JsonMatch) {
       console.error('[v0] Gemini: Stage 1 raw response:', stage1Result.text)
       throw new Error('Stage 1 JSON format not found')
@@ -2512,9 +2512,9 @@ Language: English only.
     // 생년월일에서 계절 파악해서 조후 정도 판단
     const month = parseInt(birth_date.split('-')[1])
     const isBalancedSeason = [3, 4, 9, 10].includes(month) // 봄/가을
-    
+
     let selectedYongsin = 'your lucky element'
-    
+
     if (isBalancedSeason && saju_data.eokbuYongsin) {
       // 조후가 원만하면 억부용신 선택
       selectedYongsin = saju_data.eokbuYongsin
@@ -2528,7 +2528,7 @@ Language: English only.
       // 그 다음 억부용신
       selectedYongsin = saju_data.eokbuYongsin
     }
-    
+
     // 한글 글자를 오행으로 변환
     const hanja2Element: Record<string, string> = {
       '甲': 'Wood', '乙': 'Wood',
@@ -2537,7 +2537,7 @@ Language: English only.
       '庚': 'Metal', '辛': 'Metal',
       '壬': 'Water', '癸': 'Water'
     }
-    
+
     // selectedYongsin에서 첫 번째 요소만 추출 (예: "Water > Wood" → "Water")
     let firstElement = selectedYongsin
     if (selectedYongsin.includes('>')) {
@@ -2547,7 +2547,7 @@ Language: English only.
       // "水(인성)" 형식에서 한글 부분 제거
       firstElement = selectedYongsin.split('(')[0].trim()
     }
-    
+
     // 한글 글자를 영어 오행명칭으로 변환
     let yongsinElement = firstElement
     if (hanja2Element[firstElement]) {
@@ -2627,13 +2627,13 @@ OUTPUT FORMAT (JSON ONLY):
 
     // Stage 2 JSON 파싱 (더 유연한 ������ 지원)
     let stage2JsonMatch = stage2Result.text.match(/```json\n([\s\S]*?)\n```/)
-    
+
     // 첫 번째 시도 실패시 다른 형식 시도
     if (!stage2JsonMatch) {
       // 형식2: ```json ... ``` (줄바꿈 없음)
       stage2JsonMatch = stage2Result.text.match(/```json([\s\S]*?)```/)
     }
-    
+
     if (!stage2JsonMatch) {
       // 형식3: { ... } 직접 매칭
       const directJsonMatch = stage2Result.text.match(/(\{[\s\S]*\})/)
@@ -2641,7 +2641,7 @@ OUTPUT FORMAT (JSON ONLY):
         stage2JsonMatch = [null, directJsonMatch[1]]
       }
     }
-    
+
     if (!stage2JsonMatch) {
       console.error('[v0] Gemini: Stage 2 raw response:', stage2Result.text)
       throw new Error('Stage 2 JSON format not found')
