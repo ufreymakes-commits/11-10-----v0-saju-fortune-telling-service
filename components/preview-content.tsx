@@ -362,7 +362,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
       <div className="bg-card border border-primary/40 rounded-2xl p-5 text-center shadow-lg shadow-primary/10">
         <div className="relative w-12 h-12 mx-auto mb-3 animate-float">
           <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%85%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"
+            src="/images/mascot-main.png"
             alt="Sajume mascot"
             fill
             className="object-contain"
@@ -503,7 +503,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           {/* Shopify badge */}
           <div className="flex items-center gap-1.5 mb-3">
             <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8C%E1%85%A6%E1%84%86%E1%85%A9%E1%86%A8%E1%84%8B%E1%85%B3%E1%86%AF%20%E1%84%8B%E1%85%B5%E1%86%B8%E1%84%85%E1%85%A7%E1%86%A8%E1%84%92%E1%85%A2%E1%84%8C%E1%85%AE%E1%84%89%E1%85%A6%E1%84%8B%E1%85%AD.-rHCZrL3MSmA5XIQcuz0W5A0tHTyxAR.png"
+              src="/images/shopify-logo.png"
               alt="Shopify"
               width={16}
               height={16}

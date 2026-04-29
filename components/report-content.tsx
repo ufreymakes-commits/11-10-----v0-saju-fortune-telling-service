@@ -327,7 +327,7 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
             <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
               <div className="relative w-full h-44">
                 <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Frame%20186-4UxuQefWCJ3ecnuEVZjkIyjL94QZBh.png"
+                  src="/images/bracelet-product.png"
                   alt="Signature Saju Elemental Bracelet"
                   fill
                   className="object-cover"
@@ -342,7 +342,7 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-1.5">
                     <Image
-                      src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8C%E1%85%A6%E1%84%86%E1%85%A9%E1%86%A8%E1%84%8B%E1%85%B3%E1%86%AF%20%E1%84%8B%E1%85%B5%E1%86%B8%E1%84%85%E1%85%A7%E1%86%A8%E1%84%92%E1%85%A2%E1%84%8C%E1%85%AE%E1%84%89%E1%85%A6%E1%84%8B%E1%85%AD.-rHCZrL3MSmA5XIQcuz0W5A0tHTyxAR.png"
+                      src="/images/shopify-logo.png"
                       alt="Shopify"
                       width={16}
                       height={16}

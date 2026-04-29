@@ -133,7 +133,7 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
         
         <div className="relative w-24 h-24 mx-auto mb-4 animate-float">
           <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%85%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"
+            src="/images/mascot-main.png"
             alt="Sajume mascot"
             fill
             className="object-contain"
@@ -155,7 +155,7 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
         <div className="flex items-start gap-4 mb-4">
           <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
             <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/99facts.png-GQUor5lDB3UZjqnzWfMmGM6jWNHITE.jpeg"
+              src="/images/99facts.jpg"
               alt="99 Facts"
               fill
               className="object-cover"

@@ -25,16 +25,16 @@ export default function StartPage() {
         <div className="relative w-64 md:w-80 h-44 md:h-56 mx-auto mb-0">
           {/* Left outer - Eulmok (green) */}
           <div className="absolute w-14 h-14 z-0 opacity-30" style={{ left: '0%', top: '20%' }}>
-            <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/eulmok-311z2CoqsXicrNLz220oq3Nb7q1aRl.png" alt="Eulmok" width={56} height={56} className="object-contain w-full h-full" />
+            <Image src="/images/eulmok.png" alt="Eulmok" width={56} height={56} className="object-contain w-full h-full" />
           </div>
           {/* Left inner - Gyesu (purple) */}
           <div className="absolute w-16 h-16 z-0 opacity-40" style={{ left: '15%', top: '30%' }}>
-            <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gyesu-8YTx4VfcXnNEPPK54QUH0AbfH7oLO3.png" alt="Gyesu" width={64} height={64} className="object-contain w-full h-full" />
+            <Image src="/images/gyesu.png" alt="Gyesu" width={64} height={64} className="object-contain w-full h-full" />
           </div>
           {/* Main mascot - center, floating */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-36 h-36 z-10 animate-float">
             <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8B%E1%85%B2%E1%84%85%E1%85%B5%E1%84%82%E1%85%B5%E1%86%B7%20%E1%84%8F%E1%85%A2%E1%84%85%E1%85%B5%E1%86%A8%E1%84%90%E1%85%A5_%E1%84%81%E1%85%A9%E1%84%85%E1%85%B59%E1%84%80%E1%85%A2_%E1%84%90%E1%85%AE%E1%84%86%E1%85%A7%E1%86%BC-4J7Wg4ZplPdldQ6mWiiyFy5QQ4WpGT.png"
+              src="/images/mascot-main.png"
               alt="Sajume mascot"
               width={144}
               height={144}
@@ -44,11 +44,11 @@ export default function StartPage() {
           </div>
           {/* Right inner - Gyeonggeum (gray) */}
           <div className="absolute w-16 h-16 z-0 opacity-40" style={{ right: '15%', top: '30%' }}>
-            <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/gyeonggeum-C2Pu1PvGYI22q3evrb6Ynel484URPj.png" alt="Gyeonggeum" width={64} height={64} className="object-contain w-full h-full" />
+            <Image src="/images/gyeonggeum.png" alt="Gyeonggeum" width={64} height={64} className="object-contain w-full h-full" />
           </div>
           {/* Right outer - Byeonghwa (orange) */}
           <div className="absolute w-14 h-14 z-0 opacity-30" style={{ right: '0%', top: '20%' }}>
-            <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/byeonghwa-nwRyjkGV7yuO4EC9wCYlt8Chx6jhyC.png" alt="Byeonghwa" width={56} height={56} className="object-contain w-full h-full" />
+            <Image src="/images/byeonghwa.png" alt="Byeonghwa" width={56} height={56} className="object-contain w-full h-full" />
           </div>
         </div>
 
@@ -108,7 +108,7 @@ export default function StartPage() {
             <div className="order-1">
               <div className="relative w-full max-w-md mx-auto">
                 <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Frame%20181-cfTMJ2cXy3zGAdmW4sf31fboZo7apa.png"
+                  src="/images/kpei-cert.png"
                   alt="KPEI Certification"
                   width={600}
                   height={700}
@@ -187,7 +187,7 @@ export default function StartPage() {
               <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/30 rounded-xl p-6 hover:border-purple-400/50 transition-all hover:scale-[1.02] h-full flex flex-col">
                 <h4 className="text-base md:text-lg font-semibold text-white mb-3">99 Facts</h4>
                 <div className="relative w-full mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex-shrink-0" style={{ aspectRatio: '800/533' }}>
-                  <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/99facts.png-GQUor5lDB3UZjqnzWfMmGM6jWNHITE.jpeg" alt="99 Facts" width={800} height={533} className="w-full h-full object-cover object-center" />
+                  <Image src="/images/99facts.jpg" alt="99 Facts" width={800} height={533} className="w-full h-full object-cover object-center" />
                 </div>
                 <p className="text-sm text-white/70 mb-3 flex-grow">Deep dive into your complete birth chart with 99 personalized insights.</p>
                 <div className="flex items-center justify-between">
@@ -207,7 +207,7 @@ export default function StartPage() {
                 <p className="text-sm text-white/70 mb-3 flex-grow">A signature bracelet designed to fill the missing energies in your personal Saju chart and attract good fortune.</p>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-1.5">
-                    <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%E1%84%8C%E1%85%A6%E1%84%86%E1%85%A9%E1%86%A8%E1%84%8B%E1%85%B3%E1%86%AF%20%E1%84%8B%E1%85%B5%E1%86%B8%E1%84%85%E1%85%A7%E1%86%A8%E1%84%92%E1%85%A2%E1%84%8C%E1%85%AE%E1%84%89%E1%85%A6%E1%84%8B%E1%85%AD.-rHCZrL3MSmA5XIQcuz0W5A0tHTyxAR.png" alt="Shopify" width={16} height={16} className="object-contain" />
+                    <Image src="/images/shopify-logo.png" alt="Shopify" width={16} height={16} className="object-contain" />
                     <span className="text-[10px] text-amber-300/70">Shop at Sajume Shopify</span>
                   </div>
                   <span className="text-lg font-bold text-white">$38</span>

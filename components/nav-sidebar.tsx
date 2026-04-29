@@ -58,7 +58,7 @@ export function NavSidebar() {
         <div className={`fixed top-0 left-0 right-0 z-50 h-10 bg-white border-b border-black/8 flex items-center justify-center transition-transform duration-300 ${scrolled ? '-translate-y-full' : 'translate-y-0'}`}>
           <Link href="/" aria-label="Sajume home">
             <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/SAJUME-KJvcikx26EMhwGAmVSbg5BI7E2wvxQ.png"
+              src="/images/sajume-logo.png"
               alt="SAJUME"
               width={72}
               height={20}

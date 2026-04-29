@@ -57,7 +57,7 @@ export default function CompanyPage() {
           </h1>
           <div className="relative w-full aspect-[1200/630] rounded-2xl overflow-hidden mb-10">
             <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Thenextgenpng-MFmWPjDoalrvlPgKoNVgfNdDRvW9z1.png"
+              src="/images/company-nextgen.png"
               alt="K-Saju - The Next Gen Fortune Telling"
               fill
               className="object-cover"
@@ -82,7 +82,7 @@ export default function CompanyPage() {
           <div className="grid grid-cols-2 gap-4 mb-3">
             <div className="relative aspect-[4/3] rounded-2xl overflow-hidden">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/founder%20image-Y6vZ39gBOBm3lnx1sWQHGHfVa0syux.png"
+                src="/images/founder.png"
                 alt="Sajume founder"
                 fill
                 className="object-cover"
@@ -90,7 +90,7 @@ export default function CompanyPage() {
             </div>
             <div className="relative aspect-[4/3] rounded-2xl overflow-hidden">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/certification%20image-v8v85tTjTRrn7KWIxIT6LZqcmhoEdy.png"
+                src="/images/certification.png"
                 alt="Saju analyst certification - Level 1 and Level 2"
                 fill
                 className="object-cover"
