@@ -44,16 +44,16 @@ export async function GET(req: NextRequest) {
 
     const couponIds = (couponSubmissionIds || []).map((r: { submission_id: string }) => r.submission_id)
 
-    let paidQuery = supabase
+    const paidBase = supabase
       .from('submissions')
       .select('*', { count: 'exact', head: true })
       .not('paid_report_url', 'is', null)
 
-    if (couponIds.length > 0) {
-      paidQuery = paidQuery.not('id', 'in', `(${couponIds.join(',')})`)
-    }
-
-    const { count: paidSubmissions } = await paidQuery
+    const { count: paidSubmissions } = await (
+      couponIds.length > 0
+        ? paidBase.not('id', 'in', `(${couponIds.join(',')})`)
+        : paidBase
+    )
 
     // Payments — PayPal only (exclude coupon)
     const { count: totalPayments } = await supabase
@@ -70,18 +70,18 @@ export async function GET(req: NextRequest) {
       .like('paypal_order_id', 'COUPON-%')
 
     // Monthly paid report counts (last 12 months) — exclude coupon
-    let monthlyQuery = supabase
+    const monthlyBase = supabase
       .from('submissions')
       .select('created_at')
       .not('paid_report_url', 'is', null)
       .gte('created_at', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString())
       .order('created_at', { ascending: true })
 
-    if (couponIds.length > 0) {
-      monthlyQuery = monthlyQuery.not('id', 'in', `(${couponIds.join(',')})`)
-    }
-
-    const { data: monthlyRaw } = await monthlyQuery
+    const { data: monthlyRaw } = await (
+      couponIds.length > 0
+        ? monthlyBase.not('id', 'in', `(${couponIds.join(',')})`)
+        : monthlyBase
+    )
 
     const monthlyPaidCounts: Record<string, number> = {}
     for (const row of monthlyRaw || []) {
