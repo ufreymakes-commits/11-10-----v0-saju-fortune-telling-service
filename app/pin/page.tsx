@@ -24,12 +24,15 @@ export default function PinPage() {
           </p>
         </div>
 
-        <a
-          href="mailto:support@sajume.com"
-          className="mt-1 w-full text-center py-3 px-4 rounded-xl border border-border text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+        <button
+          data-tally-open="81JRrr"
+          data-tally-layout="modal"
+          data-tally-emoji-text="👋"
+          data-tally-emoji-animation="wave"
+          className="mt-1 w-full text-center py-3 px-4 rounded-xl border border-border text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
         >
-          Having an issue? Click here.
-        </a>
+          Having an issue? Click the box below.
+        </button>
       </div>
     </main>
   )
