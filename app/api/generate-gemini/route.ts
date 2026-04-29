@@ -4,8 +4,6 @@ import { createClient } from '@/lib/supabase/server'
 import type { SajuData, Fact } from '@/lib/types'
 import { headers } from 'next/headers'
 
-export const maxDuration = 300 // 5분 - Pro plan 최대
-export const dynamic = 'force-dynamic'
 // SAJU_MASTERPIECE_GUIDE 연결 해제됨 - 필요시 다시 import 가능
 // import { SAJU_MASTERPIECE_GUIDE } from '@/lib/saju/masterpiece'
 
@@ -2659,7 +2657,7 @@ OUTPUT FORMAT (JSON ONLY):
 
     console.log(`[v0] Gemini: Generated ${facts.length} facts`)
 
-    // ===== DB에 무료 레포트 저장 (유료 레포트 생성 시 context로 사용) =====
+    // ===== DB에 무료 레포트 저장 (유료 ��포트 생성 시 context로 사용) =====
     if (body.submissionId) {
       const supabase = await createClient()
 
