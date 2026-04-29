@@ -43,6 +43,7 @@ export async function GET(req: NextRequest) {
       .like('paypal_order_id', 'COUPON-%')
 
     const couponIds = (couponSubmissionIds || []).map((r: { submission_id: string }) => r.submission_id).filter(Boolean) as string[]
+    const couponIdSet = new Set(couponIds)
 
     const { data: allPaidRows } = await supabase
       .from('submissions')
@@ -124,7 +125,6 @@ export async function GET(req: NextRequest) {
       .select('id, created_at, paid_report_url')
       .gte('created_at', new Date(Date.now() - 30 * 86400000).toISOString())
 
-    const couponIdSet = new Set(couponIds)
     const dailySubmissionCounts: Record<string, number> = {}
     const dailyPaidCounts: Record<string, number> = {}
     for (const s of dailySubmissions || []) {
