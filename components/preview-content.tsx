@@ -148,25 +148,36 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
     }
     
     async function fetchPreview() {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 240000) // 4분 타임아웃
+
       try {
         const response = await fetch('/api/generate-gemini', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ submissionId })
+          body: JSON.stringify({ submissionId }),
+          signal: controller.signal,
         })
-        
+
+        clearTimeout(timeoutId)
+
         if (!response.ok) {
           const errorText = await response.text()
           console.error('[v0] generate-gemini failed:', response.status, errorText)
-          throw new Error(`Error: ${response.status} - ${errorText}`)
+          throw new Error(`Server error: ${response.status}`)
         }
-        
+
         const result = await response.json()
         setData(result)
       } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err)
-        setError(msg)
-        console.error('[v0] Preview fetch error:', err)
+        clearTimeout(timeoutId)
+        if (err instanceof Error && err.name === 'AbortError') {
+          setError('timeout')
+        } else {
+          const msg = err instanceof Error ? err.message : String(err)
+          setError(msg)
+          console.error('[v0] Preview fetch error:', err)
+        }
       } finally {
         setIsLoading(false)
       }
@@ -235,10 +246,18 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
   }
 
   if (error || !data) {
+    const isTimeout = error === 'timeout'
     return (
       <div className="flex items-center justify-center min-h-screen px-4">
-        <div className="text-center">
-          <p className="text-sm text-destructive mb-4">{error || 'Something went wrong'}</p>
+        <div className="text-center max-w-xs">
+          <p className="text-sm font-medium text-foreground mb-2">
+            {isTimeout ? 'This is taking longer than usual.' : 'Something went wrong.'}
+          </p>
+          <p className="text-xs text-muted-foreground mb-5">
+            {isTimeout
+              ? 'The reading is still being generated. Please try again in a moment.'
+              : 'Please go back and try again.'}
+          </p>
           <Link href="/start">
             <Button variant="outline" size="sm">Try Again</Button>
           </Link>

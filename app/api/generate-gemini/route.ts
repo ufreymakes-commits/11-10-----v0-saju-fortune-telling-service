@@ -3,6 +3,9 @@ import { generateText } from 'ai'
 import { createClient } from '@/lib/supabase/server'
 import type { SajuData, Fact } from '@/lib/types'
 import { headers } from 'next/headers'
+
+export const maxDuration = 300 // 5분 - Pro plan 최대
+export const dynamic = 'force-dynamic'
 // SAJU_MASTERPIECE_GUIDE 연결 해제됨 - 필요시 다시 import 가능
 // import { SAJU_MASTERPIECE_GUIDE } from '@/lib/saju/masterpiece'
 
@@ -1326,7 +1329,7 @@ For example:
   - 土 = 식상
   - 金 = 재성
   - 水 = 관성
-  - 木 = 인성
+  - 木 = ���성
 
 丁�� (Jeong-hwa):
   - 火 = 비겁
@@ -2710,7 +2713,7 @@ OUTPUT FORMAT (JSON ONLY):
         console.log(`[v0] Gemini: Fact 8 yongsin (${resolvedYongsin}) differs from computed (${yongsinElement}), using Fact 8 value`)
       }
 
-      // yongsinElement를 submission의 saju_data에도 저장 (캐시 로드 시 사용)
+      // yongsinElement를 submission의 saju_data에��� 저장 (캐시 로드 시 사용)
       await supabase
         .from('submissions')
         .update({
