@@ -2331,7 +2331,7 @@ For example:
   - 金 = 인성
 
 癸水 (Gye-su):
-  - 水 = 비겁
+  - ��� = 비겁
   - 木 = 식���
   - 火 = 재성
   - 土 = 관성
@@ -2614,65 +2614,41 @@ OUTPUT FORMAT (JSON ONLY):
 
     console.log('[v0] Gemini: ===== STAGE 2: Final Facts Generation =====')
 
-    const stage2Result = await generateText({
-      model: 'google/gemini-2.0-flash',
-      system: stage2SystemPrompt,
-      prompt: stage2UserPrompt,
-      temperature: 0,
-      maxTokens: 4000
-    })
-
-    console.log('[v0] Gemini: Stage 2 response received, parsing...')
-    console.log('[v0] Gemini: Raw response length:', stage2Result.text.length)
-
-    // Stage 2 JSON 파싱 (더 유연한 ������ 지원)
-    let stage2JsonMatch = stage2Result.text.match(/```json\n([\s\S]*?)\n```/)
-
-    // 첫 번째 시도 실패시 다른 형식 시도
-    if (!stage2JsonMatch) {
-      // 형식2: ```json ... ``` (줄바꿈 없음)
-      stage2JsonMatch = stage2Result.text.match(/```json([\s\S]*?)```/)
-    }
-
-    if (!stage2JsonMatch) {
-      // 형식3: { ... } 직접 매칭
-      const directJsonMatch = stage2Result.text.match(/(\{[\s\S]*\})/)
-      if (directJsonMatch) {
-        stage2JsonMatch = [null, directJsonMatch[1]]
+    const parseStage2Response = (text: string) => {
+      let match = text.match(/```json\n([\s\S]*?)\n```/)
+      if (!match) match = text.match(/```json([\s\S]*?)```/)
+      if (!match) {
+        const direct = text.match(/(\{[\s\S]*\})/)
+        if (direct) match = [null, direct[1]] as RegExpMatchArray
       }
+      if (!match) throw new Error('Stage 2 JSON format not found')
+      const jsonStr = match[1].trim().replace(/,\s*}/g, '}').replace(/,\s*]/g, ']')
+      return JSON.parse(jsonStr)
     }
-
-    if (!stage2JsonMatch) {
-      console.error('[v0] Gemini: Stage 2 raw response:', stage2Result.text)
-      throw new Error('Stage 2 JSON format not found')
-    }
-
-    // JSON sanitize: 문자열 값 내부의 unescaped 따옴표 등으로 인한 파싱 실패 방지
-    let jsonStr = stage2JsonMatch[1].trim()
-    // trailing comma 제거
-    jsonStr = jsonStr.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']')
 
     let parsed: any
-    try {
-      parsed = JSON.parse(jsonStr)
-    } catch (e1) {
-      // JSON이 잘린 경우 마지막 완전한 facts 항목까지만 복구 시도
-      console.error('[v0] Gemini: JSON parse failed, attempting recovery. Error:', e1)
+    let stage2Attempts = 0
+    while (stage2Attempts < 3) {
+      stage2Attempts++
+      const stage2Result = await generateText({
+        model: 'google/gemini-2.0-flash',
+        system: stage2SystemPrompt,
+        prompt: stage2UserPrompt,
+        temperature: 0,
+        maxTokens: 4000
+      })
+      console.log(`[v0] Gemini: Stage 2 attempt ${stage2Attempts}, response length: ${stage2Result.text.length}`)
       try {
-        // facts 배열에서 완전한 객체만 추출
-        const factsMatch = jsonStr.match(/"facts"\s*:\s*\[([\s\S]*?)(?:\]|}|$)/)
-        if (!factsMatch) throw new Error('Cannot recover facts')
-        // 완전한 { ... } 객체만 추출
-        const objectMatches = factsMatch[1].match(/\{[^{}]*\}/g) || []
-        const recoveredFacts = objectMatches
-          .map((obj: string) => { try { return JSON.parse(obj) } catch { return null } })
-          .filter(Boolean)
-        if (recoveredFacts.length < 3) throw new Error('Not enough facts recovered')
-        parsed = { facts: recoveredFacts }
-        console.log(`[v0] Gemini: Recovered ${recoveredFacts.length} facts from broken JSON`)
-      } catch (e2) {
-        console.error('[v0] Gemini: Recovery failed:', e2)
-        throw new Error(`Stage 2 JSON parse failed: ${e1}`)
+        parsed = parseStage2Response(stage2Result.text)
+        if (!parsed.facts || parsed.facts.length < 9) {
+          console.error(`[v0] Gemini: Stage 2 only returned ${parsed.facts?.length} facts, retrying...`)
+          if (stage2Attempts < 3) continue
+          throw new Error(`Incomplete facts: only ${parsed.facts?.length} returned`)
+        }
+        break
+      } catch (e) {
+        console.error(`[v0] Gemini: Stage 2 attempt ${stage2Attempts} failed:`, e)
+        if (stage2Attempts >= 3) throw new Error(`Stage 2 failed after 3 attempts: ${e}`)
       }
     }
     const facts: Fact[] = parsed.facts.map((f: any) => ({
