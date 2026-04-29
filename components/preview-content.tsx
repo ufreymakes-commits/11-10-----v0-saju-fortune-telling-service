@@ -351,10 +351,8 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
 
       {/* CTA intro text - outside the card */}
       <div className="text-center mb-4">
-        <p className="text-sm text-foreground/80 leading-relaxed">
-          You build your own path.<br />
-          We just have the <strong>cheat code for your ultimate version</strong>.<br />
-          Ready to see <strong>this strategy report</strong> for your <strong>best-case scenario?</strong>
+        <p className="text-sm text-foreground/80 leading-relaxed text-balance">
+          You build your own path. We just have the <strong>cheat code for your ultimate version</strong>. Ready to see <strong>this strategy report</strong> for your <strong>best-case scenario?</strong>
         </p>
       </div>
 
@@ -376,9 +374,8 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           Full Report
         </p>
 
-        <p className="text-[10px] text-muted-foreground/70 leading-relaxed mb-3 px-2">
-          Core Aura · Inner Child Era · Present Energy · Career Motion · Money Flow<br />
-          Love &amp; Endgame · Future Self Sneak Peek · Lucky Environment · The Next Chapter
+        <p className="text-[10px] text-muted-foreground/70 leading-relaxed mb-3 px-2 text-balance">
+          Core Aura · Inner Child Era · Present Energy · Career Motion · Money Flow · Love &amp; Endgame · Future Self Sneak Peek · Lucky Environment · The Next Chapter
         </p>
         
         <div className="flex items-center justify-center gap-2 mb-3">
@@ -496,26 +493,30 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           </div>
           <h4 className="text-sm font-semibold text-white mb-1">Signature Saju Elemental Bracelet</h4>
           <p className="text-xs text-white/60 mb-3">A signature bracelet designed to fill the missing energies in your personal Saju chart and attract good fortune.</p>
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs text-amber-300">Personalized to your Saju</span>
-            <span className="text-sm font-bold text-white">$38</span>
-          </div>
-          {/* Shopify badge */}
-          <div className="flex items-center gap-1.5 mb-3">
-            <Image
-              src="/images/shopify-logo.png"
-              alt="Shopify"
-              width={16}
-              height={16}
-              className="object-contain"
+          <div className="flex items-end justify-between gap-3">
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-amber-300">Personalized to your Saju</span>
+                <span className="text-sm font-bold text-white">$38</span>
+              </div>
+              {/* Shopify badge */}
+              <div className="flex items-center gap-1.5">
+                <Image
+                  src="/images/shopify-logo.png"
+                  alt="Shopify"
+                  width={16}
+                  height={16}
+                  className="object-contain"
+                />
+                <span className="text-[11px] text-amber-300/80">Shop at Sajume Shopify</span>
+              </div>
+            </div>
+            {/* Notice me button - bottom right */}
+            <NoticeMeButton
+              product="bracelet"
+              className="shrink-0 text-center py-2 px-4 rounded-lg text-xs font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/30 hover:border-amber-400/60 transition-all"
             />
-            <span className="text-[11px] text-amber-300/80">Shop at Sajume Shopify</span>
           </div>
-          {/* Notice me button */}
-          <NoticeMeButton
-            product="bracelet"
-            className="w-full text-center py-2.5 px-4 rounded-lg text-sm font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/30 hover:border-amber-400/60 transition-all"
-          />
         </div>
       </div>
 
