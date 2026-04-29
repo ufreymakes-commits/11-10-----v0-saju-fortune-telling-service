@@ -12,7 +12,20 @@ export default function CouponSuccessPage() {
   const submissionId = params.id as string
   const [status, setStatus] = useState<'generating' | 'success'>('generating')
 
-  // Poll DB every 5 seconds — same as payment-success-handler
+  // Step 1: Trigger generation from client (same as PayPal's payment-success-handler)
+  useEffect(() => {
+    if (!submissionId) return
+
+    fetch('/api/generate-paid-report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ submissionId }),
+    }).catch(() => {
+      // silently ignore — polling will catch completion
+    })
+  }, [submissionId])
+
+  // Step 2: Poll DB every 5 seconds — same as payment-success-handler
   useEffect(() => {
     if (!submissionId) return
 

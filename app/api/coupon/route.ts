@@ -36,21 +36,11 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // No paid report yet — fire-and-forget (same as PayPal flow)
-  // Generation takes 2-3 minutes, so we don't await it here.
-  // Client will poll via /api/check-paid-report just like payment-success-handler does.
-  const origin = req.nextUrl.origin
-  fetch(`${origin}/api/generate-paid-report`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ submissionId }),
-  }).catch(() => {
-    // Silently ignore — background generation
-  })
-
-  // Redirect to the coupon success waiting page (same polling UX as PayPal)
+  // No paid report yet — return submissionId to client
+  // Client (coupon-success page) will call generate-paid-report directly, same as PayPal flow
   return NextResponse.json({
     success: true,
     redirectPath: `/coupon-success/${submissionId}`,
+    submissionId,
   })
 }
