@@ -35,17 +35,17 @@ export async function GET(req: NextRequest) {
       .from('submissions')
       .select('*', { count: 'exact', head: true })
 
-    // Payments
-    const { count: totalPayments } = await supabase
-      .from('payments')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'completed')
-
     // Paid submissions
     const { count: paidSubmissions } = await supabase
       .from('submissions')
       .select('*', { count: 'exact', head: true })
       .not('paid_report_url', 'is', null)
+
+    // Payments
+    const { count: totalPayments } = await supabase
+      .from('payments')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'completed')
 
     // Monthly paid report counts (last 12 months)
     const { data: monthlyRaw } = await supabase

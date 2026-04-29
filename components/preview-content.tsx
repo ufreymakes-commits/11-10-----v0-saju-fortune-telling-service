@@ -18,13 +18,6 @@ function ShareButton() {
     const title = 'My Saju Reading — Sajume'
     const text = 'Check out my free Saju personality reading!'
 
-    // Track share click
-    fetch('/api/track', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ event_type: 'share_free_report', page: url }),
-    }).catch(() => {})
-
     // Try Web Share API first (native mobile sheet)
     if (navigator.share) {
       try {
