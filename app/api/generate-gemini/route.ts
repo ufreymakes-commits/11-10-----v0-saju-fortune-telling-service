@@ -1327,7 +1327,7 @@ For example:
   - 土 = 식상
   - 金 = 재성
   - 水 = 관성
-  - 木 = �����������성
+  - 木 = �������������성
 
 丁�� (Jeong-hwa):
   - 火 = 비겁
@@ -1599,7 +1599,7 @@ FYI
       tenGodsPresentWithCount: tenGodsFormatted,
       tenGodsMissing: saju_data.tenGods?.missing || [],
       tenGodsCounts: tenGodsCounts, // 원본 객체도 포함
-      tenGodsByPosition: saju_data.tenGods?.byPosition || {}, // 각 위치별 십신 (연간, 연지, 월간, 월지, 일간, 일지, 시간, 시지)
+      tenGodsByPosition: saju_data.tenGods?.byPosition || {}, // 각 위치별 십신 (연간, 연지, 월간, 월지, ��간, 일지, 시간, 시지)
 
       // 12운성 (상세)
       twelveStars: saju_data.twelveStars?.map(s => ({
@@ -2647,7 +2647,34 @@ OUTPUT FORMAT (JSON ONLY):
       throw new Error('Stage 2 JSON format not found')
     }
 
-    const parsed = JSON.parse(stage2JsonMatch[1])
+    // JSON sanitize: 문자열 값 내부의 unescaped 따옴표 등으로 인한 파싱 실패 방지
+    let jsonStr = stage2JsonMatch[1].trim()
+    // trailing comma 제거
+    jsonStr = jsonStr.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']')
+
+    let parsed: any
+    try {
+      parsed = JSON.parse(jsonStr)
+    } catch (e1) {
+      // JSON이 잘린 경우 마지막 완전한 facts 항목까지만 복구 시도
+      console.error('[v0] Gemini: JSON parse failed, attempting recovery. Error:', e1)
+      try {
+        // facts 배열에서 완전한 객체만 추출
+        const factsMatch = jsonStr.match(/"facts"\s*:\s*\[([\s\S]*?)(?:\]|}|$)/)
+        if (!factsMatch) throw new Error('Cannot recover facts')
+        // 완전한 { ... } 객체만 추출
+        const objectMatches = factsMatch[1].match(/\{[^{}]*\}/g) || []
+        const recoveredFacts = objectMatches
+          .map((obj: string) => { try { return JSON.parse(obj) } catch { return null } })
+          .filter(Boolean)
+        if (recoveredFacts.length < 3) throw new Error('Not enough facts recovered')
+        parsed = { facts: recoveredFacts }
+        console.log(`[v0] Gemini: Recovered ${recoveredFacts.length} facts from broken JSON`)
+      } catch (e2) {
+        console.error('[v0] Gemini: Recovery failed:', e2)
+        throw new Error(`Stage 2 JSON parse failed: ${e1}`)
+      }
+    }
     const facts: Fact[] = parsed.facts.map((f: any) => ({
       id: f.id,
       text: f.content,
