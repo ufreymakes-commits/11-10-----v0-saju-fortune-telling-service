@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import type { Fact } from '@/lib/types'
 
 // Vercel Hobby 플랜 최대 60초
-export const maxDuration = 60
+export const maxDuration = 300
 
 /**
  * 유료 레포트 생성 API (90개 사실)
