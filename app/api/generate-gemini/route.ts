@@ -1327,7 +1327,7 @@ For example:
   - 土 = 식상
   - 金 = 재성
   - 水 = 관성
-  - 木 = �������������성
+  - 木 = ���������������성
 
 丁�� (Jeong-hwa):
   - 火 = 비겁
@@ -1599,7 +1599,7 @@ FYI
       tenGodsPresentWithCount: tenGodsFormatted,
       tenGodsMissing: saju_data.tenGods?.missing || [],
       tenGodsCounts: tenGodsCounts, // 원본 객체도 포함
-      tenGodsByPosition: saju_data.tenGods?.byPosition || {}, // 각 위치별 십신 (연간, 연지, 월간, 월지, ��간, 일지, 시간, 시지)
+      tenGodsByPosition: saju_data.tenGods?.byPosition || {}, // 각 위치별 십신 (연간, 연지, 월���, 월지, ��간, 일지, 시간, 시지)
 
       // 12운성 (상세)
       twelveStars: saju_data.twelveStars?.map(s => ({
@@ -2042,7 +2042,7 @@ Month Branch → Base Type
 + Ten Gods → Money-Making Mechanism  
 + Five Elements → Industry  
 + Day Master Strength / Authority → Work Format  
-+ Yongshin → Final Filter  
++ Yongshin ��� Final Filter  
 + Shinsal → Detail Modifiers  
 + Daewoon → Current State  
 
@@ -2635,7 +2635,7 @@ OUTPUT FORMAT (JSON ONLY):
         system: stage2SystemPrompt,
         prompt: stage2UserPrompt,
         temperature: 0,
-        maxTokens: 4000
+        maxTokens: 8000
       })
       console.log(`[v0] Gemini: Stage 2 attempt ${stage2Attempts}, response length: ${stage2Result.text.length}`)
       try {
