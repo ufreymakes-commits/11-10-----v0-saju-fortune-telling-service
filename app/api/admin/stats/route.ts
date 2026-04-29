@@ -42,18 +42,16 @@ export async function GET(req: NextRequest) {
       .eq('status', 'completed')
       .like('paypal_order_id', 'COUPON-%')
 
-    const couponIds = (couponSubmissionIds || []).map((r: { submission_id: string }) => r.submission_id)
+    const couponIds = (couponSubmissionIds || []).map((r: { submission_id: string }) => r.submission_id).filter(Boolean) as string[]
 
-    const paidBase = supabase
+    const { data: allPaidRows } = await supabase
       .from('submissions')
-      .select('*', { count: 'exact', head: true })
+      .select('id')
       .not('paid_report_url', 'is', null)
 
-    const { count: paidSubmissions } = await (
-      couponIds.length > 0
-        ? paidBase.not('id', 'in', `(${couponIds.join(',')})`)
-        : paidBase
-    )
+    const paidSubmissions = (allPaidRows || []).filter(
+      (r: { id: string }) => !couponIdSet.has(r.id)
+    ).length
 
     // Payments — PayPal only (exclude coupon)
     const { count: totalPayments } = await supabase
@@ -70,17 +68,15 @@ export async function GET(req: NextRequest) {
       .like('paypal_order_id', 'COUPON-%')
 
     // Monthly paid report counts (last 12 months) — exclude coupon
-    const monthlyBase = supabase
+    const { data: monthlyAllRaw } = await supabase
       .from('submissions')
-      .select('created_at')
+      .select('id, created_at')
       .not('paid_report_url', 'is', null)
       .gte('created_at', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString())
       .order('created_at', { ascending: true })
 
-    const { data: monthlyRaw } = await (
-      couponIds.length > 0
-        ? monthlyBase.not('id', 'in', `(${couponIds.join(',')})`)
-        : monthlyBase
+    const monthlyRaw = (monthlyAllRaw || []).filter(
+      (r: { id: string; created_at: string }) => !couponIdSet.has(r.id)
     )
 
     const monthlyPaidCounts: Record<string, number> = {}
@@ -134,7 +130,7 @@ export async function GET(req: NextRequest) {
     for (const s of dailySubmissions || []) {
       const day = (s.created_at as string).slice(0, 10)
       dailySubmissionCounts[day] = (dailySubmissionCounts[day] || 0) + 1
-      if (s.paid_report_url && !couponIdSet.has(s.id)) {
+      if (s.paid_report_url && s.id && !couponIdSet.has(s.id)) {
         dailyPaidCounts[day] = (dailyPaidCounts[day] || 0) + 1
       }
     }
