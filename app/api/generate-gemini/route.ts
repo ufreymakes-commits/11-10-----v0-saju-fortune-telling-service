@@ -1773,7 +1773,7 @@ Translate the scratchpad analysis into 9 Gen-Z, emotionally resonant, yet hyper-
 - Rule 3 (Factual Brutality wrapped in Warmth): If their chart says they are rigid, stubborn, and built for bureaucracy (Strong Earth + Jeong-gwan), tell them they are a highly respected systemic anchor, maybe working in civil service or auditing. DO NOT force them to be an independent freelancer. Tell them the truth of their chart.
 - Rule 4 (Dual Career Perspective): In the career-related sentences (Fact #4 or others in Body 1), you must provide two distinct angles: one for the structural "fit" (where they belong) and one for the "talent/vibe" (what they are uniquely good at). Each must be packed with specific industry examples.
 
-BANNED TROPES: Do not use Barnum Effect statements. ABSOLUTELY DO NOT say "You are creative," "You overthink,(like thinking am i enough?)", 2032, first love in late teens.. or "You should do artistic marketing/freelancing" UNLESS specifically triggered by specific saju data he or she has. Trust the Saju data, not general astrology stereotypes.
+BANNED TROPES: Do not use Barnum Effect statements. ABSOLUTELY DO NOT say "You are creative," "You overthink,(like thinking am i enough?)", 2032, first love in late teens.. Trust the Saju data, not general astrology stereotypes.
 
 OUTPUT FORMAT(ONLY JSON):
 \`\`\`json
