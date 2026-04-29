@@ -1327,7 +1327,7 @@ For example:
   - 土 = 식상
   - 金 = 재성
   - 水 = 관성
-  - 木 = �������성
+  - 木 = ���������성
 
 丁�� (Jeong-hwa):
   - 火 = 비겁
@@ -2459,7 +2459,7 @@ ${JSON.stringify(allSajuData, null, 2)}
     console.log('[v0] Gemini: stage1UserPrompt length =', stage1UserPrompt.length, 'chars')
 
     const stage1Result = await generateText({
-      model: 'google/gemini-2.0-flash',
+      model: 'google/gemini-3-flash',
       system: stage1SystemPrompt,
       prompt: stage1UserPrompt,
       temperature: 0,
