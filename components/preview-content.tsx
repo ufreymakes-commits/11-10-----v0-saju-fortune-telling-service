@@ -126,7 +126,7 @@ const STEM_PRONUNCIATION: Record<string, string> = {
 // Branch pronunciations  
 const BRANCH_PRONUNCIATION: Record<string, string> = {
   '子': 'Ja', '丑': 'Chuk', '寅': 'In', '卯': 'Myo', '辰': 'Jin', '巳': 'Sa',
-  '���': 'O', '未': 'Mi', '申': 'Sin', '酉': 'Yu', '戌': 'Sul', '亥': 'Hae'
+  '午': 'O', '未': 'Mi', '申': 'Sin', '酉': 'Yu', '戌': 'Sul', '亥': 'Hae'
 }
 
 interface PreviewContentPropsWithCache {
