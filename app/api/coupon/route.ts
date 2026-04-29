@@ -41,6 +41,7 @@ export async function POST(req: NextRequest) {
     .from('payments')
     .insert({
       submission_id: submissionId,
+      paypal_order_id: `COUPON-${code.trim()}-${submissionId}`,
       amount: 0,
       currency: 'USD',
       status: 'completed',
