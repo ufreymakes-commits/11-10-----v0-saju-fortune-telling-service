@@ -41,11 +41,9 @@ export async function POST(req: NextRequest) {
     .from('payments')
     .insert({
       submission_id: submissionId,
-      amount: 0, // Free via coupon
+      amount: 0,
       currency: 'USD',
       status: 'completed',
-      payment_method: 'coupon',
-      coupon_code: code.trim(),
     })
 
   if (paymentError) {
