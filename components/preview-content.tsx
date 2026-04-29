@@ -7,8 +7,52 @@ import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { DayMasterCard } from '@/components/day-master-card'
 import type { Fact, SajuData } from '@/lib/types'
-import { LockIcon, Share2Icon } from 'lucide-react'
+import { LockIcon, Share2Icon, CheckIcon } from 'lucide-react'
 import { NoticeMeButton } from '@/components/notice-me-button'
+
+function ShareButton() {
+  const [copied, setCopied] = useState(false)
+
+  const handleShare = async () => {
+    const url = window.location.href
+    const title = 'My Saju Reading — Sajume'
+    const text = 'Check out my free Saju personality reading!'
+
+    // Try Web Share API first (native mobile sheet)
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text, url })
+        return
+      } catch {
+        // user dismissed — do nothing
+        return
+      }
+    }
+
+    // Fallback: clipboard copy
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Last resort: prompt
+      window.prompt('Copy this link:', url)
+    }
+  }
+
+  return (
+    <button
+      onClick={handleShare}
+      className="fixed bottom-6 right-6 z-50 bg-primary text-primary-foreground w-12 h-12 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
+      aria-label="Share this page"
+    >
+      {copied
+        ? <CheckIcon className="w-5 h-5" />
+        : <Share2Icon className="w-5 h-5" />
+      }
+    </button>
+  )
+}
 
 // Preview page reviews data with names and countries - sorted by most recent first
 const PREVIEW_REVIEWS = [
@@ -542,18 +586,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
       </div>
 
       {/* Share Button - Fixed bottom right */}
-      <button
-        onClick={() => {
-          navigator.clipboard.writeText(window.location.href)
-          alert('Link copied to clipboard!')
-        }}
-        className="fixed bottom-6 right-6 z-50 bg-primary text-primary-foreground w-12 h-12 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
-        aria-label="Share this page"
-      >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-        </svg>
-      </button>
+      <ShareButton />
     </div>
   )
 }
