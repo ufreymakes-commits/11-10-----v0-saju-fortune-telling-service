@@ -69,13 +69,19 @@ export async function GET(req: NextRequest) {
       .eq('status', 'completed')
       .like('paypal_order_id', 'COUPON-%')
 
-    // Monthly paid report counts (last 12 months)
-    const { data: monthlyRaw } = await supabase
+    // Monthly paid report counts (last 12 months) — exclude coupon
+    let monthlyQuery = supabase
       .from('submissions')
       .select('created_at')
       .not('paid_report_url', 'is', null)
       .gte('created_at', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString())
       .order('created_at', { ascending: true })
+
+    if (couponIds.length > 0) {
+      monthlyQuery = monthlyQuery.not('id', 'in', `(${couponIds.join(',')})`)
+    }
+
+    const { data: monthlyRaw } = await monthlyQuery
 
     const monthlyPaidCounts: Record<string, number> = {}
     for (const row of monthlyRaw || []) {
@@ -83,12 +89,13 @@ export async function GET(req: NextRequest) {
       monthlyPaidCounts[month] = (monthlyPaidCounts[month] || 0) + 1
     }
 
-    // Payer country breakdown
+    // Payer country breakdown — exclude coupon
     const { data: payerCountryRows } = await supabase
       .from('payments')
       .select('payer_country')
       .eq('status', 'completed')
       .not('payer_country', 'is', null)
+      .not('paypal_order_id', 'like', 'COUPON-%')
 
     const payerCountryCounts: Record<string, number> = {}
     for (const row of payerCountryRows || []) {
@@ -115,18 +122,19 @@ export async function GET(req: NextRequest) {
       .order('created_at', { ascending: false })
       .limit(20)
 
-    // Daily submissions (last 30 days) — free + paid
+    // Daily submissions (last 30 days) — free + paid (paid excludes coupon)
     const { data: dailySubmissions } = await supabase
       .from('submissions')
-      .select('created_at, paid_report_url')
+      .select('id, created_at, paid_report_url')
       .gte('created_at', new Date(Date.now() - 30 * 86400000).toISOString())
 
+    const couponIdSet = new Set(couponIds)
     const dailySubmissionCounts: Record<string, number> = {}
     const dailyPaidCounts: Record<string, number> = {}
     for (const s of dailySubmissions || []) {
       const day = (s.created_at as string).slice(0, 10)
       dailySubmissionCounts[day] = (dailySubmissionCounts[day] || 0) + 1
-      if (s.paid_report_url) {
+      if (s.paid_report_url && !couponIdSet.has(s.id)) {
         dailyPaidCounts[day] = (dailyPaidCounts[day] || 0) + 1
       }
     }
