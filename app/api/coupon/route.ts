@@ -36,7 +36,24 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // No paid report yet — return submissionId to client
+  // No paid report yet — create payment record for coupon (same structure as PayPal)
+  const { error: paymentError } = await supabase
+    .from('payments')
+    .insert({
+      submission_id: submissionId,
+      amount: 0, // Free via coupon
+      currency: 'USD',
+      status: 'completed',
+      payment_method: 'coupon',
+      coupon_code: code.trim(),
+    })
+
+  if (paymentError) {
+    console.error('[v0] Failed to create coupon payment record:', paymentError)
+    return NextResponse.json({ success: false, error: 'Failed to process coupon' }, { status: 500 })
+  }
+
+  // Return submissionId to client
   // Client (coupon-success page) will call generate-paid-report directly, same as PayPal flow
   return NextResponse.json({
     success: true,
