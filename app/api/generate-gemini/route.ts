@@ -2562,6 +2562,8 @@ Language: English only.
     }
 
     console.log(`[v0] Gemini: Final yongsinElement: ${yongsinElement} (balanced season: ${isBalancedSeason})`)
+    // resolvedYongsin will be set after Fact 8 is generated; initialize with computed value
+    let resolvedYongsin = yongsinElement
 
     const stage2UserPrompt = `
 ===========================================
@@ -2703,9 +2705,9 @@ OUTPUT FORMAT (JSON ONLY):
       // Extract the ACTUAL yongsin Gemini used in Fact 8 to guarantee DB matches displayed text
       const fact8 = facts.find((f: { id: number; content: string }) => f.id === 8)
       const fact8Match = fact8?.content?.match(/closer you stay to\s+([A-Za-z]+)/i)
-      const actualYongsin = fact8Match?.[1] || yongsinElement
-      if (actualYongsin !== yongsinElement) {
-        console.log(`[v0] Gemini: Fact 8 yongsin (${actualYongsin}) differs from computed (${yongsinElement}), using Fact 8 value`)
+      resolvedYongsin = fact8Match?.[1] || yongsinElement
+      if (resolvedYongsin !== yongsinElement) {
+        console.log(`[v0] Gemini: Fact 8 yongsin (${resolvedYongsin}) differs from computed (${yongsinElement}), using Fact 8 value`)
       }
 
       // yongsinElement를 submission의 saju_data에도 저장 (캐시 로드 시 사용)
@@ -2714,12 +2716,10 @@ OUTPUT FORMAT (JSON ONLY):
         .update({
           saju_data: {
             ...saju_data,
-            yongsin: actualYongsin  // Fact 8에서 실제 사용된 오행명칭 저장
+            yongsin: resolvedYongsin
           }
         })
         .eq('id', body.submissionId)
-      
-      console.log('[v0] Gemini: Saved free report to DB (3 sections) with actualYongsin:', actualYongsin)
     }
 
     return NextResponse.json({
@@ -2729,7 +2729,7 @@ OUTPUT FORMAT (JSON ONLY):
         name,
         sajuData: {
           ...saju_data,
-          yongsin: actualYongsin  // Fact 8에서 실제 사용된 오행명칭
+          yongsin: resolvedYongsin
         }
       },
       allSajuDataSentToGemini: allSajuData
