@@ -1,8 +1,11 @@
 import sharp from 'sharp'
 import { readdir, unlink } from 'fs/promises'
-import { join, extname, basename } from 'path'
+import { join, extname, basename, dirname } from 'path'
+import { fileURLToPath } from 'url'
 
-const IMAGES_DIR = '/vercel/share/v0-project/public/images'
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+const IMAGES_DIR = join(__dirname, '..', 'public', 'images')
 const QUALITY = 85
 
 async function getFiles(dir) {
