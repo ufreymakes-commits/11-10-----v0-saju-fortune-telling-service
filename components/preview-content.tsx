@@ -133,16 +133,16 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
 
   // Character slider data for loading screen
   const characters = [
-    { name: 'The Pioneer', image: '/images/characters/gabmok.png' },
-    { name: 'The Adapter', image: '/images/characters/eulmok.png' },
-    { name: 'The Energizer', image: '/images/characters/byeonghwa.png' },
-    { name: 'The Empath', image: '/images/characters/jeonghwa.png' },
-    { name: 'The Anchor', image: '/images/characters/muto.png' },
-    { name: 'The Nurturer', image: '/images/characters/gito.png' },
-    { name: 'The Straight Shooter', image: '/images/characters/gyeonggeum.png' },
-    { name: 'The Perfectionist', image: '/images/characters/singeum.png' },
-    { name: 'The Explorer', image: '/images/characters/imsu.png' },
-    { name: 'The Intuitive', image: '/images/characters/gyesu.png' },
+    { name: 'The Pioneer', image: '/images/gabmok.png' },
+    { name: 'The Adapter', image: '/images/eulmok.png' },
+    { name: 'The Energizer', image: '/images/byeonghwa.png' },
+    { name: 'The Empath', image: '/images/jeonghwa.png' },
+    { name: 'The Anchor', image: '/images/muto.png' },
+    { name: 'The Nurturer', image: '/images/gito.png' },
+    { name: 'The Straight Shooter', image: '/images/gyeonggeum.png' },
+    { name: 'The Perfectionist', image: '/images/singeum.png' },
+    { name: 'The Explorer', image: '/images/imsu.png' },
+    { name: 'The Intuitive', image: '/images/gyesu.png' },
   ]
 
   if (isLoading) {

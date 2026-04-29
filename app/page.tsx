@@ -82,12 +82,12 @@ export default function LandingPage() {
           <div className="relative w-64 md:w-80 h-44 md:h-56 mx-auto mb-8">
             {/* Left outer - Eulmok (green) */}
             <div className="absolute w-14 h-14 md:w-18 md:h-18 z-0 opacity-30" style={{ left: '0%', top: '20%' }}>
-              <Image src="/images/eulmok.png" alt="Eulmok" fill className="object-contain" />
+              <Image src="/images/eulmok.png" alt="Eulmok" fill className="object-contain" priority />
             </div>
             
             {/* Left inner - Gyesu (purple) */}
             <div className="absolute w-16 h-16 md:w-20 md:h-20 z-0 opacity-40" style={{ left: '15%', top: '30%' }}>
-              <Image src="/images/gyesu.png" alt="Gyesu" fill className="object-contain" />
+              <Image src="/images/gyesu.png" alt="Gyesu" fill className="object-contain" priority />
             </div>
             
             {/* Main mascot - Pink (center, floating) */}
@@ -103,12 +103,12 @@ export default function LandingPage() {
             
             {/* Right inner - Gyeonggeum (gray) */}
             <div className="absolute w-16 h-16 md:w-20 md:h-20 z-0 opacity-40" style={{ right: '15%', top: '30%' }}>
-              <Image src="/images/gyeonggeum.png" alt="Gyeonggeum" fill className="object-contain" />
+              <Image src="/images/gyeonggeum.png" alt="Gyeonggeum" fill className="object-contain" priority />
             </div>
             
             {/* Right outer - Byeonghwa (orange) */}
             <div className="absolute w-14 h-14 md:w-18 md:h-18 z-0 opacity-30" style={{ right: '0%', top: '20%' }}>
-              <Image src="/images/byeonghwa.png" alt="Byeonghwa" fill className="object-contain" />
+              <Image src="/images/byeonghwa.png" alt="Byeonghwa" fill className="object-contain" priority />
             </div>
           </div>
           

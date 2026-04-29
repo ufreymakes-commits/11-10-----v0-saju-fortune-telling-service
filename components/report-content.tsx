@@ -174,6 +174,7 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
                 alt={`${dayMasterKorean} character`}
                 fill
                 className="object-contain drop-shadow-lg"
+                priority
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = '/images/characters-collection.png'
                 }}

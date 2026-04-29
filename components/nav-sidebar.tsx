@@ -64,6 +64,7 @@ export function NavSidebar() {
               height={20}
               className="object-contain"
               priority
+              priority
             />
           </Link>
         </div>
