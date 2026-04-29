@@ -247,7 +247,7 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
           <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
             <div className="relative w-full h-48">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Frame%20186-4UxuQefWCJ3ecnuEVZjkIyjL94QZBh.png"
+                src="/images/luck-bracelet.png"
                 alt="Signature Saju Elemental Bracelet"
                 fill
                 className="object-cover"
