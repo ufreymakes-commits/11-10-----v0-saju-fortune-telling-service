@@ -35,50 +35,25 @@ export async function GET(req: NextRequest) {
       .from('submissions')
       .select('*', { count: 'exact', head: true })
 
-    // Paid submissions — PayPal only (exclude coupon users)
-    const { data: couponSubmissionIds } = await supabase
-      .from('payments')
-      .select('submission_id')
-      .eq('status', 'completed')
-      .like('paypal_order_id', 'COUPON-%')
-
-    const couponIds = (couponSubmissionIds || []).map((r: { submission_id: string }) => r.submission_id).filter(Boolean) as string[]
-    const couponIdSet = new Set(couponIds)
-
-    const { data: allPaidRows } = await supabase
-      .from('submissions')
-      .select('id')
-      .not('paid_report_url', 'is', null)
-
-    const paidSubmissions = (allPaidRows || []).filter(
-      (r: { id: string }) => !couponIdSet.has(r.id)
-    ).length
-
-    // Payments — PayPal only (exclude coupon)
+    // Payments
     const { count: totalPayments } = await supabase
       .from('payments')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'completed')
-      .not('paypal_order_id', 'like', 'COUPON-%')
 
-    // Coupon usage count
-    const { count: couponUsageCount } = await supabase
-      .from('payments')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'completed')
-      .like('paypal_order_id', 'COUPON-%')
-
-    // Monthly paid report counts (last 12 months) — exclude coupon
-    const { data: monthlyAllRaw } = await supabase
+    // Paid submissions
+    const { count: paidSubmissions } = await supabase
       .from('submissions')
-      .select('id, created_at')
+      .select('*', { count: 'exact', head: true })
+      .not('paid_report_url', 'is', null)
+
+    // Monthly paid report counts (last 12 months)
+    const { data: monthlyRaw } = await supabase
+      .from('submissions')
+      .select('created_at')
       .not('paid_report_url', 'is', null)
       .gte('created_at', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString())
       .order('created_at', { ascending: true })
-
-    const monthlyRaw = (monthlyAllRaw || []).filter(
-      (r: { id: string; created_at: string }) => !couponIdSet.has(r.id)
-    )
 
     const monthlyPaidCounts: Record<string, number> = {}
     for (const row of monthlyRaw || []) {
@@ -86,13 +61,12 @@ export async function GET(req: NextRequest) {
       monthlyPaidCounts[month] = (monthlyPaidCounts[month] || 0) + 1
     }
 
-    // Payer country breakdown — exclude coupon
+    // Payer country breakdown
     const { data: payerCountryRows } = await supabase
       .from('payments')
       .select('payer_country')
       .eq('status', 'completed')
       .not('payer_country', 'is', null)
-      .not('paypal_order_id', 'like', 'COUPON-%')
 
     const payerCountryCounts: Record<string, number> = {}
     for (const row of payerCountryRows || []) {
@@ -119,10 +93,10 @@ export async function GET(req: NextRequest) {
       .order('created_at', { ascending: false })
       .limit(20)
 
-    // Daily submissions (last 30 days) — free + paid (paid excludes coupon)
+    // Daily submissions (last 30 days) — free + paid
     const { data: dailySubmissions } = await supabase
       .from('submissions')
-      .select('id, created_at, paid_report_url')
+      .select('created_at, paid_report_url')
       .gte('created_at', new Date(Date.now() - 30 * 86400000).toISOString())
 
     const dailySubmissionCounts: Record<string, number> = {}
@@ -130,7 +104,7 @@ export async function GET(req: NextRequest) {
     for (const s of dailySubmissions || []) {
       const day = (s.created_at as string).slice(0, 10)
       dailySubmissionCounts[day] = (dailySubmissionCounts[day] || 0) + 1
-      if (s.paid_report_url && s.id && !couponIdSet.has(s.id)) {
+      if (s.paid_report_url) {
         dailyPaidCounts[day] = (dailyPaidCounts[day] || 0) + 1
       }
     }
@@ -141,7 +115,6 @@ export async function GET(req: NextRequest) {
       totalSubmissions,
       paidSubmissions,
       totalPayments,
-      couponUsageCount,
       recentSubmissions,
       dailySubmissionCounts,
       dailyPaidCounts,
