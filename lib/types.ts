@@ -126,7 +126,7 @@ export interface SajuData {
   daewoon?: Array<{ startAge: number; endAge: number; stem: string; branch: string; fullName?: string; tenGod?: string; twelveStar?: string; element?: string }>
   
   // 연운
-  yeonwoon?: Array<{ year: number; stem: string; branch: string; fullName?: string }>
+  yeonwoon?: Array<{ year: number; stem: string; branch: string; fullName?: string; tenGod?: string; twelveStar?: string; element?: string }>
   
   // Deprecated (이전 호환성)
   luckyElement?: string
