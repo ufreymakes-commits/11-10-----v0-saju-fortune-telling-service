@@ -5,6 +5,9 @@ const nextConfig = {
     unoptimized: true,
   },
   swcMinify: false,
+  env: {
+    BUILD_VERSION: '2026-04-29-v2',
+  },
 }
 
 export default nextConfig
