@@ -1327,7 +1327,7 @@ For example:
   - 土 = 식상
   - 金 = 재성
   - 水 = 관성
-  - 木 = ���������성
+  - 木 = �����������성
 
 丁�� (Jeong-hwa):
   - 火 = 비겁
@@ -2619,7 +2619,7 @@ OUTPUT FORMAT (JSON ONLY):
       system: stage2SystemPrompt,
       prompt: stage2UserPrompt,
       temperature: 0,
-      maxTokens: 2500
+      maxTokens: 4000
     })
 
     console.log('[v0] Gemini: Stage 2 response received, parsing...')
