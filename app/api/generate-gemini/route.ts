@@ -2374,7 +2374,7 @@ ${JSON.stringify(allSajuData, null, 2)}
       system: stage1SystemPrompt,
       prompt: stage1UserPrompt,
       temperature: 0,
-      maxTokens: 2900
+      maxTokens: 3000
     })
 
     console.log('[v0] Gemini: Stage 1 response received, parsing...')
