@@ -19,7 +19,7 @@ export default function StartPage() {
   return (
     <main className="min-h-screen bg-[#0a0a14] relative overflow-x-hidden pt-10">
       <StarsBackground />
-      
+
       <div id="top" className="relative z-10 flex flex-col items-center px-4 py-8">
         {/* Characters in V-formation */}
         <div className="relative w-64 md:w-80 h-44 md:h-56 mx-auto mb-0">
@@ -56,12 +56,12 @@ export default function StartPage() {
         <h1 className="text-xl font-semibold text-gradient text-center -mt-2 mb-6">
           Enter Your Birth Info
         </h1>
-        
+
         {/* Form Card */}
         <div className="w-full max-w-md bg-white border border-primary/20 rounded-2xl p-6 md:p-8 shadow-xl">
           <BirthForm />
         </div>
-        
+
         {/* Info */}
         <p className="mt-6 text-[10px] text-white/60 text-center max-w-sm leading-relaxed">
           Your information is used solely to calculate your birth chart and will not be shared with third parties. By continuing, you agree to our privacy policy and receiving our Saju tips newsletter.
@@ -75,7 +75,7 @@ export default function StartPage() {
         <div className="max-w-5xl mx-auto">
           <h3 className="text-center text-3xl md:text-4xl font-semibold text-white/90 mb-2">Why Sajume?</h3>
           <p className="text-center text-sm md:text-base text-white/50 mb-12">
-            No more stress from wrong AI answers.<br/>Let sajume&apos;s certified expertise ease your mind.
+            No more stress from wrong AI answers.<br />Let sajume&apos;s certified expertise ease your mind.
           </p>
 
           {/* 2,765+ Reports */}
@@ -91,7 +91,7 @@ export default function StartPage() {
               <div className="rounded-xl overflow-hidden border border-purple-500/30 shadow-2xl">
                 <div style={{ padding: '109.67% 0 0 0', position: 'relative' }}>
                   <iframe
-                    src="https://player.vimeo.com/video/1185152795?badge=0&autopause=0&player_id=0&app_id=58479&loop=1&background=1&muted=1"
+                    src="https://player.vimeo.com/video/1185152795?badge=0&autopause=0&player_id=0&app_id=58479&loop=1&background=1&muted=1&playsinline=1"
                     frameBorder="0"
                     allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
                     referrerPolicy="strict-origin-when-cross-origin"
@@ -179,7 +179,7 @@ export default function StartPage() {
         <div className="max-w-2xl mx-auto">
           <h3 className="text-center text-3xl md:text-4xl font-semibold text-white/90 mb-2">Our Products</h3>
           <p className="text-center text-sm md:text-base text-white/50 mb-8 leading-relaxed">
-            From ancient Korea eerie fortune telling<br/>to lucky charm bracelets
+            From ancient Korea eerie fortune telling<br />to lucky charm bracelets
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* 99 Facts */}
