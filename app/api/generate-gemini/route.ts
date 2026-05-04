@@ -2395,7 +2395,7 @@ Respond ONLY in JSON format.`
 1. 페르소나 충돌 (일간 vs 월지)
 2. 에너지 과부하 (가장 강한 오행/십신)
 3. 사회적 유전자 (격국)
-4.[Career Deep-Dive]: 시스템 프롬프트의 Career Step 1~8을 적용한 'Structural Core'와 'Talent & Aura' 분석. 3개 이상의 구체적 직업군 명시.
+4.[Career Deep-Dive]: 시스템 프롬프트의 Career logic Step 1~8을 적용한 'Structural Core'와 'Talent & Aura' 분석. 3개 이상의 구체적 직업군 명시.
 5. [Romance & Spouse]: 연애 Rule A~I를 적용하여 배우자 성(Star)의 위치, 배우자 궁(Palace)의 안정성, 파트너의 바이브(Vibe) 분석.
 6. 심리적 갈증 (없는 오행/십신)
 7. 핵심 흉터 (형충/공망/원진)
