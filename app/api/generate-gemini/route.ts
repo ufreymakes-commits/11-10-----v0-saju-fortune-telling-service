@@ -2389,18 +2389,20 @@ Respond ONLY in JSON format.`
 [STAGE 1: 8가지 체크포인트 심화 분석]
 ===========================================
 
-아래 8가지 체크포인트에 맞춰 이 사주의 '인생 시나리오'를 2,500자로 심화 분석하라.
+아래 체크포인트에 맞춰 이 사주의 '인생 시나리오'를 2,500자로 심화 분석하라.
 절대 뻔한 소리를 하지 말고, 데이터 수치에 근거해 소름 끼칠 정도로 날카로운 심리적/현실적 핵심을 도출하라. 내가 보낸 이 사주 데이터는 이 세상 최고의 신선한 최상급 재료들이다. 너는 세계에서 가장 유명한 미슐랭 1등급 쉐프 같은 사주 데이터 분석가이다. 철저하게 이 데이터들을 가지고 최상의 해석지를 도출해내야 한다. 반드시!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 1. 페르소나 충돌 (일간 vs 월지)
 2. 에너지 과부하 (가장 강한 오행/십신)
 3. 사회적 유전자 (격국)
-4. 심리적 갈증 (없는 오행/십신)
-5. 핵심 흉터 (형충/공망/원진)
-6. 숨겨진 무기 (신살/귀인)
-7. 독립성 지수 (신강신약)
-8. 현재 좌표 (대운)
-9. 이 외에도 활용하지 않은 데이터들 중 흥미로운 점이 있다면 노트하기.
+4.[Career Deep-Dive]: 시스템 프롬프트의 Career Step 1~8을 적용한 'Structural Core'와 'Talent & Aura' 분석. 3개 이상의 구체적 직업군 명시.
+5. [Romance & Spouse]: 연애 Rule A~I를 적용하여 배우자 성(Star)의 위치, 배우자 궁(Palace)의 안정성, 파트너의 바이브(Vibe) 분석.
+6. 심리적 갈증 (없는 오행/십신)
+7. 핵심 흉터 (형충/공망/원진)
+8. 숨겨진 무기 (신살/귀인)
+9. 독립성 지수 (신강신약)
+10. 현재 좌표 (대운)
+11. 이 외에도 활용하지 않은 데이터들 중 흥미로운 점이 있다면 노트하기.
 
 OUTPUT FORMAT (JSON ONLY):
 \`\`\`json
@@ -2418,6 +2420,18 @@ OUTPUT FORMAT (JSON ONLY):
   "social_genes": {
     "gyeokguk": "...",
     "career_fit": "..."
+  },
+  "career_analysis": {
+    "independence_index_type": "Primary Classification (A vs B) + Strength Filter",
+    "structural_core": "Month Branch DNA와 Independence Index를 결합한 조직적 위치 분석",
+    "talent_aura": "Five Elements Industry와 Shinsal을 결합한 외적 재능과 아우라 분석",
+    "specific_recommendations": ["Job 1", "Job 2", "Job 3", "..."]
+  },
+  "romance_spouse": {
+    "spouse_star_presence": "배우자 성의 가시성(Heavenly Stem/Hidden Stem/Absent) 분석",
+    "spouse_palace_dynamic": "일지의 합/충/해/원진을 통한 결혼 생활의 역동성 분석",
+    "partner_vibe": "오행과 십신에 근거한 파트너의 성향과 이미지",
+    "timing_logic": "인카운터(Meeting)와 현출(Manifestation)의 시기적 단서"
   },
   "psychological_thirst": {
     "missing_element": "...",
@@ -2443,7 +2457,8 @@ OUTPUT FORMAT (JSON ONLY):
     "current_daewoon": "...",
     "key_year": "...",
     "forecast": "..."
-  }
+  },
+  "extra_notes": "12운성, 공망, 조후 등 기타 특이사항 메모"
 }
 \`\`\`
 
