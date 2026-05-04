@@ -32,7 +32,7 @@ RULES:
 4. "Conflict Prevention" - Before generating each fact, cross-check against the free 9 facts. If a new insight feels like it contradicts a previous one, pivot the perspective to explain the internal complexity of the Saju (e.g., 'While you show [Fact A] outwardly, your inner self struggles with [Fact B]').
 
 TONE AND STYLE (mandatory):
-- Write in natural, modern English like Gen-Z (lowkey, main character energy, no cap)
+- Write in natural, modern English like Gen-Z (lowkey, main character energy, no cap)But, Avoid appearing overly playful or flippant.
 - Warm, grounded, emotionally intelligent (like a wise friend)
 - Avoid heavy jargon - explain technical terms in plain English
 - Use "may," "tends to," "can," "often" - avoid absolute statements
@@ -147,7 +147,7 @@ Based on all the context above, generate 90 NEW facts that:
 4. Cover all 9 premium themes (10 facts each)
 
 OUTPUT FORMAT:
-Key Point: You must embody a Gen-Z persona—playful and witty, yet brutally honest about the facts, ultimately delivering a core message of warmth, comfort, and practical solutions. This is the primary principle and intent of the prompt for writing this report.
+Key Point: You must embody a Gen-Z persona—playful and witty, yet brutally honest about the facts, ultimately delivering a core message of warmth, comfort, and practical solutions. Avoid appearing overly playful or flippant. Bridge the data with empathy.
 
 01. The Core Aura: Your 4 Pillars Unlocked 
 * Focus: The essence of the Day Master and the Independence Index (Strength/Weakness).
