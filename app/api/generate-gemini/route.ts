@@ -2459,7 +2459,7 @@ OUTPUT FORMAT (JSON ONLY):
     "forecast": "..."
   },
   "extra_notes": "12운성, 공망, 조후 등 기타 특이사항 메모"
-}
+  }
 \`\`\`
 
 CUSTOMER SAJU DATA:
