@@ -2462,8 +2462,8 @@ ${JSON.stringify(allSajuData, null, 2)}
       model: 'google/gemini-2.0-flash',
       system: stage1SystemPrompt,
       prompt: stage1UserPrompt,
-      temperature: 0,
-      maxTokens: 2000
+      temperature: 0.2,
+      maxTokens: 5000
     })
 
     console.log('[v0] Gemini: Stage 1 response received, parsing...')
