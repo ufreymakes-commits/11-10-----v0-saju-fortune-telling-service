@@ -209,7 +209,7 @@ Key Point: You must embody a Gen-Z persona—playful and witty, yet brutally hon
 And please, you need to include these 3 sentences for 'everyone'. Because we masked this and showed on the free report page to persuade customers to pay for the paid report. Fill in the blank (*** or ** or *********** this mark), matching to this customer's saju data and context. You can put these sentences anyway in 90 sentences, considering the context.
 - The main theme of your 2026 is *** . Congratulations! But be careful of , as doesn't fit well with your lifestyle.
 - he period from 20** to 20** is the best time to meet your spouse. Your spouse will probably be in charge of  and work as a ***.
-- Are you actually ready to be rich? How about looking at it from this angle? *********** (explain in details)
+- You’ve got the blueprint to attract serious wealth. How about looking at it from this angle? *********** (explain in details)
 
 
 OUTPUT JSON STRUCTURE - ABSOLUTELY CRITICAL:
