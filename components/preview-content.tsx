@@ -237,8 +237,9 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
             <Spinner className="w-5 h-5" />
           </div>
           <p className="text-sm text-foreground/70 mb-6">
-            Don&apos;t close the window!<br />
-            We&apos;ll be done in less than 2 mins.
+            Please don&apos;t close the window or resubmit<br />
+            unless a &apos;Load Failed&apos; message appears.<br />
+            We&apos;ll be finished in less than 2 mins.
           </p>
         </div>
       </div>
