@@ -8,7 +8,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { DayMasterCard } from '@/components/day-master-card'
 import type { Fact, SajuData } from '@/lib/types'
 import { LockIcon, Share2Icon, CheckIcon } from 'lucide-react'
-import { NoticeMeButton } from '@/components/notice-me-button'
+
 
 function ShareButton() {
   const [copied, setCopied] = useState(false)
@@ -574,11 +574,8 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
                 <span className="text-[11px] text-amber-300/80">Shop at Sajume Shopify</span>
               </div>
             </div>
-            {/* Notice me button - bottom right */}
-            <NoticeMeButton
-              product="bracelet"
-              className="shrink-0 text-center py-2 px-4 rounded-lg text-xs font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/30 hover:border-amber-400/60 transition-all"
-            />
+            {/* Shop Now button - bottom right */}
+            <a href="https://sajume.com/products/personal-luck-bracelet" target="_blank" rel="noopener noreferrer" className="shrink-0 text-center py-2 px-4 rounded-lg text-xs font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/30 hover:border-amber-400/60 transition-all">Shop Now</a>
           </div>
         </div>
       </div>

@@ -255,9 +255,6 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
               />
             </div>
             <div className="p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/30">Coming Soon</span>
-              </div>
               <h4 className="text-sm font-semibold text-foreground mb-1">Signature Saju Elemental Bracelet</h4>
               <p className="text-xs text-muted-foreground mb-3">A bracelet designed to fill the missing energies in your Saju chart.</p>
               <div className="flex items-center justify-between mb-3">
@@ -273,16 +270,14 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
                 </div>
                 <span className="text-sm font-bold text-foreground">$38</span>
               </div>
-              <button
-                data-tally-open="81JRrr"
-                data-tally-layout="modal"
-                data-tally-emoji-text="👋"
-                data-tally-emoji-animation="wave"
-                onClick={() => handleNoticeMeClick('bracelet')}
-                className="w-full py-1.5 text-xs font-semibold border border-border rounded-lg hover:bg-background/50 transition-colors text-foreground"
+              <a
+                href="https://sajume.com/products/personal-luck-bracelet"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-1.5 text-xs font-semibold border border-border rounded-lg hover:bg-background/50 transition-colors text-foreground text-center block"
               >
-                Notice me
-              </button>
+                Shop Now
+              </a>
             </div>
           </div>
 

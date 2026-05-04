@@ -213,10 +213,7 @@ src="/images/shopify-logo.png"
                   </div>
                   <span className="text-lg font-bold text-white">$38</span>
                 </div>
-                <NoticeMeButton
-                  product="bracelet"
-                  className="w-full text-center py-2 px-4 rounded-lg text-sm font-medium bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/30 hover:border-amber-400/50 transition-all"
-                />
+                <a href="https://sajume.com/products/personal-luck-bracelet" target="_blank" rel="noopener noreferrer" className="w-full text-center py-2 px-4 rounded-lg text-sm font-medium bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/30 hover:border-amber-400/50 transition-all block">Shop Now</a>
               </div>
             </div>
 
