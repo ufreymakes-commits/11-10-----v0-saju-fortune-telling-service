@@ -2462,7 +2462,7 @@ ${JSON.stringify(allSajuData, null, 2)}
       model: 'google/gemini-2.0-flash',
       system: stage1SystemPrompt,
       prompt: stage1UserPrompt,
-      temperature: 0.2,
+      temperature: 0,
       maxTokens: 5000
     })
 
