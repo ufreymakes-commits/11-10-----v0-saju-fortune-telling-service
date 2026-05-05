@@ -2546,7 +2546,7 @@ OUTPUT FORMAT (JSON ONLY):
         system: stage2SystemPrompt,
         prompt: stage2UserPrompt,
         temperature: 0,
-        maxTokens: 8000
+        maxTokens: 5000
       })
       console.log(`[v0] Gemini: Stage 2 attempt ${stage2Attempts}, response length: ${stage2Result.text.length}`)
       try {
