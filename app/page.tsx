@@ -291,16 +291,11 @@ src="/images/shopify-logo.png"
             </div>
             <div className="order-1 md:order-2">
               <div className="rounded-xl overflow-hidden border border-purple-500/30 shadow-2xl">
-                <div style={{ padding: '109.67% 0 0 0', position: 'relative' }}>
-                  <iframe 
-                    src="https://player.vimeo.com/video/1185152795?badge=0&autopause=0&player_id=0&app_id=58479&loop=1&background=1&muted=1" 
-                    frameBorder="0" 
-                    allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" 
-                    referrerPolicy="strict-origin-when-cross-origin" 
-                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} 
-                    title="Sajume Report Preview"
-                  />
-                </div>
+                <img
+                  src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/20260421-1_1.gif?v=1777987705"
+                  alt="Sajume Report Preview"
+                  className="w-full h-auto block"
+                />
               </div>
             </div>
           </div>
