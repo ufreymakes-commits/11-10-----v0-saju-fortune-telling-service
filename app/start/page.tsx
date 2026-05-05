@@ -9,7 +9,7 @@ import { sharedOpenGraph, sharedTwitter } from '@/lib/metadata'
 export const metadata = {
   title: 'Enter Your Birth Info - Sajume',
   description: 'Enter your birth information to discover 99 facts about your destiny through Korean Saju astrology.',
-  openGraph: { ...sharedOpenGraph, title: 'Enter Your Birth Info - Sajume' },
+  openGraph: { ...sharedOpenGraph, title: 'Enter Your Birth Info - Sajume', url: 'https://my.sajume.com/start' },
   twitter: { ...sharedTwitter, title: 'Enter Your Birth Info - Sajume' },
 }
 

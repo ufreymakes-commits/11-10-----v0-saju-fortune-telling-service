@@ -1,5 +1,5 @@
 export const OG_IMAGE = {
-  url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Thenextgenpng-haDUszHNXdaOgdcbh4xKKBXTU1PJl5.png',
+  url: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/Thenextgenpng.png?v=1777455763',
   width: 1200,
   height: 630,
   alt: 'K-Saju - The Next Gen Fortune Telling',
