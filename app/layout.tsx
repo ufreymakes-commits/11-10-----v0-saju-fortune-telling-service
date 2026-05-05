@@ -68,7 +68,7 @@ export default function RootLayout({
         <meta property="og:image:type" content="image/png" />
         <meta name="twitter:image" content="https://my.sajume.com/images/og-nextgen.png" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta property="og:url" content="https://v0-saju-fortune-telling-service.vercel.app" />
+        <meta property="og:url" content="https://my.sajume.com" />
         <script async src="https://tally.so/widgets/embed.js"></script>
       </head>
       <body className={`${poppins.variable} ${montserrat.variable} ${geistMono.variable} font-sans antialiased`} suppressHydrationWarning>
