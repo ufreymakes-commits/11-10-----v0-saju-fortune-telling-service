@@ -91,7 +91,7 @@ export default function StartPage() {
               <div className="rounded-xl overflow-hidden border border-purple-500/30 shadow-2xl">
                 <div style={{ padding: '109.67% 0 0 0', position: 'relative' }}>
                   <iframe
-                    src="https://player.vimeo.com/video/1185152795?badge=0&autopause=0&player_id=0&app_id=58479&loop=1&background=1&muted=1&playsinline=1"
+                    src="https://player.vimeo.com/video/1185152795?badge=0&autopause=0&player_id=0&app_id=58479&loop=1&background=1&muted=1"
                     frameBorder="0"
                     allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
                     referrerPolicy="strict-origin-when-cross-origin"
