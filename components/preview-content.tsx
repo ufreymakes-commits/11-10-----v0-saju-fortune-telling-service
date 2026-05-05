@@ -188,16 +188,16 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
 
   // Character slider data for loading screen
   const characters = [
-    { name: 'The Pioneer', image: '/images/gabmok.png' },
-    { name: 'The Adapter', image: '/images/eulmok.png' },
-    { name: 'The Energizer', image: '/images/byeonghwa.png' },
-    { name: 'The Empath', image: '/images/jeonghwa.png' },
-    { name: 'The Anchor', image: '/images/muto.png' },
-    { name: 'The Nurturer', image: '/images/gito.png' },
-    { name: 'The Straight Shooter', image: '/images/gyeonggeum.png' },
-    { name: 'The Perfectionist', image: '/images/singeum.png' },
-    { name: 'The Explorer', image: '/images/imsu.png' },
-    { name: 'The Intuitive', image: '/images/gyesu.png' },
+    { name: 'The Pioneer', image: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/gabmok.png?v=1777872574' },
+    { name: 'The Adapter', image: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/eulmok.png?v=1777872574' },
+    { name: 'The Energizer', image: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/byeonghwa.png?v=1777872574' },
+    { name: 'The Empath', image: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/jeonghwa.png?v=1777872574' },
+    { name: 'The Anchor', image: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/muto.png?v=1777872573' },
+    { name: 'The Nurturer', image: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/gito.png?v=1777872574' },
+    { name: 'The Straight Shooter', image: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/gyeonggeum.png?v=1777872574' },
+    { name: 'The Perfectionist', image: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/singeum.png?v=1777872573' },
+    { name: 'The Explorer', image: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/imsu.png?v=1777872574' },
+    { name: 'The Intuitive', image: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/gyesu.png?v=1777872574' },
   ]
 
   if (isLoading) {

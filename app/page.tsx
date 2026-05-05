@@ -82,18 +82,18 @@ export default function LandingPage() {
           <div className="relative w-64 md:w-80 h-44 md:h-56 mx-auto mb-8">
             {/* Left outer - Eulmok (green) */}
             <div className="absolute w-14 h-14 md:w-18 md:h-18 z-0 opacity-30" style={{ left: '0%', top: '20%' }}>
-              <Image src="/images/eulmok.png" alt="Eulmok" fill className="object-contain" priority />
+              <Image src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/eulmok.png?v=1777872574" alt="Eulmok" fill className="object-contain" priority />
             </div>
             
             {/* Left inner - Gyesu (purple) */}
             <div className="absolute w-16 h-16 md:w-20 md:h-20 z-0 opacity-40" style={{ left: '15%', top: '30%' }}>
-              <Image src="/images/gyesu.png" alt="Gyesu" fill className="object-contain" priority />
+              <Image src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/gyesu.png?v=1777872574" alt="Gyesu" fill className="object-contain" priority />
             </div>
             
             {/* Main mascot - Pink (center, floating) */}
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 md:w-44 md:h-44 z-10 animate-float">
               <Image
-                src="/images/mascot-main.png"
+                src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/9.png?v=1777987978"
                 alt="Sajume mascot"
                 fill
                 className="object-contain drop-shadow-2xl"
@@ -103,12 +103,12 @@ export default function LandingPage() {
             
             {/* Right inner - Gyeonggeum (gray) */}
             <div className="absolute w-16 h-16 md:w-20 md:h-20 z-0 opacity-40" style={{ right: '15%', top: '30%' }}>
-              <Image src="/images/gyeonggeum.png" alt="Gyeonggeum" fill className="object-contain" priority />
+              <Image src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/gyeonggeum.png?v=1777872574" alt="Gyeonggeum" fill className="object-contain" priority />
             </div>
             
             {/* Right outer - Byeonghwa (orange) */}
             <div className="absolute w-14 h-14 md:w-18 md:h-18 z-0 opacity-30" style={{ right: '0%', top: '20%' }}>
-              <Image src="/images/byeonghwa.png" alt="Byeonghwa" fill className="object-contain" priority />
+              <Image src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/byeonghwa.png?v=1777872574" alt="Byeonghwa" fill className="object-contain" priority />
             </div>
           </div>
           
