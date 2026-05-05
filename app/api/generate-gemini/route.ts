@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { generateText } from 'ai'
+import { generateText, generateObject } from 'ai'
+import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import type { SajuData, Fact } from '@/lib/types'
 import { headers } from 'next/headers'
@@ -1327,7 +1328,7 @@ For example:
   - 土 = 식상
   - 金 = 재성
   - 水 = 관성
-  - 木 = ���������������성
+  - 木 = �����������������성
 
 丁�� (Jeong-hwa):
   - 火 = 비겁
@@ -2419,7 +2420,7 @@ Language: English only.
 `
 
     // ===== Yongsin 처리 로직 =====
-    // 조후 정도에 따라 조후용신 또는 억부용신 선택
+    // 조후 ���도에 따라 조후용신 또는 억부용신 선택
     // 생년월일에서 계절 파악해서 조후 정도 판단
     const month = parseInt(birth_date.split('-')[1])
     const isBalancedSeason = [3, 4, 9, 10].includes(month) // 봄/가을
@@ -2525,44 +2526,26 @@ OUTPUT FORMAT (JSON ONLY):
 
     console.log('[v0] Gemini: ===== STAGE 2: Final Facts Generation =====')
 
-    const parseStage2Response = (text: string) => {
-      let match = text.match(/```json\n([\s\S]*?)\n```/)
-      if (!match) match = text.match(/```json([\s\S]*?)```/)
-      if (!match) {
-        const direct = text.match(/(\{[\s\S]*\})/)
-        if (direct) match = [null, direct[1]] as RegExpMatchArray
-      }
-      if (!match) throw new Error('Stage 2 JSON format not found')
-      const jsonStr = match[1].trim().replace(/,\s*}/g, '}').replace(/,\s*]/g, ']')
-      return JSON.parse(jsonStr)
-    }
+    const factSchema = z.object({
+      facts: z.array(z.object({
+        id: z.number(),
+        title: z.string(),
+        content: z.string()
+      })).length(9)
+    })
 
-    let parsed: any
-    let stage2Attempts = 0
-    while (stage2Attempts < 3) {
-      stage2Attempts++
-      const stage2Result = await generateText({
-        model: 'google/gemini-2.0-flash',
-        system: stage2SystemPrompt,
-        prompt: stage2UserPrompt,
-        temperature: 0,
-        maxTokens: 5000
-      })
-      console.log(`[v0] Gemini: Stage 2 attempt ${stage2Attempts}, response length: ${stage2Result.text.length}`)
-      try {
-        parsed = parseStage2Response(stage2Result.text)
-        if (!parsed.facts || parsed.facts.length < 9) {
-          console.error(`[v0] Gemini: Stage 2 only returned ${parsed.facts?.length} facts, retrying...`)
-          if (stage2Attempts < 3) continue
-          throw new Error(`Incomplete facts: only ${parsed.facts?.length} returned`)
-        }
-        break
-      } catch (e) {
-        console.error(`[v0] Gemini: Stage 2 attempt ${stage2Attempts} failed:`, e)
-        if (stage2Attempts >= 3) throw new Error(`Stage 2 failed after 3 attempts: ${e}`)
-      }
-    }
-    const facts: Fact[] = parsed.facts.map((f: any) => ({
+    const stage2Result = await generateObject({
+      model: 'google/gemini-2.0-flash',
+      schema: factSchema,
+      system: stage2SystemPrompt,
+      prompt: stage2UserPrompt,
+      temperature: 0,
+      maxTokens: 8000
+    })
+
+    console.log(`[v0] Gemini: Stage 2 completed, generated ${stage2Result.object.facts.length} facts`)
+
+    const facts: Fact[] = stage2Result.object.facts.map((f: any) => ({
       id: f.id,
       text: f.content,
       category: f.title,
