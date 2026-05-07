@@ -77,7 +77,7 @@ export default function ManifestForestPage() {
           100% { opacity: 0; transform: translateY(-320px) scale(0.95); }
         }
         .animate-float-up {
-          animation: floatUp 8s ease-in-out infinite;
+          animation: floatUp 5s ease-in-out infinite;
         }
       `}</style>
 
