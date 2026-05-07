@@ -127,20 +127,28 @@ export default function ManifestForestPage() {
       </div>
 
       {/* Body text */}
-      <div className="relative z-10 max-w-xl mx-auto px-6 pt-6 pb-6 text-center">
-        <div className="space-y-5 text-[13px] md:text-[15px] leading-relaxed text-white/70">
+      <div className="relative z-10 max-w-xl mx-auto px-6 pt-6 pb-6 text-center" style={{ lineHeight: 1.6, wordBreak: 'keep-all' }}>
+        <div className="space-y-5 text-[13px] md:text-[14px] text-white/70">
           <p>
-            We are the Gumihos, the mystical guardians of dreams.<br />
-            Leave your deepest wish here with us.<br />
-            We&apos;ll keep it safe and{' '}
-            <strong className="text-white font-bold">deliver it back to your email in exactly one year.</strong>
+            We are the Gumihos,<br />
+            the mystical guardians of dreams.
           </p>
           <p>
+            Leave your deepest wish<br />
+            here with us.
+          </p>
+          <p>
+            We&apos;ll keep it safe and<br />
+            <strong className="text-white font-bold">deliver it back to your email</strong><br />
+            in exactly one year.
+          </p>
+          <p className="mt-5">
             Who knows?<br />
             By the time you receive this letter,<br />
-            your wish might have already become reality.
+            your wish might have already<br />
+            become reality.
           </p>
-          <p className="text-[13px] text-white/35 italic">
+          <p className="text-[11px] md:text-[12px] text-white/40 italic">
             P.S. We only collect true wishes, not livers! 😉
           </p>
         </div>
