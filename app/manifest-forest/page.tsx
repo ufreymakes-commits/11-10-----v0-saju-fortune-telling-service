@@ -158,7 +158,7 @@ export default function ManifestForestPage() {
         {status === 'success' ? (
           <div className="text-center py-12 px-6 rounded-2xl bg-purple-950/50 border border-purple-800/40">
             <div className="text-4xl mb-4">🦊</div>
-            <h2 className="text-xl font-semibold text-purple-300 mb-3">Your wish is my command.</h2>
+            <h2 className="text-xl font-semibold text-purple-300 mb-3">Your wish is now our command.</h2>
             <p className="text-white/60 text-sm leading-relaxed">
               The Gumihos will guard it carefully.<br />
               In exactly one year, your wish will find its way back to you.
