@@ -87,18 +87,21 @@ export default function ManifestForestPage() {
       </audio>
 
       {/* Header title above image */}
-      <div className="relative z-10 pt-10 pb-6 text-center px-4">
-        <p className="text-purple-400/70 text-xs tracking-[0.3em] uppercase font-medium mb-3">
+      <div className="relative z-10 pt-8 pb-4 text-center px-4">
+        <p className="text-purple-400/70 text-[10px] md:text-xs tracking-[0.3em] uppercase font-medium mb-2">
           ✦ The Gumihos await ✦
         </p>
-        <h1 className="text-4xl md:text-5xl font-serif font-bold text-white leading-tight text-balance">
+        <h1 className="text-2xl md:text-4xl lg:text-5xl font-serif font-bold text-white leading-tight text-balance">
           Welcome to the<br />Manifest Forest
         </h1>
       </div>
 
       {/* Image with floating wishes */}
       <div className="relative w-full max-w-2xl mx-auto px-4">
-        <div className="relative rounded-2xl overflow-hidden border border-purple-800/30 shadow-2xl shadow-purple-950/50">
+        <div className="relative overflow-hidden">
+          {/* Top fade — blends image into background */}
+          <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-[#0a0612] to-transparent z-10 pointer-events-none" />
+
           {/* The Gumiho image */}
           <img
             src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_io9toxio9toxio9t.png-QmBxvKR1SU1yJPGdXNPKt5675k3HSv.jpeg"
@@ -106,8 +109,8 @@ export default function ManifestForestPage() {
             className="w-full h-auto block"
           />
 
-          {/* Gradient overlay bottom */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0612] via-transparent to-transparent" />
+          {/* Bottom fade — blends image into background */}
+          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0a0612] to-transparent z-10 pointer-events-none" />
 
           {/* Floating wishes — left */}
           <FloatingWish wish={WISHES[0]} style={{ left: '4%', bottom: '10%', animationDelay: '0s', animationDuration: '9s' }} />
@@ -124,8 +127,8 @@ export default function ManifestForestPage() {
       </div>
 
       {/* Body text */}
-      <div className="relative z-10 max-w-xl mx-auto px-6 pt-10 pb-6 text-center">
-        <div className="space-y-5 text-[15px] leading-relaxed text-white/70">
+      <div className="relative z-10 max-w-xl mx-auto px-6 pt-6 pb-6 text-center">
+        <div className="space-y-5 text-[13px] md:text-[15px] leading-relaxed text-white/70">
           <p>
             We are the Gumihos, the mystical guardians of dreams.<br />
             Leave your deepest wish here with us.<br />
