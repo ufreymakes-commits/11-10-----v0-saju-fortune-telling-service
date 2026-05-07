@@ -5,10 +5,11 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 
-const NAV_LINKS = [
+const NAV_LINKS: { label: string; href: string; sub?: boolean }[] = [
   { label: 'Home', href: '/' },
   { label: 'Products', href: '/#products' },
   { label: 'Company', href: '/company' },
+  { label: 'Manifest Forest', href: '/manifest-forest', sub: true },
   { label: 'Paid Reports', href: '/my-report' },
 ]
 
@@ -124,12 +125,17 @@ export function NavSidebar() {
                 key={link.href}
                 href={link.href}
                 onClick={link.href === '/#products' ? handleProductsClick : undefined}
-                className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
+                className={`flex items-center gap-3 rounded-lg text-sm font-medium transition-colors ${
+                  link.sub ? 'ml-4 px-3 py-2 text-xs' : 'px-3 py-3'
+                } ${
                   isActive
                     ? 'bg-primary/20 text-primary'
+                    : link.sub
+                    ? 'text-emerald-400/70 hover:text-emerald-300 hover:bg-white/8'
                     : 'text-white/70 hover:text-white hover:bg-white/8'
                 }`}
               >
+                {link.sub && <span className="text-emerald-600/60">└</span>}
                 {link.label}
               </Link>
             )
