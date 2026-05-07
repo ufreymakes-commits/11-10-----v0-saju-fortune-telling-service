@@ -130,7 +130,8 @@ export default function ManifestForestPage() {
       <div className="relative z-10 max-w-xl mx-auto px-6 pt-6 pb-6 text-center">
         <div className="space-y-5 text-[13px] md:text-[14px] leading-relaxed text-white/70">
           <p>
-            We are the Gumihos, the mystical guardians of dreams.<br />
+            We are the Gumihos,<br />
+            the mystical guardians of dreams.<br />
             Leave your deepest wish here with us.<br />
             We&apos;ll keep it safe and{' '}
             <strong className="text-white font-bold">deliver it back to your email in exactly one year.</strong>
