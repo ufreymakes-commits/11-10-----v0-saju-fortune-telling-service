@@ -288,7 +288,10 @@ export function getHourPillar(dayStem: Stem, hour: number, minute: number = 0, c
 // ================================================================
 
 export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
-  const { year, month, day, hour, minute, country, skipDSTCorrection } = birthInfo;
+  const { year, month, day, hour, minute, country, skipDSTCorrection, timezone, longitude } = birthInfo;
+  
+  // IANA timezone이 제공된 경우 → Luxon으로 직접 처리 (TIMEZONE_OFFSETS 불필요)
+  // country 코드가 TIMEZONE_OFFSETS에 없는 경우도 커버됨 (예: "US", "New York" 등)
   const tz = TIMEZONE_OFFSETS[country] || DEFAULT_TIMEZONE;
   
   const localHour = hour ?? 12;
@@ -297,6 +300,7 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
   let stdYear: number, stdMonth: number, stdDay: number, stdHour: number, stdMinute: number;
   let utcYear: number, utcMonth: number, utcDay: number, utcHour: number, utcMinute: number;
   let isDST = false;
+  let resolvedOffset: number = tz.offset; // 실제 사용된 UTC 오프셋 (시간 단위)
   
   if (skipDSTCorrection) {
     stdYear = year;
@@ -313,6 +317,55 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
     utcDay = utcDateObj.getUTCDate();
     utcHour = utcDateObj.getUTCHours();
     utcMinute = utcDateObj.getUTCMinutes();
+    resolvedOffset = tz.offset;
+  } else if (timezone) {
+    // ================================================================
+    // IANA 타임존 직접 사용 (도시 선택 시 - 가장 정확한 경로)
+    // Luxon이 DST, 역사적 타임존 변경을 모두 자동 처리
+    // ================================================================
+    try {
+      const localDt = DateTime.fromObject(
+        { year, month, day, hour: localHour, minute: localMinute, second: 0 },
+        { zone: timezone }
+      );
+      
+      if (!localDt.isValid) throw new Error('Invalid datetime for timezone: ' + timezone);
+      
+      isDST = localDt.isInDST;
+      const actualOffsetMinutes = localDt.offset; // 분 단위 (DST 포함된 실제 오프셋)
+      resolvedOffset = actualOffsetMinutes / 60;   // 시간 단위로 변환
+      
+      // UTC 변환
+      const utcDt = localDt.toUTC();
+      utcYear = utcDt.year;
+      utcMonth = utcDt.month;
+      utcDay = utcDt.day;
+      utcHour = utcDt.hour;
+      utcMinute = utcDt.minute;
+      
+      // 표준시 = UTC + 실제 오프셋 (DST 포함)
+      // 사주 계산은 "사용자가 입력한 현지 시간" 그대로를 기준으로 함
+      stdYear = localDt.year;
+      stdMonth = localDt.month;
+      stdDay = localDt.day;
+      stdHour = localDt.hour;
+      stdMinute = localDt.minute;
+    } catch {
+      // IANA 변환 실패 시 기존 방식으로 fallback
+      const converted = convertToStandardTime(year, month, day, localHour, localMinute, country);
+      stdYear = converted.standardYear;
+      stdMonth = converted.standardMonth;
+      stdDay = converted.standardDay;
+      stdHour = converted.standardHour;
+      stdMinute = converted.standardMinute;
+      utcYear = converted.utcYear;
+      utcMonth = converted.utcMonth;
+      utcDay = converted.utcDay;
+      utcHour = converted.utcHour;
+      utcMinute = converted.utcMinute;
+      isDST = converted.isDST;
+      resolvedOffset = converted.standardOffset;
+    }
   } else {
     const converted = convertToStandardTime(year, month, day, localHour, localMinute, country);
     stdYear = converted.standardYear;
@@ -326,6 +379,7 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
     utcHour = converted.utcHour;
     utcMinute = converted.utcMinute;
     isDST = converted.isDST;
+    resolvedOffset = converted.standardOffset;
   }
   
   // UTC 시간은 참조용으로만 저장 (실제 계산에는 진태양시 사용)
@@ -333,38 +387,20 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
 
   // ================================================================
   // 진태양시 계산 (True Solar Time)
-  // 
-  // standardMeridian: 타임존 기준 자오선 (오프셋 * 15)
-  //   예: 미국 동부 -5시간 → -75도, 한국 +9시간 → 135도
-  //
-  // actualLongitude: 실제 도시 경도
-  //   - birthInfo.longitude가 있으면 사용 (도시 선택 시)
-  //   - 없으면 tz.meridian으로 fallback (기존 호환성)
+  // standardMeridian: resolvedOffset * 15 (실제 사용된 오프셋 기반)
+  // actualLongitude: birthInfo.longitude (도시 선택 시) or tz.meridian (fallback)
   // ================================================================
-  const standardMeridian = tz.offset * 15;
-  const actualLongitude = birthInfo.longitude ?? tz.meridian;
-  
-  console.log('[v0] calcSolarTime:', {
-    input: { stdYear, stdMonth, stdDay, stdHour, stdMinute },
-    'tz.offset': tz.offset,
-    'tz.meridian': tz.meridian,
-    'birthInfo.longitude': birthInfo.longitude,
-    standardMeridian,
-    actualLongitude,
-    longitudeDiff: actualLongitude - standardMeridian,
-    expectedLongitudeCorrection: Math.round((actualLongitude - standardMeridian) * 4)
-  });
+  const standardMeridian = resolvedOffset * 15;
+  const actualLongitude = longitude ?? tz.meridian;
   
   const solarTime = calcSolarTime(
     stdYear, stdMonth, stdDay, stdHour, stdMinute,
     actualLongitude, standardMeridian
   );
   
-  console.log('[v0] calcSolarTime result:', solarTime);
-  
   // ================================================================
   // 모든 사주(연주, 월주, 일주, 시주)는 진태양시(solarTime) 기준으로 계산
-  // 야자시 보정: 23시 이후는 다음 날로 처리 (일주 계산용)
+  // 야자시 보정: 23시 ���후는 다음 날로 처리 (일주 계산용)
   // ================================================================
   
   // 야자시 보정 (일주 계산용)
@@ -474,7 +510,7 @@ export function countElementsWithHiddenStems(fourPillars: FourPillars): ElementC
 }
 
 // ================================================================
-// 오행 점수 계산 (수치론 점수 방식)
+// ���행 점수 계산 (수치론 점수 방식)
 // 천간: 각 10점, 지지: 연지 10점, 월지 30점, 일지 20점, 시지 20점
 // 지장간(숨겨진 천간)은 사용 안함, 총 120점
 // ================================================================

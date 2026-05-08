@@ -18,6 +18,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { COUNTRIES, REFERRAL_SOURCES } from '@/lib/types'
 import { CitySearch } from '@/components/city-search'
 import type { City } from '@/lib/city-search'
+import { inferTimezone } from '@/lib/city-search'
 
 interface FormErrors {
   name?: string
@@ -130,12 +131,16 @@ export function BirthForm() {
     
     try {
       // Prepare submission data with city information
+      // Resolve timezone: use city's timezone if present, otherwise infer from country+longitude
+      const resolvedTimezone = selectedCity
+        ? (selectedCity.timezone || inferTimezone(selectedCity.country, selectedCity.lon))
+        : null
+
       const submitData = {
         ...formData,
         birthCountry: selectedCity?.country || formData.birthCountry,
-        // New fields for precise timezone/location
         birthCity: selectedCity?.name || null,
-        timezone: selectedCity?.timezone || null,
+        timezone: resolvedTimezone,
         longitude: selectedCity?.lon || null,
         latitude: selectedCity?.lat || null
       }
@@ -210,7 +215,6 @@ export function BirthForm() {
             value={selectedCity}
             onChange={(city) => {
               setSelectedCity(city)
-              // Also set birthCountry for backward compatibility
               if (city) {
                 setFormData({ ...formData, birthCountry: city.country })
               }
