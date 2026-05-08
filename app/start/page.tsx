@@ -5,6 +5,7 @@ import { BirthForm } from '@/components/birth-form'
 import { NoticeMeButton } from '@/components/notice-me-button'
 import { StartReviewsSection } from '@/components/start-reviews-section'
 import { sharedOpenGraph, sharedTwitter } from '@/lib/metadata'
+import { Marquee } from '@/components/marquee'
 
 export const metadata = {
   title: 'Enter Your Birth Info - Sajume',
@@ -18,6 +19,7 @@ export const metadata = {
 export default function StartPage() {
   return (
     <main className="min-h-screen bg-[#0a0a14] relative overflow-x-hidden pt-10">
+      <Marquee />
       <StarsBackground />
 
       <div id="top" className="relative z-10 flex flex-col items-center px-4 py-8">
