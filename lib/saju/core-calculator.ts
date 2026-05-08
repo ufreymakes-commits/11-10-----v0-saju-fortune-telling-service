@@ -171,14 +171,31 @@ export function calcSolarTime(
   hour: number, minute: number,
   actualLongitude: number, standardMeridian: number
 ): SolarTimeResult {
-  // 경도 보정만 적용 (경도 1도 = 4분)
-  // 주의: 균시차(Equation of Time)는 적용하지 않음
-  // 대부분의 사주 서비스(포춘텔러 등)는 지방평균시(LMT)를 사용하며,
-  // 진태양시(True Solar Time)가 아님. 균시차를 적용하면 결과가 달라짐.
-  const longitudeCorrection = Math.round((actualLongitude - standardMeridian) * 4);
+  // ================================================================
+  // 진태양시(True Solar Time) 계산
+  // 
+  // 1. 경도 보정 (LMT - Local Mean Time)
+  //    - 타임존의 기준 자오선(standardMeridian)과 실제 도시 경도(actualLongitude) 차이
+  //    - 경도 1도 = 4분
+  //    - 예: 뉴욕시(-74도) vs 미국 동부 표준(-75도) = 1도 차이 = +4분
+  //
+  // 2. 균시차 (EoT - Equation of Time)
+  //    - 지구 궤도 이심률과 자전축 경사로 인한 보정
+  //    - 연중 -14분 ~ +16분 변동
+  //    - Spencer (1971) 공식 사용
+  // ================================================================
+  
+  // 1. 경도 보정 (경도 1도 = 4분)
+  const longitudeCorrection = (actualLongitude - standardMeridian) * 4;
+  
+  // 2. 균시차 계산 (Spencer 공식)
+  const eot = calculateEoT(year, month, day);
+  
+  // 3. 총 보정값 = 경도 보정 + 균시차
+  const totalCorrection = Math.round(longitudeCorrection + eot);
   
   const localDate = new Date(year, month - 1, day, hour, minute, 0);
-  localDate.setMinutes(localDate.getMinutes() + longitudeCorrection);
+  localDate.setMinutes(localDate.getMinutes() + totalCorrection);
   
   return {
     year: localDate.getFullYear(),
@@ -186,9 +203,9 @@ export function calcSolarTime(
     day: localDate.getDate(),
     hour: localDate.getHours(),
     minute: localDate.getMinutes(),
-    correctionMinutes: longitudeCorrection,
-    longitudeCorrectionMinutes: longitudeCorrection,
-    equationOfTimeMinutes: 0 // 균시차 미적용
+    correctionMinutes: totalCorrection,
+    longitudeCorrectionMinutes: Math.round(longitudeCorrection),
+    equationOfTimeMinutes: Math.round(eot)
   };
 }
 
@@ -330,19 +347,28 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
   );
   const monthPillar = getMonthPillar(yearPillar.stem, monthBranch);
 
-  // 진태양시 (경도 보정)
-  // 중요: birthInfo.longitude는 사용하지 않음 - 이미 tz.meridian이 해당 국가/지역에 맞게 설정되어 있음
-  // birthInfo.longitude는 GPS 경도이고, tz.meridian은 사주 계산용으로 보정된 경도임
+  // ================================================================
+  // 진태양시 계산 (True Solar Time)
+  // 
+  // standardMeridian: 타임존 기준 자오선 (오프셋 * 15)
+  //   예: 미국 동부 -5시간 → -75도, 한국 +9시간 → 135도
+  //
+  // actualLongitude: 실제 도시 경도
+  //   - birthInfo.longitude가 있으면 사용 (도시 선택 시)
+  //   - 없으면 tz.meridian으로 fallback (기존 호환성)
+  // ================================================================
   const standardMeridian = tz.offset * 15;
-  const actualLongitude = tz.meridian; // 기존 로직 유지 - birthInfo.longitude 사용하지 않음
+  const actualLongitude = birthInfo.longitude ?? tz.meridian;
   
-  console.log('[v0] calcSolarTime input:', {
-    stdYear, stdMonth, stdDay, stdHour, stdMinute,
-    'tz.meridian': tz.meridian,
+  console.log('[v0] calcSolarTime:', {
+    input: { stdYear, stdMonth, stdDay, stdHour, stdMinute },
     'tz.offset': tz.offset,
+    'tz.meridian': tz.meridian,
     'birthInfo.longitude': birthInfo.longitude,
     standardMeridian,
-    actualLongitude
+    actualLongitude,
+    longitudeDiff: actualLongitude - standardMeridian,
+    expectedLongitudeCorrection: Math.round((actualLongitude - standardMeridian) * 4)
   });
   
   const solarTime = calcSolarTime(
@@ -350,7 +376,7 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
     actualLongitude, standardMeridian
   );
   
-  console.log('[v0] calcSolarTime output:', solarTime);
+  console.log('[v0] calcSolarTime result:', solarTime);
   
   // 야자시 보정
   let dayCalcYear = solarTime.year;
