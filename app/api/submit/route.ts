@@ -83,7 +83,15 @@ export async function POST(request: Request) {
       )
     }
     
-    return NextResponse.json({ submissionId: data.id })
+    // Debug info in response for troubleshooting
+    return NextResponse.json({ 
+      submissionId: data.id,
+      _debug: {
+        input: { birthDate, birthTime, birthCountry, birthCity, timezone, longitude, latitude },
+        fourPillars: sajuData.fourPillars,
+        timeInfo: sajuData.timeInfo
+      }
+    })
   } catch (error) {
     console.error('[v0] Submit error:', error)
     return NextResponse.json(
