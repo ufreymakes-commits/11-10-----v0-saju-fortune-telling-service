@@ -330,15 +330,27 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
   );
   const monthPillar = getMonthPillar(yearPillar.stem, monthBranch);
 
-  // 진태양시 (경도 보정 + 균시차)
-  // 사용자가 도시를 선택해서 경도를 제공하면 그것을 사용, 아니면 기존 tz.meridian 사용
+  // 진태양시 (경도 보정)
+  // 중요: birthInfo.longitude는 사용하지 않음 - 이미 tz.meridian이 해당 국가/지역에 맞게 설정되어 있음
+  // birthInfo.longitude는 GPS 경도이고, tz.meridian은 사주 계산용으로 보정된 경도임
   const standardMeridian = tz.offset * 15;
-  const actualLongitude = birthInfo.longitude ?? tz.meridian;
+  const actualLongitude = tz.meridian; // 기존 로직 유지 - birthInfo.longitude 사용하지 않음
+  
+  console.log('[v0] calcSolarTime input:', {
+    stdYear, stdMonth, stdDay, stdHour, stdMinute,
+    'tz.meridian': tz.meridian,
+    'tz.offset': tz.offset,
+    'birthInfo.longitude': birthInfo.longitude,
+    standardMeridian,
+    actualLongitude
+  });
   
   const solarTime = calcSolarTime(
     stdYear, stdMonth, stdDay, stdHour, stdMinute,
     actualLongitude, standardMeridian
   );
+  
+  console.log('[v0] calcSolarTime output:', solarTime);
   
   // 야자시 보정
   let dayCalcYear = solarTime.year;
