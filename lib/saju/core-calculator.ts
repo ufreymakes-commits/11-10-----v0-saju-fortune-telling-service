@@ -328,24 +328,8 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
     isDST = converted.isDST;
   }
   
+  // UTC 시간은 참조용으로만 저장 (실제 계산에는 진태양시 사용)
   const utcDate = new Date(Date.UTC(utcYear, utcMonth - 1, utcDay, utcHour, utcMinute));
-
-  // 연주
-  const yearPillar = getYearPillar(
-    utcDate.getUTCFullYear(), 
-    utcDate.getUTCMonth() + 1, 
-    utcDate.getUTCDate(), 
-    utcDate.getUTCHours()
-  );
-
-  // 월주
-  const monthBranch = getMonthBranch(
-    utcDate.getUTCFullYear(), 
-    utcDate.getUTCMonth() + 1, 
-    utcDate.getUTCDate(), 
-    utcDate.getUTCHours()
-  );
-  const monthPillar = getMonthPillar(yearPillar.stem, monthBranch);
 
   // ================================================================
   // 진태양시 계산 (True Solar Time)
@@ -378,7 +362,12 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
   
   console.log('[v0] calcSolarTime result:', solarTime);
   
-  // 야자시 보정
+  // ================================================================
+  // 모든 사주(연주, 월주, 일주, 시주)는 진태양시(solarTime) 기준으로 계산
+  // 야자시 보정: 23시 이후는 다음 날로 처리 (일주 계산용)
+  // ================================================================
+  
+  // 야자시 보정 (일주 계산용)
   let dayCalcYear = solarTime.year;
   let dayCalcMonth = solarTime.month;
   let dayCalcDay = solarTime.day;
@@ -390,7 +379,24 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
     dayCalcDay = nextDate.getDate();
   }
 
-  // 일주
+  // 연주: 진태양시 기준
+  const yearPillar = getYearPillar(
+    solarTime.year,
+    solarTime.month,
+    solarTime.day,
+    solarTime.hour
+  );
+
+  // 월주: 진태양시 기준
+  const monthBranch = getMonthBranch(
+    solarTime.year,
+    solarTime.month,
+    solarTime.day,
+    solarTime.hour
+  );
+  const monthPillar = getMonthPillar(yearPillar.stem, monthBranch);
+
+  // 일주: 야자시 보정된 날짜 기준
   const dayPillar = getDayPillar(dayCalcYear, dayCalcMonth, dayCalcDay);
 
   // 시주 계산
@@ -476,7 +482,7 @@ export function countElementsWithHiddenStems(fourPillars: FourPillars): ElementC
 export function calculateElementScores(fourPillars: FourPillars): ElementCount {
   const scores: ElementCount = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
 
-  // 천간 점수 (각 10점)
+  // 천�� 점수 (각 10점)
   const yearStemElement = STEM_TO_ELEMENT[fourPillars.year.stem];
   scores[yearStemElement] += 10;
 

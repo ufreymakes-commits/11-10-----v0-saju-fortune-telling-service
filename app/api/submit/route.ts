@@ -39,6 +39,17 @@ export async function POST(request: Request) {
     
     const sajuData = calculateSaju(birthInfo)
     
+    // Debug: Log calculated saju pillars for verification
+    console.log('[v0] Saju calculation result:', {
+      input: { birthDate, birthTime, birthCountry, birthCity, timezone, longitude },
+      pillars: {
+        year: sajuData.fourPillars?.year,
+        month: sajuData.fourPillars?.month,
+        day: sajuData.fourPillars?.day,
+        hour: sajuData.fourPillars?.hour
+      }
+    })
+    
     // Run test suite once per deployment (only logs to console, no side effects)
     runSajuTests()
     
