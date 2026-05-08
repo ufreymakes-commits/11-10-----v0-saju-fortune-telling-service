@@ -20,6 +20,7 @@ import {
   findCurrentSolarTerm
 } from './jeolgi';
 import { convertToStandardTime, convertWithTimezoneAndLongitude, calculateTrueSolarTime } from './timezone-utils';
+import { DateTime } from 'luxon';
 
 // ================================================================
 // Types
@@ -350,8 +351,9 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
       stdDay = localDt.day;
       stdHour = localDt.hour;
       stdMinute = localDt.minute;
-    } catch {
+    } catch (err) {
       // IANA 변환 실패 시 기존 방식으로 fallback
+      console.log('[v0] IANA path failed, falling back:', err);
       const converted = convertToStandardTime(year, month, day, localHour, localMinute, country);
       stdYear = converted.standardYear;
       stdMonth = converted.standardMonth;

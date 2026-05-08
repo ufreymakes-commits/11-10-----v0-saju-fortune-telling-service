@@ -92,8 +92,12 @@ export async function POST(request: Request) {
         raw_birthCity: birthCity,
         birthDate,
         birthTime,
-        fourPillars: sajuData.fourPillars,
-        timeInfo: (sajuData as any).timeInfo ?? null
+        fourPillars: {
+          year: sajuData.fourPillars?.year,
+          month: sajuData.fourPillars?.month,
+          day: sajuData.fourPillars?.day,
+          hour: sajuData.fourPillars?.hour
+        }
       }
     })
   } catch (error) {
