@@ -8,7 +8,11 @@ export async function POST(request: Request) {
   try {
     const body = await request.json()
     
-    const { name, birthDate, birthCountry, birthTime, gender, referralSource } = body
+    const { 
+      name, birthDate, birthCountry, birthTime, gender, referralSource,
+      // New fields for precise timezone/location
+      birthCity, timezone, longitude, latitude 
+    } = body
     
     // Validate required fields
     if (!name || !birthDate || !birthCountry || !gender || !referralSource) {
@@ -18,14 +22,19 @@ export async function POST(request: Request) {
       )
     }
     
-    // Calculate Saju data
+    // Calculate Saju data with enhanced timezone/location info
     const birthInfo: BirthInfo = {
       name,
       birthDate,
       birthCountry,
       birthTime: birthTime || undefined,
       gender,
-      referralSource
+      referralSource,
+      // New optional fields for true solar time calculation
+      birthCity: birthCity || undefined,
+      timezone: timezone || undefined,
+      longitude: longitude || undefined,
+      latitude: latitude || undefined
     }
     
     const sajuData = calculateSaju(birthInfo)
@@ -45,7 +54,12 @@ export async function POST(request: Request) {
         birth_time: birthTime || null,
         gender,
         referral_source: referralSource,
-        saju_data: sajuData
+        saju_data: sajuData,
+        // New fields for precise timezone/location
+        birth_city: birthCity || null,
+        timezone: timezone || null,
+        longitude: longitude || null,
+        latitude: latitude || null
       })
       .select('id')
       .single()

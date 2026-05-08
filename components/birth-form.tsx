@@ -16,6 +16,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
 import { Spinner } from '@/components/ui/spinner'
 import { COUNTRIES, REFERRAL_SOURCES } from '@/lib/types'
+import { CitySearch } from '@/components/city-search'
+import type { City } from '@/lib/city-search'
 
 interface FormErrors {
   name?: string
@@ -78,6 +80,9 @@ export function BirthForm() {
     gender: '',
     referralSource: ''
   })
+  
+  // New: City selection for precise timezone/longitude
+  const [selectedCity, setSelectedCity] = useState<City | null>(null)
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {}
@@ -99,8 +104,8 @@ export function BirthForm() {
       }
     }
     
-    if (!formData.birthCountry) {
-      newErrors.birthCountry = 'Please select your birth country'
+    if (!selectedCity) {
+      newErrors.birthCountry = 'Please select your birth city'
     }
     
     if (!formData.gender) {
@@ -124,10 +129,21 @@ export function BirthForm() {
     track('form_submit', '/start', { country: formData.country })
     
     try {
+      // Prepare submission data with city information
+      const submitData = {
+        ...formData,
+        birthCountry: selectedCity?.country || formData.birthCountry,
+        // New fields for precise timezone/location
+        birthCity: selectedCity?.name || null,
+        timezone: selectedCity?.timezone || null,
+        longitude: selectedCity?.lon || null,
+        latitude: selectedCity?.lat || null
+      }
+      
       const response = await fetch('/api/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(submitData)
       })
       
       if (!response.ok) {
@@ -187,45 +203,24 @@ export function BirthForm() {
           {errors.birthDate && <FieldError>{errors.birthDate}</FieldError>}
         </Field>
 
-        {/* Birth Country */}
+        {/* Birth City */}
         <Field>
-          <FieldLabel className="text-gray-800 font-medium">Birth Country</FieldLabel>
-          <Select 
-            value={formData.birthCountry} 
-            onValueChange={(value) => setFormData({ ...formData, birthCountry: value })}
-          >
-            <SelectTrigger className="w-full bg-white border-gray-300 focus:border-primary text-gray-900 data-[placeholder]:text-purple-300">
-              <SelectValue placeholder="Select your birth country" />
-            </SelectTrigger>
-            <SelectContent 
-              className="bg-white max-h-[40vh] overflow-y-auto"
-              position="popper"
-              sideOffset={4}
-              onPointerDownOutside={(e) => {
-                // Prevent closing when touching the scrollbar or during scroll
-                const target = e.target as HTMLElement
-                if (target.closest('[data-radix-select-viewport]')) {
-                  e.preventDefault()
-                }
-              }}
-              onOpenAutoFocus={(e) => {
-                // Prevent auto-focus which can cause issues on mobile
-                e.preventDefault()
-              }}
-            >
-              <div className="py-1">
-                {COUNTRIES.map((country) => (
-                  <SelectItem 
-                    key={country.value} 
-                    value={country.value} 
-                    className="text-gray-900 py-3 cursor-pointer touch-manipulation"
-                  >
-                    {country.label}
-                  </SelectItem>
-                ))}
-              </div>
-            </SelectContent>
-          </Select>
+          <FieldLabel className="text-gray-800 font-medium">Birth City</FieldLabel>
+          <CitySearch
+            value={selectedCity}
+            onChange={(city) => {
+              setSelectedCity(city)
+              // Also set birthCountry for backward compatibility
+              if (city) {
+                setFormData({ ...formData, birthCountry: city.country })
+              }
+            }}
+            placeholder="Search for your birth city..."
+            className="[&_input]:bg-white [&_input]:border-gray-300 [&_input]:text-gray-900 [&_input]:placeholder:text-purple-300"
+          />
+          <p className="text-xs text-gray-600 mt-1.5">
+            Search by city name (e.g., Seoul, New York, London)
+          </p>
           {errors.birthCountry && <FieldError>{errors.birthCountry}</FieldError>}
         </Field>
 

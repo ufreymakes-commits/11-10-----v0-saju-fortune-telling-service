@@ -19,7 +19,7 @@ import {
   getMonthStem,
   findCurrentSolarTerm
 } from './jeolgi';
-import { convertToStandardTime } from './timezone-utils';
+import { convertToStandardTime, convertWithTimezoneAndLongitude, calculateTrueSolarTime } from './timezone-utils';
 
 // ================================================================
 // Types
@@ -80,7 +80,12 @@ export interface BirthInfo {
   minute?: number;
   gender: 'male' | 'female';
   country: string;
+  /** IANA 타임존 (e.g., "Asia/Seoul", "America/New_York") - 사용자가 도시를 선택하면 자동 설정 */
+  timezone?: string;
+  /** 실제 출생 도시 경도 - 정밀 진태양시 계산에 사용 */
   longitude?: number;
+  /** 실제 출생 도시 위도 */
+  latitude?: number;
   /**
    * 섬머타임(DST) 자동 보정 건너뛰기
    * - true: 입력된 시간이 이미 표준시로 변환된 경우 (기존 Sajume 사용자 데이터)
@@ -138,14 +143,43 @@ export interface SolarTimeResult {
   hour: number;
   minute: number;
   correctionMinutes: number;
+  longitudeCorrectionMinutes: number;
+  equationOfTimeMinutes: number;
+}
+
+/**
+ * 균시차(Equation of Time) 계산
+ * 
+ * 지구 궤도의 이심률과 자전축 경사로 인해 발생하는
+ * 평균태양시와 진태양시의 차이 (연중 -14분 ~ +16분)
+ */
+function calculateEoT(year: number, month: number, day: number): number {
+  // 연초부터의 일수 계산
+  const startOfYear = new Date(year, 0, 1);
+  const targetDate = new Date(year, month - 1, day);
+  const dayOfYear = Math.floor((targetDate.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  
+  // B 값 (라디안)
+  const B = (2 * Math.PI * (dayOfYear - 81)) / 365;
+  
+  // Spencer (1971) 공식
+  return 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
 }
 
 export function calcSolarTime(
-  year: number, month: number, day: number, 
+  year: number, month: number, day: number,
   hour: number, minute: number,
   actualLongitude: number, standardMeridian: number
 ): SolarTimeResult {
-  const correctionMinutes = Math.round((actualLongitude - standardMeridian) * 4);
+  // 1. 경도 보정 (경도 1도 = 4분)
+  const longitudeCorrection = Math.round((actualLongitude - standardMeridian) * 4);
+  
+  // 2. 균시차 계산 (진태양시 완성을 위한 핵심)
+  const eot = calculateEoT(year, month, day);
+  
+  // 3. 총 보정값 = 경도 보정 + 균시차
+  const correctionMinutes = Math.round(longitudeCorrection + eot);
+  
   const localDate = new Date(year, month - 1, day, hour, minute, 0);
   localDate.setMinutes(localDate.getMinutes() + correctionMinutes);
   
@@ -155,7 +189,9 @@ export function calcSolarTime(
     day: localDate.getDate(),
     hour: localDate.getHours(),
     minute: localDate.getMinutes(),
-    correctionMinutes
+    correctionMinutes,
+    longitudeCorrectionMinutes: longitudeCorrection,
+    equationOfTimeMinutes: Math.round(eot)
   };
 }
 
@@ -297,9 +333,10 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
   );
   const monthPillar = getMonthPillar(yearPillar.stem, monthBranch);
 
-  // 진태양시
+  // 진태양시 (경도 보정 + 균시차)
+  // 사용자가 도시를 선택해서 경도를 제공하면 그것을 사용, 아니면 기존 tz.meridian 사용
   const standardMeridian = tz.offset * 15;
-  const actualLongitude = tz.meridian;
+  const actualLongitude = birthInfo.longitude ?? tz.meridian;
   
   const solarTime = calcSolarTime(
     stdYear, stdMonth, stdDay, stdHour, stdMinute,

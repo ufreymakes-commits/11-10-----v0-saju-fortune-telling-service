@@ -114,7 +114,7 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     minute = m
   }
   
-  // 기본 분석 실행
+  // 기본 분석 실행 (새 필드: timezone, longitude 전달)
   const analysis = runFullAnalysis({
     year: date.getFullYear(),
     month: date.getMonth() + 1,
@@ -122,7 +122,11 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     hour,
     minute,
     gender: birthInfo.gender as 'male' | 'female',
-    country: birthInfo.birthCountry
+    country: birthInfo.birthCountry,
+    // 새 필드: 도시 선택 시 정밀 진태양시 계산에 사용
+    timezone: birthInfo.timezone,
+    longitude: birthInfo.longitude,
+    latitude: birthInfo.latitude
   })
   
   const fp = analysis.fourPillars
@@ -384,7 +388,7 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
       수: elementCounts['수'] || 0
     },
     
-    // 오행 점수 (수치론 120점 - 월령 중심 - 가장 정확)
+    // 오행 점수 (수치론 120점 - 월령 중심 - 가�� 정확)
     elementBalance,
     elementBalanceKorean,
     dominantElement: Object.entries(elementBalance).reduce((a, b) => 

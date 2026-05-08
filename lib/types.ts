@@ -7,6 +7,11 @@ export interface BirthInfo {
   birthTime?: string // HH:mm
   gender: 'male' | 'female' | 'other'
   referralSource: string
+  // New fields for precise timezone and true solar time calculation
+  birthCity?: string
+  timezone?: string // IANA timezone (e.g., "Asia/Seoul", "America/New_York")
+  longitude?: number // Birth location longitude for true solar time
+  latitude?: number // Birth location latitude
 }
 
 export interface SajuData {
