@@ -171,17 +171,14 @@ export function calcSolarTime(
   hour: number, minute: number,
   actualLongitude: number, standardMeridian: number
 ): SolarTimeResult {
-  // 1. 경도 보정 (경도 1도 = 4분)
+  // 경도 보정만 적용 (경도 1도 = 4분)
+  // 주의: 균시차(Equation of Time)는 적용하지 않음
+  // 대부분의 사주 서비스(포춘텔러 등)는 지방평균시(LMT)를 사용하며,
+  // 진태양시(True Solar Time)가 아님. 균시차를 적용하면 결과가 달라짐.
   const longitudeCorrection = Math.round((actualLongitude - standardMeridian) * 4);
   
-  // 2. 균시차 계산 (진태양시 완성을 위한 핵심)
-  const eot = calculateEoT(year, month, day);
-  
-  // 3. 총 보정값 = 경도 보정 + 균시차
-  const correctionMinutes = Math.round(longitudeCorrection + eot);
-  
   const localDate = new Date(year, month - 1, day, hour, minute, 0);
-  localDate.setMinutes(localDate.getMinutes() + correctionMinutes);
+  localDate.setMinutes(localDate.getMinutes() + longitudeCorrection);
   
   return {
     year: localDate.getFullYear(),
@@ -189,9 +186,9 @@ export function calcSolarTime(
     day: localDate.getDate(),
     hour: localDate.getHours(),
     minute: localDate.getMinutes(),
-    correctionMinutes,
+    correctionMinutes: longitudeCorrection,
     longitudeCorrectionMinutes: longitudeCorrection,
-    equationOfTimeMinutes: Math.round(eot)
+    equationOfTimeMinutes: 0 // 균시차 미적용
   };
 }
 
@@ -483,7 +480,7 @@ export function calculateElementScoresWithHiddenStems(fourPillars: FourPillars):
   const scores: ElementCount = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
 
   // 지장간 (HIDDEN_STEMS from constants)
-  // 자: 계(본) / 축: 기(본) 정(중) 계(말) / 인: 갑(본) 병(중) 무(말) / ... 등
+  // 자: 계(본) / 축: 기(본) 정(중) ���(말) / 인: 갑(본) 병(중) 무(말) / ... 등
   const HIDDEN_STEMS_INFO: Record<string, Array<{ stem: string; weight: 'main' | 'middle' | 'minor' }>> = {
     '자': [{ stem: '계', weight: 'main' }],
     '축': [
