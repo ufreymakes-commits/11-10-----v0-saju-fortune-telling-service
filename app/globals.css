@@ -209,3 +209,38 @@
     overflow: hidden;
   }
 }
+
+/* PDF / Print styles */
+@media print {
+  /* Hide nav, stars, buttons */
+  nav,
+  header,
+  .stars-background,
+  [data-tally-open],
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Force white background and black text for readability */
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Expand all collapsible sections */
+  [data-collapsed="true"] {
+    display: block !important;
+  }
+
+  /* Avoid page breaks inside cards */
+  .rounded-xl {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Remove shadows */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+}

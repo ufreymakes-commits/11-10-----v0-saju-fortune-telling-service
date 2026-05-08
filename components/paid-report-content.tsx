@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { CheckCircleIcon, LinkIcon, CheckIcon, ChevronDownIcon } from 'lucide-react'
+import { CheckCircleIcon, LinkIcon, CheckIcon, ChevronDownIcon, DownloadIcon } from 'lucide-react'
 import type { Submission, SajuData } from '@/lib/types'
 import { getDayMasterCharacter } from '@/lib/day-master-characters'
 import { track } from '@/hooks/use-track'
@@ -68,6 +68,20 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
       track('share_paid_report', '/paid-report')
+    }
+  }
+
+  const handleDownloadPDF = () => {
+    if (typeof window !== 'undefined') {
+      // Expand all sections before printing
+      const allOpen: Record<number, boolean> = {}
+      sections.forEach((_: any, idx: number) => { allOpen[idx] = true })
+      setOpenSections(allOpen)
+      track('download_pdf_paid_report', '/paid-report')
+      // Small delay to allow sections to render before print dialog
+      setTimeout(() => {
+        window.print()
+      }, 300)
     }
   }
 
@@ -342,10 +356,19 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
         </div>
       </div>
 
+      {/* Fixed Download PDF Button */}
+      <button
+        onClick={handleDownloadPDF}
+        className="fixed bottom-[4.5rem] right-5 z-50 flex items-center gap-2 bg-card border border-border text-foreground text-xs px-4 py-2.5 rounded-full shadow-lg hover:border-primary/40 hover:bg-primary/5 transition-all print:hidden"
+      >
+        <DownloadIcon className="w-3.5 h-3.5 text-muted-foreground" />
+        <span>Download PDF</span>
+      </button>
+
       {/* Fixed Share Button */}
       <button
         onClick={handleCopyLink}
-        className="fixed bottom-6 right-5 z-50 flex items-center gap-2 bg-card border border-primary/40 text-foreground text-xs px-4 py-2.5 rounded-full shadow-lg shadow-primary/20 hover:border-primary/70 hover:bg-primary/10 transition-all"
+        className="fixed bottom-6 right-5 z-50 flex items-center gap-2 bg-card border border-primary/40 text-foreground text-xs px-4 py-2.5 rounded-full shadow-lg shadow-primary/20 hover:border-primary/70 hover:bg-primary/10 transition-all print:hidden"
       >
         {copied ? (
           <>
