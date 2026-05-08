@@ -83,13 +83,17 @@ export async function POST(request: Request) {
       )
     }
     
-    // Debug info in response for troubleshooting
     return NextResponse.json({ 
       submissionId: data.id,
       _debug: {
-        input: { birthDate, birthTime, birthCountry, birthCity, timezone, longitude, latitude },
+        raw_birthCountry: birthCountry,
+        raw_timezone: timezone,
+        raw_longitude: longitude,
+        raw_birthCity: birthCity,
+        birthDate,
+        birthTime,
         fourPillars: sajuData.fourPillars,
-        timeInfo: sajuData.timeInfo
+        timeInfo: (sajuData as any).timeInfo ?? null
       }
     })
   } catch (error) {
