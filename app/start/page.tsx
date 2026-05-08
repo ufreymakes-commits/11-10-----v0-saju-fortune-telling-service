@@ -53,9 +53,14 @@ export default function StartPage() {
         </div>
 
         {/* Title */}
-        <h1 className="text-xl font-semibold text-gradient text-center -mt-2 mb-6">
+        <h1 className="text-xl font-semibold text-gradient text-center -mt-2 mb-3">
           Enter Your Birth Info
         </h1>
+        
+        {/* Subtitle */}
+        <p className="text-white text-center mb-6 text-sm md:text-base font-medium">
+          No Sign-up, 9 Free Facts
+        </p>
 
         {/* Form Card */}
         <div className="w-full max-w-md bg-white border border-primary/20 rounded-2xl p-6 md:p-8 shadow-xl">
