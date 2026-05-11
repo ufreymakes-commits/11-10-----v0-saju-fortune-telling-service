@@ -337,7 +337,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
         </div>
       </div>
 
-      {/* Five Elements Balance — blurred teaser */}
+      {/* Five Elements Balance ��� blurred teaser */}
       <div className="mb-6 bg-card border border-border rounded-xl p-4 shadow-sm relative">
         {/* Lock icon centered */}
         <div className="flex justify-center mb-2">
@@ -584,13 +584,14 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
       {/* Saju Compatibility card */}
       <div className="mt-6">
         <div className="bg-gradient-to-br from-pink-900/40 to-rose-900/40 border border-pink-500/30 rounded-xl p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-full bg-pink-500/20 flex items-center justify-center">
-              <svg className="w-4 h-4 text-pink-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-            </div>
-            <h4 className="text-sm font-semibold text-white">Saju Compatibility</h4>
+          <h4 className="text-sm font-semibold text-white mb-3">Saju Compatibility</h4>
+          <div className="relative w-full h-32 mb-3 rounded-lg overflow-hidden bg-[#1a1a2e]">
+            <Image
+              src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/29.png?v=1778483455"
+              alt="Relationship Compatibility"
+              fill
+              className="object-cover"
+            />
           </div>
           <p className="text-xs text-white/60 mb-3">Deep dive into your relationship dynamics and love compatibility based on both Saju charts.</p>
           <div className="flex items-end justify-between gap-3">
