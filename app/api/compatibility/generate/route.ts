@@ -56,7 +56,7 @@ Combined Analysis Notes:
 // ================================================================
 async function callGemini(systemPrompt: string, userPrompt: string): Promise<string> {
   const result = await generateText({
-    model: 'google/gemini-3-flash',
+    model: 'google/gemini-2-flash',
     system: systemPrompt,
     prompt: userPrompt,
   })
