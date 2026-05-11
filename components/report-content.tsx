@@ -367,16 +367,19 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
             </div>
 
             {/* Saju Compatibility */}
-            <div className="bg-gradient-to-br from-pink-900/40 to-rose-900/40 border border-pink-500/30 rounded-xl p-4 opacity-70">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-[10px] bg-pink-500/20 text-pink-300 px-2 py-0.5 rounded-full border border-pink-500/30">Coming Soon</span>
-              </div>
+            <div className="bg-gradient-to-br from-pink-900/40 to-rose-900/40 border border-pink-500/30 rounded-xl p-4">
               <h4 className="text-sm font-semibold text-white mb-1">Saju Compatibility</h4>
-              <p className="text-xs text-white/60 mb-2">Deep dive into your relationship dynamics and love compatibility.</p>
-              <div className="flex items-center justify-between">
+              <p className="text-xs text-white/60 mb-3">Deep dive into your relationship dynamics and love compatibility.</p>
+              <div className="flex items-center justify-between mb-3">
                 <span className="text-xs text-pink-300">Compare two birth charts</span>
-                <span className="text-sm font-bold text-white/50">$12</span>
+                <span className="text-sm font-bold text-white">$19.99</span>
               </div>
+              <a
+                href="/compatibility"
+                className="w-full py-1.5 text-xs font-semibold rounded-lg bg-pink-500/20 hover:bg-pink-500/30 text-pink-200 border border-pink-500/30 transition-colors text-center block"
+              >
+                Shop Now (3 mins)
+              </a>
             </div>
 
             {/* 12-Month Fortune Subscription */}

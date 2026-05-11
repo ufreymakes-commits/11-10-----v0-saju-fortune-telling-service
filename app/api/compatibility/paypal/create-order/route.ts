@@ -59,7 +59,7 @@ export async function POST(request: Request) {
       purchase_units: [{
         reference_id: submissionId,
         description: `Sajume Compatibility Report: ${submission.person_a_name} & ${submission.person_b_name}`,
-        amount: { currency_code: 'USD', value: '14.99' }
+        amount: { currency_code: 'USD', value: '19.99' }
       }],
       application_context: {
         brand_name: 'Sajume',

@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
+import { Field, FieldLabel, FieldError } from '@/components/ui/field'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { Spinner } from '@/components/ui/spinner'
 import { CitySearch } from '@/components/city-search'
 import { inferTimezone } from '@/lib/city-search'
@@ -14,8 +15,12 @@ import { HeartIcon } from 'lucide-react'
 
 interface PersonFormData {
   name: string
-  birthDate: string
-  birthTime: string
+  birthYear: string
+  birthMonth: string
+  birthDay: string
+  birthHour: string
+  birthMinute: string
+  birthPeriod: string
   birthCountry: string
   gender: string
 }
@@ -32,6 +37,11 @@ interface FormErrors {
   personB: PersonFormErrors
 }
 
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+]
+
 function PersonForm({
   label,
   data,
@@ -40,6 +50,7 @@ function PersonForm({
   onDataChange,
   onCityChange,
   accentColor,
+  borderColor,
 }: {
   label: string
   data: PersonFormData
@@ -48,12 +59,13 @@ function PersonForm({
   onDataChange: (field: keyof PersonFormData, value: string) => void
   onCityChange: (city: City | null) => void
   accentColor: string
+  borderColor: string
 }) {
   return (
     <div className="space-y-4">
       <h3 className={`text-sm font-semibold uppercase tracking-widest ${accentColor}`}>{label}</h3>
 
-      {/* Name */}
+      {/* Full Name */}
       <Field>
         <FieldLabel className="text-gray-800 font-medium">Full Name</FieldLabel>
         <Input
@@ -61,20 +73,51 @@ function PersonForm({
           placeholder="Enter full name"
           value={data.name}
           onChange={(e) => onDataChange('name', e.target.value)}
-          className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-pink-400"
+          className={`bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:${borderColor}`}
         />
         {errors.name && <FieldError>{errors.name}</FieldError>}
       </Field>
 
-      {/* Birth Date */}
+      {/* Date of Birth — Month / Day / Year dropdowns */}
       <Field>
         <FieldLabel className="text-gray-800 font-medium">Date of Birth</FieldLabel>
-        <Input
-          type="date"
-          value={data.birthDate}
-          onChange={(e) => onDataChange('birthDate', e.target.value)}
-          className="bg-white border-gray-300 text-gray-900 focus:border-pink-400"
-        />
+        <div className="grid grid-cols-3 gap-2">
+          {/* Month */}
+          <Select value={data.birthMonth} onValueChange={(v) => onDataChange('birthMonth', v)}>
+            <SelectTrigger className="bg-white border-gray-300 text-gray-900 data-[placeholder]:text-gray-400">
+              <SelectValue placeholder="Month" />
+            </SelectTrigger>
+            <SelectContent className="bg-white max-h-[40vh] overflow-y-auto">
+              {MONTHS.map((m, i) => (
+                <SelectItem key={m} value={String(i + 1).padStart(2, '0')} className="text-gray-900">{m}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Day */}
+          <Select value={data.birthDay} onValueChange={(v) => onDataChange('birthDay', v)}>
+            <SelectTrigger className="bg-white border-gray-300 text-gray-900 data-[placeholder]:text-gray-400">
+              <SelectValue placeholder="Day" />
+            </SelectTrigger>
+            <SelectContent className="bg-white max-h-[40vh] overflow-y-auto">
+              {Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0')).map((d) => (
+                <SelectItem key={d} value={d} className="text-gray-900">{d}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Year */}
+          <Select value={data.birthYear} onValueChange={(v) => onDataChange('birthYear', v)}>
+            <SelectTrigger className="bg-white border-gray-300 text-gray-900 data-[placeholder]:text-gray-400">
+              <SelectValue placeholder="Year" />
+            </SelectTrigger>
+            <SelectContent className="bg-white max-h-[40vh] overflow-y-auto">
+              {Array.from({ length: 100 }, (_, i) => String(new Date().getFullYear() - i)).map((y) => (
+                <SelectItem key={y} value={y} className="text-gray-900">{y}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         {errors.birthDate && <FieldError>{errors.birthDate}</FieldError>}
       </Field>
 
@@ -94,17 +137,49 @@ function PersonForm({
         {errors.birthCountry && <FieldError>{errors.birthCountry}</FieldError>}
       </Field>
 
-      {/* Birth Time */}
+      {/* Birth Time — Hour / Min / AM/PM dropdowns */}
       <Field>
         <FieldLabel className="text-gray-800 font-medium">
           Birth Time <span className="text-gray-400 font-normal">(optional)</span>
         </FieldLabel>
-        <Input
-          type="time"
-          value={data.birthTime}
-          onChange={(e) => onDataChange('birthTime', e.target.value)}
-          className="bg-white border-gray-300 text-gray-900 focus:border-pink-400"
-        />
+        <div className="grid grid-cols-3 gap-2">
+          {/* Hour */}
+          <Select value={data.birthHour} onValueChange={(v) => onDataChange('birthHour', v)}>
+            <SelectTrigger className="bg-white border-gray-300 text-gray-900 data-[placeholder]:text-gray-400">
+              <SelectValue placeholder="Hour" />
+            </SelectTrigger>
+            <SelectContent className="bg-white">
+              {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0')).map((h) => (
+                <SelectItem key={h} value={h} className="text-gray-900">{h}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Minute */}
+          <Select value={data.birthMinute} onValueChange={(v) => onDataChange('birthMinute', v)}>
+            <SelectTrigger className="bg-white border-gray-300 text-gray-900 data-[placeholder]:text-gray-400">
+              <SelectValue placeholder="Min" />
+            </SelectTrigger>
+            <SelectContent className="bg-white max-h-[40vh] overflow-y-auto" position="popper" sideOffset={4}>
+              <div className="py-1">
+                {Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0')).map((m) => (
+                  <SelectItem key={m} value={m} className="text-gray-900 py-2.5 touch-manipulation">{m}</SelectItem>
+                ))}
+              </div>
+            </SelectContent>
+          </Select>
+
+          {/* AM/PM */}
+          <Select value={data.birthPeriod} onValueChange={(v) => onDataChange('birthPeriod', v)}>
+            <SelectTrigger className="bg-white border-gray-300 text-gray-900 data-[placeholder]:text-gray-400">
+              <SelectValue placeholder="AM/PM" />
+            </SelectTrigger>
+            <SelectContent className="bg-white">
+              <SelectItem value="AM" className="text-gray-900">AM</SelectItem>
+              <SelectItem value="PM" className="text-gray-900">PM</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </Field>
 
       {/* Gender */}
@@ -135,24 +210,36 @@ function PersonForm({
   )
 }
 
+function buildBirthTime(hour: string, minute: string, period: string): string | null {
+  if (!hour || !minute || !period) return null
+  return `${hour}:${minute} ${period}`
+}
+
+function buildBirthDate(year: string, month: string, day: string): string | null {
+  if (!year || !month || !day) return null
+  return `${year}-${month}-${day}`
+}
+
+const emptyPerson = (): PersonFormData => ({
+  name: '', birthYear: '', birthMonth: '', birthDay: '',
+  birthHour: '', birthMinute: '', birthPeriod: '',
+  birthCountry: '', gender: ''
+})
+
 export function CompatibilityForm() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({ personA: {}, personB: {} })
 
-  const [personA, setPersonA] = useState<PersonFormData>({
-    name: '', birthDate: '', birthTime: '', birthCountry: '', gender: ''
-  })
-  const [personB, setPersonB] = useState<PersonFormData>({
-    name: '', birthDate: '', birthTime: '', birthCountry: '', gender: ''
-  })
+  const [personA, setPersonA] = useState<PersonFormData>(emptyPerson())
+  const [personB, setPersonB] = useState<PersonFormData>(emptyPerson())
   const [cityA, setCityA] = useState<City | null>(null)
   const [cityB, setCityB] = useState<City | null>(null)
 
   const validatePerson = (data: PersonFormData, city: City | null): PersonFormErrors => {
     const errs: PersonFormErrors = {}
     if (!data.name.trim()) errs.name = 'Please enter a name'
-    if (!data.birthDate) errs.birthDate = 'Please enter a birth date'
+    if (!data.birthYear || !data.birthMonth || !data.birthDay) errs.birthDate = 'Please enter a complete birth date'
     if (!city) errs.birthCountry = 'Please select a birth city'
     if (!data.gender) errs.gender = 'Please select a gender'
     return errs
@@ -173,13 +260,18 @@ export function CompatibilityForm() {
       const timezoneA = cityA ? (cityA.timezone || inferTimezone(cityA.country, cityA.lon)) : null
       const timezoneB = cityB ? (cityB.timezone || inferTimezone(cityB.country, cityB.lon)) : null
 
+      const birthDateA = buildBirthDate(personA.birthYear, personA.birthMonth, personA.birthDay)
+      const birthDateB = buildBirthDate(personB.birthYear, personB.birthMonth, personB.birthDay)
+      const birthTimeA = buildBirthTime(personA.birthHour, personA.birthMinute, personA.birthPeriod)
+      const birthTimeB = buildBirthTime(personB.birthHour, personB.birthMinute, personB.birthPeriod)
+
       const response = await fetch('/api/compatibility/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           personAName: personA.name,
-          personABirthDate: personA.birthDate,
-          personABirthTime: personA.birthTime || null,
+          personABirthDate: birthDateA,
+          personABirthTime: birthTimeA,
           personABirthCountry: cityA?.country || personA.birthCountry,
           personABirthCity: cityA?.name || null,
           personATimezone: timezoneA,
@@ -187,8 +279,8 @@ export function CompatibilityForm() {
           personALatitude: cityA?.lat || null,
           personAGender: personA.gender,
           personBName: personB.name,
-          personBBirthDate: personB.birthDate,
-          personBBirthTime: personB.birthTime || null,
+          personBBirthDate: birthDateB,
+          personBBirthTime: birthTimeB,
           personBBirthCountry: cityB?.country || personB.birthCountry,
           personBBirthCity: cityB?.name || null,
           personBTimezone: timezoneB,
@@ -199,9 +291,7 @@ export function CompatibilityForm() {
       })
 
       const data = await response.json()
-
       if (!response.ok) throw new Error(data.error || 'Submission failed')
-
       router.push(`/compatibility/checkout/${data.submissionId}`)
     } catch (err) {
       console.error('[v0] Compatibility form submit error:', err)
@@ -221,6 +311,7 @@ export function CompatibilityForm() {
           onDataChange={(field, value) => setPersonA(prev => ({ ...prev, [field]: value }))}
           onCityChange={setCityA}
           accentColor="text-pink-500"
+          borderColor="border-pink-400"
         />
       </div>
 
@@ -243,6 +334,7 @@ export function CompatibilityForm() {
           onDataChange={(field, value) => setPersonB(prev => ({ ...prev, [field]: value }))}
           onCityChange={setCityB}
           accentColor="text-rose-500"
+          borderColor="border-rose-400"
         />
       </div>
 
@@ -258,7 +350,7 @@ export function CompatibilityForm() {
             Processing...
           </span>
         ) : (
-          'See Your Compatibility — $14.99'
+          'See Your Compatibility — $19.99'
         )}
       </Button>
 

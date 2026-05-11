@@ -108,7 +108,7 @@ export function CompatibilityCheckoutContent({
       <div className="space-y-3">
         <div className="flex items-baseline justify-between px-1">
           <span className="text-white/60 text-sm">Compatibility Report</span>
-          <span className="text-white font-bold text-xl">$14.99</span>
+          <span className="text-white font-bold text-xl">$19.99</span>
         </div>
 
         {error && (

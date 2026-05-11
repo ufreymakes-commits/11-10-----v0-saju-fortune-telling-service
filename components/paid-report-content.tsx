@@ -296,26 +296,19 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
           </div>
 
           {/* Saju Compatibility */}
-          <div className="bg-card border border-border rounded-xl p-4 shadow-sm opacity-80">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-[10px] bg-pink-500/20 text-pink-400 px-2 py-0.5 rounded-full border border-pink-500/30">Coming Soon</span>
-            </div>
+          <div className="bg-card border border-pink-500/30 rounded-xl p-4 shadow-sm">
             <h4 className="text-sm font-semibold text-foreground mb-1">Saju Compatibility</h4>
             <p className="text-xs text-muted-foreground mb-3">Deep dive into your relationship dynamics and love compatibility.</p>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs text-pink-400">Compare two birth charts</span>
-              <span className="text-sm font-bold text-foreground">$12</span>
+              <span className="text-sm font-bold text-foreground">$19.99</span>
             </div>
-            <button
-              data-tally-open="81JRrr"
-              data-tally-layout="modal"
-              data-tally-emoji-text="👋"
-              data-tally-emoji-animation="wave"
-              onClick={() => handleNoticeMeClick('compatibility')}
-              className="w-full py-1.5 text-xs font-semibold border border-border rounded-lg hover:bg-background/50 transition-colors text-foreground"
+            <a
+              href="/compatibility"
+              className="w-full py-1.5 text-xs font-semibold border border-pink-500/40 rounded-lg hover:bg-pink-500/10 transition-colors text-pink-400 text-center block"
             >
-              Notice me
-            </button>
+              Shop Now (3 mins)
+            </a>
           </div>
 
           {/* 12-Month Fortune Subscription */}

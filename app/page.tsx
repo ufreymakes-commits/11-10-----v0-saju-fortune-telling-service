@@ -228,18 +228,19 @@ src="/images/shopify-logo.png"
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                       </svg>
                     </div>
-                    <span className="text-xs text-white/40">Coming Soon</span>
                   </div>
                 </div>
                 <p className="text-sm text-white/70 mb-3 flex-grow">The Art of Saju Compatibility: Are You Meant to Be?</p>
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs text-pink-300">Discover your match</span>
-                  <span className="text-lg font-bold text-white/50">$15</span>
+                  <span className="text-lg font-bold text-white">$19.99</span>
                 </div>
-                <NoticeMeButton
-                  product="compatibility"
-                  className="w-full text-center py-2 px-4 rounded-lg text-sm font-medium bg-pink-500/20 hover:bg-pink-500/30 text-pink-200 border border-pink-500/30 hover:border-pink-400/50 transition-all"
-                />
+                <Link
+                  href="/compatibility"
+                  className="w-full text-center py-2 px-4 rounded-lg text-sm font-medium bg-pink-500/20 hover:bg-pink-500/30 text-pink-200 border border-pink-500/30 hover:border-pink-400/50 transition-all block"
+                >
+                  Shop Now (3 mins)
+                </Link>
               </div>
             </div>
 
