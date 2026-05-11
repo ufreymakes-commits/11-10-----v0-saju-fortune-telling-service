@@ -238,7 +238,7 @@ export default function StartPage() {
                   href="/compatibility"
                   className="w-full text-center py-2 px-4 rounded-lg text-sm font-medium bg-pink-500/20 hover:bg-pink-500/30 text-pink-200 border border-pink-500/30 hover:border-pink-400/50 transition-all block"
                 >
-                  Shop Now (3 mins)
+                  Now Available
                 </Link>
               </div>
             </div>

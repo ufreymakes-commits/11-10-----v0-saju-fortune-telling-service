@@ -15,9 +15,7 @@ import { HeartIcon } from 'lucide-react'
 
 interface PersonFormData {
   name: string
-  birthYear: string
-  birthMonth: string
-  birthDay: string
+  birthDate: string
   birthHour: string
   birthMinute: string
   birthPeriod: string
@@ -36,11 +34,6 @@ interface FormErrors {
   personA: PersonFormErrors
   personB: PersonFormErrors
 }
-
-const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
-]
 
 function PersonForm({
   label,
@@ -78,46 +71,22 @@ function PersonForm({
         {errors.name && <FieldError>{errors.name}</FieldError>}
       </Field>
 
-      {/* Date of Birth — Month / Day / Year dropdowns */}
+      {/* Date of Birth — YYYY-MM-DD (same as birth-form.tsx) */}
       <Field>
         <FieldLabel className="text-gray-800 font-medium">Date of Birth</FieldLabel>
-        <div className="grid grid-cols-3 gap-2">
-          {/* Month */}
-          <Select value={data.birthMonth} onValueChange={(v) => onDataChange('birthMonth', v)}>
-            <SelectTrigger className="bg-white border-gray-300 text-gray-900 data-[placeholder]:text-gray-400">
-              <SelectValue placeholder="Month" />
-            </SelectTrigger>
-            <SelectContent className="bg-white max-h-[40vh] overflow-y-auto">
-              {MONTHS.map((m, i) => (
-                <SelectItem key={m} value={String(i + 1).padStart(2, '0')} className="text-gray-900">{m}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* Day */}
-          <Select value={data.birthDay} onValueChange={(v) => onDataChange('birthDay', v)}>
-            <SelectTrigger className="bg-white border-gray-300 text-gray-900 data-[placeholder]:text-gray-400">
-              <SelectValue placeholder="Day" />
-            </SelectTrigger>
-            <SelectContent className="bg-white max-h-[40vh] overflow-y-auto">
-              {Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0')).map((d) => (
-                <SelectItem key={d} value={d} className="text-gray-900">{d}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* Year */}
-          <Select value={data.birthYear} onValueChange={(v) => onDataChange('birthYear', v)}>
-            <SelectTrigger className="bg-white border-gray-300 text-gray-900 data-[placeholder]:text-gray-400">
-              <SelectValue placeholder="Year" />
-            </SelectTrigger>
-            <SelectContent className="bg-white max-h-[40vh] overflow-y-auto">
-              {Array.from({ length: 100 }, (_, i) => String(new Date().getFullYear() - i)).map((y) => (
-                <SelectItem key={y} value={y} className="text-gray-900">{y}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <Input
+          type="text"
+          placeholder="YYYY-MM-DD"
+          value={data.birthDate}
+          onChange={(e) => {
+            let value = e.target.value.replace(/[^0-9-]/g, '')
+            if (value.length === 4 && !value.includes('-')) value = value + '-'
+            else if (value.length === 7 && value.charAt(4) === '-' && value.indexOf('-', 5) === -1) value = value + '-'
+            if (value.length <= 10) onDataChange('birthDate', value)
+          }}
+          className={`bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:${borderColor}`}
+          aria-invalid={!!errors.birthDate}
+        />
         {errors.birthDate && <FieldError>{errors.birthDate}</FieldError>}
       </Field>
 
@@ -215,13 +184,8 @@ function buildBirthTime(hour: string, minute: string, period: string): string | 
   return `${hour}:${minute} ${period}`
 }
 
-function buildBirthDate(year: string, month: string, day: string): string | null {
-  if (!year || !month || !day) return null
-  return `${year}-${month}-${day}`
-}
-
 const emptyPerson = (): PersonFormData => ({
-  name: '', birthYear: '', birthMonth: '', birthDay: '',
+  name: '', birthDate: '',
   birthHour: '', birthMinute: '', birthPeriod: '',
   birthCountry: '', gender: ''
 })
@@ -239,7 +203,7 @@ export function CompatibilityForm() {
   const validatePerson = (data: PersonFormData, city: City | null): PersonFormErrors => {
     const errs: PersonFormErrors = {}
     if (!data.name.trim()) errs.name = 'Please enter a name'
-    if (!data.birthYear || !data.birthMonth || !data.birthDay) errs.birthDate = 'Please enter a complete birth date'
+    if (!data.birthDate || !/^\d{4}-\d{2}-\d{2}$/.test(data.birthDate)) errs.birthDate = 'Please enter date in YYYY-MM-DD format'
     if (!city) errs.birthCountry = 'Please select a birth city'
     if (!data.gender) errs.gender = 'Please select a gender'
     return errs
@@ -260,8 +224,8 @@ export function CompatibilityForm() {
       const timezoneA = cityA ? (cityA.timezone || inferTimezone(cityA.country, cityA.lon)) : null
       const timezoneB = cityB ? (cityB.timezone || inferTimezone(cityB.country, cityB.lon)) : null
 
-      const birthDateA = buildBirthDate(personA.birthYear, personA.birthMonth, personA.birthDay)
-      const birthDateB = buildBirthDate(personB.birthYear, personB.birthMonth, personB.birthDay)
+      const birthDateA = personA.birthDate || null
+      const birthDateB = personB.birthDate || null
       const birthTimeA = buildBirthTime(personA.birthHour, personA.birthMinute, personA.birthPeriod)
       const birthTimeB = buildBirthTime(personB.birthHour, personB.birthMinute, personB.birthPeriod)
 
