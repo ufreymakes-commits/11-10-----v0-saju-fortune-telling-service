@@ -249,8 +249,8 @@ src="/images/shopify-logo.png"
                 <h4 className="text-base md:text-lg font-semibold text-white mb-3">12 months Saju Reading</h4>
                 <div className="relative w-full h-40 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e]">
                   <Image
-                    src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/99facts_c8a8f201-682f-478e-9aee-b053f45de68f.png?v=1778483477"
-                    alt="99 Facts"
+                    src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/30.png?v=1778484201"
+                    alt="12 months Saju Reading"
                     fill
                     className="object-cover"
                   />

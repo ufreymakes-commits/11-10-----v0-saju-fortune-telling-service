@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
+import { generateText } from 'ai'
 import { createClient } from '@/lib/supabase/server'
-import { GoogleGenerativeAI } from '@google/generative-ai'
 
 // ================================================================
 // STAGE 1: Build saju context string (2500 chars) from raw saju data
@@ -52,21 +52,15 @@ Combined Analysis Notes:
 }
 
 // ================================================================
-// Gemini helper
+// Gemini helper - AI SDK 사용 (generate-gemini와 동일)
 // ================================================================
 async function callGemini(systemPrompt: string, userPrompt: string): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY
-  if (!apiKey) throw new Error('GEMINI_API_KEY not configured')
-
-  const genAI = new GoogleGenerativeAI(apiKey)
-  const model = genAI.getGenerativeModel({
-    model: 'gemini-2.0-flash',
-    systemInstruction: systemPrompt,
+  const result = await generateText({
+    model: 'google/gemini-3-flash',
+    system: systemPrompt,
+    prompt: userPrompt,
   })
-
-  const result = await model.generateContent(userPrompt)
-  const response = await result.response
-  return response.text()
+  return result.text
 }
 
 // ================================================================
@@ -167,15 +161,39 @@ Return a JSON array of sections with this structure:
 
     const stage2Raw = await callGemini(stage2SystemPrompt, stage2UserPrompt)
 
-    // Parse JSON from Gemini response
+    console.log('[v0] Compatibility: Stage 2 raw response length:', stage2Raw.length)
+
+    // === JSON 파싱 (generate-gemini의 정확한 로직 동일 적용) ===
+    let stage2JsonMatch = stage2Raw.match(/```json\n([\s\S]*?)\n```/)
+    
+    if (!stage2JsonMatch) {
+      stage2JsonMatch = stage2Raw.match(/```json([\s\S]*?)```/)
+    }
+    
+    if (!stage2JsonMatch) {
+      const directJsonMatch = stage2Raw.match(/(\[[\s\S]*\])/)
+      if (directJsonMatch) {
+        stage2JsonMatch = [null, directJsonMatch[1]]
+      }
+    }
+    
+    if (!stage2JsonMatch) {
+      console.error('[v0] Compatibility: Stage 2 raw response:', stage2Raw)
+      return NextResponse.json({ error: 'Failed to parse Stage 2 response' }, { status: 500 })
+    }
+
     let facts: unknown[] = []
     try {
-      const jsonMatch = stage2Raw.match(/\[[\s\S]*\]/)
-      if (jsonMatch) facts = JSON.parse(jsonMatch[0])
-    } catch {
-      // If JSON parsing fails, wrap raw text as single section
+      facts = JSON.parse(stage2JsonMatch[1])
+      if (!Array.isArray(facts)) {
+        facts = [facts] // 단일 객체면 배열로 감싸기
+      }
+    } catch (parseErr) {
+      console.error('[v0] Compatibility: JSON parse error:', parseErr, 'Raw:', stage2JsonMatch[1])
       facts = [{ title: 'Compatibility Report', content: stage2Raw, score: null }]
     }
+
+    console.log(`[v0] Compatibility: Generated ${facts.length} facts from Stage 2`)
 
     // Save stage 2 result
     await supabase
