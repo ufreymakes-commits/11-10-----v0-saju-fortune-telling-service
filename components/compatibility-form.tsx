@@ -114,7 +114,7 @@ function PersonForm({
         <div className="grid grid-cols-3 gap-2">
           {/* Hour */}
           <Select value={data.birthHour} onValueChange={(v) => onDataChange('birthHour', v)}>
-            <SelectTrigger className="bg-white border-gray-300 text-gray-900 data-[placeholder]:text-gray-400">
+            <SelectTrigger className="w-full bg-white border-gray-300 focus:border-primary text-gray-900 data-[placeholder]:text-gray-400">
               <SelectValue placeholder="Hour" />
             </SelectTrigger>
             <SelectContent className="bg-white">
@@ -126,7 +126,7 @@ function PersonForm({
 
           {/* Minute */}
           <Select value={data.birthMinute} onValueChange={(v) => onDataChange('birthMinute', v)}>
-            <SelectTrigger className="bg-white border-gray-300 text-gray-900 data-[placeholder]:text-gray-400">
+            <SelectTrigger className="w-full bg-white border-gray-300 focus:border-primary text-gray-900 data-[placeholder]:text-gray-400">
               <SelectValue placeholder="Min" />
             </SelectTrigger>
             <SelectContent className="bg-white max-h-[40vh] overflow-y-auto" position="popper" sideOffset={4}>
@@ -140,7 +140,7 @@ function PersonForm({
 
           {/* AM/PM */}
           <Select value={data.birthPeriod} onValueChange={(v) => onDataChange('birthPeriod', v)}>
-            <SelectTrigger className="bg-white border-gray-300 text-gray-900 data-[placeholder]:text-gray-400">
+            <SelectTrigger className="w-full bg-white border-gray-300 focus:border-primary text-gray-900 data-[placeholder]:text-gray-400">
               <SelectValue placeholder="AM/PM" />
             </SelectTrigger>
             <SelectContent className="bg-white">
