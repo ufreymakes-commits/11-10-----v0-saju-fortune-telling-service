@@ -3,62 +3,121 @@ import { generateText } from 'ai'
 import { createClient } from '@/lib/supabase/server'
 
 // ================================================================
-// STAGE 1: Build saju context string (2500 chars) from raw saju data
+// STAGE 1: Build complete allSajuData (99 facts와 동일하게)
 // ================================================================
-function buildSajuContext(
+function buildAllSajuData(
   personAName: string,
   personBName: string,
   sajuDataA: Record<string, unknown>,
   sajuDataB: Record<string, unknown>
-): string {
-  const formatPillar = (p: { stem?: string; branch?: string; element?: string } | undefined) =>
-    p ? `${p.stem || ''}${p.branch || ''} (${p.element || ''})` : 'unknown'
-
-  const formatPerson = (name: string, data: Record<string, unknown>) => {
-    const pillars = data.fourPillars as {
-      year?: { stem?: string; branch?: string; element?: string }
-      month?: { stem?: string; branch?: string; element?: string }
-      day?: { stem?: string; branch?: string; element?: string }
-      hour?: { stem?: string; branch?: string; element?: string }
-    } | undefined
-    const elements = data.elementBalance as Record<string, number> | undefined
-    const dayMaster = data.dayMaster as { element?: string; yinYang?: string } | undefined
-
-    return `
-[${name}]
-Four Pillars:
-  Year: ${formatPillar(pillars?.year)}
-  Month: ${formatPillar(pillars?.month)}
-  Day: ${formatPillar(pillars?.day)}
-  Hour: ${formatPillar(pillars?.hour)}
-Day Master: ${dayMaster?.element || 'unknown'} (${dayMaster?.yinYang || 'unknown'})
-Element Balance: ${elements ? Object.entries(elements).map(([k, v]) => `${k}: ${v}`).join(', ') : 'unknown'}
-`.trim()
+) {
+  const formatSajuData = (name: string, saju: Record<string, unknown>) => {
+    // 99 facts의 allSajuData 구조와 동일하게 구성
+    return {
+      name,
+      // 기본 정보
+      birthDate: saju.birthDate || '',
+      
+      // 4주 (천간/지지)
+      fourPillars: saju.fourPillars || {},
+      
+      // 일간 (중요)
+      dayMaster: (saju.dayPillar as any)?.stem || '',
+      dayMasterKorean: saju.dayMasterKorean || '',
+      
+      // 격국
+      lifeStage: saju.gyeokguk || '',
+      
+      // 신강/신약
+      energyGrade: (saju.sinGangSinYak as any)?.grade || '',
+      energyRatio: (saju.sinGangSinYak as any)?.ratio || 0,
+      
+      // 오행 개수
+      elementCountBasic: saju.elementCountBasic || {},
+      elementCountWithHidden: saju.elementCount || {},
+      
+      // 오행 점수
+      elementScore: saju.elementBalanceKorean || {},
+      dominantElement: saju.dominantElement || '',
+      
+      // 십신
+      tenGodsPresent: (saju.tenGods as any)?.present || [],
+      tenGodsMissing: (saju.tenGods as any)?.missing || [],
+      tenGodsCounts: saju.tenGodsCounts || {},
+      tenGodsByPosition: (saju.tenGods as any)?.byPosition || {},
+      
+      // 12운성
+      twelveStars: saju.twelveStars || [],
+      
+      // 관계식
+      harmonies: {
+        cheongganHap: saju.cheongganHap || [],
+        jijiYughap: saju.jijiYughap || [],
+        jijiSamhap: saju.jijiSamhap || [],
+        jijiBanghap: saju.jijiBanghap || []
+      },
+      
+      clashes: {
+        cheongganChung: saju.cheongganChung || [],
+        jijiChung: saju.jijiChung || []
+      },
+      
+      hyeong: saju.hyeong || [],
+      pa: saju.pa || [],
+      hae: saju.hae || [],
+      wonjin: saju.wonjin || [],
+      
+      // 길성
+      gilseong: saju.gilseong || {},
+      
+      // 공망
+      gongmang: saju.gongmang || [],
+      
+      // 신살
+      spirits: saju.spirits || [],
+      sinsalDetails: saju.sinsalDetails || [],
+      sinsalSummary: saju.sinsalSummary || '',
+      sinsalCombinedGuide: saju.sinsalCombinedGuide || '',
+      
+      // 12신살
+      twelveSinsalByYearBranch: saju.twelveSinsalByYearBranch || {},
+      twelveSinsalByDayBranch: saju.twelveSinsalByDayBranch || {},
+      
+      // 용신
+      yongsin: saju.yongsin || { eokbu: 'None', johu: 'None', exists: false },
+      
+      // 대운
+      daewoon: saju.daewoon || [],
+      
+      // 연운
+      yeonwoon: saju.yeonwoon || { current2026: 'N/A', allYears: [] },
+      
+      // 합충 정보
+      hapChungSummary: saju.hapChungSummary || '',
+      hapChungAdjustmentDetails: saju.hapChungAdjustmentDetails || []
+    }
   }
 
-  return `
-SAJU COMPATIBILITY DATA
-=======================
-${formatPerson(personAName, sajuDataA)}
-
-${formatPerson(personBName, sajuDataB)}
-
-Combined Analysis Notes:
-- Compare day masters for compatibility
-- Analyze element balance between both charts
-- Note any complementary or conflicting elements
-- Assess the harmony of the four pillars
-`.trim()
+  return {
+    personA: formatSajuData(personAName, sajuDataA),
+    personB: formatSajuData(personBName, sajuDataB)
+  }
 }
 
 // ================================================================
 // Gemini helper - AI SDK 사용 (generate-gemini와 동일)
 // ================================================================
-async function callGemini(systemPrompt: string, userPrompt: string): Promise<string> {
+async function callGemini(
+  systemPrompt: string,
+  userPrompt: string,
+  options?: { temperature?: number; maxTokens?: number }
+): Promise<string> {
   const result = await generateText({
     model: 'google/gemini-2-flash',
     system: systemPrompt,
     prompt: userPrompt,
+    temperature: options?.temperature ?? 0,
+    maxTokens: options?.maxTokens ?? 3000
   })
   return result.text
 }
@@ -108,20 +167,28 @@ export async function POST(request: Request) {
     }
 
     // 4. Stage 1: Build context interpretation (~2500 chars)
-    const sajuContext = buildSajuContext(
+    const allSajuData = buildAllSajuData(
       submission.person_a_name,
       submission.person_b_name,
       submission.person_a_saju_data || {},
       submission.person_b_saju_data || {}
     )
 
+    console.log('[v0] Compatibility: ===== COMPLETE SAJU DATA FOR STAGE 1 & 2 =====')
+    console.log('[v0] Compatibility:', JSON.stringify(allSajuData, null, 2))
+    console.log('[v0] Compatibility: ====================================================')
+
     const stage1SystemPrompt = `여기에 입력하세요 (Stage 1 System Prompt - Saju Compatibility Interpretation Context)`
 
-    const stage1UserPrompt = `여기에 입력하세요 (Stage 1 User Prompt - provide the saju context below and ask for interpretation)
+    const stage1UserPrompt = `여기에 입력하세요 (Stage 1 User Prompt)
 
-${sajuContext}`
+Compatibility Chart Data (Complete Saju Information):
+${JSON.stringify(allSajuData, null, 2)}`
 
-    const contextInterpretation = await callGemini(stage1SystemPrompt, stage1UserPrompt)
+    const contextInterpretation = await callGemini(stage1SystemPrompt, stage1UserPrompt, {
+      temperature: 0,
+      maxTokens: 3000
+    })
 
     // Save stage 1 result
     const { data: reportRow, error: insertError } = await supabase
@@ -159,7 +226,10 @@ Return a JSON array of sections with this structure:
   }
 ]`
 
-    const stage2Raw = await callGemini(stage2SystemPrompt, stage2UserPrompt)
+    const stage2Raw = await callGemini(stage2SystemPrompt, stage2UserPrompt, {
+      temperature: 0,
+      maxTokens: 8000
+    })
 
     console.log('[v0] Compatibility: Stage 2 raw response length:', stage2Raw.length)
 
