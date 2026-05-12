@@ -4,6 +4,63 @@ import { StarsBackground } from '@/components/stars-background'
 import { CompatibilityReportContent } from '@/components/compatibility-report-content'
 import { sharedOpenGraph, sharedTwitter } from '@/lib/metadata'
 
+// 궁합 점수 계산 함수 (데이터 기반 - 일관된 결과)
+function calculateCompatibilityScore(sajuA: Record<string, unknown>, sajuB: Record<string, unknown>): number {
+  let score = 50
+
+  const dayMasterA = (sajuA.dayMaster as string) || ''
+  const dayMasterB = (sajuB.dayMaster as string) || ''
+  
+  // 일간합 체크 (+15점)
+  const ilganHapPairs = [['甲', '己'], ['乙', '庚'], ['丙', '辛'], ['丁', '壬'], ['戊', '癸']]
+  if (ilganHapPairs.some(([a, b]) => (dayMasterA === a && dayMasterB === b) || (dayMasterA === b && dayMasterB === a))) {
+    score += 15
+  }
+
+  // 일지 육합 체크 (+12점)
+  const dayBranchA = (sajuA.dayPillar as any)?.branch || ''
+  const dayBranchB = (sajuB.dayPillar as any)?.branch || ''
+  const yukHapPairs = [['子', '丑'], ['寅', '亥'], ['卯', '戌'], ['辰', '酉'], ['巳', '申'], ['午', '未']]
+  if (yukHapPairs.some(([a, b]) => (dayBranchA === a && dayBranchB === b) || (dayBranchA === b && dayBranchB === a))) {
+    score += 12
+  }
+
+  // 일지 삼합 체크 (+8점)
+  const samhapGroups = [['寅', '午', '戌'], ['申', '子', '辰'], ['巳', '酉', '丑'], ['亥', '卯', '未']]
+  if (samhapGroups.some(group => group.includes(dayBranchA) && group.includes(dayBranchB))) {
+    score += 8
+  }
+
+  // 일지충 체크 (-10점)
+  const chungPairs = [['子', '午'], ['丑', '未'], ['寅', '申'], ['卯', '酉'], ['辰', '戌'], ['巳', '亥']]
+  if (chungPairs.some(([a, b]) => (dayBranchA === a && dayBranchB === b) || (dayBranchA === b && dayBranchB === a))) {
+    score -= 10
+  }
+
+  // 원진 체크 (-8점)
+  const wonjinPairs = [['子', '未'], ['丑', '午'], ['寅', '巳'], ['卯', '辰'], ['申', '亥'], ['酉', '戌']]
+  if (wonjinPairs.some(([a, b]) => (dayBranchA === a && dayBranchB === b) || (dayBranchA === b && dayBranchB === a))) {
+    score -= 8
+  }
+
+  // 오행 상생 체크 (+5점)
+  const dominantA = (sajuA.dominantElement as string) || ''
+  const dominantB = (sajuB.dominantElement as string) || ''
+  const sangsaeng = [['목', '화'], ['화', '토'], ['토', '금'], ['금', '수'], ['수', '목']]
+  if (sangsaeng.some(([a, b]) => (dominantA === a && dominantB === b) || (dominantA === b && dominantB === a))) {
+    score += 5
+  }
+
+  // 신강/신약 보완 체크 (+5점)
+  const gradeA = (sajuA.sinGangSinYak as any)?.grade || ''
+  const gradeB = (sajuB.sinGangSinYak as any)?.grade || ''
+  if ((gradeA === '신강' && gradeB === '신약') || (gradeA === '신약' && gradeB === '신강')) {
+    score += 5
+  }
+
+  return Math.max(40, Math.min(95, score))
+}
+
 interface PageProps {
   params: Promise<{ id: string }>
 }
@@ -101,7 +158,9 @@ export default async function CompatibilityPaidReportPage({ params }: PageProps)
   // Extract relationship type from last section (Section 7)
   const sections = Array.isArray(report?.facts) ? report.facts : []
   const relationshipType = sections[sections.length - 1]?.title || ''
-  const compatibilityScore = null // TODO: Add DB column later
+  
+  // Calculate compatibility score from saju data
+  const compatibilityScore = calculateCompatibilityScore(sajuDataA, sajuDataB)
   
   return (
     <main className="min-h-screen bg-[#0f0a14] relative">

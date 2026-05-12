@@ -386,7 +386,12 @@ ${JSON.stringify(allSajuData, null, 2)}`
     
     console.log('[v0] Compatibility: Calculated score:', compatibilityResult.score, 'Type:', compatibilityResult.relationshipType)
 
-    const stage2UserPrompt = `두 사람을 위한 사주 궁합 레포트를 만들어라. 각각 7개의 섹션으로 이루어진 주제에 따라 문장들을 작성해라. 1개의 섹션에는 2,000자 정도의 길이의 영어 문장들이 들어간다. 미국인 Gen-z 해설가가 말하는 것 처럼, 너무 가볍지 않은 선에서 gen-z 용어도 가끔 섞어서 넣어준다. (no cap, vibe, aura, for real 등). 참고로 현대에선 동성애자 커플도 종종 있으니, 같은 성별의 사주 궁합 요청이 들어와도 놀라지 말고 침착하고 친절하게 이성커플과 같은 대우로 풀이를 작성하라.
+    const stage2UserPrompt = `두 사람을 위한 사주 궁합 레포트를 만들어라. 각각 7개의 섹션으로 이루어진 주제에 따라 문장들을 작성해라. 미국인 Gen-z 해설가가 말하는 것 처럼, 너무 가볍지 않은 선에서 gen-z 용어도 가끔 섞어서 넣어준다. (no cap, vibe, aura, for real 등). 참고로 현대에선 동성애자 커플도 종종 있으니, 같은 성별의 사주 궁합 요청이 들어와도 놀라지 말고 침착하고 친절하게 이성커플과 같은 대우로 풀이를 작성하라.
+
+=== CRITICAL LENGTH REQUIREMENT ===
+EACH SECTION MUST BE AT LEAST 1,500-2,000 CHARACTERS (approximately 300-400 words).
+DO NOT write short paragraphs. Each section should have 4-6 substantial paragraphs with detailed analysis.
+If your content is shorter than 1,500 characters per section, you MUST expand it with more details, examples, and insights.
 
 === CRITICAL RULES (MUST FOLLOW) ===
 1. ABSOLUTELY NO Chinese characters (한자) allowed. Never write 甲, 乙, 丙, 丁, 戊, 己, 庚, 辛, 壬, 癸, etc.
@@ -395,6 +400,7 @@ ${JSON.stringify(allSajuData, null, 2)}`
 4. ALL text must be in plain English only.
 5. When referencing elements, use English: Wood, Fire, Earth, Metal, Water (NOT 목화토금수).
 6. When referencing stems, translate to English descriptions (e.g., "Yang Wood energy" instead of "甲목").
+7. EACH SECTION MUST BE LONG AND DETAILED (minimum 1,500 characters).
 
 IMPORTANT - Title format rules:
 - Section 1-6 titles MUST be poetic English phrases WITHOUT any brackets or tags. Example: "Spring Rain Nurturing Parched Earth" NOT "[Birth of Landscape] Spring Rain..."

@@ -94,7 +94,7 @@ export function CompatibilityReportContent({
             Saju Compatibility Report
           </div>
 
-          {/* Day Master Characters with Images */}
+          {/* Unified Character Box: Name, Birth Date, Character, Heart in center */}
           {(personADayMaster || personBDayMaster) && (() => {
             const koreanA = ENGLISH_TO_KOREAN[personADayMaster] || ''
             const koreanB = ENGLISH_TO_KOREAN[personBDayMaster] || ''
@@ -103,9 +103,11 @@ export function CompatibilityReportContent({
             
             return (
               <div className="bg-gradient-to-r from-pink-900/20 to-rose-900/20 border border-pink-500/20 rounded-xl p-5">
-                <div className="flex items-center justify-center gap-6">
-                  {/* Person A Character */}
+                <div className="flex items-center justify-center gap-4">
+                  {/* Person A */}
                   <div className="text-center flex-1">
+                    <div className="text-sm font-bold text-white mb-0.5">{personAName}</div>
+                    <div className="text-[10px] text-white/40 mb-2">{personABirthDate}</div>
                     {characterA && (
                       <div className="relative w-20 h-20 mx-auto mb-2">
                         <Image
@@ -119,17 +121,18 @@ export function CompatibilityReportContent({
                         />
                       </div>
                     )}
-                    <div className="text-xs text-white/50 mb-0.5">{personAName}</div>
-                    <div className={`text-sm font-bold ${characterA?.color || 'text-pink-300'}`}>
+                    <div className={`text-xs font-semibold ${characterA?.color || 'text-pink-300'}`}>
                       {personADayMaster}
                     </div>
                   </div>
                   
                   {/* Heart */}
-                  <HeartIcon className="w-5 h-5 text-pink-400 flex-shrink-0" />
+                  <HeartIcon className="w-6 h-6 text-pink-400 flex-shrink-0" />
                   
-                  {/* Person B Character */}
+                  {/* Person B */}
                   <div className="text-center flex-1">
+                    <div className="text-sm font-bold text-white mb-0.5">{personBName}</div>
+                    <div className="text-[10px] text-white/40 mb-2">{personBBirthDate}</div>
                     {characterB && (
                       <div className="relative w-20 h-20 mx-auto mb-2">
                         <Image
@@ -143,8 +146,7 @@ export function CompatibilityReportContent({
                         />
                       </div>
                     )}
-                    <div className="text-xs text-white/50 mb-0.5">{personBName}</div>
-                    <div className={`text-sm font-bold ${characterB?.color || 'text-pink-300'}`}>
+                    <div className={`text-xs font-semibold ${characterB?.color || 'text-pink-300'}`}>
                       {personBDayMaster}
                     </div>
                   </div>
@@ -152,21 +154,6 @@ export function CompatibilityReportContent({
               </div>
             )
           })()}
-
-          {/* Main heading with names and date */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-center gap-3">
-              <span className="text-white font-bold text-lg">{personAName}</span>
-              <HeartIcon className="w-5 h-5 text-pink-400 flex-shrink-0" />
-              <span className="text-white font-bold text-lg">{personBName}</span>
-            </div>
-
-            <div className="flex items-center justify-center gap-4 text-white/40 text-xs">
-              <span>{personABirthDate}</span>
-              <span>·</span>
-              <span>{personBBirthDate}</span>
-            </div>
-          </div>
 
           {/* Compatibility Score */}
           {compatibilityScore !== null && compatibilityScore !== undefined && (
@@ -211,18 +198,18 @@ export function CompatibilityReportContent({
         {sections.map((section, idx) => (
           <div
             key={idx}
-            className="rounded-2xl border border-white/8 bg-white/[0.03] overflow-hidden"
+            className="rounded-2xl border border-purple-200/30 bg-gradient-to-br from-white/95 to-purple-50/90 overflow-hidden shadow-sm"
           >
             <button
               onClick={() => toggleSection(idx)}
               className="w-full flex items-center justify-between p-5 text-left"
             >
               <div className="flex items-center gap-3">
-                <span className="text-pink-400/60 font-mono text-xs">{String(idx + 1).padStart(2, '0')}</span>
-                <span className="text-white font-semibold text-sm">{section.title}</span>
+                <span className="text-purple-500 font-mono text-xs font-semibold">{String(idx + 1).padStart(2, '0')}</span>
+                <span className="text-purple-900 font-semibold text-sm">{section.title}</span>
               </div>
               <ChevronDownIcon
-                className={`w-4 h-4 text-white/40 transition-transform flex-shrink-0 ${
+                className={`w-4 h-4 text-purple-400 transition-transform flex-shrink-0 ${
                   openSections[idx] ? 'rotate-180' : ''
                 }`}
               />
@@ -230,8 +217,8 @@ export function CompatibilityReportContent({
 
             {openSections[idx] && (
               <div className="px-5 pb-5">
-                <div className="h-px bg-white/5 mb-4" />
-                <p className="text-white/70 text-sm leading-relaxed whitespace-pre-wrap">
+                <div className="h-px bg-purple-200/50 mb-4" />
+                <p className="text-purple-900/80 text-sm leading-relaxed whitespace-pre-wrap">
                   {section.content}
                 </p>
               </div>
