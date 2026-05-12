@@ -1,8 +1,27 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, headers } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { calculateSaju } from '@/lib/saju-calculator'
 import { runSajuTests } from '@/lib/saju-test'
 import type { BirthInfo } from '@/lib/types'
+
+// Helper function to get client IP address
+function getClientIP(request: Request): string {
+  const headersList = headers()
+  
+  // Try to get IP from common proxy headers
+  const forwarded = headersList.get('x-forwarded-for')
+  if (forwarded) {
+    // x-forwarded-for can contain multiple IPs, use the first one
+    return forwarded.split(',')[0].trim()
+  }
+  
+  // Cloudflare
+  const cfIP = headersList.get('cf-connecting-ip')
+  if (cfIP) return cfIP
+  
+  // Fallback (rarely used)
+  return headersList.get('x-real-ip') || 'unknown'
+}
 
 export async function POST(request: Request) {
   try {
@@ -24,11 +43,11 @@ export async function POST(request: Request) {
     // Create Supabase client
     const supabase = await createClient()
     
-    // Check daily submission limit (3 per day per person)
-    // Using email as identifier (assuming we have user info), fallback to name+birthDate
-    const identifier = name.toLowerCase() + birthDate
+    // Get client IP address
+    const clientIP = getClientIP(request)
+    console.log('[v0] Submission from IP:', clientIP)
     
-    // Get today's date range (00:00:00 to 23:59:59 UTC)
+    // Check daily submission limit (3 per day per IP address)
     const today = new Date()
     today.setUTCHours(0, 0, 0, 0)
     const tomorrow = new Date(today)
@@ -37,8 +56,7 @@ export async function POST(request: Request) {
     const { data: todaySubmissions, error: countError } = await supabase
       .from('submissions')
       .select('id', { count: 'exact', head: true })
-      .eq('name', name)
-      .eq('birth_date', birthDate)
+      .eq('client_ip', clientIP)
       .gte('created_at', today.toISOString())
       .lt('created_at', tomorrow.toISOString())
     
@@ -98,11 +116,11 @@ export async function POST(request: Request) {
         gender,
         referral_source: referralSource,
         saju_data: sajuData,
-        // New fields for precise timezone/location
         birth_city: birthCity || null,
         timezone: timezone || null,
         longitude: longitude || null,
-        latitude: latitude || null
+        latitude: latitude || null,
+        client_ip: clientIP
       })
       .select('id')
       .single()
