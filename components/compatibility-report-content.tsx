@@ -5,6 +5,16 @@ import Image from 'next/image'
 import { track } from '@/hooks/use-track'
 import { HeartIcon, ChevronDownIcon, DownloadIcon, LinkIcon, CheckIcon } from 'lucide-react'
 import { CompatibilityReportLoader } from './compatibility-report-loader'
+import { getDayMasterCharacter } from '@/lib/day-master-characters'
+
+// English to Korean day master mapping for character lookup
+const ENGLISH_TO_KOREAN: Record<string, string> = {
+  'Yang Wood': '갑', 'Yin Wood': '을',
+  'Yang Fire': '병', 'Yin Fire': '정',
+  'Yang Earth': '무', 'Yin Earth': '기',
+  'Yang Metal': '경', 'Yin Metal': '신',
+  'Yang Water': '임', 'Yin Water': '계',
+}
 
 interface Section {
   title: string
@@ -84,24 +94,64 @@ export function CompatibilityReportContent({
             Saju Compatibility Report
           </div>
 
-          {/* Day Master Characters (천간) — Top banner */}
-          {(personADayMaster || personBDayMaster) && (
-            <div className="bg-gradient-to-r from-pink-900/20 to-rose-900/20 border border-pink-500/20 rounded-xl p-4 space-y-2">
-              <div className="flex items-center justify-center gap-4">
-                <div className="text-center">
-                  <div className="text-xs text-white/40 mb-1">Person A</div>
-                  <div className="text-lg font-bold text-pink-300">{personADayMaster}</div>
-                  <div className="text-[10px] text-white/30 mt-1">Day Master</div>
-                </div>
-                <HeartIcon className="w-4 h-4 text-pink-400" />
-                <div className="text-center">
-                  <div className="text-xs text-white/40 mb-1">Person B</div>
-                  <div className="text-lg font-bold text-pink-300">{personBDayMaster}</div>
-                  <div className="text-[10px] text-white/30 mt-1">Day Master</div>
+          {/* Day Master Characters with Images */}
+          {(personADayMaster || personBDayMaster) && (() => {
+            const koreanA = ENGLISH_TO_KOREAN[personADayMaster] || ''
+            const koreanB = ENGLISH_TO_KOREAN[personBDayMaster] || ''
+            const characterA = getDayMasterCharacter(koreanA)
+            const characterB = getDayMasterCharacter(koreanB)
+            
+            return (
+              <div className="bg-gradient-to-r from-pink-900/20 to-rose-900/20 border border-pink-500/20 rounded-xl p-5">
+                <div className="flex items-center justify-center gap-6">
+                  {/* Person A Character */}
+                  <div className="text-center flex-1">
+                    {characterA && (
+                      <div className="relative w-20 h-20 mx-auto mb-2">
+                        <Image
+                          src={characterA.imagePath}
+                          alt={`${personADayMaster} character`}
+                          fill
+                          className="object-contain drop-shadow-lg"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/images/characters-collection.png'
+                          }}
+                        />
+                      </div>
+                    )}
+                    <div className="text-xs text-white/50 mb-0.5">{personAName}</div>
+                    <div className={`text-sm font-bold ${characterA?.color || 'text-pink-300'}`}>
+                      {personADayMaster}
+                    </div>
+                  </div>
+                  
+                  {/* Heart */}
+                  <HeartIcon className="w-5 h-5 text-pink-400 flex-shrink-0" />
+                  
+                  {/* Person B Character */}
+                  <div className="text-center flex-1">
+                    {characterB && (
+                      <div className="relative w-20 h-20 mx-auto mb-2">
+                        <Image
+                          src={characterB.imagePath}
+                          alt={`${personBDayMaster} character`}
+                          fill
+                          className="object-contain drop-shadow-lg"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/images/characters-collection.png'
+                          }}
+                        />
+                      </div>
+                    )}
+                    <div className="text-xs text-white/50 mb-0.5">{personBName}</div>
+                    <div className={`text-sm font-bold ${characterB?.color || 'text-pink-300'}`}>
+                      {personBDayMaster}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )
+          })()}
 
           {/* Main heading with names and date */}
           <div className="space-y-3">
@@ -148,6 +198,14 @@ export function CompatibilityReportContent({
         </div>
       </div>
 
+      {/* Hint text with bouncing arrow */}
+      <div className="max-w-lg mx-auto px-4 mb-4">
+        <div className="flex items-center justify-center gap-2 text-white/40 text-xs">
+          <span>Tap the arrow to reveal the content</span>
+          <ChevronDownIcon className="w-4 h-4 animate-bounce" />
+        </div>
+      </div>
+
       {/* Sections */}
       <div className="max-w-lg mx-auto px-4 space-y-3">
         {sections.map((section, idx) => (
@@ -159,7 +217,10 @@ export function CompatibilityReportContent({
               onClick={() => toggleSection(idx)}
               className="w-full flex items-center justify-between p-5 text-left"
             >
-              <span className="text-white font-semibold text-sm">{section.title}</span>
+              <div className="flex items-center gap-3">
+                <span className="text-pink-400/60 font-mono text-xs">{String(idx + 1).padStart(2, '0')}</span>
+                <span className="text-white font-semibold text-sm">{section.title}</span>
+              </div>
               <ChevronDownIcon
                 className={`w-4 h-4 text-white/40 transition-transform flex-shrink-0 ${
                   openSections[idx] ? 'rotate-180' : ''
