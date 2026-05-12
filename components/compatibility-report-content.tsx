@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { track } from '@/hooks/use-track'
 import { HeartIcon, ChevronDownIcon, DownloadIcon, LinkIcon, CheckIcon } from 'lucide-react'
 import { CompatibilityReportLoader } from './compatibility-report-loader'
@@ -70,11 +71,7 @@ export function CompatibilityReportContent({
     }
   }
 
-  // Overall score (average of all section scores)
-  const scoredSections = sections.filter((s) => s.score != null)
-  const overallScore = scoredSections.length > 0
-    ? Math.round(scoredSections.reduce((acc, s) => acc + (s.score ?? 0), 0) / scoredSections.length)
-    : null
+
 
   return (
     <div className="min-h-screen bg-[#0f0a14] pb-24">
@@ -137,13 +134,7 @@ export function CompatibilityReportContent({
             </div>
           )}
 
-          {/* Overall score */}
-          {overallScore !== null && (
-            <div className="inline-flex flex-col items-center gap-1 bg-pink-500/10 border border-pink-500/20 rounded-2xl px-8 py-4">
-              <span className="text-4xl font-bold text-pink-400">{overallScore}</span>
-              <span className="text-white/50 text-xs">Overall Compatibility Score</span>
-            </div>
-          )}
+
         </div>
       </div>
 
@@ -158,14 +149,7 @@ export function CompatibilityReportContent({
               onClick={() => toggleSection(idx)}
               className="w-full flex items-center justify-between p-5 text-left"
             >
-              <div className="flex items-center gap-3">
-                <span className="text-white font-semibold text-sm">{section.title}</span>
-                {section.score != null && (
-                  <span className="text-xs font-medium text-pink-400 bg-pink-500/10 border border-pink-500/20 px-2 py-0.5 rounded-full">
-                    {section.score}%
-                  </span>
-                )}
-              </div>
+              <span className="text-white font-semibold text-sm">{section.title}</span>
               <ChevronDownIcon
                 className={`w-4 h-4 text-white/40 transition-transform flex-shrink-0 ${
                   openSections[idx] ? 'rotate-180' : ''
@@ -176,16 +160,6 @@ export function CompatibilityReportContent({
             {openSections[idx] && (
               <div className="px-5 pb-5">
                 <div className="h-px bg-white/5 mb-4" />
-                {section.score != null && (
-                  <div className="mb-3">
-                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-pink-500 to-rose-400 rounded-full transition-all"
-                        style={{ width: `${section.score}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
                 <p className="text-white/70 text-sm leading-relaxed whitespace-pre-wrap">
                   {section.content}
                 </p>
@@ -193,6 +167,92 @@ export function CompatibilityReportContent({
             )}
           </div>
         ))}
+      </div>
+
+      {/* Store Products */}
+      <div className="max-w-lg mx-auto px-4 mt-8">
+        <h3 className="text-sm font-semibold text-white mb-4 text-center">More from Sajume</h3>
+        <div className="space-y-4">
+
+          {/* Signature Saju Elemental Bracelet */}
+          <div className="bg-white/[0.03] border border-white/10 rounded-xl overflow-hidden">
+            <div className="relative w-full h-48">
+              <Image
+                src="/images/luck-bracelet.png"
+                alt="Signature Saju Elemental Bracelet"
+                fill
+                className="object-cover"
+              />
+            </div>
+            <div className="p-4">
+              <h4 className="text-sm font-semibold text-white mb-1">Signature Saju Elemental Bracelet</h4>
+              <p className="text-xs text-white/60 mb-3">A bracelet designed to fill the missing energies in your Saju chart.</p>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-1.5">
+                  <Image
+                    src="/images/shopify-logo.png"
+                    alt="Shopify"
+                    width={16}
+                    height={16}
+                    className="object-contain"
+                  />
+                  <span className="text-[10px] text-white/50">Shop at Sajume Shopify</span>
+                </div>
+                <span className="text-sm font-bold text-white">$38</span>
+              </div>
+              <a
+                href="https://sajume.com/products/personal-luck-bracelet"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-1.5 text-xs font-semibold border border-white/20 rounded-lg hover:bg-white/5 transition-colors text-white text-center block"
+              >
+                Shop Now
+              </a>
+            </div>
+          </div>
+
+          {/* 12-Month Fortune Subscription */}
+          <div className="bg-white/[0.03] border border-blue-500/30 rounded-xl overflow-hidden">
+            <div className="relative w-full h-32">
+              <Image
+                src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/30.png?v=1778484201"
+                alt="12-Month Fortune Subscription"
+                fill
+                className="object-cover"
+              />
+            </div>
+            <div className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full border border-blue-500/30">Coming Soon</span>
+              </div>
+              <h4 className="text-sm font-semibold text-white mb-1">12-Month Fortune Subscription</h4>
+              <p className="text-xs text-white/60 mb-3">Monthly personalized fortune readings based on your Saju chart.</p>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs text-blue-400">Delivered monthly</span>
+                <span className="text-sm font-bold text-white">$6.58/mo</span>
+              </div>
+              <button
+                className="w-full py-1.5 text-xs font-semibold border border-white/20 rounded-lg hover:bg-white/5 transition-colors text-white/70"
+                disabled
+              >
+                Coming Soon
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="max-w-lg mx-auto px-4 mt-8 text-center pb-32">
+        <p className="text-[10px] text-white/40">
+          This report is generated based on Korean Saju (Four Pillars) astrology.
+          <br />
+          For entertainment purposes only.
+        </p>
+        <p className="mt-4 text-[10px] text-white/30">All rights reserved by Sajume.</p>
+        <div className="mt-4 flex flex-col items-center gap-3">
+          <p className="text-[10px] text-white/20">Business: hello@sajume.com</p>
+        </div>
       </div>
 
       {/* Fixed Download PDF Button */}

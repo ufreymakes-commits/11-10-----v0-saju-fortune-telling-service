@@ -85,8 +85,9 @@ export default async function CompatibilityPaidReportPage({ params }: PageProps)
   const sajuDataA = submission.person_a_saju_data as any || {}
   const sajuDataB = submission.person_b_saju_data as any || {}
   
-  const dayMasterA = (sajuDataA.fourPillars?.day?.stem || '') + (sajuDataA.fourPillars?.day?.branch || '')
-  const dayMasterB = (sajuDataB.fourPillars?.day?.stem || '') + (sajuDataB.fourPillars?.day?.branch || '')
+  // dayMaster is stored at root level, not inside fourPillars
+  const dayMasterA = sajuDataA.dayMaster || sajuDataA.dayMasterKorean || ''
+  const dayMasterB = sajuDataB.dayMaster || sajuDataB.dayMasterKorean || ''
   
   // Extract relationship type from last section (섹션 7)
   const sections = Array.isArray(report?.facts) ? report.facts : []
