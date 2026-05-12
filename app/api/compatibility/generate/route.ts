@@ -408,13 +408,13 @@ IMPORTANT - Title format rules:
 - ALL content must be in English.
     
 섹션 1: 두 사람이 그리는 한 폭의 수묵화
-제목 예시 (영어로): "Spring Rain Nurturing Parched Earth", or "A Majestic Pine Standing on Fertile Ground" or "Where the moist earth embraces the forest's song."
+제목 예시 (영어로): "Spring Rain Nurturing Parched Earth", or "A Majestic Pine Standing on Fertile Ground" or "Where the moist earth embraces the forest's song." (예시입니다)
 
 내용 지침:
 형상화: 두 사람의 dayMaster(일간)를 자연물에 비유하여 만남의 첫인상을 시각적으로 묘사합니다.
 만남의 의미: Person A의 부족한 기운을 B가 어떻게 채워주는지, 혹은 비슷한 기운이 만나 어떤 폭발력을 내는지 서술합니다.
-내면의 욕구: tenGodsCounts와 energyGrade를 분석하여 두 사람이 인생에서 공통적으로 지향하는 가치나 개인적 욕구를 비교합니다.
-하모니 시뮬레이션: 두 사람이 만났을 때 흐르는 특유의 분위기를 대화체로 표현합니다.
+내면의 욕구: tenGodsCounts와 energyGrade를 분석하여 두 사람이 인생에서 공통적으로 지향하는 가치나 개인적인 삶의 욕구를 비교합니다.
+하모니 시뮬레이션: 두 사람이 만났을 때 흐르는 특유의 분위기를 실제 자주 할만한 대화, 들을 만한 말로 상상해서 표현합니다. 랜덤 예시: "A님은 주로 '너 덕분에 진짜 심리적으로 든든해'라고 말하고, B님은 '내가 더 실용적으로 먼저 잘 챙겨줄게'라는 말을 자주 주고받을 흐름이네요."
 
 섹션 2: 겉과 속, 우리가 연결되는 방식
 제목 예시 (영어로): "Love at First Sight and Deepening Connection Over Time"
@@ -435,28 +435,28 @@ IMPORTANT - Title format rules:
 
 내용 지침:
 현실적 시나리오: clashes(충), wonjin(원진), hyeong(형) 데이터를 기반으로 두 사람이 실제로 싸우게 될 상황을 예시합니다.
-포인트: 구체적인 화법 가이드와 함께 둘이 같이 하면 좋을 활동이나 데이트를 추천합니다. 절대 뻔한 소리나 두루뭉실한 소리 금지!
+포인트: 구체적인 화법 가이드와 함께 둘이 같이 하면 좋을 활동이나 데이트를 추천합니다. 너무 뻔한 소리나 두루뭉실한 소리 금지!
 
 섹션 5: 밤의 하모니와 현실적인 경제 공동체
 제목 (영어로): "Your Secret Chemistry and Financial Synergy"
 
 내용 지침:
-밤의 하모니: jijiYughap(속궁합)을 활용한 잠자리 성향을 언급합니다. 적당한 수위로 이야기합니다.
-재물운 시너지: tenGodsCounts(재성/관성)를 결합하여 두 사람의 재물운을 분석합니다.
+밤의 하모니: jijiYughap(속궁합)을 활용한 잠자리 성향을 언급합니다. 무례하지 않게 적당한 수위로 근거있게 이야기합니다.
+재물운 시너지: tenGodsCounts를 결합하여 두 사람의 재물운을 분석합니다.실제로 구체적으로 두 사람의 돈을 모으는 방식이나 일하는 커리어 방식을 해설지에서 참고해서, 함께 재물을 관리하고 늘려나가는 아주 현대적이고 구체적인 방법을 제시합니다.
 
 섹션 6: 이 관계의 정점과 결혼의 문턱
 제목 (영어로): "Your Timeline Together and Marriage Opportunities"
 
 내용 지침:
-시기 지정: daewoon과 yeonwoon을 매칭하여 결혼운이 들어오는 시기를 연도로 명확히 집어줍니다.
+시기 지정: daewoon과 yeonwoon을 매칭하여 결혼운이 들어오는 시기를 연도로 명확히 집어줍니다. 최근 과거의 10년부터 앞으로의 10년 중 가장 유력한 연도들을 몇개 뽑아 정확하게 근거와 함께 짚어냅니다. 이별수가 있다면, '이별수가 있다' 라고 단정지어 이야기 하기 보다는, 특정 연도에 거리감이 생기거나 갈등이 일어날 수 있으니 지혜롭게 해결하는 방법에 대해서 이야기를 초점 맞추어 서술합니다. 이 분들이 만약 결혼하게 된다면 서로에게 어떤 부부가 될지 귀엽게 상상해봅니다. 출산으로 아이가 들어오는 운이 보인다면, 출산 연도를 암시해도 좋겠습니다. 출산이 꼭 아이가 아니더라도, 건물이나 업에서의 좋은 결과물이 될 수도 있겠지만요.
 
 섹션 7: 최종 관계 타입
 CRITICAL: 제목은 반드시 다음 4개 중 하나만 정확히 작성: "Soulmate Type" / "Complementary Type" / "Effort-Required Type" / "Karmic Type"
 
 내용 지침:
-운명의 파동: 향후 30년의 daewoon 흐름을 분석하여 두 사람의 상승장과 하락장이 어떻게 교차하는지 보여줍니다.
+운명의 파동: 향후 30년의 daewoon 흐름을 분석하여 두 사람의 에너지의 상승장과 하락장이 어떻게 교차하는지 보여줍니다. 사주 궁합보다 중요한 것은 배려"임을 강조하는 따뜻한 조언과 함께, 상대의 에너지를 통해 고객과 상대 파트너 각각의 삶에서 어떤 영역(재물, 명예, 공부 등)이 확장되는지 구체적인 개운 액션 플랜을 제시하며 마무리합니다.
 관계 정의: 위 4가지 타입 중 최종 타입을 본문에서도 명확히 설명합니다.
-현실 점검 및 처방: 구체적인 개운 액션 플랜을 제시하며 마무리합니다. 누구에게나 들어맞을 절대 뻔한 소리나 두루뭉실한 소리 금지!
+현실 점검 및 처방: 구체적인 개운 액션 플랜을 제시하며 감동적으로 이 관계에 대해서 서술하며 마무리합니다. 누구에게나 들어맞을 절대 뻔한 소리나 두루뭉실한 소리는 금지!
 
 Names: ${submission.person_a_name} & ${submission.person_b_name}
 
