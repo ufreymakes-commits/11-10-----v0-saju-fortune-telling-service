@@ -53,20 +53,25 @@ export async function POST(request: Request) {
     const tomorrow = new Date(today)
     tomorrow.setUTCDate(tomorrow.getUTCDate() + 1)
     
-    const { data: todaySubmissions, error: countError } = await supabase
+    // Use count: 'exact' to get the count without returning data
+    const { count: submissionCount, error: countError } = await supabase
       .from('submissions')
-      .select('id', { count: 'exact', head: true })
+      .select('*', { count: 'exact', head: true })
       .eq('client_ip', clientIP)
       .gte('created_at', today.toISOString())
       .lt('created_at', tomorrow.toISOString())
     
     if (countError) {
       console.error('[v0] Error checking submission limit:', countError)
+      return NextResponse.json(
+        { error: 'Failed to check submission limit' },
+        { status: 500 }
+      )
     }
     
-    const submissionCount = todaySubmissions?.length || 0
+    console.log('[v0] IP:', clientIP, '| Submissions today:', submissionCount || 0)
     
-    if (submissionCount >= 3) {
+    if ((submissionCount || 0) >= 3) {
       return NextResponse.json(
         { 
           error: 'Daily submission limit reached. Please try again tomorrow!',
