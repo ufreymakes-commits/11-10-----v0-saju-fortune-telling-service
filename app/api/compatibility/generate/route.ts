@@ -408,7 +408,7 @@ IMPORTANT - Title format rules:
 - ALL content must be in English.
     
 섹션 1: 두 사람이 그리는 한 폭의 수묵화
-제목 예시 (영어로): "Spring Rain Nurturing Parched Earth", "A Majestic Pine Standing on Fertile Ground"
+제목 예시 (영어로): "Spring Rain Nurturing Parched Earth", or "A Majestic Pine Standing on Fertile Ground" or "Where the moist earth embraces the forest's song."
 
 내용 지침:
 형상화: 두 사람의 dayMaster(일간)를 자연물에 비유하여 만남의 첫인상을 시각적으로 묘사합니다.
