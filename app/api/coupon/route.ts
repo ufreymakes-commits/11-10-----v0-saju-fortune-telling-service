@@ -19,6 +19,32 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: 'Invalid coupon code' }, { status: 400 })
   }
 
+  // Check if coupon has been used more than 2 times already
+  const { data: couponUses, error: couponCountError } = await supabase
+    .from('payments')
+    .select('id', { count: 'exact', head: true })
+    .eq('paypal_order_id', `COUPON-${code.trim()}-%`)
+    .like('paypal_order_id', `COUPON-${code.trim()}-%`)
+
+  // Alternative: if the LIKE doesn't work, count manually
+  const { data: allCouponPayments } = await supabase
+    .from('payments')
+    .select('id')
+    .ilike('paypal_order_id', `COUPON-${code.trim()}%`)
+
+  const couponUsageCount = allCouponPayments?.length || 0
+
+  if (couponUsageCount >= 2) {
+    return NextResponse.json(
+      { 
+        success: false, 
+        error: 'This coupon has reached its usage limit (2 uses maximum).',
+        limitReached: true 
+      },
+      { status: 429 }
+    )
+  }
+
   // Check if paid report already exists (e.g. paid via PayPal)
   const { data: existing } = await supabase
     .from('submissions')

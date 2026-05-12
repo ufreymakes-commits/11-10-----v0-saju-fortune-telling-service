@@ -10,7 +10,6 @@ export async function POST(request: Request) {
     
     const { 
       name, birthDate, birthCountry, birthTime, gender, referralSource,
-      // New fields for precise timezone/location
       birthCity, timezone, longitude, latitude 
     } = body
     
@@ -22,7 +21,44 @@ export async function POST(request: Request) {
       )
     }
     
-    // Calculate Saju data with enhanced timezone/location info
+    // Create Supabase client
+    const supabase = await createClient()
+    
+    // Check daily submission limit (3 per day per person)
+    // Using email as identifier (assuming we have user info), fallback to name+birthDate
+    const identifier = name.toLowerCase() + birthDate
+    
+    // Get today's date range (00:00:00 to 23:59:59 UTC)
+    const today = new Date()
+    today.setUTCHours(0, 0, 0, 0)
+    const tomorrow = new Date(today)
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1)
+    
+    const { data: todaySubmissions, error: countError } = await supabase
+      .from('submissions')
+      .select('id', { count: 'exact', head: true })
+      .eq('name', name)
+      .eq('birth_date', birthDate)
+      .gte('created_at', today.toISOString())
+      .lt('created_at', tomorrow.toISOString())
+    
+    if (countError) {
+      console.error('[v0] Error checking submission limit:', countError)
+    }
+    
+    const submissionCount = todaySubmissions?.length || 0
+    
+    if (submissionCount >= 3) {
+      return NextResponse.json(
+        { 
+          error: 'Daily submission limit reached. Please try again tomorrow!',
+          limitReached: true 
+        },
+        { status: 429 }
+      )
+    }
+    
+    // Calculate Saju data
     const birthInfo: BirthInfo = {
       name,
       birthDate,
@@ -30,7 +66,6 @@ export async function POST(request: Request) {
       birthTime: birthTime || undefined,
       gender,
       referralSource,
-      // New optional fields for true solar time calculation
       birthCity: birthCity || undefined,
       timezone: timezone || undefined,
       longitude: longitude || undefined,
@@ -52,9 +87,6 @@ export async function POST(request: Request) {
     
     // Run test suite once per deployment (only logs to console, no side effects)
     runSajuTests()
-    
-    // Store in database
-    const supabase = await createClient()
     
     const { data, error } = await supabase
       .from('submissions')
