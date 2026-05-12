@@ -96,17 +96,18 @@ export default async function CompatibilityPaidReportPage({ params }: PageProps)
   return (
     <main className="min-h-screen bg-[#0f0a14] relative">
       <StarsBackground />
-      <CompatibilityReportContent
-        personAName={submission.person_a_name}
-        personBName={submission.person_b_name}
-        personABirthDate={submission.person_a_birth_date}
-        personBBirthDate={submission.person_b_birth_date}
-        personADayMaster={dayMasterA}
-        personBDayMaster={dayMasterB}
-        relationshipType={relationshipType}
-        firstSectionTitle={sections[0]?.title || ''}
-        sections={sections}
-      />
+        <CompatibilityReportContent
+          personAName={submission.person_a_name}
+          personBName={submission.person_b_name}
+          personABirthDate={submission.person_a_birth_date}
+          personBBirthDate={submission.person_b_birth_date}
+          personADayMaster={dayMasterA}
+          personBDayMaster={dayMasterB}
+          relationshipType={relationshipType}
+          firstSectionTitle={sections[0]?.title || ''}
+          sections={sections}
+          submissionId={id}
+        />
     </main>
   )
 }

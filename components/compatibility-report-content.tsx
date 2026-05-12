@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { track } from '@/hooks/use-track'
 import { HeartIcon, ChevronDownIcon, DownloadIcon, LinkIcon, CheckIcon } from 'lucide-react'
+import { CompatibilityReportLoader } from './compatibility-report-loader'
 
 interface Section {
   title: string
@@ -20,6 +21,7 @@ interface CompatibilityReportContentProps {
   relationshipType: string
   firstSectionTitle: string
   sections: Section[]
+  submissionId?: string
 }
 
 export function CompatibilityReportContent({
@@ -32,7 +34,16 @@ export function CompatibilityReportContent({
   relationshipType,
   firstSectionTitle,
   sections,
+  submissionId,
 }: CompatibilityReportContentProps) {
+  // If no sections (report not generated yet), show loader
+  if (!sections || sections.length === 0) {
+    if (!submissionId) {
+      return <div className="text-white text-center py-20">Error: No submission ID provided</div>
+    }
+    return <CompatibilityReportLoader submissionId={submissionId} />
+  }
+  
   const [openSections, setOpenSections] = useState<Record<number, boolean>>({ 0: true })
   const [copied, setCopied] = useState(false)
 
