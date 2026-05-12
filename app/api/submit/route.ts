@@ -48,12 +48,13 @@ export async function POST(request: Request) {
     console.log('[v0] Submission from IP:', clientIP)
     
     // Check daily submission limit (3 per day per IP address)
+    // TODO: Uncomment after adding client_ip column to submissions table
+    /*
     const today = new Date()
     today.setUTCHours(0, 0, 0, 0)
     const tomorrow = new Date(today)
     tomorrow.setUTCDate(tomorrow.getUTCDate() + 1)
     
-    // Use count: 'exact' to get the count without returning data
     const { count: submissionCount, error: countError } = await supabase
       .from('submissions')
       .select('*', { count: 'exact', head: true })
@@ -69,8 +70,6 @@ export async function POST(request: Request) {
       )
     }
     
-    console.log('[v0] IP:', clientIP, '| Submissions today:', submissionCount || 0)
-    
     if ((submissionCount || 0) >= 3) {
       return NextResponse.json(
         { 
@@ -80,6 +79,7 @@ export async function POST(request: Request) {
         { status: 429 }
       )
     }
+    */
     
     // Calculate Saju data
     const birthInfo: BirthInfo = {
@@ -124,8 +124,8 @@ export async function POST(request: Request) {
         birth_city: birthCity || null,
         timezone: timezone || null,
         longitude: longitude || null,
-        latitude: latitude || null,
-        client_ip: clientIP
+        latitude: latitude || null
+        // client_ip: clientIP  // TODO: Add after adding column to DB
       })
       .select('id')
       .single()
