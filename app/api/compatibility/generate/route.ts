@@ -504,21 +504,15 @@ Return a JSON array of 7 sections with this structure:
 
     console.log(`[v0] Compatibility: Generated ${facts.length} facts from Stage 2`)
 
-    // Save stage 2 result with score and relationship type
+    // Save stage 2 result
     await supabase
       .from('compatibility_reports')
-      .update({ 
-        facts,
-        compatibility_score: compatibilityResult.score,
-        relationship_type: compatibilityResult.relationshipType
-      })
+      .update({ facts })
       .eq('id', reportRow.id)
 
     return NextResponse.json({ 
       success: true, 
-      reportId: reportRow.id,
-      compatibilityScore: compatibilityResult.score,
-      relationshipType: compatibilityResult.relationshipType
+      reportId: reportRow.id
     })
   } catch (error) {
     console.error('[v0] Generate compatibility error:', error)

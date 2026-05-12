@@ -98,10 +98,10 @@ export default async function CompatibilityPaidReportPage({ params }: PageProps)
   const dayMasterA = hanjaToEnglish[dayMasterHanjaA] || dayMasterHanjaA || ''
   const dayMasterB = hanjaToEnglish[dayMasterHanjaB] || dayMasterHanjaB || ''
   
-  // Extract relationship type from DB or last section
+  // Extract relationship type from last section (Section 7)
   const sections = Array.isArray(report?.facts) ? report.facts : []
-  const relationshipType = report?.relationship_type || sections[sections.length - 1]?.title || ''
-  const compatibilityScore = report?.compatibility_score || null
+  const relationshipType = sections[sections.length - 1]?.title || ''
+  const compatibilityScore = null // TODO: Add DB column later
   
   return (
     <main className="min-h-screen bg-[#0f0a14] relative">
