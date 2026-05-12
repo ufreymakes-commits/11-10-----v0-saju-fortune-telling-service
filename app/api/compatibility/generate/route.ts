@@ -339,7 +339,7 @@ export async function POST(request: Request) {
 7. 필수 : 이 둘의 관계가 이 4가지 중 어떤 유형인지 [소울메이트형 / 상호보완형 / 노력필요형 / 카르마형] 중 최종 타입을 확정하고 명확하게 작성합니다.
 `
 
-    const stage1UserPrompt = `두 사람의 사주 데이터를 확인한 후 아래 3500 글자의 해설지를 작성하라. 3번부터는 [최종 Prompt Instruction: 궁합 실전 해석 - 심화 업데이트본] 을 참고해서 작성하라. 참고로 현대에선 동성애자 커플도 종종 있으니, 같은 성별의 사주 궁합 요청이 들어와도 놀라지 말고 침착하고 친절하게 이성커플과 같은 대우로 풀이를 작성하라.
+    const stage1UserPrompt = `두 사람의 사주 데이터를 확인한 후 아래 4000 글자의 해설지를 작성하라. 3번부터는 [최종 Prompt Instruction: 궁합 실전 해석 - 심화 업데이트본] 을 참고해서 작성하라. 참고로 현대에선 동성애자 커플도 종종 있으니, 같은 성별의 사주 궁합 요청이 들어와도 놀라지 말고 침착하고 친절하게 이성커플과 같은 대우로 풀이를 작성하라.
 
     1. 두 사람의 사주 데이터를 보며 기본적인 사주의 특징과 성향 이해
     2. 두 사람의 구체적인 사주 분석 (사주팔자, 일간, 월지, 격국, 오행, 십신, 신살, 신강/신약 등 종체적인 두 사람의 개개인 사주 해석, 그리고 기관이나 직장에서 일하는 직장인 타입인지, 전문가 혹은 사업가 타입인지, 프리랜서인지도 어느정도 파악하고 있어야 함.)
@@ -396,7 +396,7 @@ If your content is shorter than 1,500 characters per section, you MUST expand it
 === CRITICAL RULES (MUST FOLLOW) ===
 1. ABSOLUTELY NO Chinese characters (한자) allowed. Never write 甲, 乙, 丙, 丁, 戊, 己, 庚, 辛, 壬, 癸, etc.
 2. ABSOLUTELY NO Korean text allowed. Never write 갑, 을, 병, 정, 무, 기, 경, 신, 임, 계, etc.
-3. ABSOLUTELY NO markdown formatting. Never use **, ##, *, or any markdown symbols.
+3. ABSOLUTELY NO markdown formatting. Never use * or **, ##, *, or any markdown symbols.
 4. ALL text must be in plain English only.
 5. When referencing elements, use English: Wood, Fire, Earth, Metal, Water (NOT 목화토금수).
 6. When referencing stems, translate to English descriptions (e.g., "Yang Wood energy" instead of "甲목").
