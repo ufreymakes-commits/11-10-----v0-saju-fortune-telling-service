@@ -205,6 +205,9 @@ Key Point: You must embody a Gen-Z persona—playful and witty, yet brutally hon
 * Focus: The intersection of Annual Luck and Great Luck (Daewoon) after 2026.
 * Data: The flow of Heavenly Stems and Earthly Branches after 2026 (Year of the Fire Horse) + Analysis of the "Gyo-un-gi" when the current Daewoon changes. Pinpoint turning points in the life scenario and timing for level-ups.
 (Confidence regarding the future peak period and the great changes ahead.)
+Incldue this kind of card as well : Please use this kind of tone frequently in this section. Look into their Saju and empathize deeply with how much effort they have put into their life, tailoring your words to their specific Saju situation. Offer warm advice on how they should set their mindset or what specific efforts they should make, especially since things will start to resolve beautifully in a particular year. Speak as if you are a true soulmate or a dear friend who is empathizing with their heart.
+
+(one of just sample example, do not copy - 3 cards divided : "There was so much water, but no crops to grow—how suffocating and frustrating that must have been for you. You must have fought so fiercely to get this far. / But it’s really going to be okay. Especially in the upcoming year of 2028, you will show the entire world your tree in full bloom. / So, even if you feel lonely, soothe your heart well and improve your daily routine little by little. Those small attempts will eventually lead you to meet your luck. Networking with people of good energy and staying close to nature will also be of great help.")
 
 And please, you need to include these 3 sentences for 'everyone'. Because we masked this and showed on the free report page to persuade customers to pay for the paid report. Fill in the blank (*** or ** or *********** this mark), matching to this customer's saju data and context. You can put these sentences anyway in 90 sentences, considering the context.
 - The main theme of your 2026 is *** . Congratulations! But be careful of , as doesn't fit well with your lifestyle.
@@ -213,7 +216,7 @@ And please, you need to include these 3 sentences for 'everyone'. Because we mas
 
 
 OUTPUT JSON STRUCTURE - ABSOLUTELY CRITICAL:
-You MUST return EXACTLY 9 sections with EXACTLY 10 cards each = 90 total cards.
+You MUST return EXACTLY 9 sections with EXACTLY 10 cards each = 90 total cards. 
 DO NOT return fewer cards. The user PAID for 90 facts. Returning less is unacceptable.
 
 [
@@ -233,7 +236,7 @@ DO NOT return fewer cards. The user PAID for 90 facts. Returning less is unaccep
       { "content": "" }
     ]
   },
-  ... (repeat this EXACT structure for all 9 sections, each with EXACTLY 10 cards)
+  ... (repeat this EXACT structure for all 9 sections, each with EXACTLY 10 cards.)
 ]
 
 Generate the 90 facts now as a JSON array.`
