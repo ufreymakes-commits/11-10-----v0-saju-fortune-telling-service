@@ -113,7 +113,7 @@ async function callGemini(
   options?: { temperature?: number; maxTokens?: number }
 ): Promise<string> {
   const result = await generateText({
-    model: 'google/gemini-2-flash',
+    model: 'google/gemini-2.0-flash',
     system: systemPrompt,
     prompt: userPrompt,
     temperature: options?.temperature ?? 0,
