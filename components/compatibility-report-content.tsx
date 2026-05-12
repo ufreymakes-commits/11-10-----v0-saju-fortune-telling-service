@@ -15,6 +15,10 @@ interface CompatibilityReportContentProps {
   personBName: string
   personABirthDate: string
   personBBirthDate: string
+  personADayMaster: string
+  personBDayMaster: string
+  relationshipType: string
+  firstSectionTitle: string
   sections: Section[]
 }
 
@@ -23,6 +27,10 @@ export function CompatibilityReportContent({
   personBName,
   personABirthDate,
   personBBirthDate,
+  personADayMaster,
+  personBDayMaster,
+  relationshipType,
+  firstSectionTitle,
   sections,
 }: CompatibilityReportContentProps) {
   const [openSections, setOpenSections] = useState<Record<number, boolean>>({ 0: true })
@@ -61,26 +69,66 @@ export function CompatibilityReportContent({
     <div className="min-h-screen bg-[#0f0a14] pb-24">
       {/* Header */}
       <div className="bg-gradient-to-b from-pink-950/40 to-transparent pt-12 pb-8 px-4">
-        <div className="max-w-lg mx-auto text-center space-y-4">
+        <div className="max-w-lg mx-auto text-center space-y-6">
           <div className="inline-flex items-center gap-2 bg-pink-500/10 border border-pink-500/20 text-pink-400 text-xs font-medium px-3 py-1.5 rounded-full">
             Saju Compatibility Report
           </div>
 
-          <div className="flex items-center justify-center gap-3">
-            <span className="text-white font-bold text-lg">{personAName}</span>
-            <HeartIcon className="w-5 h-5 text-pink-400 flex-shrink-0" />
-            <span className="text-white font-bold text-lg">{personBName}</span>
+          {/* Day Master Characters (천간) — Top banner */}
+          {(personADayMaster || personBDayMaster) && (
+            <div className="bg-gradient-to-r from-pink-900/20 to-rose-900/20 border border-pink-500/20 rounded-xl p-4 space-y-2">
+              <div className="flex items-center justify-center gap-4">
+                <div className="text-center">
+                  <div className="text-xs text-white/40 mb-1">Person A</div>
+                  <div className="text-lg font-bold text-pink-300">{personADayMaster}</div>
+                  <div className="text-[10px] text-white/30 mt-1">Day Master</div>
+                </div>
+                <HeartIcon className="w-4 h-4 text-pink-400" />
+                <div className="text-center">
+                  <div className="text-xs text-white/40 mb-1">Person B</div>
+                  <div className="text-lg font-bold text-pink-300">{personBDayMaster}</div>
+                  <div className="text-[10px] text-white/30 mt-1">Day Master</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Main heading with names and date */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-white font-bold text-lg">{personAName}</span>
+              <HeartIcon className="w-5 h-5 text-pink-400 flex-shrink-0" />
+              <span className="text-white font-bold text-lg">{personBName}</span>
+            </div>
+
+            <div className="flex items-center justify-center gap-4 text-white/40 text-xs">
+              <span>{personABirthDate}</span>
+              <span>·</span>
+              <span>{personBBirthDate}</span>
+            </div>
           </div>
 
-          <div className="flex items-center justify-center gap-4 text-white/40 text-xs">
-            <span>{personABirthDate}</span>
-            <span>·</span>
-            <span>{personBBirthDate}</span>
-          </div>
+          {/* First section title + Relationship type */}
+          {(firstSectionTitle || relationshipType) && (
+            <div className="bg-white/5 border border-white/10 rounded-lg p-3 space-y-2">
+              {firstSectionTitle && (
+                <div>
+                  <div className="text-[10px] text-white/40 mb-1">Compatibility Theme</div>
+                  <div className="text-sm font-semibold text-white">{firstSectionTitle}</div>
+                </div>
+              )}
+              {relationshipType && (
+                <div>
+                  <div className="text-[10px] text-white/40 mb-1">Relationship Type</div>
+                  <div className="text-sm font-semibold text-pink-300">{relationshipType}</div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Overall score */}
           {overallScore !== null && (
-            <div className="inline-flex flex-col items-center gap-1 bg-pink-500/10 border border-pink-500/20 rounded-2xl px-8 py-4 mt-2">
+            <div className="inline-flex flex-col items-center gap-1 bg-pink-500/10 border border-pink-500/20 rounded-2xl px-8 py-4">
               <span className="text-4xl font-bold text-pink-400">{overallScore}</span>
               <span className="text-white/50 text-xs">Overall Compatibility Score</span>
             </div>

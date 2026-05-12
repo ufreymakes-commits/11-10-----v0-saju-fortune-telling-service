@@ -12,7 +12,7 @@ export default async function CompatibilityReportPage({
   const { id } = await params
   const supabase = await createClient()
 
-  // Fetch submission
+  // Fetch submission (including saju data for day master extraction)
   const { data: submission, error: subError } = await supabase
     .from('compatibility_submissions')
     .select(`
@@ -20,7 +20,9 @@ export default async function CompatibilityReportPage({
       person_a_name,
       person_b_name,
       person_a_birth_date,
-      person_b_birth_date
+      person_b_birth_date,
+      person_a_saju_data,
+      person_b_saju_data
     `)
     .eq('id', id)
     .single()
@@ -56,6 +58,17 @@ export default async function CompatibilityReportPage({
 
   const sections = Array.isArray(report.facts) ? report.facts : []
 
+  // Extract day master and relationship type
+  const sajuDataA = submission.person_a_saju_data as any || {}
+  const sajuDataB = submission.person_b_saju_data as any || {}
+  
+  const dayMasterA = (sajuDataA.fourPillars?.day?.stem || '') + (sajuDataA.fourPillars?.day?.branch || '')
+  const dayMasterB = (sajuDataB.fourPillars?.day?.stem || '') + (sajuDataB.fourPillars?.day?.branch || '')
+  
+  // Extract relationship type from last section (섹션 7)
+  const lastSection = sections[sections.length - 1] || {}
+  const relationshipType = lastSection.title || ''
+
   return (
     <main className="min-h-screen bg-[#0f0a14] relative">
       <StarsBackground />
@@ -64,6 +77,10 @@ export default async function CompatibilityReportPage({
         personBName={submission.person_b_name}
         personABirthDate={submission.person_a_birth_date}
         personBBirthDate={submission.person_b_birth_date}
+        personADayMaster={dayMasterA}
+        personBDayMaster={dayMasterB}
+        relationshipType={relationshipType}
+        firstSectionTitle={sections[0]?.title || ''}
         sections={sections}
       />
     </main>
