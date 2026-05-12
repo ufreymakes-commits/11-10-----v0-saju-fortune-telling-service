@@ -40,7 +40,7 @@ export function CompatibilityCheckoutContent({
       })
       const data = await response.json()
       if (!response.ok || !data.success) throw new Error(data.error || 'Payment capture failed')
-      router.push(`/compatibility/report/${data.submissionId}`)
+      router.push(`/compatibility/report/${data.submissionId}/paid`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Payment verification failed')
       setIsLoading(false)
