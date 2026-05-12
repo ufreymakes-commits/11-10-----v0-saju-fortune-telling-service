@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { track } from '@/hooks/use-track'
 import { HeartIcon, ChevronDownIcon, DownloadIcon, LinkIcon, CheckIcon } from 'lucide-react'
-import { CompatibilityReportLoader } from './compatibility-report-loader'
 import { getDayMasterCharacter } from '@/lib/day-master-characters'
 
 // English to Korean day master mapping for character lookup
@@ -49,12 +48,14 @@ export function CompatibilityReportContent({
   submissionId,
   compatibilityScore,
 }: CompatibilityReportContentProps) {
-  // If no sections (report not generated yet), show loader
+  // If no sections, show simple waiting message (generation already started in payment-success-handler)
   if (!sections || sections.length === 0) {
-    if (!submissionId) {
-      return <div className="text-white text-center py-20">Error: No submission ID provided</div>
-    }
-    return <CompatibilityReportLoader submissionId={submissionId} />
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen text-center px-4">
+        <p className="text-white/60">Your report is being generated...</p>
+        <p className="text-white/40 text-sm mt-2">Please wait a moment and refresh the page.</p>
+      </div>
+    )
   }
   
   const [openSections, setOpenSections] = useState<Record<number, boolean>>({ 0: true })
