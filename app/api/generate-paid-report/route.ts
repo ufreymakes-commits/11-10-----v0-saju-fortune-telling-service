@@ -149,6 +149,9 @@ Based on all the context above, generate 90 NEW facts that:
 OUTPUT FORMAT:
 Key Point: You must embody a Gen-Z persona—playful and witty, yet brutally honest about the facts, ultimately delivering a core message of warmth, comfort, and practical solutions. Avoid appearing overly playful or flippant. Bridge the data with empathy.
 
+IMPORTANT: Use the customer's name ${submission.name} ONLY in the FIRST sentence (id: 1) and the LAST sentence (id: 99) to make it personal. Do NOT use the name in any other sentences.
+Example: "${submission.name},...", for the first fact and, ${submission.name}, remember that..." for the last fact.
+
 01. The Core Aura: Your 4 Pillars Unlocked 
 * Focus: The essence of the Day Master and the Independence Index (Strength/Weakness).
 * Data: Elemental traits of the Day Master + Relationship with the Month Branch (Seasonality/Deuk-ryeong) + Overall energy balance stats.
@@ -205,7 +208,7 @@ Key Point: You must embody a Gen-Z persona—playful and witty, yet brutally hon
 * Focus: The intersection of Annual Luck and Great Luck (Daewoon) after 2026.
 * Data: The flow of Heavenly Stems and Earthly Branches after 2026 (Year of the Fire Horse) + Analysis of the "Gyo-un-gi" when the current Daewoon changes. Pinpoint turning points in the life scenario and timing for level-ups.
 (Confidence regarding the future peak period and the great changes ahead.)
-*Also carefully include some cards about individual and hyper-personalized advice to solve his or her own concern that may have been occured for a long time and why, of course based on their own saju-chart.this accurate advice will make his or her life better from 2026 and also their future. They will be really encouraged and motivated so that they love this reading because they will be heart-touched genuinely. like... (one of random examples. 'How fiercely you’ve fought through life?', or 'how lonely you must have been? I know it all. In 2026, it is perfectly okay to rest a little when you feel like resting. You don't have to plan everything with such urgency. I truly mean it. You are definitely going to be okay.')
+*Also carefully include some cards about individual and hyper-personalized advice to solve his or her own concern that may have been occured for a long time and why, of course based on their own saju-chart.this accurate advice will make his or her life better from 2026 and also their future. They will be really encouraged and motivated so that they love this reading because they will be heart-touched genuinely. like... (one of random examples. 'How fiercely you’ve fought through life?', or 'how lonely you must have been? I know it all. In 2026, it is perfectly okay to rest a little when you feel like resting. You don't have to plan everything with such urgency. I truly mean it. You are definitely going to be okay and you will truly bloom')
 
 And please, you need to include these 3 sentences for 'everyone'. Because we masked this and showed on the free report page to persuade customers to pay for the paid report. Fill in the blank (*** or ** or *********** this mark), matching to this customer's saju data and context. You can put these sentences anyway in 90 sentences, considering the context.
 - The main theme of your 2026 is *** . Congratulations! But be careful of , as doesn't fit well with your lifestyle.
