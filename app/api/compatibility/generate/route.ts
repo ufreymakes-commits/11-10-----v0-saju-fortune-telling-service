@@ -105,6 +105,105 @@ function buildAllSajuData(
 }
 
 // ================================================================
+// 궁합 점수 계산 함수 (데이터 기반 - 일관된 결과)
+// ================================================================
+function calculateCompatibilityScore(sajuA: Record<string, unknown>, sajuB: Record<string, unknown>): {
+  score: number
+  relationshipType: 'Soulmate Type' | 'Complementary Type' | 'Effort-Required Type' | 'Karmic Type'
+} {
+  let score = 50 // 기본 점수
+
+  // 1. 일간합 체크 (갑기, 을경, 병신, 정임, 무계) - +15점
+  const dayMasterA = (sajuA.dayMaster as string) || ''
+  const dayMasterB = (sajuB.dayMaster as string) || ''
+  const ilganHapPairs = [
+    ['甲', '己'], ['乙', '庚'], ['丙', '辛'], ['丁', '壬'], ['戊', '癸']
+  ]
+  const hasIlganHap = ilganHapPairs.some(
+    ([a, b]) => (dayMasterA === a && dayMasterB === b) || (dayMasterA === b && dayMasterB === a)
+  )
+  if (hasIlganHap) score += 15
+
+  // 2. 일지 육합 체크 - +12점
+  const dayBranchA = (sajuA.dayPillar as any)?.branch || ''
+  const dayBranchB = (sajuB.dayPillar as any)?.branch || ''
+  const yukHapPairs = [
+    ['子', '丑'], ['寅', '亥'], ['卯', '戌'], ['辰', '酉'], ['巳', '申'], ['午', '未']
+  ]
+  const hasYukHap = yukHapPairs.some(
+    ([a, b]) => (dayBranchA === a && dayBranchB === b) || (dayBranchA === b && dayBranchB === a)
+  )
+  if (hasYukHap) score += 12
+
+  // 3. 일지 삼합 체크 - +8점
+  const samhapGroups = [
+    ['寅', '午', '戌'], ['申', '子', '辰'], ['巳', '酉', '丑'], ['亥', '卯', '未']
+  ]
+  const hasSamhap = samhapGroups.some(
+    group => group.includes(dayBranchA) && group.includes(dayBranchB)
+  )
+  if (hasSamhap) score += 8
+
+  // 4. 일지충 체크 - -10점
+  const chungPairs = [
+    ['子', '午'], ['丑', '未'], ['寅', '申'], ['卯', '酉'], ['辰', '戌'], ['巳', '亥']
+  ]
+  const hasChung = chungPairs.some(
+    ([a, b]) => (dayBranchA === a && dayBranchB === b) || (dayBranchA === b && dayBranchB === a)
+  )
+  if (hasChung) score -= 10
+
+  // 5. 원진 체크 - -8점
+  const wonjinPairs = [
+    ['子', '未'], ['丑', '午'], ['寅', '巳'], ['卯', '辰'], ['申', '亥'], ['酉', '戌']
+  ]
+  const hasWonjin = wonjinPairs.some(
+    ([a, b]) => (dayBranchA === a && dayBranchB === b) || (dayBranchA === b && dayBranchB === a)
+  )
+  if (hasWonjin) score -= 8
+
+  // 6. 오행 상생/상극 체크
+  const dominantA = (sajuA.dominantElement as string) || ''
+  const dominantB = (sajuB.dominantElement as string) || ''
+  // 상생: 목→화→토→금→수→목 (+5점)
+  const sangsaeng = [['목', '화'], ['화', '토'], ['토', '금'], ['금', '수'], ['수', '목']]
+  const hasSangsaeng = sangsaeng.some(
+    ([a, b]) => (dominantA === a && dominantB === b) || (dominantA === b && dominantB === a)
+  )
+  if (hasSangsaeng) score += 5
+  // 상극: 목→토, 토→수, 수→화, 화→금, 금→목 (-5점)
+  const sanggeuk = [['목', '토'], ['토', '수'], ['수', '화'], ['화', '금'], ['금', '목']]
+  const hasSanggeuk = sanggeuk.some(
+    ([a, b]) => (dominantA === a && dominantB === b) || (dominantA === b && dominantB === a)
+  )
+  if (hasSanggeuk) score -= 5
+
+  // 7. 신강/신약 보완 체크 - +5점
+  const gradeA = (sajuA.sinGangSinYak as any)?.grade || ''
+  const gradeB = (sajuB.sinGangSinYak as any)?.grade || ''
+  if ((gradeA === '신강' && gradeB === '신약') || (gradeA === '신약' && gradeB === '신강')) {
+    score += 5
+  }
+
+  // 점수 범위 제한 (40-95)
+  score = Math.max(40, Math.min(95, score))
+
+  // 관계 유형 결정 (점수 기반)
+  let relationshipType: 'Soulmate Type' | 'Complementary Type' | 'Effort-Required Type' | 'Karmic Type'
+  if (score >= 80) {
+    relationshipType = 'Soulmate Type'
+  } else if (score >= 65) {
+    relationshipType = 'Complementary Type'
+  } else if (score >= 50) {
+    relationshipType = 'Effort-Required Type'
+  } else {
+    relationshipType = 'Karmic Type'
+  }
+
+  return { score, relationshipType }
+}
+
+// ================================================================
 // Gemini helper - AI SDK 사용 (generate-gemini와 동일)
 // ================================================================
 async function callGemini(
@@ -279,11 +378,27 @@ ${JSON.stringify(allSajuData, null, 2)}`
     // 5. Stage 2: Generate structured report sections from Stage 1 context
     const stage2SystemPrompt = `2명의 고객 사주 데이터를 각각 확인하고, 1단계에서 작성한 3500자 해설지를 확인하라. 너는 최고의 현대 사주 명리학 전문 사주 해설가이다. 문장을 쓸 때, 늘 임팩트있고 구체적으로 지침하려 하며, 두루뭉실보다는 눈에 보이는 현상, 들리는 말의 현상 등, 고객들이 직접 일상생활에서 마주하는 일들을 기반으로 해설을 하는 경향이 있다. 20-30대 젊은 고객들이 이해할 수 있도록 따끔하고 정확하고 친절하면서도, 읽는 사람이 너무 무섭거나 부정적으로 생각하지 않도록 긍정적인 방향의 개운법이나 더 나아질 수 있또록 위안과 위로 감동을 주는 것을 목표로 한다. `
 
-    const stage2UserPrompt = `두 사람을 위한 사주 궁합 레포트를 만들어라. 각각 7개의 섹션으로 이루어진 주제에 따라 문장들을 작성해라. 섹션도, 본문도 페이지의 모든 것은 당연히 영어여야 한다. 1개의 섹션에는 2,000자 정도의 길이의 영어 문장들이 들어간다. 미국인 Gen-z 해설가가 말하는 것 처럼, 너무 가볍지 않은 선에서 gen-z 용어도 가끔 섞어서 넣어준다. (no cap, vibe, aura, for real 등). 참고로 현대에선 동성애자 커플도 종종 있으니, 같은 성별의 사주 궁합 요청이 들어와도 놀라지 말고 침착하고 친절하게 이성커플과 같은 대우로 풀이를 작성하라.
+    // Calculate compatibility score and relationship type (data-based, consistent)
+    const compatibilityResult = calculateCompatibilityScore(
+      submission.person_a_saju_data || {},
+      submission.person_b_saju_data || {}
+    )
+    
+    console.log('[v0] Compatibility: Calculated score:', compatibilityResult.score, 'Type:', compatibilityResult.relationshipType)
+
+    const stage2UserPrompt = `두 사람을 위한 사주 궁합 레포트를 만들어라. 각각 7개의 섹션으로 이루어진 주제에 따라 문장들을 작성해라. 1개의 섹션에는 2,000자 정도의 길이의 영어 문장들이 들어간다. 미국인 Gen-z 해설가가 말하는 것 처럼, 너무 가볍지 않은 선에서 gen-z 용어도 가끔 섞어서 넣어준다. (no cap, vibe, aura, for real 등). 참고로 현대에선 동성애자 커플도 종종 있으니, 같은 성별의 사주 궁합 요청이 들어와도 놀라지 말고 침착하고 친절하게 이성커플과 같은 대우로 풀이를 작성하라.
+
+=== CRITICAL RULES (MUST FOLLOW) ===
+1. ABSOLUTELY NO Chinese characters (한자) allowed. Never write 甲, 乙, 丙, 丁, 戊, 己, 庚, 辛, 壬, 癸, etc.
+2. ABSOLUTELY NO Korean text allowed. Never write 갑, 을, 병, 정, 무, 기, 경, 신, 임, 계, etc.
+3. ABSOLUTELY NO markdown formatting. Never use **, ##, *, or any markdown symbols.
+4. ALL text must be in plain English only.
+5. When referencing elements, use English: Wood, Fire, Earth, Metal, Water (NOT 목화토금수).
+6. When referencing stems, translate to English descriptions (e.g., "Yang Wood energy" instead of "甲목").
 
 IMPORTANT - Title format rules:
 - Section 1-6 titles MUST be poetic English phrases WITHOUT any brackets or tags. Example: "Spring Rain Nurturing Parched Earth" NOT "[Birth of Landscape] Spring Rain..."
-- Section 7 title MUST be EXACTLY one of these 4 types (in English): "Soulmate Type" / "Complementary Type" / "Effort-Required Type" / "Karmic Type"
+- Section 7 title MUST be EXACTLY: "${compatibilityResult.relationshipType}" (This is pre-calculated based on chart analysis)
 - ALL content must be in English.
     
 섹션 1: 두 사람이 그리는 한 폭의 수묵화
@@ -307,7 +422,7 @@ IMPORTANT - Title format rules:
 제목 (영어로): "The Energy Flow in This Relationship: Who's Steering?"
 
 내용 지침:
-에너지 분석: energyGrade와 tenGods를 분석하여 두 사람 사이의 갑을 관계(혹은 동등함)를 분석합니다.
+에너지 분석: energyGrade와 tenGods를 분석하여 두 사람 사이의 갑을 관계(혹은 동등함)��� 분석합니다.
 
 섹션 4: 우리가 반복해서 부딪히는 진짜 이유
 제목 (영어로): "Warning: Where Your Dissonance Begins"
@@ -389,13 +504,22 @@ Return a JSON array of 7 sections with this structure:
 
     console.log(`[v0] Compatibility: Generated ${facts.length} facts from Stage 2`)
 
-    // Save stage 2 result
+    // Save stage 2 result with score and relationship type
     await supabase
       .from('compatibility_reports')
-      .update({ facts })
+      .update({ 
+        facts,
+        compatibility_score: compatibilityResult.score,
+        relationship_type: compatibilityResult.relationshipType
+      })
       .eq('id', reportRow.id)
 
-    return NextResponse.json({ success: true, reportId: reportRow.id })
+    return NextResponse.json({ 
+      success: true, 
+      reportId: reportRow.id,
+      compatibilityScore: compatibilityResult.score,
+      relationshipType: compatibilityResult.relationshipType
+    })
   } catch (error) {
     console.error('[v0] Generate compatibility error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

@@ -85,14 +85,23 @@ export default async function CompatibilityPaidReportPage({ params }: PageProps)
   const sajuDataA = submission.person_a_saju_data as any || {}
   const sajuDataB = submission.person_b_saju_data as any || {}
   
-  // dayMaster is stored at root level, not inside fourPillars
-  const dayMasterA = sajuDataA.dayMaster || sajuDataA.dayMasterKorean || ''
-  const dayMasterB = sajuDataB.dayMaster || sajuDataB.dayMasterKorean || ''
+  // Convert Hanja day master to English
+  const hanjaToEnglish: Record<string, string> = {
+    '甲': 'Yang Wood', '乙': 'Yin Wood',
+    '丙': 'Yang Fire', '丁': 'Yin Fire',
+    '戊': 'Yang Earth', '己': 'Yin Earth',
+    '庚': 'Yang Metal', '辛': 'Yin Metal',
+    '壬': 'Yang Water', '癸': 'Yin Water'
+  }
+  const dayMasterHanjaA = sajuDataA.dayMaster || ''
+  const dayMasterHanjaB = sajuDataB.dayMaster || ''
+  const dayMasterA = hanjaToEnglish[dayMasterHanjaA] || dayMasterHanjaA || ''
+  const dayMasterB = hanjaToEnglish[dayMasterHanjaB] || dayMasterHanjaB || ''
   
-  // Extract relationship type from last section (섹션 7)
+  // Extract relationship type from DB or last section
   const sections = Array.isArray(report?.facts) ? report.facts : []
-  const lastSection = sections[sections.length - 1] || {}
-  const relationshipType = lastSection.title || ''
+  const relationshipType = report?.relationship_type || sections[sections.length - 1]?.title || ''
+  const compatibilityScore = report?.compatibility_score || null
   
   return (
     <main className="min-h-screen bg-[#0f0a14] relative">
@@ -108,6 +117,7 @@ export default async function CompatibilityPaidReportPage({ params }: PageProps)
           firstSectionTitle={sections[0]?.title || ''}
           sections={sections}
           submissionId={id}
+          compatibilityScore={compatibilityScore}
         />
     </main>
   )

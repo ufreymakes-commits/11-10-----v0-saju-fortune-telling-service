@@ -23,6 +23,7 @@ interface CompatibilityReportContentProps {
   firstSectionTitle: string
   sections: Section[]
   submissionId?: string
+  compatibilityScore?: number | null
 }
 
 export function CompatibilityReportContent({
@@ -36,6 +37,7 @@ export function CompatibilityReportContent({
   firstSectionTitle,
   sections,
   submissionId,
+  compatibilityScore,
 }: CompatibilityReportContentProps) {
   // If no sections (report not generated yet), show loader
   if (!sections || sections.length === 0) {
@@ -115,6 +117,14 @@ export function CompatibilityReportContent({
               <span>{personBBirthDate}</span>
             </div>
           </div>
+
+          {/* Compatibility Score */}
+          {compatibilityScore !== null && compatibilityScore !== undefined && (
+            <div className="inline-flex flex-col items-center gap-1 bg-pink-500/10 border border-pink-500/20 rounded-2xl px-8 py-4">
+              <span className="text-4xl font-bold text-pink-400">{compatibilityScore}</span>
+              <span className="text-white/50 text-xs">Chemistry Score</span>
+            </div>
+          )}
 
           {/* First section title + Relationship type */}
           {(firstSectionTitle || relationshipType) && (
