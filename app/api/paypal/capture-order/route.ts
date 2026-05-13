@@ -72,9 +72,25 @@ export async function POST(request: Request) {
     })
 
     const captureData = await captureResponse.json()
+    
+    // Enhanced logging for debugging payment issues
+    console.log('[v0] PayPal capture response:', {
+      orderId,
+      httpStatus: captureResponse.status,
+      paypalStatus: captureData.status,
+      details: captureData.details || null,
+      message: captureData.message || null
+    })
 
-    if (!captureResponse.ok || captureData.status !== 'COMPLETED') {
-      console.error('[v0] PayPal capture failed:', captureData)
+    // Accept both COMPLETED and APPROVED status (PayPal sometimes returns APPROVED first)
+    const validStatuses = ['COMPLETED', 'APPROVED']
+    if (!captureResponse.ok || !validStatuses.includes(captureData.status)) {
+      console.error('[v0] PayPal capture failed:', {
+        orderId,
+        httpOk: captureResponse.ok,
+        status: captureData.status,
+        error: captureData.details || captureData.message || captureData
+      })
       await supabase.from('payments').update({ status: 'failed' }).eq('paypal_order_id', orderId)
       return NextResponse.json({ error: 'Payment capture failed' }, { status: 400 })
     }
