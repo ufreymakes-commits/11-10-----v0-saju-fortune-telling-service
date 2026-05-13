@@ -34,11 +34,11 @@ export async function POST(req: NextRequest) {
 
   const couponUsageCount = allCouponPayments?.length || 0
 
-  if (couponUsageCount >= 3) {
+  if (couponUsageCount >= 10) {
     return NextResponse.json(
       { 
         success: false, 
-        error: 'This coupon has reached its usage limit (3 uses maximum).',
+        error: 'This coupon has reached its usage limit (10 uses maximum).',
         limitReached: true 
       },
       { status: 429 }
