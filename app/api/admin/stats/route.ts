@@ -89,7 +89,7 @@ export async function GET(req: NextRequest) {
     // Recent submissions — include birth_date for display
     const { data: recentSubmissions } = await supabase
       .from('submissions')
-      .select('id, name, country, birth_date, created_at, paid_report_url')
+      .select('id, name, birth_country, birth_date, created_at, paid_report_url')
       .order('created_at', { ascending: false })
       .limit(20)
 

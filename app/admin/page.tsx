@@ -12,7 +12,7 @@ interface Stats {
   recentSubmissions: {
     id: string
     name: string
-    country: string
+    birth_country: string
     birth_date: string
     created_at: string
     paid_report_url: string | null
@@ -427,7 +427,7 @@ export default function AdminPage() {
                   (stats.recentSubmissions || []).map((s, i) => (
                     <tr key={s.id} className={`border-b border-gray-50 ${i % 2 === 0 ? '' : 'bg-gray-50/50'}`}>
                       <td className="px-5 py-3 font-medium text-gray-800">{s.name}</td>
-                      <td className="px-5 py-3 text-gray-500 text-xs">{s.country || '—'}</td>
+                      <td className="px-5 py-3 text-gray-500 text-xs">{s.birth_country || '—'}</td>
                       <td className="px-5 py-3 text-gray-500 text-xs">{s.birth_date || '—'}</td>
                       <td className="px-5 py-3 text-gray-400 text-xs">
                         {new Date(s.created_at).toLocaleString('ko-KR', {
