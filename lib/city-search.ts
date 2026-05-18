@@ -3,6 +3,7 @@ import citiesData from './data/cities.json'
 export interface City {
   name: string
   country: string
+  admin1?: string // State/Province (optional)
   lat: number
   lon: number
   timezone?: string // Optional - may not be present in all datasets
@@ -12,6 +13,7 @@ export interface City {
 interface RawCity {
   n: string   // name
   c: string   // country
+  a1?: string // admin1 (state/province) - optional
   at: number  // latitude
   on: number  // longitude
   tz?: string  // timezone (IANA) - optional
@@ -21,6 +23,7 @@ interface RawCity {
 const cities: City[] = (citiesData as RawCity[]).map(c => ({
   name: c.n,
   country: c.c,
+  admin1: c.a1,
   lat: c.at,
   lon: c.on,
   timezone: c.tz // Will be undefined if not present
@@ -75,8 +78,13 @@ export function getAvailableCountries(): string[] {
 
 /**
  * Format city display name
+ * For US/CA, shows "City, State, Country" format
+ * For other countries, shows "City, Country" format
  */
 export function formatCityName(city: City): string {
+  if (city.admin1 && (city.country === 'US' || city.country === 'CA')) {
+    return `${city.name}, ${city.admin1}, ${city.country}`
+  }
   return `${city.name}, ${city.country}`
 }
 

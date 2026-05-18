@@ -165,7 +165,11 @@ export function CitySearch({
               }`}
             >
               <span className="font-medium">{city.name}</span>
-              <span className="text-white/40 ml-1">{city.country}</span>
+              {city.admin1 && (city.country === 'US' || city.country === 'CA') ? (
+                <span className="text-white/40 ml-1">{city.admin1}, {city.country}</span>
+              ) : (
+                <span className="text-white/40 ml-1">{city.country}</span>
+              )}
             </button>
           ))}
         </div>
