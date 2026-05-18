@@ -377,17 +377,17 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           From your ideal career path to when you&apos;ll meet your soulmate!
         </p>
         <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
-          <span className="text-foreground/50">Hidden VIP Insights</span>
-          <LockIcon className="w-3 h-3 text-muted-foreground" />
+          <span className="bg-gradient-to-r from-purple-500 to-fuchsia-500 bg-clip-text text-transparent">Hidden VIP Insights</span>
+          <LockIcon className="w-3 h-3 text-purple-400" />
         </h2>
         
         <div className="space-y-2">
           {/* Fact 10 */}
           <div className="relative bg-muted border border-border rounded-lg p-3 overflow-hidden">
             <div className="flex gap-2">
-              <span className="text-muted-foreground font-bold text-sm">🚨 10</span>
+              <span className="text-muted-foreground font-bold text-sm">10</span>
               <p className="text-foreground/90 text-xs leading-relaxed font-bold">
-                {submission.name}, Congratulations! The main theme of your 2026 is &quot;<span className="blur-[5px] select-none bg-primary/20 px-2">hidden content</span>&quot;. Hmm.. But be careful of <span className="blur-[5px] select-none bg-primary/20 px-2">something</span>, as <span className="blur-[5px] select-none bg-primary/20 px-2">reason here</span> doesn&apos;t fit well with your lifestyle.
+                🚨 {submission.name}, Congratulations! The main theme of your 2026 is &quot;<span className="blur-[5px] select-none bg-primary/20 px-2">hidden content</span>&quot;. Hmm.. But be careful of <span className="blur-[5px] select-none bg-primary/20 px-2">something</span>, as <span className="blur-[5px] select-none bg-primary/20 px-2">reason here</span> doesn&apos;t fit well with your lifestyle.
               </p>
             </div>
           </div>
@@ -395,9 +395,9 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           {/* Fact 11 */}
           <div className="relative bg-muted border border-border rounded-lg p-3 overflow-hidden">
             <div className="flex gap-2">
-              <span className="text-muted-foreground font-bold text-sm">💍 11</span>
+              <span className="text-muted-foreground font-bold text-sm">11</span>
               <p className="text-foreground/90 text-xs leading-relaxed font-bold">
-                The period from 20<span className="blur-[5px] select-none bg-primary/20 px-1">xx</span> to 20<span className="blur-[5px] select-none bg-primary/20 px-1">xx</span> is the best time to meet your spouse. Your spouse will probably be in charge of <span className="blur-[5px] select-none bg-primary/20 px-2">role here</span> and work as a <span className="blur-[5px] select-none bg-primary/20 px-2">job title</span>.
+                💍 The period from 20<span className="blur-[5px] select-none bg-primary/20 px-1">xx</span> to 20<span className="blur-[5px] select-none bg-primary/20 px-1">xx</span> is the best time to meet your spouse. Your spouse will probably be in charge of <span className="blur-[5px] select-none bg-primary/20 px-2">role here</span> and work as a <span className="blur-[5px] select-none bg-primary/20 px-2">job title</span>.
               </p>
             </div>
           </div>
@@ -405,9 +405,9 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           {/* Fact 12 */}
           <div className="relative bg-muted border border-border rounded-lg p-3 overflow-hidden">
             <div className="flex gap-2">
-              <span className="text-muted-foreground font-bold text-sm">💰 12</span>
+              <span className="text-muted-foreground font-bold text-sm">12</span>
               <p className="text-foreground/90 text-xs leading-relaxed font-bold">
-                Hey, {submission.name}! Your wealth flow timing and secret talents are already mapped out like <span className="blur-[5px] select-none bg-primary/20 px-3">여기 블러 처리</span> Ready to see your future from this angle?
+                💰 Hey, {submission.name}! Your wealth flow timing and secret talents are already mapped out like <span className="blur-[5px] select-none bg-primary/20 px-3">여기 블러 처리</span> Ready to see your future from this angle?
               </p>
             </div>
           </div>
