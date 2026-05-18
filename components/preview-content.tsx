@@ -373,6 +373,9 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
 
       {/* Teaser Facts 10, 11, 12 with blur */}
       <div className="mb-6">
+        <p className="text-xs text-left mb-2 bg-gradient-to-r from-purple-500 to-fuchsia-500 bg-clip-text text-transparent font-medium">
+          From your ideal career path to when you&apos;ll meet your soulmate!
+        </p>
         <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
           <span className="text-foreground/50">Hidden VIP Insights</span>
           <LockIcon className="w-3 h-3 text-muted-foreground" />
