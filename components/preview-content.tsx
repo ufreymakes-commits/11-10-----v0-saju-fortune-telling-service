@@ -374,7 +374,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
       {/* Teaser Facts 10, 11, 12 with blur */}
       <div className="mb-6">
         <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
-          <span className="text-foreground/50">Hidden Insights</span>
+          <span className="text-foreground/50">Hidden VIP Insights</span>
           <LockIcon className="w-3 h-3 text-muted-foreground" />
         </h2>
         
@@ -411,7 +411,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           
           {/* ...99 facts indicator */}
           <div className="text-center py-3">
-            <span className="text-muted-foreground text-sm tracking-widest">. . . 99 facts</span>
+            <span className="text-muted-foreground text-sm tracking-widest">. . . 99 hidden gems</span>
           </div>
         </div>
       </div>
@@ -435,7 +435,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
         </div>
         
         <h3 className="text-lg font-semibold text-gradient mb-0">
-          Unlock All 99 Facts
+          Unlock 99 Secret Facts!
         </h3>
         <p className="text-sm font-medium text-foreground/80 mb-2">
           Full Report
