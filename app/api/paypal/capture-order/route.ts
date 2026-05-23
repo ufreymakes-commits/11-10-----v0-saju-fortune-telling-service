@@ -82,6 +82,28 @@ export async function POST(request: Request) {
       message: captureData.message || null
     })
 
+    // Check if order was already captured (this means payment was successful)
+    const isAlreadyCaptured = captureData.details?.some(
+      (d: { issue?: string }) => d.issue === 'ORDER_ALREADY_CAPTURED'
+    )
+    
+    if (isAlreadyCaptured) {
+      console.log('[v0] Order already captured, treating as success:', orderId)
+      // Update to completed since payment was already successful
+      await supabase.from('payments').update({ 
+        status: 'completed',
+        completed_at: new Date().toISOString()
+      }).eq('paypal_order_id', orderId)
+      
+      const { data: existingPayment } = await supabase
+        .from('payments')
+        .select('submission_id')
+        .eq('paypal_order_id', orderId)
+        .single()
+      
+      return NextResponse.json({ success: true, submissionId: existingPayment?.submission_id })
+    }
+
     // Accept both COMPLETED and APPROVED status (PayPal sometimes returns APPROVED first)
     const validStatuses = ['COMPLETED', 'APPROVED']
     if (!captureResponse.ok || !validStatuses.includes(captureData.status)) {
