@@ -552,13 +552,13 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           })()}
         </p>
         <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-amber-500/30 rounded-xl p-5">
-          <div className="relative w-full h-48 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center">
+          <div className="relative w-full mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center" style={{ aspectRatio: '796/531' }}>
             <Image
-              src="/images/luck-bracelet.png"
+              src="/images/saju-bracelet-new.png"
               alt="Signature Saju Elemental Bracelet"
-              width={400}
-              height={300}
-              className="object-cover object-center"
+              width={796}
+              height={531}
+              className="w-full h-full object-cover object-center"
             />
           </div>
           <h4 className="text-sm font-semibold text-white mb-1">Signature Saju Elemental Bracelet</h4>

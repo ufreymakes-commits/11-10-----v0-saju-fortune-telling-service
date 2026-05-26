@@ -260,9 +260,9 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
 
           {/* Signature Saju Elemental Bracelet */}
           <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
-            <div className="relative w-full h-48">
+            <div className="relative w-full" style={{ aspectRatio: '796/531' }}>
               <Image
-                src="/images/luck-bracelet.png"
+                src="/images/saju-bracelet-new.png"
                 alt="Signature Saju Elemental Bracelet"
                 fill
                 className="object-cover"

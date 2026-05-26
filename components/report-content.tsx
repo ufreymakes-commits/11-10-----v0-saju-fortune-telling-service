@@ -326,9 +326,9 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
           <div className="space-y-4">
             {/* Signature Saju Elemental Bracelet */}
             <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
-              <div className="relative w-full h-44">
+              <div className="relative w-full" style={{ aspectRatio: '796/531' }}>
                 <Image
-                  src="/images/bracelet-product.png"
+                  src="/images/saju-bracelet-new.png"
                   alt="Signature Saju Elemental Bracelet"
                   fill
                   className="object-cover"

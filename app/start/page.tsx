@@ -227,8 +227,8 @@ export default function StartPage() {
             <div className="group md:col-span-1">
               <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-amber-500/30 rounded-xl p-6 h-full flex flex-col">
                 <h4 className="text-base md:text-lg font-semibold text-white mb-3">Signature Saju Elemental Bracelet</h4>
-                <div className="relative w-full mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex-shrink-0" style={{ aspectRatio: '800/533' }}>
-                  <Image src="/images/luck-bracelet.png" alt="Signature Saju Elemental Bracelet" width={800} height={533} className="w-full h-full object-cover object-center" />
+                <div className="relative w-full mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex-shrink-0" style={{ aspectRatio: '796/531' }}>
+                  <Image src="/images/saju-bracelet-new.png" alt="Signature Saju Elemental Bracelet" width={796} height={531} className="w-full h-full object-cover object-center" />
                 </div>
                 <p className="text-sm text-white/70 mb-3 flex-grow">A signature bracelet designed to fill the missing energies in your personal Saju chart and attract good fortune.</p>
                 <div className="flex items-center justify-between mb-3">

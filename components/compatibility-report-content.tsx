@@ -234,9 +234,9 @@ export function CompatibilityReportContent({
 
           {/* Signature Saju Elemental Bracelet */}
           <div className="bg-white/[0.03] border border-white/10 rounded-xl overflow-hidden">
-            <div className="relative w-full h-48">
+            <div className="relative w-full" style={{ aspectRatio: '796/531' }}>
               <Image
-                src="/images/luck-bracelet.png"
+                src="/images/saju-bracelet-new.png"
                 alt="Signature Saju Elemental Bracelet"
                 fill
                 className="object-cover"
