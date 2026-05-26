@@ -77,6 +77,30 @@ export default function StartPage() {
 
       <StartReviewsSection />
 
+      {/* Ancient Eastern Wisdom Section */}
+      <section className="relative z-10 py-12 px-4">
+        <div className="max-w-2xl mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-semibold text-white/90 mb-2">
+            Ancient Eastern wisdom,
+          </h2>
+          <p className="text-sm md:text-base text-white/60 mb-4">
+            meets data to read the flow of destiny.
+          </p>
+          <p className="text-sm text-purple-400 mb-8">
+            #CareerPath #LovePattern #2026AnnualLuck
+          </p>
+          <div className="max-w-sm mx-auto rounded-2xl overflow-hidden border border-purple-500/30 shadow-2xl">
+            <Image
+              src="/images/saju-preview.jpg"
+              alt="Saju Report Preview"
+              width={400}
+              height={800}
+              className="w-full h-auto"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Why Sajume Section */}
       <section className="relative z-10 py-12 px-4 bg-gradient-to-b from-transparent via-purple-900/10 to-transparent">
         <div className="max-w-5xl mx-auto">
