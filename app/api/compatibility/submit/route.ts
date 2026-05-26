@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { calculateSaju } from '@/lib/saju-calculator'
 import type { BirthInfo } from '@/lib/types'
 
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
     const sajuDataA = calculateSaju(birthInfoA)
     const sajuDataB = calculateSaju(birthInfoB)
 
-    const supabase = await createClient()
+    const supabase = createAdminClient()
 
     const { data, error } = await supabase
       .from('compatibility_submissions')

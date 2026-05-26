@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 
 function getPayPalConfig() {
   const USE_SANDBOX = process.env.PAYPAL_MODE === 'sandbox'
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     const { clientId, clientSecret, apiUrl } = getPayPalConfig()
     if (!clientId || !clientSecret) return NextResponse.json({ error: 'Payment system not configured' }, { status: 500 })
 
-    const supabase = await createClient()
+    const supabase = createAdminClient()
     const { data: submission, error: fetchError } = await supabase
       .from('compatibility_submissions')
       .select('id, person_a_name, person_b_name')

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { generateText } from 'ai'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 
 // ================================================================
 // STAGE 1: Build complete allSajuData (99 facts와 동일하게)
@@ -229,7 +229,7 @@ export async function POST(request: Request) {
     const { submissionId } = await request.json()
     if (!submissionId) return NextResponse.json({ error: 'Missing submission ID' }, { status: 400 })
 
-    const supabase = await createClient()
+    const supabase = createAdminClient()
 
     // 1. Check payment is completed
     const { data: payment, error: paymentError } = await supabase
@@ -453,7 +453,7 @@ IMPORTANT - Title format rules:
 섹션 7: 최종 관계 타입
 CRITICAL: 제목은 반드시 다음 4개 중 하나만 정확히 작성: "Soulmate Type" / "Complementary Type" / "Effort-Required Type" / "Karmic Type"
 
-내용 지침:
+내용 지���:
 운명의 파동: 향후 30년의 daewoon 흐름을 분석하여 두 사람의 에너지의 상승장과 하락장이 어떻게 교차하는지 보여줍니다. 사주 궁합보다 중요한 것은 배려"임을 강조하는 따뜻한 조언과 함께, 상대의 에너지를 통해 고객과 상대 파트너 각각의 삶에서 어떤 영역(재물, 명예, 공부 등)이 확장되는지 구체적인 개운 액션 플랜을 제시하며 마무리합니다.
 관계 정의: 위 4가지 타입 중 최종 타입을 본문에서도 명확히 설명합니다.
 현실 점검 및 처방: 구체적인 개운 액션 플랜을 제시하며 감동적으로 이 관계에 대해서 서술하며 마무리합니다. 누구에게나 들어맞을 절대 뻔한 소리나 두루뭉실한 소리는 금지!
