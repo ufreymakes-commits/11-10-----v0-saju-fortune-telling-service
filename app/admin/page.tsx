@@ -144,8 +144,8 @@ export default function AdminPage() {
   const c = stats.counts || {}
   const totalPayments = stats.totalPayments ?? 0
 
-  // 매출 계산 = 유료 레포트 생성 수 기준 (paid_report_url 있는 submissions)
-  const paidCount = stats.paidSubmissions ?? 0
+  // 매출 계산 = PayPal 결제 완료 수 기준 (payments 테이블 status='completed')
+  const paidCount = totalPayments
   const grossRevenue = paidCount * 9.99
   const netRevenue = paidCount * NET_PER_SALE
   const aiCost = paidCount * AI_COST_PER_PAID
@@ -218,7 +218,7 @@ export default function AdminPage() {
         {/* 매출 현황 */}
         <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-gray-700">매출 현황 <span className="text-xs font-normal text-gray-400">(유료 레포트 생성 수 기준)</span></h2>
+            <h2 className="text-sm font-semibold text-gray-700">매출 현황 <span className="text-xs font-normal text-gray-400">(PayPal 결제 완료 수 기준)</span></h2>
             {rateLoading ? (
               <span className="text-xs text-gray-400">환율 조회 중...</span>
             ) : krwRate ? (
