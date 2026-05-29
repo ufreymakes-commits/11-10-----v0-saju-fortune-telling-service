@@ -244,6 +244,15 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
       <p className="text-center text-xs text-muted-foreground mt-3">
         You can use your credit card — no PayPal account needed
       </p>
+      <div className="flex justify-center mt-2">
+        <Image
+          src="/images/credit-cards.png"
+          alt="Visa, Mastercard, American Express"
+          width={120}
+          height={20}
+          className="opacity-60"
+        />
+      </div>
 
       {/* Coupon code toggle */}
       <div className="mt-4">
