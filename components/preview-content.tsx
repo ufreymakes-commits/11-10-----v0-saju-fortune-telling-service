@@ -465,8 +465,17 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
         
         <p className="mt-3 text-[11px] text-foreground/60 leading-relaxed">
           <span className="font-semibold">Can I use credit card? I have no Paypal</span><br/>
-          : Yes, it's available. select <span className="font-bold underline">&apos;Pay with a card&apos;</span> in the Paypal window.
+          : Yes, it&apos;s available. select <span className="font-bold underline">&apos;Pay with a card&apos;</span> in the Paypal window.
         </p>
+        <div className="flex justify-center mt-2">
+          <Image
+            src="/images/credit-cards.png"
+            alt="Visa, Mastercard, American Express"
+            width={120}
+            height={20}
+            className="opacity-60"
+          />
+        </div>
       </div>
       
       {/* Social Proof */}
