@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { CompatibilityReportContent } from '@/components/compatibility-report-content'
 import { CompatibilityReportLoader } from '@/components/compatibility-report-loader'
 import { StarsBackground } from '@/components/stars-background'
@@ -10,7 +10,7 @@ export default async function CompatibilityReportPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   // Fetch submission (including saju data for day master extraction)
   const { data: submission, error: subError } = await supabase

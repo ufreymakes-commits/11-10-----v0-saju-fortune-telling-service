@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { CompatibilityCheckoutContent } from '@/components/compatibility-checkout-content'
 import { StarsBackground } from '@/components/stars-background'
 
@@ -9,7 +9,7 @@ export default async function CompatibilityCheckoutPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { data: submission, error } = await supabase
     .from('compatibility_submissions')

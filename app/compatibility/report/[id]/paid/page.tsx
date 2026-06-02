@@ -1,5 +1,5 @@
 import { notFound, redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { StarsBackground } from '@/components/stars-background'
 import { CompatibilityReportContent } from '@/components/compatibility-report-content'
 import { sharedOpenGraph, sharedTwitter } from '@/lib/metadata'
@@ -67,7 +67,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps) {
   const { id } = await params
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   
   const { data } = await supabase
     .from('compatibility_submissions')
@@ -93,7 +93,7 @@ export default async function CompatibilityPaidReportPage({ params }: PageProps)
     notFound()
   }
   
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   
   // Fetch submission, payment, and report data in parallel
   // section_key='compatibility_full' is the only valid paid report

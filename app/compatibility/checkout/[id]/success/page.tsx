@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { StarsBackground } from '@/components/stars-background'
 import { CompatibilityPaymentSuccessHandler } from '@/components/compatibility-payment-success-handler'
 import { Spinner } from '@/components/ui/spinner'
@@ -25,7 +25,7 @@ export default async function CompatibilityCheckoutSuccessPage({ params, searchP
     notFound()
   }
   
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   
   // Check if submission exists
   const { data: submission } = await supabase
