@@ -339,7 +339,7 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
       {/* Fixed Download PDF Button */}
       <button
         onClick={handleDownloadPDF}
-        className="fixed bottom-[4.5rem] right-5 z-50 flex items-center gap-2 bg-card border border-border text-foreground text-xs px-4 py-2.5 rounded-full shadow-lg hover:border-primary/40 hover:bg-primary/5 transition-all print:hidden"
+        className="fixed bottom-24 md:bottom-[4.5rem] right-4 md:right-5 z-50 flex items-center gap-2 bg-card border border-border text-foreground text-xs px-3 md:px-4 py-2 md:py-2.5 rounded-full shadow-lg hover:border-primary/40 hover:bg-primary/5 transition-all print:hidden"
       >
         <DownloadIcon className="w-3.5 h-3.5 text-muted-foreground" />
         <span>Download PDF</span>
@@ -348,7 +348,7 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
       {/* Fixed Share Button */}
       <button
         onClick={handleCopyLink}
-        className="fixed bottom-6 right-5 z-50 flex items-center gap-2 bg-card border border-primary/40 text-foreground text-xs px-4 py-2.5 rounded-full shadow-lg shadow-primary/20 hover:border-primary/70 hover:bg-primary/10 transition-all print:hidden"
+        className="fixed bottom-12 md:bottom-6 right-4 md:right-5 z-50 flex items-center gap-2 bg-card border border-primary/40 text-foreground text-xs px-3 md:px-4 py-2 md:py-2.5 rounded-full shadow-lg shadow-primary/20 hover:border-primary/70 hover:bg-primary/10 transition-all print:hidden"
       >
         {copied ? (
           <>
