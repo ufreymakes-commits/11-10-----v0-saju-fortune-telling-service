@@ -71,33 +71,22 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
     }
   }
 
-  const handleDownloadPDF = async () => {
+  const handleDownloadPDF = () => {
     if (typeof window !== 'undefined') {
-      // Expand all sections before generating PDF
+      // Expand all sections before printing
       const allOpen: Record<number, boolean> = {}
       sections.forEach((_: any, idx: number) => { allOpen[idx] = true })
       setOpenSections(allOpen)
       track('download_pdf_paid_report', '/paid-report')
       
       // Small delay to allow sections to render
-      setTimeout(async () => {
-        try {
-          const html2pdf = (await import('html2pdf.js')).default
-          const element = document.querySelector('.pdf-content') || document.body
-          const opt = {
-            margin: [10, 10, 10, 10],
-            filename: `${submission.name || 'Saju'}-99-Facts-Report.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, logging: false },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-          }
-          await html2pdf().set(opt).from(element).save()
-        } catch (error) {
-          console.error('PDF generation failed:', error)
-          // Fallback to print
-          window.print()
+      setTimeout(() => {
+        // For mobile: show instruction alert then open print dialog
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+        if (isMobile) {
+          alert('Tip: In the print menu, select "Save as PDF" or "Print to PDF" to download your report.')
         }
+        window.print()
       }, 300)
     }
   }
