@@ -97,9 +97,9 @@ interface PreviewData {
   teaserFacts: Fact[]
   submission: {
     name: string
-    birthDate?: string
-    birthTime?: string | null
-    birthCountry?: string
+    birth_date?: string
+    birth_time?: string | null
+    birth_country?: string
     gender?: string
     calendar?: string
     sajuData: SajuData
@@ -291,7 +291,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           <span className="text-gradient font-semibold">{submission.name}&apos;s</span> Four Pillars
         </h2>
         <p className="text-[10px] text-muted-foreground/70 text-center mb-3">
-          {submission.birthDate || ''}{submission.birthTime ? `, ${submission.birthTime}` : ''}{submission.birthCountry ? `, ${submission.birthCountry}` : ''}
+          {submission.birth_date || ''}{submission.birth_time ? `, ${submission.birth_time}` : ''}{submission.birth_country ? `, ${submission.birth_country}` : ''}
         </p>
         <div className="grid grid-cols-4 gap-2 text-center mb-4">
           {pillars.map(({ label, labelKr, pillar }) => (
