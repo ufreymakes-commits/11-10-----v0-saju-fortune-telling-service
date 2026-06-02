@@ -242,16 +242,49 @@ DO NOT return fewer cards. The user PAID for 90 facts. Returning less is unaccep
 
 Generate the 90 facts now as a JSON array.`
 
-    // 6. Gemini API 호출 (temperature=0 for deterministic output)
+    // 6. Gemini API 호출 with retry logic (최대 3번 시도)
     console.log('[v0] Calling Gemini API...')
     const startTime = Date.now()
-    const { text: rawResponse } = await generateText({
-      model: 'google/gemini-3-flash',
-      system: PAID_REPORT_SYSTEM_PROMPT,
-      prompt: userPrompt,
-      maxTokens: 16000,
-      temperature: 0,
-    })
+    
+    let rawResponse = ''
+    let lastError: Error | null = null
+    const MAX_RETRIES = 3
+    
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        console.log(`[v0] Gemini API attempt ${attempt}/${MAX_RETRIES}`)
+        const result = await generateText({
+          model: 'google/gemini-3-flash',
+          system: PAID_REPORT_SYSTEM_PROMPT,
+          prompt: userPrompt,
+          maxTokens: 16000,
+          temperature: 0,
+        })
+        rawResponse = result.text
+        console.log(`[v0] Gemini API succeeded on attempt ${attempt}`)
+        break // 성공하면 루프 종료
+      } catch (error) {
+        lastError = error as Error
+        console.error(`[v0] Gemini API attempt ${attempt} failed:`, error)
+        
+        if (attempt < MAX_RETRIES) {
+          // 재시도 전 잠시 대기 (exponential backoff: 2초, 4초)
+          const delay = Math.pow(2, attempt) * 1000
+          console.log(`[v0] Retrying in ${delay}ms...`)
+          await new Promise(resolve => setTimeout(resolve, delay))
+        }
+      }
+    }
+    
+    // 모든 시도 실패
+    if (!rawResponse && lastError) {
+      console.error('[v0] All Gemini API attempts failed')
+      return NextResponse.json({ 
+        error: 'AI service temporarily unavailable. Please try again in a few minutes.',
+        details: lastError.message 
+      }, { status: 503 })
+    }
+    
     const geminiTime = Date.now() - startTime
     console.log(`[v0] Gemini API completed in ${geminiTime}ms`)
     console.log('[v0] Response length:', rawResponse.length, 'chars')
