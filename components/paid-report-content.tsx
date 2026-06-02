@@ -73,16 +73,20 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
 
   const handleDownloadPDF = () => {
     if (typeof window !== 'undefined') {
-      console.log('[v0] handleDownloadPDF called')
-      // Expand all sections before printing
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+      
+      if (isMobile) {
+        alert('PDF downloads are currently only supported on desktop. Please share the link to download it from your PC.')
+        return
+      }
+      
+      // Desktop only: Expand all sections before printing
       const allOpen: Record<number, boolean> = {}
       sections.forEach((_: any, idx: number) => { allOpen[idx] = true })
       setOpenSections(allOpen)
       track('download_pdf_paid_report', '/paid-report')
       
-      // Small delay to allow sections to render
       setTimeout(() => {
-        console.log('[v0] Calling window.print()')
         window.print()
       }, 300)
     }
