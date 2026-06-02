@@ -73,6 +73,7 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
 
   const handleDownloadPDF = () => {
     if (typeof window !== 'undefined') {
+      console.log('[v0] handleDownloadPDF called')
       // Expand all sections before printing
       const allOpen: Record<number, boolean> = {}
       sections.forEach((_: any, idx: number) => { allOpen[idx] = true })
@@ -81,11 +82,7 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
       
       // Small delay to allow sections to render
       setTimeout(() => {
-        // For mobile: show instruction alert then open print dialog
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-        if (isMobile) {
-          alert('Tip: In the print menu, select "Save as PDF" or "Print to PDF" to download your report.')
-        }
+        console.log('[v0] Calling window.print()')
         window.print()
       }, 300)
     }
