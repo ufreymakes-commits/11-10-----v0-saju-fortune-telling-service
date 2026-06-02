@@ -71,16 +71,33 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
     }
   }
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     if (typeof window !== 'undefined') {
-      // Expand all sections before printing
+      // Expand all sections before generating PDF
       const allOpen: Record<number, boolean> = {}
       sections.forEach((_: any, idx: number) => { allOpen[idx] = true })
       setOpenSections(allOpen)
       track('download_pdf_paid_report', '/paid-report')
-      // Small delay to allow sections to render before print dialog
-      setTimeout(() => {
-        window.print()
+      
+      // Small delay to allow sections to render
+      setTimeout(async () => {
+        try {
+          const html2pdf = (await import('html2pdf.js')).default
+          const element = document.querySelector('.pdf-content') || document.body
+          const opt = {
+            margin: [10, 10, 10, 10],
+            filename: `${submission.name || 'Saju'}-99-Facts-Report.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, logging: false },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+          }
+          await html2pdf().set(opt).from(element).save()
+        } catch (error) {
+          console.error('PDF generation failed:', error)
+          // Fallback to print
+          window.print()
+        }
       }, 300)
     }
   }
@@ -94,7 +111,7 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
   }
 
   return (
-    <div className="px-4 py-8 max-w-3xl mx-auto">
+    <div className="px-4 py-8 max-w-3xl mx-auto pdf-content">
 
       {/* Header */}
       <div className="text-center mb-6">
