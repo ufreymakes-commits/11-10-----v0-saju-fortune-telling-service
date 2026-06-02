@@ -42,7 +42,44 @@ export async function POST(request: Request) {
     })
     const captureData = await captureResponse.json()
 
-    if (!captureResponse.ok || captureData.status !== 'COMPLETED') {
+    // Enhanced logging for debugging
+    console.log('[v0] Compatibility PayPal capture response:', {
+      orderId,
+      httpStatus: captureResponse.status,
+      paypalStatus: captureData.status,
+      details: captureData.details || null
+    })
+
+    // Check if order was already captured (this means payment was successful)
+    const isAlreadyCaptured = captureData.details?.some(
+      (d: { issue?: string }) => d.issue === 'ORDER_ALREADY_CAPTURED'
+    )
+    
+    if (isAlreadyCaptured) {
+      console.log('[v0] Compatibility order already captured, treating as success:', orderId)
+      await supabase.from('compatibility_payments').update({ 
+        status: 'completed',
+        completed_at: new Date().toISOString()
+      }).eq('paypal_order_id', orderId)
+      
+      const { data: existingPayment } = await supabase
+        .from('compatibility_payments')
+        .select('submission_id')
+        .eq('paypal_order_id', orderId)
+        .single()
+      
+      return NextResponse.json({ success: true, submissionId: existingPayment?.submission_id })
+    }
+
+    // Accept both COMPLETED and APPROVED status
+    const validStatuses = ['COMPLETED', 'APPROVED']
+    if (!captureResponse.ok || !validStatuses.includes(captureData.status)) {
+      console.error('[v0] Compatibility PayPal capture failed:', {
+        orderId,
+        httpOk: captureResponse.ok,
+        status: captureData.status,
+        error: captureData.details || captureData.message || captureData
+      })
       await supabase.from('compatibility_payments').update({ status: 'failed' }).eq('paypal_order_id', orderId)
       return NextResponse.json({ error: 'Payment capture failed' }, { status: 400 })
     }
