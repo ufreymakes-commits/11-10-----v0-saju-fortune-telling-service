@@ -498,7 +498,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
             </svg>
           ))}
         </div>
-        <p className="text-xs text-muted-foreground">2,875 users got their reports</p>
+        <p className="text-xs text-muted-foreground">4,071 users got their reports</p>
         <p className="text-[10px] text-muted-foreground">4.9/5 from 100% genuine reviews</p>
       </div>
 
