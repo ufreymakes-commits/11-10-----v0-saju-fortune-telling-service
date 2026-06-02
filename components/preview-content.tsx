@@ -463,6 +463,13 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           </Button>
         </Link>
         
+        <Button 
+          onClick={() => alert("You can use your credit card with 'Pay with a card' in the Paypal window. You do not need a Paypal account :)")}
+          className="w-full max-w-xs bg-[#FFC439] text-black hover:bg-[#f5b830] h-11 text-sm font-semibold rounded-md shadow-lg mt-2"
+        >
+          Use Credit Card
+        </Button>
+        
         <p className="mt-3 text-[11px] text-foreground/60 leading-relaxed">
           <span className="font-semibold">Can I use credit card? I have no Paypal</span><br/>
           : Yes, it&apos;s available. select <span className="font-bold underline">&apos;Pay with a card&apos;</span> in the Paypal window.
