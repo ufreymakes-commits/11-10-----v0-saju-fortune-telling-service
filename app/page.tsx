@@ -149,7 +149,7 @@ export default function LandingPage() {
               </svg>
             ))}
           </div>
-          <p className="text-center text-base font-bold text-white/80 mb-3">+2,765 reports sent</p>
+          <p className="text-center text-base font-bold text-white/80 mb-3">+4,071 reports sent</p>
           <p className="text-center text-sm text-white/50 mb-3 font-semibold">
             If these reviews are found to be manipulated or fake, we will stop selling this service.
           </p>
@@ -281,10 +281,10 @@ src="/images/shopify-logo.png"
             No more stress from wrong AI answers.<br/>Let sajume's certified expertise ease your mind.
           </p>
           
-          {/* First Row: 2,765+ Reports Delivered */}
+          {/* First Row: 4,071+ Reports Delivered */}
           <div className="mb-12 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div className="order-2 md:order-1">
-              <h4 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent mb-3">2,765+</h4>
+              <h4 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent mb-3">4,071+</h4>
               <p className="text-2xl md:text-2xl font-semibold text-white mb-4">Reports Delivered</p>
               <p className="text-sm md:text-base text-white/60 leading-relaxed">
                 The world's only saju service that analyzes your chart based on exact global local birth time & delivers a full report in English.

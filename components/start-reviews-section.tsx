@@ -82,7 +82,7 @@ export function StartReviewsSection() {
             </svg>
           ))}
         </div>
-        <p className="text-center text-base font-bold text-white/80 mb-2">+2,765 reports sent</p>
+        <p className="text-center text-base font-bold text-white/80 mb-2">+4,071 reports sent</p>
         <p className="text-center text-sm font-bold text-white/70 mb-1 leading-relaxed">
           If these reviews are found to be manipulated or fake, we will stop selling this service.
         </p>

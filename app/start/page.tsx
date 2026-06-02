@@ -109,10 +109,10 @@ export default function StartPage() {
             No more stress from wrong AI answers.<br />Let sajume&apos;s certified expertise ease your mind.
           </p>
 
-          {/* 2,765+ Reports */}
+          {/* 4,071+ Reports */}
           <div className="mb-12 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div className="order-2 md:order-1">
-              <h4 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent mb-3">2,765+</h4>
+              <h4 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent mb-3">4,071+</h4>
               <p className="text-2xl font-semibold text-white mb-4">Reports Delivered</p>
               <p className="text-sm md:text-base text-white/60 leading-relaxed">
                 The world&apos;s only saju service that analyzes your chart based on exact global local birth time &amp; delivers a full report in English.
