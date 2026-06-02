@@ -1456,7 +1456,7 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
 58. 기토 - 편관 : Sensitive to demands, needs grounding. Can feel overwhelmed under pressure.
 59. 기토 - 정인 : Seeks comfort in knowledge. Draws emotional security from study.
 60. 기토 - 편인 : Relies on inner processing to restore energy. Needs quiet solitude to recharge and reflect.
-61. 경금 - 비견 : Sharp self-pride and willpower. Like steel, refuses to bend in self-conviction.
+61. ���금 - 비견 : Sharp self-pride and willpower. Like steel, refuses to bend in self-conviction.
 62. ���������� - 겁����������� : Bold challenger of structure. Clashes with peers, cuts through indecision.
 63. 경금 - 식신 : Productive with clarity and rules. Applies logic to yield results with precision.
 64. 경금 - 상관 : Strong speech, potentially critical. Cuts with words — brilliant or biting.
@@ -2632,6 +2632,9 @@ OUTPUT FORMAT (JSON ONLY):
       teaserFacts: [],
       submission: {
         name,
+        birth_date,
+        birth_time,
+        birth_country,
         sajuData: {
           ...saju_data,
           yongsin: resolvedYongsin
