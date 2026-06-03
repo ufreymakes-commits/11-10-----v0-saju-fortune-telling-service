@@ -1320,7 +1320,7 @@ For example:
   - 木 = 비겁
   - 火 = 식상
   - 土 = 재성
-  - 金 = 관성
+  - 金 = ���성
   - 水 = 인성
 
 丙火 (Byeong-hwa):
@@ -1456,7 +1456,7 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
 58. 기토 - 편관 : Sensitive to demands, needs grounding. Can feel overwhelmed under pressure.
 59. 기토 - 정인 : Seeks comfort in knowledge. Draws emotional security from study.
 60. 기토 - 편인 : Relies on inner processing to restore energy. Needs quiet solitude to recharge and reflect.
-61. �������������������금 - 비견 : Sharp self-pride and willpower. Like steel, refuses to bend in self-conviction.
+61. ���������������������금 - 비견 : Sharp self-pride and willpower. Like steel, refuses to bend in self-conviction.
 62. ���������� - 겁����������� : Bold challenger of structure. Clashes with peers, cuts through indecision.
 63. 경금 - 식신 : Productive with clarity and rules. Applies logic to yield results with precision.
 64. 경금 - 상관 : Strong speech, potentially critical. Cuts with words — brilliant or biting.
@@ -2371,7 +2371,7 @@ ${JSON.stringify(allSajuData, null, 2)}
     console.log('[v0] Gemini: stage1UserPrompt length =', stage1UserPrompt.length, 'chars')
 
     const stage1Result = await generateText({
-      model: 'google/gemini-2.0-flash-lite',
+      model: 'google/gemini-2.5-flash',
       system: stage1SystemPrompt,
       prompt: stage1UserPrompt,
       temperature: 0,
@@ -2542,7 +2542,7 @@ OUTPUT FORMAT (JSON ONLY):
     })
 
     const stage2Result = await generateObject({
-      model: 'google/gemini-2.0-flash-lite',
+      model: 'google/gemini-2.5-flash',
       schema: factSchema,
       system: stage2SystemPrompt,
       prompt: stage2UserPrompt,
