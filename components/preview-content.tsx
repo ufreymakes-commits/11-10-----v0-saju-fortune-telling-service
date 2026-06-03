@@ -97,9 +97,6 @@ interface PreviewData {
   teaserFacts: Fact[]
   submission: {
     name: string
-    birth_date?: string
-    birth_time?: string | null
-    birth_country?: string
     gender?: string
     calendar?: string
     sajuData: SajuData
