@@ -254,7 +254,7 @@ Generate the 90 facts now as a JSON array.`
       try {
         console.log(`[v0] Gemini API attempt ${attempt}/${MAX_RETRIES}`)
         const result = await generateText({
-          model: 'google/gemini-3-flash',
+          model: 'google/gemini-2.0-flash',
           system: PAID_REPORT_SYSTEM_PROMPT,
           prompt: userPrompt,
           maxTokens: 16000,
