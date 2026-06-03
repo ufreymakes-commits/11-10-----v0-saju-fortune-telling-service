@@ -2611,13 +2611,13 @@ OUTPUT FORMAT (JSON ONLY):
       }
 
       // Force Fact 8 to use the computed yongsinElement (AI sometimes ignores the prompt)
-      const fact8 = facts.find((f: { id: number; content: string }) => f.id === 8)
-      if (fact8) {
-        const fact8Match = fact8.content.match(/closer you stay to\s+([A-Za-z]+)/i)
+      const fact8 = facts.find((f: { id: number; text?: string }) => f.id === 8)
+      if (fact8 && fact8.text) {
+        const fact8Match = fact8.text.match(/closer you stay to\s+([A-Za-z]+)/i)
         const aiYongsin = fact8Match?.[1]
         if (aiYongsin && aiYongsin.toLowerCase() !== yongsinElement.toLowerCase()) {
           console.log(`[v0] Gemini: AI used wrong yongsin (${aiYongsin}), forcing to computed value (${yongsinElement})`)
-          fact8.content = fact8.content.replace(
+          fact8.text = fact8.text.replace(
             /closer you stay to\s+[A-Za-z]+/i,
             `closer you stay to ${yongsinElement}`
           )
