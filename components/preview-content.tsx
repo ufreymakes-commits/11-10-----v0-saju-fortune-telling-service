@@ -287,12 +287,9 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
     <div className="px-4 py-8 max-w-2xl mx-auto">
       {/* Four Pillars Card */}
       <div className="bg-card border border-border rounded-xl p-4 mb-6 shadow-lg shadow-primary/5">
-        <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-1 text-center">
+        <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-3 text-center">
           <span className="text-gradient font-semibold">{submission.name}&apos;s</span> Four Pillars
         </h2>
-        <p className="text-[10px] text-muted-foreground/70 text-center mb-3">
-          {submission.birth_date || ''}{submission.birth_time ? `, ${submission.birth_time}` : ''}{submission.birth_country ? `, ${submission.birth_country}` : ''}
-        </p>
         <div className="grid grid-cols-4 gap-2 text-center mb-4">
           {pillars.map(({ label, labelKr, pillar }) => (
             <div key={label} className="bg-background/50 rounded-lg p-2">
