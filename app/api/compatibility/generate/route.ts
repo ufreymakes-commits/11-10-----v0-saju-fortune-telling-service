@@ -212,7 +212,7 @@ async function callGemini(
   options?: { temperature?: number; maxTokens?: number }
 ): Promise<string> {
   const result = await generateText({
-    model: 'google/gemini-2.0-flash',
+    model: 'google/gemini-2.5-flash',
     system: systemPrompt,
     prompt: userPrompt,
     temperature: options?.temperature ?? 0,
@@ -290,7 +290,7 @@ export async function POST(request: Request) {
 
 대길(大吉) - 정배합(정) & 편배합(편): 천간합이 성립하는 최고의 조합이다.
 
-정배합(음양의 조화): 남갑+여기, 남병+여신, 남무+여계, 남경+여을, 남임+여정. (안정적이고 이상적인 결합)
+정배합(음양의 조화): 남갑+여기, 남병+여신, 남무+여��, 남경+여을, 남임+여정. (안정적이고 이상적인 결합)
 
 편배합(강한 인력): 남을+여경, 남정+여임, 남기+여갑, 남신+여병, 남계+여무. (다이나믹하고 강렬한 끌림)
 
