@@ -212,21 +212,12 @@ async function callGemini(
   options?: { temperature?: number; maxTokens?: number }
 ): Promise<string> {
   const result = await generateText({
-    model: 'google/gemini-2.5-
-    2026-06-03 05:28:03.029 [info] [v0] Gemini: Stage 1 response received, parsing...
-2026-06-03 05:28:03.030 [info] [v0] Gemini: Raw response length: 36280
-2026-06-03 05:28:03.030 [info] [v0] Gemini: ===== STAGE 1 OUTPUT =====
-2026-06-03 05:28:03.030 [info] [v0] Gemini: social_genes.career_fit = Your core social DNA is all about that 정인격 (Direct Resource Structure). This means you're naturally wired for roles that involve deep learning, research, teaching, or counseling. You thrive in environments where knowledge is power and stability is key. Think of it as having main character energy in any field that values intellect, certification, and a solid foundation of understanding. You're not just about surface-level stuff; you're here for the deep dives and the real wisdom.
-2026-06-03 05:28:03.030 [info] [v0] Gemini: independence_index = {"singang_sinyak":"중화신강 (Balanced Strong)","percentage":"55%","life_strategy":"With a 'Balanced Strong' Day Master at 55%, you've got a super robust sense of self and serious willpower. You're not easily swayed by others and prefer to be the main character of your own story, calling the shots. You can handle pressure like a champ and bounce back from anything. This totally aligns with your 'True Predator' vibe in career, meaning you're naturally inclined to lead, innovate, and carve out your own path. Don't be afraid to trust your gut and take charge, because you're built for it."}
-2026-06-03 05:28:03.031 [info] [v0] Gemini: Full Stage 1 Output: {
-  "persona_conflict": {
-    "day_master": "己 (Gi Earth)",
-    "month_branch": "巳 (Sa Fire)",
-    "analysis": "Okay, so your core vibe, your Day Master 己 (Gi Earth), is all about being grounded, nurturing, and super adaptable, kinda like fertile soil. But then your Month Branch, 巳 (Sa Fire), which sets your early life and social scene, is straight-up fire energy. For you, that fire translates to 정인 (Direct Resource), meaning a deep-seated need for knowledge, wisdom, and stability. It's not a clash, more like your nurturing core gets a major glow-up from a super intellectual and supportive environment. You're naturally grounded but also lowkey brilliant, always soaking up info, and can totally bring the heat with your ideas when needed. It's like you're a chill, wise sage with a secret competitive streak and a knack for expressing yourself."
-  },
-  "energy_overload": {
-    "dominant_element": "Fire (화)",
-    "dominant_ten_god": "정인 (Direct Resource)",
+    model: 'google/gemini-2.5-flash-lite',
+    system: systemPrompt,
+    prompt: userPrompt,
+    temperature: options?.temperature ?? 0,
+    maxTokens: options?.maxTokens ?? 3000
+  })
     "effect": "Your chart is seriously lit with Fire energy, making it your dominant element. For you, 己 (Gi Earth), Fire translates directly to 정인 (Direct Resource). This means you've got a massive drive for learning, wisdom, and soaking up knowledge like a sponge. You're probably super thoughtful, value deep understanding, and crave stability and security. This energy can make you a total brainiac, always seeking to understand the 'why' behind everything. Just make sure you don't get stuck in analysis paralysis, 'cause all that thinking can sometimes lead to overthinking or being a bit too cautious."
   },
   "social_genes": {
@@ -651,7 +642,7 @@ async function callGemini(
       },
       {
         "year": 2030,
-        "ganzi": "경술",
+        "ganzi": "경���",
         "fullName": "庚戌",
         "tenGod": "N/A",
         "twelveStar": "N/A"
@@ -929,14 +920,14 @@ IMPORTANT - Title format rules:
 내용 지침:
 에너지 분석: energyGrade와 tenGods를 분석하여 두 사람 사이의 갑을 관계(혹은 동등함) 분석합니다.
 
-섹션 4: 우리가 반복해서 부딪히는 진짜 이유
+섹션 4: 우리가 반복���서 부딪히는 진짜 이유
 제목 (영어로): "Warning: Where Your Dissonance Begins"
 
 내용 지침:
 현실적 시나리오: clashes(충), wonjin(원진), hyeong(형) 데이터를 기반으로 두 사람이 실제로 싸우게 될 상황을 예시합니다.
 포인트: 구체적인 화법 가이드와 함께 둘이 같이 하면 좋을 활동이나 데이트를 추천합니다. 너무 뻔한 소리나 두루뭉실한 소리 금지!
 
-섹션 5: 밤의 하모니와 현실적인 경제 공동체
+섹션 5: 밤의 하모니와 현실적인 경�� 공동체
 제목 (영어로): "Your Secret Chemistry and Financial Synergy"
 
 내용 지침:
