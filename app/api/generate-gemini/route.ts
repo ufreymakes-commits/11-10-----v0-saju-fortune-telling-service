@@ -1456,7 +1456,7 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
 58. 기토 - 편관 : Sensitive to demands, needs grounding. Can feel overwhelmed under pressure.
 59. 기토 - 정인 : Seeks comfort in knowledge. Draws emotional security from study.
 60. 기토 - 편인 : Relies on inner processing to restore energy. Needs quiet solitude to recharge and reflect.
-61. �����금 - 비견 : Sharp self-pride and willpower. Like steel, refuses to bend in self-conviction.
+61. �������금 - 비견 : Sharp self-pride and willpower. Like steel, refuses to bend in self-conviction.
 62. ���������� - 겁����������� : Bold challenger of structure. Clashes with peers, cuts through indecision.
 63. 경금 - 식신 : Productive with clarity and rules. Applies logic to yield results with precision.
 64. 경금 - 상관 : Strong speech, potentially critical. Cuts with words — brilliant or biting.
@@ -2286,7 +2286,7 @@ Respond ONLY in JSON format.`
 [STAGE 1: 11가지 체크포인트 심화 분석]
 ===========================================
 
-아래 체크포인트에 맞춰 이 사주의 '인생 시나리오'를 2,500자로 심화 분석하라.
+아래 체���포인트에 맞춰 이 사주의 '인생 시나리오'를 2,500자로 심화 분석하라.
 절대 뻔한 소리를 하지 말고, 데이터 수치에 근거해 소름 끼칠 정도로 날카로운 심리적/현실적 핵심을 도출하라. 내가 보낸 이 사주 데이터는 이 세상 최고의 신선한 최상급 재료들이다. 너는 세계에서 가장 유명한 미슐랭 1등급 쉐프 같은 사주 데이터 분석가이다. 철저하게 이 데이터들을 가지고 최상의 해석지를 도출해내야 한다. 반드시!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 1. 페르소나 충돌 (일간 vs 월지)
@@ -2371,7 +2371,7 @@ ${JSON.stringify(allSajuData, null, 2)}
     console.log('[v0] Gemini: stage1UserPrompt length =', stage1UserPrompt.length, 'chars')
 
     const stage1Result = await generateText({
-      model: 'google/gemini-2.0-flash',
+      model: 'google/gemini-3-flash',
       system: stage1SystemPrompt,
       prompt: stage1UserPrompt,
       temperature: 0,
@@ -2542,7 +2542,7 @@ OUTPUT FORMAT (JSON ONLY):
     })
 
     const stage2Result = await generateObject({
-      model: 'google/gemini-2.0-flash',
+      model: 'google/gemini-3-flash',
       schema: factSchema,
       system: stage2SystemPrompt,
       prompt: stage2UserPrompt,
