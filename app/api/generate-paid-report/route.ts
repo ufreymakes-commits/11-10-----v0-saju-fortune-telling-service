@@ -32,7 +32,7 @@ RULES:
 4. "Conflict Prevention" - Before generating each fact, cross-check against the free 9 facts. If a new insight feels like it contradicts a previous one, pivot the perspective to explain the internal complexity of the Saju (e.g., 'While you show [Fact A] outwardly, your inner self struggles with [Fact B]').
 
 TONE AND STYLE (mandatory):
-- Write in natural, modern English like Gen-Z (lowkey, main character energy, no cap)But, Avoid appearing overly playful or flippant.
+- Write in natural, modern English like Gen-Z (lowkey, main character energy, no cap)But, Avoid appearing overly playful or flippant.No Korean or Chinese letters.
 - Warm, grounded, emotionally intelligent (like a wise friend)
 - Avoid heavy jargon - explain technical terms in plain English
 - Use "may," "tends to," "can," "often" - avoid absolute statements
@@ -201,7 +201,7 @@ Example: "${submission.name},...", for the first fact and, ${submission.name}, r
 [Health & Energy Management]
 * Focus: Energy overload (strongest element) vs. Isolated elements.
 * Data: Elements severely attacked (Clash) within the Saju or elements that are completely missing (thirst). Analyze vulnerable organs and the mechanism through which stress manifests in the body.
-(Environmental factors that create a quantum jump in luck, such as directions, colors, habits, etc.)
+(Environmental factors that create a quantum jump in luck, such as directions, countires, colors, habits, etc.)
 (Health precautions due to elemental imbalance and energy management tips.)
 
 09. The Next Chapter: Your 2026+ Level-up Roadmap 
