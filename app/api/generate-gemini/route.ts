@@ -1456,7 +1456,7 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
 58. 기토 - 편관 : Sensitive to demands, needs grounding. Can feel overwhelmed under pressure.
 59. 기토 - 정인 : Seeks comfort in knowledge. Draws emotional security from study.
 60. 기토 - 편인 : Relies on inner processing to restore energy. Needs quiet solitude to recharge and reflect.
-61. �����������금 - 비견 : Sharp self-pride and willpower. Like steel, refuses to bend in self-conviction.
+61. �������������금 - 비견 : Sharp self-pride and willpower. Like steel, refuses to bend in self-conviction.
 62. ���������� - 겁����������� : Bold challenger of structure. Clashes with peers, cuts through indecision.
 63. 경금 - 식신 : Productive with clarity and rules. Applies logic to yield results with precision.
 64. 경금 - 상관 : Strong speech, potentially critical. Cuts with words — brilliant or biting.
@@ -2607,15 +2607,22 @@ OUTPUT FORMAT (JSON ONLY):
         }
       }
 
-      // Extract the ACTUAL yongsin Gemini used in Fact 8 to guarantee DB matches displayed text
+      // Force Fact 8 to use the computed yongsinElement (AI sometimes ignores the prompt)
       const fact8 = facts.find((f: { id: number; content: string }) => f.id === 8)
-      const fact8Match = fact8?.content?.match(/closer you stay to\s+([A-Za-z]+)/i)
-      resolvedYongsin = fact8Match?.[1] || yongsinElement
-      if (resolvedYongsin !== yongsinElement) {
-        console.log(`[v0] Gemini: Fact 8 yongsin (${resolvedYongsin}) differs from computed (${yongsinElement}), using Fact 8 value`)
+      if (fact8) {
+        const fact8Match = fact8.content.match(/closer you stay to\s+([A-Za-z]+)/i)
+        const aiYongsin = fact8Match?.[1]
+        if (aiYongsin && aiYongsin.toLowerCase() !== yongsinElement.toLowerCase()) {
+          console.log(`[v0] Gemini: AI used wrong yongsin (${aiYongsin}), forcing to computed value (${yongsinElement})`)
+          fact8.content = fact8.content.replace(
+            /closer you stay to\s+[A-Za-z]+/i,
+            `closer you stay to ${yongsinElement}`
+          )
+        }
       }
+      resolvedYongsin = yongsinElement
 
-      // yongsinElement를 submission의 saju_data에��� 저장 (캐시 로드 시 사용)
+      // yongsinElement를 submission의 saju_data에 저장 (캐시 로드 시 사용)
       await supabase
         .from('submissions')
         .update({
