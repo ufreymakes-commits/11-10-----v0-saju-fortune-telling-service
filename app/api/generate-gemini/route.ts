@@ -1456,7 +1456,7 @@ Format: [Day Master] – [Ten God] – [One-line Interpretation]
 58. 기토 - 편관 : Sensitive to demands, needs grounding. Can feel overwhelmed under pressure.
 59. 기토 - 정인 : Seeks comfort in knowledge. Draws emotional security from study.
 60. 기토 - 편인 : Relies on inner processing to restore energy. Needs quiet solitude to recharge and reflect.
-61. �������������금 - 비견 : Sharp self-pride and willpower. Like steel, refuses to bend in self-conviction.
+61. ���������������금 - 비견 : Sharp self-pride and willpower. Like steel, refuses to bend in self-conviction.
 62. ���������� - 겁����������� : Bold challenger of structure. Clashes with peers, cuts through indecision.
 63. 경금 - 식신 : Productive with clarity and rules. Applies logic to yield results with precision.
 64. 경금 - 상관 : Strong speech, potentially critical. Cuts with words — brilliant or biting.
@@ -2552,14 +2552,17 @@ OUTPUT FORMAT (JSON ONLY):
 
     console.log(`[v0] Gemini: Stage 2 completed, generated ${stage2Result.object.facts.length} facts`)
 
-    const facts: Fact[] = stage2Result.object.facts.map((f: any) => ({
+    // Force exactly 9 facts (gemini-2.5-flash sometimes generates more)
+    const rawFacts = stage2Result.object.facts.slice(0, 9)
+    
+    const facts: Fact[] = rawFacts.map((f: any) => ({
       id: f.id,
       text: f.content,
       category: f.title,
       title: f.title
     }))
 
-    console.log(`[v0] Gemini: Generated ${facts.length} facts`)
+    console.log(`[v0] Gemini: Using ${facts.length} facts (limited to 9)`)
 
     // ===== DB에 무료 레포트 저장 (유료 ��포트 생성 시 context로 사용) =====
     if (body.submissionId) {
