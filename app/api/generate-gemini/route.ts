@@ -2371,7 +2371,7 @@ ${JSON.stringify(allSajuData, null, 2)}
     console.log('[v0] Gemini: stage1UserPrompt length =', stage1UserPrompt.length, 'chars')
 
     const stage1Result = await generateText({
-      model: 'google/gemini-2.5-flash-lite',
+      model: 'google/gemini-2.5-flash',
       system: stage1SystemPrompt,
       prompt: stage1UserPrompt,
       temperature: 0,
@@ -2542,7 +2542,7 @@ OUTPUT FORMAT (JSON ONLY):
     })
 
     const stage2Result = await generateObject({
-      model: 'google/gemini-2.5-flash-lite',
+      model: 'google/gemini-2.5-flash',
       schema: factSchema,
       system: stage2SystemPrompt,
       prompt: stage2UserPrompt,
