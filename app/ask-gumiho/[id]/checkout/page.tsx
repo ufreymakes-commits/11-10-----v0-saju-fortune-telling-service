@@ -224,7 +224,7 @@ export default function AskGumihoCheckoutPage() {
         {/* Back Link */}
         <div className="text-center mt-6">
           <Link href={`/ask-gumiho/${submissionId}`} className="text-sm text-primary hover:underline">
-            Edit my questions
+            Edit my questions (Type the whole again)
           </Link>
         </div>
       </div>
