@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { Loader2, CheckCircle } from 'lucide-react'
 
 function SuccessContent() {
@@ -43,29 +44,26 @@ function SuccessContent() {
           return
         }
 
-        // 2. Generate answers
+        // 2. Generate answers - fire and forget (polling will catch completion)
         setStatus('generating')
-        const generateRes = await fetch('/api/gumiho/generate-answers', {
+        fetch('/api/gumiho/generate-answers', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             gumihoQuestionId: questionId
           })
+        }).then(async (res) => {
+          if (res.ok) {
+            // Generation completed within timeout - redirect immediately
+            setStatus('success')
+            setTimeout(() => {
+              router.push(`/ask-gumiho/${submissionId}/answers?questionId=${questionId}`)
+            }, 1500)
+          }
+          // If not ok (e.g. 500 timeout), polling below will catch the DB write
+        }).catch(() => {
+          // Network error - polling below will handle it
         })
-
-        const generateData = await generateRes.json()
-
-        if (!generateRes.ok) {
-          setError(generateData.error || 'Failed to generate answers')
-          setStatus('error')
-          return
-        }
-
-        // 3. Success - redirect to answers page
-        setStatus('success')
-        setTimeout(() => {
-          router.push(`/ask-gumiho/${submissionId}/answers?questionId=${questionId}`)
-        }, 1500)
 
       } catch {
         setError('Something went wrong. Please contact support.')
@@ -75,6 +73,35 @@ function SuccessContent() {
 
     processPayment()
   }, [token, questionId, submissionId, router])
+
+  // Poll DB every 5 seconds while generating - catches cases where Gemini
+  // completes but the API timed out before returning the response
+  useEffect(() => {
+    if (status !== 'generating') return
+
+    const supabase = createClient()
+    const interval = setInterval(async () => {
+      try {
+        const { data } = await supabase
+          .from('gumiho_questions')
+          .select('answer_1, answer_2, answer_3')
+          .eq('id', questionId)
+          .single()
+
+        if (data?.answer_1 && data?.answer_2 && data?.answer_3) {
+          clearInterval(interval)
+          setStatus('success')
+          setTimeout(() => {
+            router.push(`/ask-gumiho/${submissionId}/answers?questionId=${questionId}`)
+          }, 1500)
+        }
+      } catch {
+        // keep polling
+      }
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [status, questionId, submissionId, router])
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
