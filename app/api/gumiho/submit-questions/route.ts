@@ -24,9 +24,10 @@ export async function POST(request: Request) {
 
     // Verify user has purchased 99 Facts report
     const { data: paidReport } = await supabase
-      .from('paid_reports')
+      .from('reports')
       .select('id')
       .eq('submission_id', submissionId)
+      .eq('section_key', 'paid_full')
       .single()
 
     if (!paidReport) {
