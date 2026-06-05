@@ -22,6 +22,37 @@ export default function AskGumihoCheckoutPage() {
     question_2: string
     question_3: string
   } | null>(null)
+  const [showCoupon, setShowCoupon] = useState(false)
+  const [couponCode, setCouponCode] = useState('')
+  const [couponLoading, setCouponLoading] = useState(false)
+  const [couponError, setCouponError] = useState<string | null>(null)
+
+  const handleCouponSubmit = async () => {
+    if (!couponCode.trim()) return
+    setCouponLoading(true)
+    setCouponError(null)
+    try {
+      const res = await fetch('/api/gumiho/coupon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          code: couponCode.trim(), 
+          gumihoQuestionId: questionId,
+          submissionId 
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok || !data.success) {
+        setCouponError(data.error || 'Invalid coupon')
+        setCouponLoading(false)
+        return
+      }
+      router.push(data.redirectPath)
+    } catch {
+      setCouponError('Something went wrong')
+      setCouponLoading(false)
+    }
+  }
 
   useEffect(() => {
     async function fetchData() {
@@ -157,6 +188,38 @@ export default function AskGumihoCheckoutPage() {
         <p className="text-xs text-muted-foreground text-center mt-3">
           Secure payment powered by PayPal
         </p>
+
+        {/* Coupon code toggle */}
+        <div className="mt-4">
+          <button
+            onClick={() => setShowCoupon(v => !v)}
+            className="w-full text-center text-[11px] text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors"
+          >
+            {showCoupon ? 'Hide coupon code' : 'Have a coupon code?'}
+          </button>
+          {showCoupon && (
+            <div className="mt-2 flex gap-2">
+              <input
+                type="text"
+                value={couponCode}
+                onChange={e => setCouponCode(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleCouponSubmit()}
+                placeholder="Enter coupon code"
+                className="flex-1 bg-muted border border-border rounded-lg px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/40"
+              />
+              <button
+                onClick={handleCouponSubmit}
+                disabled={couponLoading}
+                className="px-4 py-2 bg-primary/20 border border-primary/30 text-foreground text-xs font-medium rounded-lg hover:bg-primary/30 transition-colors disabled:opacity-50"
+              >
+                {couponLoading ? '...' : 'Apply'}
+              </button>
+            </div>
+          )}
+          {couponError && (
+            <p className="mt-1.5 text-center text-[11px] text-red-400">{couponError}</p>
+          )}
+        </div>
 
         {/* Back Link */}
         <div className="text-center mt-6">

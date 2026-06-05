@@ -12,13 +12,41 @@ function SuccessContent() {
   const submissionId = params.id as string
   const questionId = searchParams.get('questionId')
   const token = searchParams.get('token') // PayPal order ID
+  const isCoupon = searchParams.get('coupon') === 'true'
 
   const [status, setStatus] = useState<'capturing' | 'generating' | 'success' | 'error'>('capturing')
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function processPayment() {
-      if (!token || !questionId) {
+      if (!questionId) {
+        setError('Invalid question ID')
+        setStatus('error')
+        return
+      }
+
+      // If coupon, skip PayPal capture and go straight to generating
+      if (isCoupon) {
+        setStatus('generating')
+        fetch('/api/gumiho/generate-answers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            gumihoQuestionId: questionId
+          })
+        }).then(async (res) => {
+          if (res.ok) {
+            setStatus('success')
+            setTimeout(() => {
+              router.push(`/ask-gumiho/${submissionId}/answers?questionId=${questionId}`)
+            }, 1500)
+          }
+        }).catch(() => {})
+        return
+      }
+
+      // PayPal flow - need token
+      if (!token) {
         setError('Invalid payment session')
         setStatus('error')
         return
@@ -72,7 +100,7 @@ function SuccessContent() {
     }
 
     processPayment()
-  }, [token, questionId, submissionId, router])
+  }, [token, questionId, submissionId, router, isCoupon])
 
   // Poll DB every 5 seconds while generating - catches cases where Gemini
   // completes but the API timed out before returning the response
