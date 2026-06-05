@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -12,6 +12,7 @@ export default function AskGumihoPage() {
   const params = useParams()
   const router = useRouter()
   const submissionId = params.id as string
+  const videoRef = useRef<HTMLVideoElement>(null)
 
   const [submission, setSubmission] = useState<{
     name: string
@@ -21,7 +22,9 @@ export default function AskGumihoPage() {
   } | null>(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [showVideo, setShowVideo] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [questionIdForRedirect, setQuestionIdForRedirect] = useState<string | null>(null)
 
   const [question1, setQuestion1] = useState('')
   const [question2, setQuestion2] = useState('')
@@ -94,13 +97,25 @@ export default function AskGumihoPage() {
         return
       }
 
-      // Redirect to checkout
-      router.push(`/ask-gumiho/${submissionId}/checkout?questionId=${data.gumihoQuestionId}`)
+      // Show video for 5 seconds, then redirect
+      setQuestionIdForRedirect(data.gumihoQuestionId)
+      setShowVideo(true)
     } catch {
       setError('Something went wrong. Please try again.')
       setSubmitting(false)
     }
   }
+
+  // Handle video ended or 5 second timeout
+  useEffect(() => {
+    if (showVideo && questionIdForRedirect) {
+      const timeout = setTimeout(() => {
+        router.push(`/ask-gumiho/${submissionId}/checkout?questionId=${questionIdForRedirect}`)
+      }, 5000)
+
+      return () => clearTimeout(timeout)
+    }
+  }, [showVideo, questionIdForRedirect, submissionId, router])
 
   if (loading) {
     return (
@@ -121,13 +136,43 @@ export default function AskGumihoPage() {
     )
   }
 
+  // Video transition screen
+  if (showVideo) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+        <video
+          ref={videoRef}
+          src="https://cdn.shopify.com/videos/c/o/v/cd26f1b3e2c64063ad1ae953bb6e5b2b.mp4"
+          autoPlay
+          muted
+          playsInline
+          className="w-full max-w-md rounded-xl"
+        />
+        <p className="text-sm text-muted-foreground mt-4 animate-pulse">The Gumiho is preparing your reading...</p>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-gradient mb-2">Ask the Gumiho 1:1</h1>
           <p className="text-sm text-muted-foreground">Your 3 Burning Questions Answered</p>
+        </div>
+
+        {/* Video Banner */}
+        <div className="relative w-full mb-6 rounded-xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background z-10 pointer-events-none" />
+          <video
+            src="https://cdn.shopify.com/videos/c/o/v/cd26f1b3e2c64063ad1ae953bb6e5b2b.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full"
+          />
         </div>
 
         {/* Verify Info Card */}
@@ -145,9 +190,12 @@ export default function AskGumihoPage() {
 
         {/* Questions Section */}
         <div className="space-y-4 mb-6">
-          <h2 className="text-lg font-semibold text-foreground text-center">
-            Ask the Gumiho 3 Questions
-          </h2>
+          <div className="text-center">
+            <h2 className="text-lg font-semibold text-foreground">
+              Ask the Gumiho 3 Questions
+            </h2>
+            <p className="text-xs text-muted-foreground/70 mt-1">The more specific your question, the sharper the Gumiho&apos;s answer</p>
+          </div>
 
           <div className="space-y-4">
             <div>

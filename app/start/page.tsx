@@ -4,6 +4,7 @@ import { StarsBackground } from '@/components/stars-background'
 import { BirthForm } from '@/components/birth-form'
 import { NoticeMeButton } from '@/components/notice-me-button'
 import { StartReviewsSection } from '@/components/start-reviews-section'
+import { AskGumihoProductCard } from '@/components/ask-gumiho-product-card'
 import { sharedOpenGraph, sharedTwitter } from '@/lib/metadata'
 import { Marquee } from '@/components/marquee'
 
@@ -222,6 +223,9 @@ export default function StartPage() {
                 </div>
               </div>
             </Link>
+
+            {/* Ask the Gumiho 1:1 */}
+            <AskGumihoProductCard />
 
             {/* Bracelet */}
             <div className="group md:col-span-1">

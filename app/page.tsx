@@ -4,6 +4,7 @@ import { StarsBackground } from '@/components/stars-background'
 import { Marquee } from '@/components/marquee'
 import { TextReviewSlider } from '@/components/text-review-slider'
 import { NoticeMeButton } from '@/components/notice-me-button'
+import { AskGumihoProductCard } from '@/components/ask-gumiho-product-card'
 
 // 텍스트 기반 리뷰 데이터 (preview-content와 동일)
 const TEXT_REVIEWS = [
@@ -188,6 +189,9 @@ export default function LandingPage() {
                 </div>
               </div>
             </Link>
+
+            {/* Ask the Gumiho 1:1 */}
+            <AskGumihoProductCard />
 
             {/* Signature Saju Elemental Bracelet */}
             <div className="group md:col-span-1">

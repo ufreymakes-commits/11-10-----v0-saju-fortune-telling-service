@@ -462,7 +462,11 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
         </Link>
         
         <Button 
-          onClick={() => alert("You can use your credit card with 'Pay with a card' in the Paypal window. You do not need a Paypal account :)")}
+          onClick={() => {
+            if (typeof window !== 'undefined') {
+              window.alert("You can use your credit card with 'Pay with a card' in the Paypal window. You do not need a Paypal account :)")
+            }
+          }}
           className="w-full max-w-xs bg-[#FFC439] text-black hover:bg-[#f5b830] h-11 text-sm font-semibold rounded-md shadow-lg mt-2"
         >
           Use Credit Card
@@ -542,6 +546,38 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Ask the Gumiho 1:1 Card */}
+      <div className="mt-6">
+        <div className="bg-gradient-to-br from-fuchsia-900/40 to-purple-900/40 border border-fuchsia-500/30 rounded-xl p-5">
+          <h4 className="text-sm font-semibold text-white mb-3">Ask the Gumiho 1:1</h4>
+          <div className="relative w-full h-32 mb-3 rounded-lg overflow-hidden bg-[#1a1a2e]">
+            <Image
+              src="/images/ask-gumiho.png"
+              alt="Ask the Gumiho 1:1"
+              fill
+              className="object-cover"
+            />
+          </div>
+          <p className="text-xs text-white/60 mb-3">Your 3 Burning Questions Answered - Personalized guidance from the nine-tailed fox based on your complete Saju profile.</p>
+          <div className="flex items-end justify-between gap-3">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-xs text-fuchsia-300">99 Facts customers only</span>
+              <span className="text-sm font-bold text-white">$9.99</span>
+            </div>
+            <button
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  window.alert('This product is exclusively available to customers who have purchased the 99 Facts Report. Please purchase the 99 Facts Report first.')
+                }
+              }}
+              className="shrink-0 text-center py-2 px-4 rounded-lg text-xs font-semibold bg-fuchsia-500/20 hover:bg-fuchsia-500/30 text-fuchsia-200 border border-fuchsia-500/30 hover:border-fuchsia-400/60 transition-all"
+            >
+              Ask Now
+            </button>
           </div>
         </div>
       </div>
