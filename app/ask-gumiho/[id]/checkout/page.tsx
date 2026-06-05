@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function AskGumihoCheckoutPage() {
   const params = useParams()
@@ -188,6 +189,29 @@ export default function AskGumihoCheckoutPage() {
         <p className="text-xs text-muted-foreground text-center mt-3">
           Secure payment powered by PayPal
         </p>
+
+        {/* Use Credit Card Button */}
+        <Button 
+          onClick={() => {
+            if (typeof window !== 'undefined') {
+              window.alert("You can use your credit card with 'Pay with a card' in the PayPal window. You do not need a PayPal account :)")
+            }
+          }}
+          className="w-full max-w-xs mx-auto bg-[#FFC439] text-black hover:bg-[#f5b830] h-11 text-sm font-semibold rounded-md shadow-lg mt-3 flex"
+        >
+          Use Credit Card
+        </Button>
+
+        {/* Credit Card Logos */}
+        <div className="flex justify-center mt-3">
+          <Image
+            src="/images/credit-cards.png"
+            alt="Visa, Mastercard, American Express"
+            width={120}
+            height={20}
+            className="opacity-60"
+          />
+        </div>
 
         {/* Coupon code toggle */}
         <div className="mt-4">
