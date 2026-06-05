@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { CheckCircleIcon, LinkIcon, CheckIcon, ChevronDownIcon, DownloadIcon } from 'lucide-react'
 import type { Submission, SajuData } from '@/lib/types'
 import { getDayMasterCharacter } from '@/lib/day-master-characters'
@@ -49,6 +50,7 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
 
   useScreenshotDetect('/paid-report')
 
+  const submissionId = (submission as any).id as string
   const sections: any[] = paidReport?.facts && Array.isArray(paidReport.facts) ? paidReport.facts : []
   const sajuData = (submission.saju_data || {}) as SajuData
 
@@ -243,6 +245,31 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
       <div className="mt-8">
         <h3 className="text-sm font-semibold text-foreground mb-4 text-center">More from Sajume</h3>
         <div className="space-y-4">
+
+          {/* Ask the Gumiho 1:1 */}
+          <Link href={`/ask-gumiho/${submissionId}`}>
+            <div className="bg-card border border-primary/30 rounded-xl overflow-hidden shadow-sm hover:border-primary/50 transition-colors cursor-pointer">
+              <div className="relative w-full" style={{ aspectRatio: '796/531' }}>
+                <Image
+                  src="/images/ask-gumiho.png"
+                  alt="Ask the Gumiho 1:1"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="p-4">
+                <h4 className="text-sm font-semibold text-foreground mb-1">Ask the Gumiho 1:1</h4>
+                <p className="text-xs text-muted-foreground mb-3">Your 3 Burning Questions Answered - Personalized guidance from the nine-tailed fox based on your complete Saju profile.</p>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs text-primary">Personalized AI Reading</span>
+                  <span className="text-sm font-bold text-foreground">$9.99</span>
+                </div>
+                <span className="w-full py-1.5 text-xs font-semibold border border-primary/40 rounded-lg hover:bg-primary/10 transition-colors text-primary text-center block">
+                  Ask Now
+                </span>
+              </div>
+            </div>
+          </Link>
 
           {/* Signature Saju Elemental Bracelet */}
           <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
