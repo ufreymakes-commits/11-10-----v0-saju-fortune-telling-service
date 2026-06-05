@@ -46,9 +46,10 @@ export default function AskGumihoPage() {
 
       // Verify paid report exists
       const { data: paidReport } = await supabase
-        .from('paid_reports')
+        .from('reports')
         .select('id')
         .eq('submission_id', submissionId)
+        .eq('section_key', 'paid_full')
         .single()
 
       if (!paidReport) {
