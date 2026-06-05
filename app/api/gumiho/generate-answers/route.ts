@@ -89,17 +89,19 @@ export async function POST(request: Request) {
     }
 
     // 4b. Free report (9 facts + interpretation)
-    const { data: report } = await supabase
+    const { data: freeReport } = await supabase
       .from('reports')
-      .select('free_facts, interpretation')
+      .select('facts, context_interpretation')
       .eq('submission_id', submissionId)
+      .eq('section_key', 'free')
       .single()
 
     // 4c. Paid report (99 facts)
     const { data: paidReport } = await supabase
-      .from('paid_reports')
+      .from('reports')
       .select('facts')
       .eq('submission_id', submissionId)
+      .eq('section_key', 'paid_full')
       .single()
 
     if (!paidReport) {
@@ -119,10 +121,10 @@ Birth Country: ${submission.birth_country}
 ${JSON.stringify(submission.saju_data, null, 2)}
 
 === FREE REPORT - 9 FACTS ===
-${JSON.stringify(report?.free_facts || [], null, 2)}
+${JSON.stringify(freeReport?.facts || [], null, 2)}
 
 === FREE REPORT - INTERPRETATION (1500 chars) ===
-${report?.interpretation || 'Not available'}
+${freeReport?.context_interpretation || 'Not available'}
 
 === PREMIUM 99 FACTS REPORT ===
 ${JSON.stringify(paidReport.facts, null, 2)}
