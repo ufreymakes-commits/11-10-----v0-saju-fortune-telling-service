@@ -1,6 +1,17 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+function getBaseUrl(request: Request): string {
+  const host = request.headers.get('host')
+  const protocol = request.headers.get('x-forwarded-proto') || 'https'
+  if (host) return `${protocol}://${host}`
+  let baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+  if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+    baseUrl = `https://${baseUrl}`
+  }
+  return baseUrl.replace(/\/$/, '')
+}
+
 function getPayPalConfig() {
   const USE_SANDBOX = process.env.PAYPAL_MODE === 'sandbox'
   const clientId = USE_SANDBOX
@@ -104,18 +115,23 @@ export async function POST(request: Request) {
     
     if (isAlreadyCaptured) {
       console.log('[v0] Order already captured, treating as success:', orderId)
-      // Update to completed since payment was already successful
-      await supabase.from('payments').update({ 
-        status: 'completed',
-        completed_at: new Date().toISOString()
-      }).eq('paypal_order_id', orderId)
-      
       const { data: existingPayment } = await supabase
         .from('payments')
         .select('submission_id')
         .eq('paypal_order_id', orderId)
         .single()
-      
+
+      const reportUrl = existingPayment?.submission_id
+        ? `${getBaseUrl(request)}/report/${existingPayment.submission_id}/paid`
+        : null
+
+      // Update to completed since payment was already successful
+      await supabase.from('payments').update({ 
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+        report_url: reportUrl,
+      }).eq('paypal_order_id', orderId)
+
       return NextResponse.json({ success: true, submissionId: existingPayment?.submission_id })
     }
 
@@ -142,12 +158,24 @@ export async function POST(request: Request) {
       captureData.purchase_units?.[0]?.shipping?.address?.country_code ||
       null
 
+    // submission_id를 먼저 조회해서 report_url을 구성
+    const { data: paymentRow } = await supabase
+      .from('payments')
+      .select('submission_id')
+      .eq('paypal_order_id', orderId)
+      .single()
+
+    const reportUrl = paymentRow?.submission_id
+      ? `${getBaseUrl(request)}/report/${paymentRow.submission_id}/paid`
+      : null
+
     const { data: payment, error: updateError } = await supabase
       .from('payments')
       .update({
         status: 'completed',
         completed_at: new Date().toISOString(),
         payer_country: payerCountry,
+        report_url: reportUrl,
       })
       .eq('paypal_order_id', orderId)
       .select('submission_id')

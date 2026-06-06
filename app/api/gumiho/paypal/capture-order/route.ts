@@ -1,6 +1,17 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+function getBaseUrl(request: Request): string {
+  const host = request.headers.get('host')
+  const protocol = request.headers.get('x-forwarded-proto') || 'https'
+  if (host) return `${protocol}://${host}`
+  let baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+  if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+    baseUrl = `https://${baseUrl}`
+  }
+  return baseUrl.replace(/\/$/, '')
+}
+
 function getPayPalConfig() {
   const USE_SANDBOX = process.env.PAYPAL_MODE === 'sandbox'
   const clientId = USE_SANDBOX
@@ -103,16 +114,21 @@ export async function POST(request: Request) {
     )
 
     if (isAlreadyCaptured) {
-      await supabase.from('gumiho_payments').update({
-        status: 'completed',
-        completed_at: new Date().toISOString()
-      }).eq('paypal_order_id', orderId)
-
       const { data: existingPayment } = await supabase
         .from('gumiho_payments')
         .select('gumiho_question_id, submission_id')
         .eq('paypal_order_id', orderId)
         .single()
+
+      const reportUrl = existingPayment?.submission_id
+        ? `${getBaseUrl(request)}/ask-gumiho/${existingPayment.submission_id}/answers`
+        : null
+
+      await supabase.from('gumiho_payments').update({
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+        report_url: reportUrl,
+      }).eq('paypal_order_id', orderId)
 
       return NextResponse.json({ 
         success: true, 
@@ -132,11 +148,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Payment capture failed' }, { status: 400 })
     }
 
+    // submission_id를 조회해서 report_url 구성
+    const { data: paymentRow } = await supabase
+      .from('gumiho_payments')
+      .select('submission_id')
+      .eq('paypal_order_id', orderId)
+      .single()
+
+    const reportUrl = paymentRow?.submission_id
+      ? `${getBaseUrl(request)}/ask-gumiho/${paymentRow.submission_id}/answers`
+      : null
+
     const { data: payment, error: updateError } = await supabase
       .from('gumiho_payments')
       .update({
         status: 'completed',
-        completed_at: new Date().toISOString()
+        completed_at: new Date().toISOString(),
+        report_url: reportUrl,
       })
       .eq('paypal_order_id', orderId)
       .select('gumiho_question_id, submission_id')
