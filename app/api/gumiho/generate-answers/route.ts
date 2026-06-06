@@ -22,6 +22,9 @@ IMPORTANT GUIDELINES:
 9. Do not scare them. Do not make them confused. 
 10. Please wrap up the last paragraph of the answers as warm and encouraging with confidence.
 
+FYI
+1990-2030 Ganji: 庚午,辛未,壬申,癸酉,甲戌,乙亥,丙子,丁丑,戊寅,己卯,庚辰,辛巳,壬午,癸未,甲申,乙酉,丙戌,丁亥,戊子,己丑,庚寅,辛卯,壬辰,癸巳,甲午,乙未,丙申,丁酉,戊戌,己亥,庚子,辛丑,壬寅,癸卯,甲辰,乙巳,丙午,丁未,戊申,己酉,庚戌
+
 FORMAT YOUR RESPONSE AS JSON:
 {
   "answer_1": "Your detailed answer to question 1...",
