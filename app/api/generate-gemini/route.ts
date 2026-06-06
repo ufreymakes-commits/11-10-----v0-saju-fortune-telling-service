@@ -17,6 +17,9 @@ import { headers } from 'next/headers'
  * Model: google/gemini-3-flash (Gemini 3 Flash - 최신, 가장 빠르고 저렴)
  */
 
+// Vercel 함수 최대 실행 시간 (AI 응답이 느릴 때 타임아웃 500 에러 방지)
+export const maxDuration = 300
+
 export async function POST(request: Request) {
   try {
     const body = await request.json()
