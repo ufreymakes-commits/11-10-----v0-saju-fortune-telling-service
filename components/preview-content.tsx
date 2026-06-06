@@ -611,7 +611,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
               className="w-full h-full object-cover object-center"
             />
           </div>
-          <h4 className="text-sm font-semibold text-white mb-1">Signature Saju Elemental Bracelet</h4>
+          <h4 className="text-sm font-semibold text-white mb-1">Your Personal Lucky Element Bracelet</h4>
           <p className="text-xs text-white/60 mb-3">A signature bracelet designed to fill the missing energies in your personal Saju chart and attract good fortune.</p>
           <div className="flex items-end justify-between gap-3">
             <div className="flex flex-col gap-1.5">

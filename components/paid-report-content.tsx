@@ -282,7 +282,7 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
               />
             </div>
             <div className="p-4">
-              <h4 className="text-sm font-semibold text-foreground mb-1">Signature Saju Elemental Bracelet</h4>
+              <h4 className="text-sm font-semibold text-foreground mb-1">Your Personal Lucky Element Bracelet</h4>
               <p className="text-xs text-muted-foreground mb-3">A bracelet designed to fill the missing energies in your Saju chart.</p>
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-1.5">
