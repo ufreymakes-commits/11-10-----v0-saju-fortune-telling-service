@@ -33,6 +33,21 @@ export async function POST(request: Request) {
     if (!clientId || !clientSecret) return NextResponse.json({ error: 'Payment system not configured' }, { status: 500 })
 
     const supabase = createAdminClient()
+
+    // Idempotency guard: if this order is already completed, return success immediately
+    // without re-calling PayPal capture. This prevents a duplicate capture call from
+    // accidentally overwriting a successful payment as "failed".
+    const { data: existingRow } = await supabase
+      .from('compatibility_payments')
+      .select('status, submission_id')
+      .eq('paypal_order_id', orderId)
+      .single()
+
+    if (existingRow?.status === 'completed') {
+      console.log('[v0] Compatibility order already completed in DB, returning success:', orderId)
+      return NextResponse.json({ success: true, submissionId: existingRow.submission_id })
+    }
+
     const accessToken = await getPayPalAccessToken()
     if (!accessToken) return NextResponse.json({ error: 'Failed to authenticate with PayPal' }, { status: 500 })
 
@@ -52,7 +67,8 @@ export async function POST(request: Request) {
 
     // Check if order was already captured (this means payment was successful)
     const isAlreadyCaptured = captureData.details?.some(
-      (d: { issue?: string }) => d.issue === 'ORDER_ALREADY_CAPTURED'
+      (d: { issue?: string }) =>
+        d.issue === 'ORDER_ALREADY_CAPTURED' || d.issue === 'ORDER_ALREADY_COMPLETED'
     )
     
     if (isAlreadyCaptured) {
@@ -80,7 +96,14 @@ export async function POST(request: Request) {
         status: captureData.status,
         error: captureData.details || captureData.message || captureData
       })
-      await supabase.from('compatibility_payments').update({ status: 'failed' }).eq('paypal_order_id', orderId)
+      // IMPORTANT: never downgrade an already-completed payment to "failed".
+      // Only mark as failed if it is not already completed, to avoid the
+      // double-charge scenario where a retried capture overwrites a success.
+      await supabase
+        .from('compatibility_payments')
+        .update({ status: 'failed' })
+        .eq('paypal_order_id', orderId)
+        .neq('status', 'completed')
       return NextResponse.json({ error: 'Payment capture failed' }, { status: 400 })
     }
 

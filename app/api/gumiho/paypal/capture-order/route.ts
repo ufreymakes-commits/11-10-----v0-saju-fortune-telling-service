@@ -56,6 +56,24 @@ export async function POST(request: Request) {
 
     const supabase = await createClient()
 
+    // Idempotency guard: if this order is already completed, return success immediately
+    // without re-calling PayPal capture. Prevents a duplicate/retried capture call from
+    // overwriting a successful payment as "failed" (which causes double charges).
+    const { data: existingRow } = await supabase
+      .from('gumiho_payments')
+      .select('status, gumiho_question_id, submission_id')
+      .eq('paypal_order_id', orderId)
+      .single()
+
+    if (existingRow?.status === 'completed') {
+      console.log('[v0] Gumiho order already completed in DB, returning success:', orderId)
+      return NextResponse.json({
+        success: true,
+        gumihoQuestionId: gumihoQuestionId || existingRow.gumiho_question_id,
+        submissionId: existingRow.submission_id,
+      })
+    }
+
     const accessToken = await getPayPalAccessToken()
     if (!accessToken) {
       return NextResponse.json({ error: 'Failed to authenticate with PayPal' }, { status: 500 })
@@ -80,7 +98,8 @@ export async function POST(request: Request) {
 
     // Check if order was already captured
     const isAlreadyCaptured = captureData.details?.some(
-      (d: { issue?: string }) => d.issue === 'ORDER_ALREADY_CAPTURED'
+      (d: { issue?: string }) =>
+        d.issue === 'ORDER_ALREADY_CAPTURED' || d.issue === 'ORDER_ALREADY_COMPLETED'
     )
 
     if (isAlreadyCaptured) {
@@ -105,7 +124,11 @@ export async function POST(request: Request) {
     const validStatuses = ['COMPLETED', 'APPROVED']
     if (!captureResponse.ok || !validStatuses.includes(captureData.status)) {
       console.error('[v0] Gumiho PayPal capture failed:', captureData)
-      await supabase.from('gumiho_payments').update({ status: 'failed' }).eq('paypal_order_id', orderId)
+      await supabase
+        .from('gumiho_payments')
+        .update({ status: 'failed' })
+        .eq('paypal_order_id', orderId)
+        .neq('status', 'completed')
       return NextResponse.json({ error: 'Payment capture failed' }, { status: 400 })
     }
 
