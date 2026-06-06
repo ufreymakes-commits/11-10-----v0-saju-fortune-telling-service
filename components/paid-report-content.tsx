@@ -309,9 +309,8 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
           </div>
 
           {/* Saju Compatibility */}
-          <div className="bg-card border border-pink-500/30 rounded-xl p-4 shadow-sm">
-            <h4 className="text-sm font-semibold text-foreground mb-2">Saju Compatibility</h4>
-            <div className="relative w-full h-24 mb-2 rounded-lg overflow-hidden bg-[#1a1a2e]">
+          <div className="bg-card border border-pink-500/30 rounded-xl overflow-hidden shadow-sm">
+            <div className="relative w-full" style={{ aspectRatio: '796/531' }}>
               <Image
                 src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/29.png?v=1778483455"
                 alt="Relationship Compatibility"
@@ -319,17 +318,20 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
                 className="object-cover"
               />
             </div>
-            <p className="text-xs text-muted-foreground mb-2">Deep dive into your relationship dynamics and love compatibility.</p>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-pink-400">Compare two birth charts</span>
-              <span className="text-sm font-bold text-foreground">$19.99</span>
+            <div className="p-4">
+              <h4 className="text-sm font-semibold text-foreground mb-1">Saju Compatibility</h4>
+              <p className="text-xs text-muted-foreground mb-3">Deep dive into your relationship dynamics and love compatibility.</p>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs text-pink-400">Compare two birth charts</span>
+                <span className="text-sm font-bold text-foreground">$19.99</span>
+              </div>
+              <a
+                href="/compatibility"
+                className="w-full py-1.5 text-xs font-semibold border border-pink-500/40 rounded-lg hover:bg-pink-500/10 transition-colors text-pink-400 text-center block"
+              >
+                Shop Now (3 mins)
+              </a>
             </div>
-            <a
-              href="/compatibility"
-              className="w-full py-1.5 text-xs font-semibold border border-pink-500/40 rounded-lg hover:bg-pink-500/10 transition-colors text-pink-400 text-center block"
-            >
-              Shop Now (3 mins)
-            </a>
           </div>
 
           {/* 12-Month Fortune Subscription */}
