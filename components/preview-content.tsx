@@ -622,7 +622,10 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           <div className="flex items-end justify-between gap-3">
             <div className="flex flex-col gap-0.5">
               <span className="text-xs text-fuchsia-300">99 Facts customers only</span>
-              <span className="text-sm font-bold text-white">$9.99</span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-white/40 line-through">$19.99</span>
+                <span className="text-sm font-bold text-white">$9.99</span>
+              </div>
             </div>
             <button
               onClick={() => {
@@ -654,7 +657,10 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           <div className="flex items-end justify-between gap-3">
             <div className="flex flex-col gap-0.5">
               <span className="text-xs text-pink-300">Compare two birth charts</span>
-              <span className="text-sm font-bold text-white">$19.99</span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-white/40 line-through">$39.99</span>
+                <span className="text-sm font-bold text-white">$19.99</span>
+              </div>
             </div>
             <a
               href="/compatibility"

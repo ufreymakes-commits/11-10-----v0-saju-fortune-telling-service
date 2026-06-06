@@ -262,7 +262,10 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
                 <p className="text-xs text-muted-foreground mb-3">Your 3 Burning Questions Answered - Personalized guidance from the nine-tailed fox based on your complete Saju profile.</p>
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs text-primary">Personalized AI Reading</span>
-                  <span className="text-sm font-bold text-foreground">$9.99</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground line-through">$19.99</span>
+                    <span className="text-sm font-bold text-foreground">$9.99</span>
+                  </div>
                 </div>
                 <span className="w-full py-1.5 text-xs font-semibold border border-primary/40 rounded-lg hover:bg-primary/10 transition-colors text-primary text-center block">
                   Ask Now
@@ -323,7 +326,10 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
               <p className="text-xs text-muted-foreground mb-3">Deep dive into your relationship dynamics and love compatibility.</p>
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs text-pink-400">Compare two birth charts</span>
-                <span className="text-sm font-bold text-foreground">$19.99</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground line-through">$39.99</span>
+                  <span className="text-sm font-bold text-foreground">$19.99</span>
+                </div>
               </div>
               <a
                 href="/compatibility"
