@@ -585,6 +585,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center gap-2">
                 <span className="text-xs text-amber-300">Personalized to your Saju</span>
+                <span className="text-xs text-white/40 line-through">$50</span>
                 <span className="text-sm font-bold text-white">$38</span>
               </div>
               {/* Shopify badge */}
@@ -631,7 +632,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
               }}
               className="shrink-0 text-center py-2 px-4 rounded-lg text-xs font-semibold bg-fuchsia-500 hover:bg-fuchsia-400 text-white border border-fuchsia-400 transition-all"
             >
-              Ask Now
+              Ask Now (3 mins)
             </button>
           </div>
         </div>
