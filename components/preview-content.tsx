@@ -550,38 +550,6 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
         </div>
       </div>
 
-      {/* Ask the Gumiho 1:1 Card */}
-      <div className="mt-6">
-        <div className="bg-gradient-to-br from-fuchsia-900/40 to-purple-900/40 border border-fuchsia-500/30 rounded-xl p-5">
-          <h4 className="text-sm font-semibold text-white mb-3">Ask the Gumiho 1:1</h4>
-          <div className="relative w-full h-32 mb-3 rounded-lg overflow-hidden bg-[#1a1a2e]">
-            <Image
-              src="/images/ask-gumiho.png"
-              alt="Ask the Gumiho 1:1"
-              fill
-              className="object-cover"
-            />
-          </div>
-          <p className="text-xs text-white/60 mb-3">Your 3 Burning Questions Answered - Personalized guidance from the nine-tailed fox based on your complete Saju profile.</p>
-          <div className="flex items-end justify-between gap-3">
-            <div className="flex flex-col gap-0.5">
-              <span className="text-xs text-fuchsia-300">99 Facts customers only</span>
-              <span className="text-sm font-bold text-white">$9.99</span>
-            </div>
-            <button
-              onClick={() => {
-                if (typeof window !== 'undefined') {
-                  window.alert('This product is exclusively available to customers who have purchased the 99 Facts Report. Please purchase the 99 Facts Report first.')
-                }
-              }}
-              className="shrink-0 text-center py-2 px-4 rounded-lg text-xs font-semibold bg-fuchsia-500/20 hover:bg-fuchsia-500/30 text-fuchsia-200 border border-fuchsia-500/30 hover:border-fuchsia-400/60 transition-all"
-            >
-              Ask Now
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* Personal Luck Bracelet Card */}
       <div className="mt-8">
         <p className="text-lg font-semibold text-foreground mb-2 text-center">
@@ -632,7 +600,39 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
               </div>
             </div>
             {/* Shop Now button - bottom right */}
-            <a href="https://sajume.com/products/personal-luck-bracelet" target="_blank" rel="noopener noreferrer" className="shrink-0 text-center py-2 px-4 rounded-lg text-xs font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/30 hover:border-amber-400/60 transition-all">Shop Now</a>
+            <a href="https://sajume.com/products/personal-luck-bracelet" target="_blank" rel="noopener noreferrer" className="shrink-0 text-center py-2 px-4 rounded-lg text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-black border border-amber-400 transition-all">Shop Now</a>
+          </div>
+        </div>
+      </div>
+
+      {/* Ask the Gumiho 1:1 Card */}
+      <div className="mt-6">
+        <div className="bg-gradient-to-br from-fuchsia-900/40 to-purple-900/40 border border-fuchsia-500/30 rounded-xl p-5">
+          <h4 className="text-sm font-semibold text-white mb-3">Ask the Gumiho 1:1</h4>
+          <div className="relative w-full mb-3 rounded-lg overflow-hidden bg-[#1a1a2e]" style={{ aspectRatio: '796/531' }}>
+            <Image
+              src="/images/ask-gumiho.png"
+              alt="Ask the Gumiho 1:1"
+              fill
+              className="object-cover"
+            />
+          </div>
+          <p className="text-xs text-white/60 mb-3">Your 3 Burning Questions Answered - Personalized guidance from the nine-tailed fox based on your complete Saju profile.</p>
+          <div className="flex items-end justify-between gap-3">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-xs text-fuchsia-300">99 Facts customers only</span>
+              <span className="text-sm font-bold text-white">$9.99</span>
+            </div>
+            <button
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  window.alert('This product is exclusively available to customers who have purchased the 99 Facts Report. Please purchase the 99 Facts Report first.')
+                }
+              }}
+              className="shrink-0 text-center py-2 px-4 rounded-lg text-xs font-semibold bg-fuchsia-500 hover:bg-fuchsia-400 text-white border border-fuchsia-400 transition-all"
+            >
+              Ask Now
+            </button>
           </div>
         </div>
       </div>
@@ -641,7 +641,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
       <div className="mt-6">
         <div className="bg-gradient-to-br from-pink-900/40 to-rose-900/40 border border-pink-500/30 rounded-xl p-5">
           <h4 className="text-sm font-semibold text-white mb-3">Saju Compatibility</h4>
-          <div className="relative w-full h-32 mb-3 rounded-lg overflow-hidden bg-[#1a1a2e]">
+          <div className="relative w-full mb-3 rounded-lg overflow-hidden bg-[#1a1a2e]" style={{ aspectRatio: '796/531' }}>
             <Image
               src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/29.png?v=1778483455"
               alt="Relationship Compatibility"
@@ -657,7 +657,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
             </div>
             <a
               href="/compatibility"
-              className="shrink-0 text-center py-2 px-4 rounded-lg text-xs font-semibold bg-pink-500/20 hover:bg-pink-500/30 text-pink-200 border border-pink-500/30 hover:border-pink-400/60 transition-all"
+              className="shrink-0 text-center py-2 px-4 rounded-lg text-xs font-semibold bg-pink-500 hover:bg-pink-400 text-white border border-pink-400 transition-all"
             >
               Shop Now (3 mins)
             </a>
