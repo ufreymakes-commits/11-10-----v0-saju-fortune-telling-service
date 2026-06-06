@@ -267,8 +267,8 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
                     <span className="text-sm font-bold text-foreground">$9.99</span>
                   </div>
                 </div>
-                <span className="w-full py-1.5 text-xs font-semibold border border-primary/40 rounded-lg hover:bg-primary/10 transition-colors text-primary text-center block">
-                  Ask Now
+                <span className="w-full py-2 text-xs font-semibold bg-primary hover:bg-primary/90 rounded-lg transition-colors text-primary-foreground text-center block">
+                  Ask Now (3 mins)
                 </span>
               </div>
             </div>
@@ -298,13 +298,16 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
                   />
                   <span className="text-[10px] text-muted-foreground">Shop at Sajume Shopify</span>
                 </div>
-                <span className="text-sm font-bold text-foreground">$38</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground line-through">$50</span>
+                  <span className="text-sm font-bold text-foreground">$38</span>
+                </div>
               </div>
               <a
                 href="https://sajume.com/products/personal-luck-bracelet"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-1.5 text-xs font-semibold border border-border rounded-lg hover:bg-background/50 transition-colors text-foreground text-center block"
+                className="w-full py-2 text-xs font-semibold bg-amber-500 hover:bg-amber-400 rounded-lg transition-colors text-black text-center block"
               >
                 Shop Now
               </a>
@@ -333,7 +336,7 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
               </div>
               <a
                 href="/compatibility"
-                className="w-full py-1.5 text-xs font-semibold border border-pink-500/40 rounded-lg hover:bg-pink-500/10 transition-colors text-pink-400 text-center block"
+                className="w-full py-2 text-xs font-semibold bg-pink-500 hover:bg-pink-400 rounded-lg transition-colors text-white text-center block"
               >
                 Shop Now (3 mins)
               </a>
@@ -357,7 +360,7 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
               data-tally-emoji-text="👋"
               data-tally-emoji-animation="wave"
               onClick={() => handleNoticeMeClick('subscription')}
-              className="w-full py-1.5 text-xs font-semibold border border-border rounded-lg hover:bg-background/50 transition-colors text-foreground"
+              className="w-full py-2 text-xs font-semibold bg-blue-500 hover:bg-blue-400 rounded-lg transition-colors text-white"
             >
               Notice me
             </button>
