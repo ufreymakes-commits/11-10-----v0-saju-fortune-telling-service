@@ -307,7 +307,8 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
                 href="https://sajume.com/products/personal-luck-bracelet"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-2 text-xs font-semibold bg-amber-500 hover:bg-amber-400 rounded-lg transition-colors text-black text-center block"
+                style={{ backgroundColor: '#95BF47' }}
+                className="w-full py-2 text-xs font-semibold rounded-lg transition-opacity hover:opacity-90 text-white text-center block"
               >
                 Shop Now
               </a>
