@@ -998,7 +998,7 @@ OUTPUT FORMAT (JSON ONLY):
     })
 
     const stage2Result = await generateObject({
-      model: 'google/gemini-2.5-flash',
+      model: 'google/gemini-2.5-flash-lite',
       schema: factSchema,
       system: stage2SystemPrompt,
       prompt: stage2UserPrompt,
