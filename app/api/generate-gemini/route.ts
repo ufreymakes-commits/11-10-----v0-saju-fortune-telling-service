@@ -66,9 +66,6 @@ export async function POST(request: Request) {
 
     console.log(`[v0] Gemini: Generating 9 facts for ${name}`)
 
-    // ===== SYSTEM PROMPT (고정: 마스터피스 가이드 + 역할 정의) =====
-    const systemPrompt = `You will make a report with this 'pre-calculated Saju', DO NOT Calculate again.
-
     // ===== 십신 포맷팅: "비견 (3개), 식신 (2개)" 형식 =====
     // 십신별 개수 계산 (byPosition 기준 - 8개 위치에서 실제 개수 세기)
     const tenGodsCounts: Record<string, number> = {}
@@ -87,7 +84,7 @@ export async function POST(request: Request) {
 
     // 십신 포맷팅: "비견 (3개), 식신 (2개)" 형식
     const tenGodsFormatted = Object.entries(tenGodsCounts)
-      .map(([name, count]) => `${name} (${count}개)`)
+      .map(([name, count]) => name + " (" + count + "개)")
       .join(', ')
 
     const allSajuData = {
