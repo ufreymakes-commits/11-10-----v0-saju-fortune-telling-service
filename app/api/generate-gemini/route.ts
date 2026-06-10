@@ -1008,7 +1008,7 @@ OUTPUT FORMAT (JSON ONLY):
 
     console.log(`[v0] Gemini: Stage 2 completed, generated ${stage2Result.object.facts.length} facts`)
 
-    // Force exactly 9 facts (gemini-2.5-flash sometimes generates more)
+    // Force exactly 9 facts (gemini-2.5-flash-lite sometimes generates more)
     const rawFacts = stage2Result.object.facts.slice(0, 9)
     
     const facts: Fact[] = rawFacts.map((f: any) => ({
