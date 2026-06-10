@@ -371,14 +371,6 @@ Core Indicators: Spouse’s temperament, marital harmony, and inner interpersona
 
 Deep Insight: Analysis of Hidden Stems (Jijang-gan) for predicting emotional flow and marital dynamics.
 
-Case Study (Byeong-Sin Day Pillar):
-
-Day Branch Ten God: Indirect Wealth (Pyeon-jae).
-
-Spouse Image: Active, adventurous, and independent personality.
-
-Key Trait: Pursuit of large-scale opportunities over stable employment; shared lifestyle tendencies between self and spouse.
-
 2. Spouse Tendencies by the Ten Gods (Sipseong)
 Bi-gyeon (Friend): Peer-to-peer equality, high independence, and mutual respect with minimal interference.
 
