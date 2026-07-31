@@ -151,7 +151,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
     'Tracing your past struggles...',
     'Your new chapter is loading',
     'Vibe check almost complete!',
-    'Hold on, we're almost done!'
+    "Hold on, we're almost done!"
   ]
 
   // Rotate loading messages every 7 seconds
