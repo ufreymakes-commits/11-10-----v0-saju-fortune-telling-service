@@ -973,7 +973,7 @@ OUTPUT FORMAT (JSON ONLY):
         id: z.number(),
         title: z.string(),
         content: z.string()
-      })).length(3)
+      }))
     })
 
     const stage2Result = await generateObject({
