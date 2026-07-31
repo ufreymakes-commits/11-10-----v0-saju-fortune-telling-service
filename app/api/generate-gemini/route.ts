@@ -925,32 +925,28 @@ Language: English only.
 
     const stage2UserPrompt = `
 ===========================================
-[STAGE 2: 9가지 팩트 생성]
+[STAGE 2: 3가지 팩트 생성]
 ===========================================
 
 Customer Name: ${name}
 
 앞서 작성된 '심화 분석 보고서'를 완벽하게 씹어먹고 숙지하라.
-이제 이 내용을 바탕으로 유저에게 줄 9가지 사실을 기깔나게 작성하라. 너의 실력을 보여줘 Gemini. 각 사실은 공백 포함 200자 이내의 영어 문장이여야 한다.
-이건 유료 레포트를 전환시키기 위해서 작성되는 9개의 무료 샘플 레포트이기 때문에, 고객이 이것을 읽고 더 많은 내용이 담겨있는 유료 레포트도 궁금하게끔 해야한다. 
+이제 이 내용을 바탕으로 유저에게 줄 3가지 사실을 기깔나게 작성하라. 너의 실력을 보여줘 Gemini. 각 사실은 공백 포함 200자 이내의 영어 문장이여야 한다.
+이건 유료 레포트를 전환시키기 위해서 작성되는 3개의 무료 샘플 레포트이기 때문에, 고객이 이것을 읽고 더 많은 내용이 담겨있는 유료 레포트도 궁금하게끔 해야한다. 
 
 and The goal is not to sound 'just' positive.
 The goal is to sound true.
 
-IMPORTANT: Use the customer's name (${name}) ONLY in the FIRST sentence (id: 1) and the LAST sentence (id: 9) to make it personal. Do NOT use the name in any other sentences.
+IMPORTANT: Use the customer's name (${name}) ONLY in the FIRST sentence (id: 1) and the LAST sentence (id: 3) to make it personal. Do NOT use the name in the middle sentence (id: 2).
 Example: "Hey ${name}, ..." for the first fact, and "${name}, remember that..." for the last fact.
 
-테마: 커리어/연애/인생/건강/위로와 응원
-인생을 살면서 늘 궁금해하거나 고민하는 삶의 현상으로 보이는 현실에 대한 9가지 팩트이자 위로와 공감이어야 한다. 글을 읽자마자 이렇게 느껴야 한다. '뭐야? 나에 대해서 어떻게 알았지? 이거 뭐야 완전 eerie 하네. 근데 또 엄청 위로가 되고 내 지난 날의 괴로움과 고통에 대해서 누구보다 정확하게 어루만져줘서 눈물이 나려하네. 응원을 받았어. 이 서비스 정말 감동적이다.'
+테마: 성격(Personality) / 직업(Career Path) / 인생 터닝포인트(Life Turning Points)
+인생을 살면서 늘 궁금해하거나 고민하는 삶의 현상으로 보이는 현실에 대한 3가지 팩트이자 위로와 공감이어야 한다. 글을 읽자마자 이렇게 느껴야 한다. '뭐야? 나에 대해서 어떻게 알았지? 이거 뭐야 완전 eerie 하네. 근데 또 엄청 위로가 되고 내 지난 날의 괴로움과 고통에 대해서 누구보다 정확하게 어루만져줘서 눈물이 나려하네. 응원을 받았어. 이 서비스 정말 감동적이다.'
 
 [🚫 절대 주의사항 (결제 전환율을 위한 필수 제약)]
 - 현재의 구체적 상황(예: 너 지금 솔로지?)이나 미래에 대한 구체적 예언을 절대 하지 말 것. 틀리면 고객이 즉각 이탈함. 철저히 '행동 패턴'과 '심리 기질'에만 집중할 것.
-- 4번(Career Path): 직업명(예: Project Manager, Doctor 등)을 절대 직접적으로 언급하지 말 것! 대신 고객이 어떤 '업무 환경(구조적 적합성)'에서 스트레스를 받고, 어떤 '일하는 방식(재능적 두각)'에서 가장 빛나는지 그 패턴을 이 사람의 사주 해설지를 확인한 후 구체적이고 사실적으로 묘사할 것.
-- 7번(Life Turning Points): 어떤 종류의 터닝포인트인지는 구체적으로 얘기해주되, 구체적인 연도나 나이를 절대로 스포일러 하지 말 것! (예: 2026년에 조심해라, 38살에 만난다 등 금지).대신 예를 들어 "몇년 안에 ~ 이런 터닝포인트가 다가오고 있고, ~이런 문제를 해결하게 된다."등의 강력한 호기심(Curiosity Gap)만 유발하여 유료 결제를 유도할 것.
-
-8번 문장은 모든 사람에게 반드시 이렇게 동일한 포맷의 문장이 나가야 한다. "Did you know that among Fire, Water, Wood, Metal, and Earth, the closer you stay to ${yongsinElement} , the luckier you become?"
-
-이 때 용신의 경우, 사주에 조후(추위/더위) 문제가 심각하다면, 반드시 조후용신의 오행을 ${yongsinElement}에 넣을 것. 조후가 원만하다면(봄/가을생 등), 억부용신의 오행을 ${yongsinElement}에 넣을 것. 만약 조후용신이 '병(丙)'이나 '사(巳)'처럼 글자로 되어 있다면, 이를 오행 영어(Fire, Water, Wood, Metal, Earth) 명칭으로 매핑해서 변환해서 단 1개의 오행 요소만을 넣을 것.
+- 2번(Career Path): 직업명(예: Project Manager, Doctor 등)을 절대 직접적으로 언급하지 말 것! 대신 고객이 어떤 '업무 환경(구조적 적합성)'에서 스트레스를 받고, 어떤 '일하는 방식(재능적 두각)'에서 가장 빛나는지 그 패턴을 이 사람의 사주 해설지를 확인한 후 구체적이고 사실적으로 묘사할 것.
+- 3번(Life Turning Points): 어떤 종류의 터닝포인트인지는 구체적으로 얘기해주되, 구체적인 연도나 나이를 절대로 스포일러 하지 말 것! (예: 2026년에 조심해라, 38살에 만난다 등 금지).대신 예를 들어 "몇년 안에 ~ 이런 터닝포인트가 다가오고 있고, ~이런 문제를 해결하게 된다."등의 강력한 호기심(Curiosity Gap)만 유발하여 유료 결제를 유도할 것.
 
 === 심화 분석 보고서 ===
 ${JSON.stringify(deepAnalysis, null, 2)}
@@ -963,14 +959,8 @@ OUTPUT FORMAT (JSON ONLY):
 {
   "facts": [
     {"id": 1, "title": "[Personality/Energy]", "content": "[2 sentences]"},
-    {"id": 2, "title": "[Inner World]", "content": "[2 sentences]"},
-    {"id": 3, "title": "[Social Dynamics]", "content": "[2 sentences]"},
-    {"id": 4, "title": "[Career Path]", "content": "[2 sentences: 구조적 적합성 + 재능적 두각]"},
-    {"id": 5, "title": "[Love & Relationships]", "content": "[2 sentences]"},
-    {"id": 6, "title": "[Health & Wellbeing]", "content": "[2 sentences]"},
-    {"id": 7, "title": "[Life Turning Points]", "content": "[2 sentences with specific years]"},
-    {"id": 8, "title": "[Hidden Strengths]", "content": "[2 sentences]"},
-    {"id": 9, "title": "[Words of Comfort]", "content": "[2 sentences: 위로와 응원]"}
+    {"id": 2, "title": "[Career Path]", "content": "[2 sentences: 구조적 적합성 + 재능적 두각]"},
+    {"id": 3, "title": "[Life Turning Points]", "content": "[2 sentences: 강력한 Curiosity Gap + 위로와 응원]"}
   ]
 }
 \`\`\`
@@ -983,7 +973,7 @@ OUTPUT FORMAT (JSON ONLY):
         id: z.number(),
         title: z.string(),
         content: z.string()
-      })).length(9)
+      })).length(3)
     })
 
     const stage2Result = await generateObject({
@@ -997,8 +987,8 @@ OUTPUT FORMAT (JSON ONLY):
 
     console.log(`[v0] Gemini: Stage 2 completed, generated ${stage2Result.object.facts.length} facts`)
 
-    // Force exactly 9 facts (gemini-2.5-flash sometimes generates more)
-    const rawFacts = stage2Result.object.facts.slice(0, 9)
+    // Force exactly 3 facts (gemini-2.5-flash sometimes generates more)
+    const rawFacts = stage2Result.object.facts.slice(0, 3)
     
     const facts: Fact[] = rawFacts.map((f: any) => ({
       id: f.id,
@@ -1007,7 +997,7 @@ OUTPUT FORMAT (JSON ONLY):
       title: f.title
     }))
 
-    console.log(`[v0] Gemini: Using ${facts.length} facts (limited to 9)`)
+    console.log(`[v0] Gemini: Using ${facts.length} facts (limited to 3)`)
 
     // ===== DB에 무료 레포트 저장 (유료 ��포트 생성 시 context로 사용) =====
     if (body.submissionId) {
@@ -1016,12 +1006,12 @@ OUTPUT FORMAT (JSON ONLY):
       // 1500자 해설 역할을 하는 deepAnalysis를 문자열로 저장
       const contextInterpretation = JSON.stringify(deepAnalysis)
 
-      // 9개 사실을 4개 섹션으로 분배 (3개씩)
-      const sectionKeys = ['personality', 'career', 'love']
+      // 3개 사실을 3개 섹션으로 분배 (1개씩): 성격 / 직업 / 인생 터닝포인트
+      const sectionKeys = ['personality', 'career', 'life']
       const factsBySection: Record<string, Fact[]> = {}
 
       sectionKeys.forEach((key, idx) => {
-        factsBySection[key] = facts.slice(idx * 3, (idx + 1) * 3)
+        factsBySection[key] = facts.slice(idx * 1, (idx + 1) * 1)
       })
 
       // 각 섹션을 DB에 저장 또는 업데이트
@@ -1055,19 +1045,8 @@ OUTPUT FORMAT (JSON ONLY):
         }
       }
 
-      // Force Fact 8 to use the computed yongsinElement (AI sometimes ignores the prompt)
-      const fact8 = facts.find((f: { id: number; text?: string }) => f.id === 8)
-      if (fact8 && fact8.text) {
-        const fact8Match = fact8.text.match(/closer you stay to\s+([A-Za-z]+)/i)
-        const aiYongsin = fact8Match?.[1]
-        if (aiYongsin && aiYongsin.toLowerCase() !== yongsinElement.toLowerCase()) {
-          console.log(`[v0] Gemini: AI used wrong yongsin (${aiYongsin}), forcing to computed value (${yongsinElement})`)
-          fact8.text = fact8.text.replace(
-            /closer you stay to\s+[A-Za-z]+/i,
-            `closer you stay to ${yongsinElement}`
-          )
-        }
-      }
+      // 용신(yongsin)은 fact가 아니라 사주 데이터에서 직접 계산된 값을 사용한다.
+      // (팔찌 업셀 문구가 submission.sajuData.yongsin 값을 읽어 개인화됨)
       resolvedYongsin = yongsinElement
 
       // yongsinElement를 submission의 saju_data에 저장 (캐시 로드 시 사용)

@@ -319,8 +319,8 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
       {/* Free Facts */}
       <div className="mb-6">
         <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
-          <span className="text-gradient">9 Free Insights</span>
-          <span className="text-[10px] bg-accent/20 text-accent px-2 py-0.5 rounded">FREE</span>
+          <span className="text-gradient">3 Free Insights First!</span>
+          <span className="text-[10px] font-bold bg-accent/20 text-accent px-2 py-0.5 rounded border border-accent/50">FREE</span>
         </h2>
         
         <div className="space-y-2">
@@ -557,10 +557,8 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
         </p>
         <p className="text-sm text-muted-foreground text-center mb-4 leading-relaxed">
           {(() => {
-            // Extract yongsin directly from Fact 8 text to guarantee consistency
-            const fact8 = data?.freeFacts?.find(f => f.id === 8)
-            const match = fact8?.content?.match(/closer you stay to\s+([A-Za-z]+)/i)
-            const yongsin = match?.[1] || submission.sajuData?.yongsin || submission.sajuData?.luckyElement || 'Water'
+            // 용신은 사주 데이터에서 직접 계산된 값을 사용 (무료 fact가 3개로 줄어 fact 8이 없음)
+            const yongsin = submission.sajuData?.yongsin || submission.sajuData?.luckyElement || 'Water'
             return (
               <>
                 Did you know that among Fire, Water, Wood, Metal, and Earth,<br className="hidden md:inline" />
