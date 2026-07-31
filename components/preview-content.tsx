@@ -146,7 +146,12 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
     'Decoding your Five Elements...',
     'Wait, this chart actually hits different..',
     'Mapping out your timeline..',
-    'Vibe check complete!'
+    'Scanning your hidden dynamics',
+    'Unlocking your true potential...',
+    'Tracing your past struggles...',
+    'Your new chapter is loading',
+    'Vibe check almost complete!',
+    'Hold on, we're almost done!',
   ]
 
   // Rotate loading messages every 7 seconds
