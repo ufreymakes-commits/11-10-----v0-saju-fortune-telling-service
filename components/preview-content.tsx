@@ -139,6 +139,26 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
   const [data, setData] = useState<PreviewData | null>(cachedData || null)
   const [isLoading, setIsLoading] = useState(!cachedData)
   const [error, setError] = useState<string | null>(null)
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0)
+
+  const loadingMessages = [
+    'Your Main Character is stepping in...',
+    'Decoding your Five Elements...',
+    'Wait, this chart actually hits different..',
+    'Mapping out your timeline..',
+    'Vibe check complete!'
+  ]
+
+  // Rotate loading messages every 7 seconds
+  useEffect(() => {
+    if (!isLoading) return
+
+    const interval = setInterval(() => {
+      setLoadingMessageIndex((prev) => (prev + 1) % loadingMessages.length)
+    }, 7000)
+
+    return () => clearInterval(interval)
+  }, [isLoading, loadingMessages.length])
 
   useEffect(() => {
     // If we have cached data, skip API call
@@ -232,7 +252,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           </div>
           
           <h2 className="text-lg font-semibold text-foreground mb-2">
-            Your Main Character is stepping in...
+            {loadingMessages[loadingMessageIndex]}
           </h2>
           <div className="flex items-center justify-center gap-2 mb-3">
             <Spinner className="w-5 h-5" />
