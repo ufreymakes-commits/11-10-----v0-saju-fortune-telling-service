@@ -62,7 +62,7 @@ export default function StartPage() {
         
         {/* Subtitle */}
         <p className="text-white text-center mb-6 text-sm md:text-base font-medium">
-          No Sign-up, 9 Free Facts
+          No Sign-up, Free Saju Chart
         </p>
 
         {/* Form Card */}
@@ -193,8 +193,8 @@ export default function StartPage() {
                 href="#top"
                 className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-semibold text-base shadow-lg shadow-purple-900/40 hover:from-purple-500 hover:to-fuchsia-500 transition-all hover:scale-105"
               >
-                Get 9 Facts For Free
-                <span className="text-white/70 font-normal text-sm">(1 min)</span>
+                  Get Your Free Saju Chart
+                  <span className="text-white/70 font-normal text-sm">(1 min)</span>
               </Link>
             </div>
           </div>
@@ -218,7 +218,7 @@ export default function StartPage() {
                 </div>
                 <p className="text-sm text-white/70 mb-3 flex-grow">Deep dive into your complete birth chart with 99 personalized insights.</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-purple-300">9 free + 90 premium</span>
+                  <span className="text-xs text-purple-300">99 facts</span>
                   <span className="text-lg font-bold text-white">$9.99</span>
                 </div>
               </div>

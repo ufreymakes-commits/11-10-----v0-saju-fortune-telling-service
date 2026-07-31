@@ -124,14 +124,14 @@ export default function LandingPage() {
             href="/start"
             className="inline-flex items-center gap-2 bg-pink-400 text-white px-6 py-2.5 rounded-full text-sm md:text-base font-semibold hover:bg-pink-500 transition-all hover:scale-105 shadow-lg shadow-pink-500/30"
           >
-            Get 9 Facts For Free (1 min)
+            Get Your Free Saju Chart (1 min)
             <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
               <path d="M7 4L13 10L7 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </Link>
           
           <p className="mt-4 text-xs md:text-sm text-white/40">
-            9 facts free | Full report $9.99
+            Free Saju chart | 99 Facts report $9.99
           </p>
         </div>
       </section>
@@ -184,7 +184,7 @@ export default function LandingPage() {
                 </div>
                 <p className="text-sm text-white/70 mb-3 flex-grow">Deep dive into your complete birth chart with 99 personalized insights.</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-purple-300">9 free + 90 premium</span>
+                  <span className="text-xs text-purple-300">99 facts</span>
                   <span className="text-lg font-bold text-white">$9.99</span>
                 </div>
               </div>
@@ -385,13 +385,13 @@ src="/images/shopify-logo.png"
                 href="/start"
                 className="inline-flex items-center gap-2 bg-pink-400 text-white px-6 py-2.5 rounded-full text-sm md:text-base font-semibold hover:bg-pink-500 transition-all hover:scale-105 shadow-lg shadow-pink-500/30"
               >
-                Get 9 Facts For Free (1 min)
+                Get Your Free Saju Chart (1 min)
                 <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
                   <path d="M7 4L13 10L7 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </Link>
               <p className="mt-4 text-xs md:text-sm text-white/40">
-                9 facts free | Full report $9.99
+                Free Saju chart | 99 Facts report $9.99
               </p>
             </div>
           </div>
