@@ -111,7 +111,7 @@ export async function POST(request: Request) {
         description: `Sajume 99 Facts Birth Chart Report for ${submission.name}`,
         amount: {
           currency_code: 'USD',
-          value: '9.99'
+          value: '19.99'
         }
       }],
       application_context: {
@@ -151,7 +151,7 @@ export async function POST(request: Request) {
     await supabase.from('payments').insert({
       submission_id: submissionId,
       paypal_order_id: orderData.id,
-      amount: 9.99,
+      amount: 19.99,
       currency: 'USD',
       status: 'pending'
     })

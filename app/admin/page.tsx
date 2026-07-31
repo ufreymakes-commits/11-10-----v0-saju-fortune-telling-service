@@ -28,8 +28,8 @@ interface Stats {
 const MONTHLY_OPS_USD = 45 // Vercel Pro $20 + Supabase Pro $25
 // AI Gateway: 결제 1건당 약 $0.024 (유료 레포트 생성 비용)
 const AI_COST_PER_PAID = 0.024
-// PayPal 수수료 제외 순수액
-const NET_PER_SALE = 9.25
+// PayPal 수수료 제외 순수액 ($19.99 - PayPal 수수료 약 $1.19)
+const NET_PER_SALE = 18.80
 
 // ISO 국가 코드 → 국기 이모지
 function countryFlag(code: string) {
@@ -146,7 +146,7 @@ export default function AdminPage() {
 
   // 매출 계산 = PayPal 결제 완료 수 기준 (payments 테이블 status='completed')
   const paidCount = totalPayments
-  const grossRevenue = paidCount * 9.99
+  const grossRevenue = paidCount * 19.99
   const netRevenue = paidCount * NET_PER_SALE
   const aiCost = paidCount * AI_COST_PER_PAID
   const netAfterOps = netRevenue - aiCost - MONTHLY_OPS_USD
@@ -232,7 +232,7 @@ export default function AdminPage() {
               <p className="text-xs text-gray-400 mb-1">총 매출액</p>
               <p className="text-xl font-bold text-gray-900">{formatUSD(grossRevenue)}</p>
               {krwGross !== null && <p className="text-xs text-blue-500 mt-1">{formatKRW(krwGross)}</p>}
-              <p className="text-[10px] text-gray-300 mt-1">{paidCount}건 × $9.99</p>
+                  <p className="text-[10px] text-gray-300 mt-1">{paidCount}건 × $19.99</p>
             </div>
             <div className="border border-gray-100 rounded-lg p-4">
               <p className="text-xs text-gray-400 mb-1">PayPal 수수료 제외</p>
@@ -286,7 +286,7 @@ export default function AdminPage() {
                   Object.entries(stats.monthlyPaidCounts || {})
                     .sort((a, b) => b[0].localeCompare(a[0]))
                     .map(([month, count], i) => {
-                      const gross = count * 9.99
+                      const gross = count * 19.99
                       const net = count * NET_PER_SALE - count * AI_COST_PER_PAID - MONTHLY_OPS_USD
                       const krw = krwRate ? net * krwRate : null
                       const [y, m] = month.split('-')

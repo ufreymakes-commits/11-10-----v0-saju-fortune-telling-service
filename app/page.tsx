@@ -131,7 +131,7 @@ export default function LandingPage() {
           </Link>
           
           <p className="mt-4 text-xs md:text-sm text-white/40">
-            Free Saju chart | 99 Facts report $9.99
+            Free Saju chart | 99 Facts report $19.99
           </p>
         </div>
       </section>
@@ -185,7 +185,7 @@ export default function LandingPage() {
                 <p className="text-sm text-white/70 mb-3 flex-grow">Deep dive into your complete birth chart with 99 personalized insights.</p>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-purple-300">99 facts</span>
-                  <span className="text-lg font-bold text-white">$9.99</span>
+                  <span className="text-lg font-bold text-white">$19.99</span>
                 </div>
               </div>
             </Link>
@@ -391,7 +391,7 @@ src="/images/shopify-logo.png"
                 </svg>
               </Link>
               <p className="mt-4 text-xs md:text-sm text-white/40">
-                Free Saju chart | 99 Facts report $9.99
+            Free Saju chart | 99 Facts report $19.99
               </p>
             </div>
           </div>

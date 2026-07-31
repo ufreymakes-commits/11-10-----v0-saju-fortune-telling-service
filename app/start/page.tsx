@@ -219,7 +219,7 @@ export default function StartPage() {
                 <p className="text-sm text-white/70 mb-3 flex-grow">Deep dive into your complete birth chart with 99 personalized insights.</p>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-purple-300">99 facts</span>
-                  <span className="text-lg font-bold text-white">$9.99</span>
+                  <span className="text-lg font-bold text-white">$19.99</span>
                 </div>
               </div>
             </Link>

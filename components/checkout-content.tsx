@@ -166,14 +166,14 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
             <p className="text-sm text-muted-foreground">Personalized Saju analysis</p>
           </div>
           <div className="text-right">
-            <p className="text-muted-foreground line-through text-sm">$19.99</p>
-            <p className="text-lg font-bold text-secondary">$9.99</p>
+            <p className="text-muted-foreground line-through text-sm">$39.99</p>
+            <p className="text-lg font-bold text-secondary">$19.99</p>
           </div>
         </div>
         
         <div className="border-t border-border/30 pt-4 flex justify-between items-center">
           <span className="font-medium">Total</span>
-          <span className="text-xl font-bold text-gradient">$9.99 USD</span>
+          <span className="text-xl font-bold text-gradient">$19.99 USD</span>
         </div>
       </div>
 
