@@ -9,11 +9,11 @@ import { AskGumihoProductCard } from '@/components/ask-gumiho-product-card'
 // 텍스트 기반 리뷰 데이터 (preview-content와 동일)
 const TEXT_REVIEWS = [
   // Row 1 (id 0–16)
-  { id: 0,  text: "I started with the free 9 facts first because I was skeptical and was surprised by how accurate the information I got back was, it was almost scary. I ended up getting the 99 facts and everything I been through and am currently going through was mentioned and it gave me a lot of clarity. Thank you so much for this! I've been lost trying to figure out a lot of things and this helped a lot.", name: "Jasmine S.", country: "NY, US", flag: "🇺🇸", date: "Apr 25, 2026" },
+  { id: 0,  text: "I started with the free facts first because I was skeptical and was surprised by how accurate the information I got back was, it was almost scary. I ended up getting the 99 facts and everything I been through and am currently going through was mentioned and it gave me a lot of clarity. Thank you so much for this! I've been lost trying to figure out a lot of things and this helped a lot.", name: "Jasmine S.", country: "NY, US", flag: "🇺🇸", date: "Apr 25, 2026" },
   { id: 100, text: "My JAW dropped! I was so shocked to see how much everything aligned. This reading was like none other.", name: "Salina Chang", country: "US", flag: "🇺🇸", date: "May 7, 2026" },
   { id: 101, text: "Wow almost every single point of the 99 facts was spot on. Will be purchasing more reports in the future.", name: "Mika", country: "Philippines", flag: "🇵🇭", date: "May 7, 2026" },
   { id: 102, text: "was abit skeptical at first but i decided to give it a try, and the reading turns out to be pretty accurate (more accurate than some of the fortune tellers i go to) and honestly, this is worth giving it a try to find out about ur fortune reading!", name: "Joey Chua", country: "Singapore", flag: "🇸🇬", date: "May 6, 2026" },
-  { id: 1,  text: "I received the free 9 Facts First, due to worry that this was going to be a bit like a scam. Once I read through the 9 facts, I was intrigued and purchased the 99 Report. I'm glad I did. There's so much in here and I felt called out, lol. I really was shocked at how accurately it read me.", name: "Emily W", country: "NY, US", flag: "🇺🇸", date: "Apr 16, 2026" },
+  { id: 1,  text: "I received the free Facts First, due to worry that this was going to be a bit like a scam. Once I read through the free facts, I was intrigued and purchased the 99 Report. I'm glad I did. There's so much in here and I felt called out, lol. I really was shocked at how accurately it read me.", name: "Emily W", country: "NY, US", flag: "🇺🇸", date: "Apr 16, 2026" },
   { id: 2,  text: "I really enjoyed reading this Saju packet. The fact-based format made it feel engaging, personal, and easy to connect with. I began highlighting the points that felt accurate, but quickly realized I had highlighted almost every page.", name: "Hannah", country: "LA, US", flag: "🇺🇸", date: "Apr 10, 2026" },
   { id: 3,  text: "This was great insight. I definitely felt some feeling were validated.", name: "Jessica", country: "Chicago, US", flag: "🇺🇸", date: "Apr 1, 2026" },
   { id: 4,  text: "When I started reading the 99 Facts, most of them were unbelievably true to me. It's good to know what my past has been based on the charts and what the current and future look like.", name: "Tao Mon Lae", country: "Myanmar", flag: "🇲🇲", date: "Apr 1, 2026" },
@@ -24,7 +24,7 @@ const TEXT_REVIEWS = [
   { id: 9,  text: "The 99 Facts report was concise and exactly what I needed. I would highly recommend it.", name: "Simon", country: "LA, US", flag: "🇺🇸", date: "Mar 4, 2026" },
   { id: 10, text: "The 99 facts premium version is the real deal - I got it at the discounted price, but I wouldn't mind purchasing it again at its original price.", name: "Natalie", country: "Singapore", flag: "🇸🇬", date: "Mar 4, 2026" },
   { id: 11, text: "I loved it! It's very precise.", name: "Cecilia Mamani", country: "Chile", flag: "🇨🇱", date: "Mar 4, 2026" },
-  { id: 12, text: "I tried the sample 9 facts before purchasing the full report and that alone blew my mind. It's made me curious to try the full in depth report because of how scarily accurate it was.", name: "Alyssa", country: "LA, US", flag: "🇺🇸", date: "Mar 27, 2026" },
+  { id: 12, text: "I tried the sample free facts before purchasing the full report and that alone blew my mind. It's made me curious to try the full in depth report because of how scarily accurate it was.", name: "Alyssa", country: "LA, US", flag: "🇺🇸", date: "Mar 27, 2026" },
   { id: 13, text: "Like others have said, it is scarily accurate. It also gave me some clarity and confirmation that I am where I'm supposed to be right now. There's also some great advice that I'll definitely follow.", name: "Hannah", country: "LA, US", flag: "🇺🇸", date: "Mar 21, 2026" },
   // Row 2 (id 14–)
   { id: 14, text: "It was scary accurate on so many things. But now it makes me really think about my future much more now because it was truly hit on a few things I have been thinking about for months.", name: "Meng", country: "Chicago, US", flag: "🇺🇸", date: "Mar 31, 2026" },
@@ -35,7 +35,7 @@ const TEXT_REVIEWS = [
   { id: 19, text: "Great report!", name: "Nom", country: "Vietnam", flag: "🇻🇳", date: "Mar 20, 2026" },
   { id: 20, text: "The reports brought up a lot that I pushed aside. Made me more introspective of how I want to move forward.", name: "Esther", country: "NY, US", flag: "🇺🇸", date: "Mar 20, 2026" },
   { id: 21, text: "Wow almost every single point of the 99 facts was spot on. Will be purchasing more reports in the future.", name: "Nicko", country: "Iran", flag: "🇮🇷", date: "Mar 20, 2026" },
-  { id: 22, text: "It's crazy how accurate the facts are. Just with the first 9 facts, I got goosebumps with the accuracy!!", name: "Yin May Thinn", country: "Myanmar", flag: "🇲🇲", date: "Mar 18, 2026" },
+  { id: 22, text: "It's crazy how accurate the facts are. Just with the first free facts, I got goosebumps with the accuracy!!", name: "Yin May Thinn", country: "Myanmar", flag: "🇲🇲", date: "Mar 18, 2026" },
   { id: 23, text: "I did this on a whim and received the full report within 30 min. It was eerily accurate, just as advertised. I've been to multiple different fortune tellers and not one of them has given me actual timelines.", name: "Yvonne", country: "LA, US", flag: "🇺🇸", date: "Mar 18, 2026" },
   { id: 24, text: "This was extremely helpful and insightful. If you're going to purchase a detailed reading, I highly recommend choosing the Premium option. It really helped me understand myself better.", name: "Anonymous", country: "US", flag: "🇺🇸", date: "Jan 31, 2026" },
 ]
@@ -124,14 +124,14 @@ export default function LandingPage() {
             href="/start"
             className="inline-flex items-center gap-2 bg-pink-400 text-white px-6 py-2.5 rounded-full text-sm md:text-base font-semibold hover:bg-pink-500 transition-all hover:scale-105 shadow-lg shadow-pink-500/30"
           >
-            Get Your Free Saju Chart (1 min)
+            Get Your First 3 Facts (1 min)
             <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
               <path d="M7 4L13 10L7 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </Link>
           
           <p className="mt-4 text-xs md:text-sm text-white/40">
-            Free Saju chart | 99 Facts report $19.99
+            First 3 Facts | 99 Facts report $19.99
           </p>
         </div>
       </section>
@@ -385,13 +385,13 @@ src="/images/shopify-logo.png"
                 href="/start"
                 className="inline-flex items-center gap-2 bg-pink-400 text-white px-6 py-2.5 rounded-full text-sm md:text-base font-semibold hover:bg-pink-500 transition-all hover:scale-105 shadow-lg shadow-pink-500/30"
               >
-                Get Your Free Saju Chart (1 min)
+                Get Your First 3 Facts (1 min)
                 <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
                   <path d="M7 4L13 10L7 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </Link>
               <p className="mt-4 text-xs md:text-sm text-white/40">
-            Free Saju chart | 99 Facts report $19.99
+            First 3 Facts | 99 Facts report $19.99
               </p>
             </div>
           </div>

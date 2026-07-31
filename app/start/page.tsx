@@ -62,7 +62,7 @@ export default function StartPage() {
         
         {/* Subtitle */}
         <p className="text-white text-center mb-6 text-sm md:text-base font-medium">
-          No Sign-up, Free Saju Chart
+          No Sign-up, First 3 Facts
         </p>
 
         {/* Form Card */}
@@ -193,7 +193,7 @@ export default function StartPage() {
                 href="#top"
                 className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-semibold text-base shadow-lg shadow-purple-900/40 hover:from-purple-500 hover:to-fuchsia-500 transition-all hover:scale-105"
               >
-                  Get Your Free Saju Chart
+                  Get Your First 3 Facts
                   <span className="text-white/70 font-normal text-sm">(1 min)</span>
               </Link>
             </div>
