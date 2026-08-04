@@ -404,52 +404,6 @@ Generate both the 90 main facts and the 3 hidden cards now as a single JSON obje
       return NextResponse.json({ error: 'Failed to parse AI response' }, { status: 500 })
     }
       
-      // 시도 3: ``` ... ``` 형식 (json 키워드 없음)
-      if (!jsonMatch) {
-        jsonMatch = rawResponse.match(/```\n?([\s\S]*?)\n?```/)
-      }
-      
-      // 시도 4: [ ... ] 직접 매칭 (배열의 시작과 끝을 정확히 찾기)
-      if (!jsonMatch) {
-        // 마지막 닫는 대괄호 위치를 찾아서 정확히 추출
-        const startIdx = rawResponse.indexOf('[')
-        if (startIdx !== -1) {
-          let bracketCount = 0
-          let endIdx = -1
-          for (let i = startIdx; i < rawResponse.length; i++) {
-            if (rawResponse[i] === '[') bracketCount++
-            if (rawResponse[i] === ']') bracketCount--
-            if (bracketCount === 0) {
-              endIdx = i
-              break
-            }
-          }
-          if (endIdx !== -1) {
-            jsonMatch = [null, rawResponse.substring(startIdx, endIdx + 1)]
-          }
-        }
-      }
-      
-      if (!jsonMatch || !jsonMatch[1]) {
-        console.error('[v0] No valid JSON found in response')
-        console.error('[v0] Raw response preview:', rawResponse.substring(0, 1000))
-        throw new Error('No JSON array found in response')
-      }
-      
-      // JSON 문자열 정제 (불필���한 whitespace 제거)
-      const jsonString = jsonMatch[1].trim()
-      console.log('[v0] Extracted JSON length:', jsonString.length)
-      
-      paidFacts = JSON.parse(jsonString)
-      console.log('[v0] Successfully parsed', paidFacts.length, 'facts')
-      
-    } catch (parseError) {
-      console.error('[v0] Failed to parse Gemini response:', parseError)
-      console.error('[v0] Raw response preview:', rawResponse.substring(0, 500))
-      console.error('[v0] Raw response end:', rawResponse.substring(rawResponse.length - 500))
-      return NextResponse.json({ error: 'Failed to parse AI response' }, { status: 500 })
-    }
-
     // 8. DB에 저장
     const { error: insertError } = await supabase
       .from('reports')
