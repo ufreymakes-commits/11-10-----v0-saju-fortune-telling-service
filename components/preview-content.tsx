@@ -265,7 +265,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           <p className="text-sm text-foreground/70 mb-6">
             Please don&apos;t close the window or resubmit<br />
             unless a &apos;Load Failed&apos; message appears❗️<br />
-            We&apos;ll be finished in less than 3 mins.
+            We&apos;ll be finished in less than 2 mins.
           </p>
         </div>
       </div>
