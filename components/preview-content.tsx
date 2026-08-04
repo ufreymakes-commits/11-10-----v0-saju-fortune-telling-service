@@ -405,30 +405,30 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
         </h2>
         
         <div className="space-y-2">
-          {/* Fact 10 */}
+          {/* Fact 4 */}
           <div className="relative bg-muted border border-border rounded-lg p-3 overflow-hidden">
             <div className="flex gap-2">
-              <span className="text-muted-foreground font-bold text-sm">10</span>
+              <span className="text-muted-foreground font-bold text-sm">4</span>
               <p className="text-foreground/90 text-xs leading-relaxed font-bold">
                 🚨 {submission.name}, Congratulations! The main theme of your 2026 is &quot;<span className="blur-[5px] select-none bg-primary/20 px-2">hidden content</span>&quot;. Hmm.. But be careful of <span className="blur-[5px] select-none bg-primary/20 px-2">something</span>, as <span className="blur-[5px] select-none bg-primary/20 px-2">reason here</span> doesn&apos;t fit well with your lifestyle.
               </p>
             </div>
           </div>
           
-          {/* Fact 11 */}
+          {/* Fact 5 */}
           <div className="relative bg-muted border border-border rounded-lg p-3 overflow-hidden">
             <div className="flex gap-2">
-              <span className="text-muted-foreground font-bold text-sm">11</span>
+              <span className="text-muted-foreground font-bold text-sm">5</span>
               <p className="text-foreground/90 text-xs leading-relaxed font-bold">
                 💍 The period from 20<span className="blur-[5px] select-none bg-primary/20 px-1">xx</span> to 20<span className="blur-[5px] select-none bg-primary/20 px-1">xx</span> is the best time to meet your spouse. Your spouse will probably be in charge of <span className="blur-[5px] select-none bg-primary/20 px-2">role here</span> and work as a <span className="blur-[5px] select-none bg-primary/20 px-2">job title</span>.
               </p>
             </div>
           </div>
           
-          {/* Fact 12 */}
+          {/* Fact 6 */}
           <div className="relative bg-muted border border-border rounded-lg p-3 overflow-hidden">
             <div className="flex gap-2">
-              <span className="text-muted-foreground font-bold text-sm">12</span>
+              <span className="text-muted-foreground font-bold text-sm">6</span>
               <p className="text-foreground/90 text-xs leading-relaxed font-bold">
                 💰 Hey, {submission.name}! Your wealth flow timing and secret talents are already mapped out like <span className="blur-[5px] select-none bg-primary/20 px-3">여기 블러 처리</span> Ready to see your future from this angle?
               </p>
