@@ -304,7 +304,7 @@ Generate both the 90 main facts and the 3 hidden cards now as a single JSON obje
           model: 'google/gemini-2.5-flash',
           system: PAID_REPORT_SYSTEM_PROMPT,
           prompt: userPrompt,
-          maxTokens: 16000,
+          maxOutputTokens: 16000,
           temperature: 0,
         })
         rawResponse = result.text
@@ -368,7 +368,7 @@ Generate both the 90 main facts and the 3 hidden cards now as a single JSON obje
             }
           }
           if (endIdx !== -1) {
-            jsonMatch = [null, rawResponse.substring(startIdx, endIdx + 1)]
+            jsonMatch = ['', rawResponse.substring(startIdx, endIdx + 1)]
           }
         }
       }
