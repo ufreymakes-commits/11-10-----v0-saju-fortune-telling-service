@@ -731,13 +731,17 @@ Respond ONLY in JSON format.`
 [STAGE 1: 11가지 체크포인트 심화 분석]
 ===========================================
 
-아래 체크포인트에 맞춰 이 사주의 '인생 시나리오'를 800자로 심화 분석하라.
-절대 뻔한 소리를 하지 말고, 데이터 수치에 근거해 소름 끼칠 정도로 날카로운 심리적/현실적 핵심을 각 포인트별로 키워드와 함께 도출하라. 내가 보낸 이 사주 데이터는 이 세상 최고의 신선한 최상급 재료들이다. 너는 세계에서 가장 유명한 미슐랭 1등급 쉐프 같은 사주 데이터 분석가이다. 철저하게 이 데이터들을 가지고 최상의 해석지를 도출해내야 한다. 반드시!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+[🚨 절대 주의사항: 속도와 압축이 생명이다! 🚨]
+이것은 유저에게 보여줄 텍스트가 아니라 Stage 2를 위한 '내부 뼈대(Skeleton) 데이터'다. 
+절대 줄글이나 서술형 문장으로 설명하지 마라. 전체 텍스트 분량은 반드시 300자 이내로 압축하라. 
+모든 항목의 분석 결과는 **최대 3개의 단어(핵심 키워드) 또는 10자 이내의 짧은 구문**으로만 도출하라.
+
+단, 내가 보낸 사주 데이터는 최상급 재료이며 너는 세계 최고의 미슐랭 3스타 사주 분석가다. 글자 수는 극한으로 줄이되, 데이터 수치에 근거한 소름 끼칠 정도로 날카로운 심리적/현실적 핵심(Core)만은 완벽하게 찔러내야 한다. 반드시!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 1. 페르소나 충돌 (일간 vs 월지)
 2. 에너지 과부하 (가장 강한 오행/십신)
 3. 사회적 유전자 (격국)
-4.[Career Deep-Dive]: 시스템 프롬프트의 Career logic Step 1~8을 적용한 'Structural Core'와 'Talent & Aura' 분석. 3개 이상의 구체적 직업군 명시.
+4. [Career Deep-Dive]: 시스템 프롬프트의 Career logic Step 1~8을 적용한 'Structural Core'와 'Talent & Aura' 분석. 3개 이상의 구체적 직업군 명시.
 5. [Romance & Spouse]: 연애 Rule A~I를 적용하여 배우자 성(Star)의 위치, 배우자 궁(Palace)의 안정성, 파트너의 바이브(Vibe) 분석. 2026년 전후 10년 중에서 중요한 연애/결혼 관련 대운 타이밍 표기.
 6. 심리적 갈증 (없는 오행/십신)
 7. 핵심 흉터 (형충/공망/원진)
@@ -747,60 +751,60 @@ Respond ONLY in JSON format.`
 11. 이 외에도 활용하지 않은 데이터들 중 흥미로운 점이 있다면 노트하기.
 
 OUTPUT FORMAT (JSON ONLY):
-\`\`\`json
+```json
 {
   "persona_conflict": {
     "day_master": "...",
     "month_branch": "...",
-    "analysis": "..."
+    "analysis": "일간과 월지의 관계 분석 (단, 절대 서술형 금지. 최대 3단어 키워드로 압축)"
   },
   "energy_overload": {
     "dominant_element": "...",
     "dominant_ten_god": "...",
-    "effect": "..."
+    "effect": "가장 강한 오행/십신이 미치는 영향 (단, 최대 3단어 키워드로 압축)"
   },
   "social_genes": {
     "gyeokguk": "...",
-    "career_fit": "..."
+    "career_fit": "격국에 따른 사회적 적합성 (단, 최대 3단어 키워드로 압축)"
   },
   "career_analysis": {
-    "independence_index_type": "Primary Classification (A vs B) + Strength Filter",
-    "structural_core": "Month Branch DNA와 Independence Index를 결합한 조직적 위치 분석",
-    "talent_aura": "Five Elements Industry와 Shinsal을 결합한 외적 재능과 아우라 분석",
+    "independence_index_type": "Primary Classification (A vs B) + Strength Filter (단, 핵심 타입명만 짧게)",
+    "structural_core": "Month Branch DNA와 Independence Index를 결합한 조직적 위치 분석 (단, 최대 3단어 키워드로 압축)",
+    "talent_aura": "Five Elements Industry와 Shinsal을 결합한 외적 재능과 아우라 분석 (단, 최대 3단어 키워드로 압축)",
     "specific_recommendations": ["Job 1", "Job 2", "Job 3", "..."]
   },
   "romance_spouse": {
-    "spouse_star_presence": "배우자 성의 가시성(Heavenly Stem/Hidden Stem/Absent) 분석",
-    "spouse_palace_dynamic": "일지의 합/충/해/원진을 통한 결혼 생활의 역동성 분석",
-    "partner_vibe": "오행과 십신에 근거한 파트너의 성향과 이미지",
-    "timing_logic": "인카운터(Meeting)와 현출(Manifestation)의 시기적 단서"
+    "spouse_star_presence": "배우자 성의 가시성(Heavenly Stem/Hidden Stem/Absent) 분석 (단, 최대 3단어 키워드로 압축)",
+    "spouse_palace_dynamic": "일지의 합/충/해/원진을 통한 결혼 생활의 역동성 분석 (단, 최대 3단어 키워드로 압축)",
+    "partner_vibe": "오행과 십신에 근거한 파트너의 성향과 이미지 (단, 최대 3단어 키워드로 압축)",
+    "timing_logic": "인카운터(Meeting)와 현출(Manifestation)의 시기적 단서 (단, 연도와 핵심 키워드만 짧게)"
   },
   "psychological_thirst": {
     "missing_element": "...",
     "missing_ten_god": "...",
-    "subconscious_drive": "..."
+    "subconscious_drive": "없는 오행/십신이 유발하는 내면의 결핍/갈등 (단, 최대 3단어 키워드로 압축)"
   },
   "core_trauma": {
     "clashes": "...",
     "voids": "...",
-    "impact": "..."
+    "impact": "형충/공망/원진의 영향 (단, 최대 3단어 키워드로 압축)"
   },
   "hidden_weapon": {
     "sinsal": "...",
     "guiin": "...",
-    "application": "..."
+    "application": "신살과 귀인의 활용 (단, 최대 3단어 키워드로 압축)"
   },
   "independence_index": {
     "singang_sinyak": "...",
     "percentage": "...",
-    "life_strategy": "..."
+    "life_strategy": "신강/신약에 따른 생존 전략 (단, 최대 3단어 키워드로 압축)"
   },
   "current_coordinate": {
     "current_daewoon": "...",
     "key_year": "...",
-    "forecast": "..."
+    "forecast": "대운 흐름과 다가올 변화 (단, 최대 3단어 키워드로 압축)"
   },
-  "extra_notes": "12운성, 공망, 조후 등 기타 특이사항 메모"
+  "extra_notes": "12운성, 공망, 조후 등 기타 특이사항 메모 (단, 최대 3단어 키워드로 압축)"
   }
 \`\`\`
 
