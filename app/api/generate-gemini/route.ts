@@ -731,7 +731,7 @@ Respond ONLY in JSON format.`
 [STAGE 1: 11가지 체크포인트 심화 분석]
 ===========================================
 
-[🚨 절대 주의사항: 속도와 압축이 생명이다! 🚨]
+[🚨 절�� 주의사항: 속도와 압축이 생명이다! 🚨]
 이것은 유저에게 보여줄 텍스트가 아니라 Stage 2를 위한 '내부 뼈대(Skeleton) 데이터'다. 
 절대 줄글이나 서술형 문장으로 설명하지 마라. 전체 텍스트 분량은 반드시 300자 이내로 압축하라. 
 모든 항목의 분석 결과는 **최대 3개의 단어(핵심 키워드) 또는 10자 이내의 짧은 구문**으로만 도출하라.
@@ -806,7 +806,6 @@ OUTPUT FORMAT (JSON ONLY):
   },
   "extra_notes": "12운성, 공망, 조후 등 기타 특이사항 메모 (단, 최대 3단어 키워드로 압축)"
   }
-\`\`\`
 
 CUSTOMER SAJU DATA:
 ${JSON.stringify(allSajuData, null, 2)}
@@ -959,7 +958,6 @@ ${JSON.stringify(deepAnalysis, null, 2)}
 ${JSON.stringify(allSajuData, null, 2)}
 
 OUTPUT FORMAT (JSON ONLY):
-\`\`\`json
 {
   "facts": [
     {"id": 1, "title": "[Personality/Energy]", "content": "[2 sentences]"},
