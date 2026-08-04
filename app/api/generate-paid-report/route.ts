@@ -20,16 +20,16 @@ export const maxDuration = 300
 const PAID_REPORT_SYSTEM_PROMPT = `You are an expert Korean Saju analyst creating a premium paid report called 99 facts from your birth chart - korean ancient saju based.
 
 CRITICAL CONTEXT INJECTION:
-The user has already received 9 FREE facts. You must now generate 90 ADDITIONAL facts.
+The user has already received 3 FREE facts. You must now generate 90 ADDITIONAL facts.
 
 RULES:
-1. "Ensure Absolute Continuity" - The 90 new facts must be a seamless expansion of the initial 9 facts. There must be ZERO logical conflict or contradiction.
+1. "Ensure Absolute Continuity" - The 90 new facts must be a seamless expansion of the initial 3 facts. There must be ZERO logical conflict or contradiction.
 
-2. "Deep-Dive, Don't Repeat" - Do NOT repeat information from the first 9 facts. Instead, use them as 'Anchors' and dive deeper into the specific 'Why' and 'How' based on the 4 pillars. Think of the free report as the 'Trailer' and this paid report as the 'Full Deep-Dive Movie'.
+2. "Deep-Dive, Don't Repeat" - Do NOT repeat information from the first 3 facts. Instead, use them as 'Anchors' and dive deeper into the specific 'Why' and 'How' based on the 4 pillars. Think of the free report as the 'Trailer' and this paid report as the 'Full Deep-Dive Movie'.
 
-3. "Narrative Alignment" - Maintain the same 'Life Persona' established in the first 9 facts. Use the initial analysis as the 'Source of Truth' to ensure the user feels like they are reading a single, cohesive story of their life.
+3. "Narrative Alignment" - Maintain the same 'Life Persona' established in the first 3 facts. Use the initial analysis as the 'Source of Truth' to ensure the user feels like they are reading a single, cohesive story of their life.
 
-4. "Conflict Prevention" - Before generating each fact, cross-check against the free 9 facts. If a new insight feels like it contradicts a previous one, pivot the perspective to explain the internal complexity of the Saju (e.g., 'While you show [Fact A] outwardly, your inner self struggles with [Fact B]').
+4. "Conflict Prevention" - Before generating each fact, cross-check against the free 3 facts. If a new insight feels like it contradicts a previous one, pivot the perspective to explain the internal complexity of the Saju (e.g., 'While you show [Fact A] outwardly, your inner self struggles with [Fact B]').
 
 TONE AND STYLE (mandatory):
 - Write in natural, modern English like Gen-Z (lowkey, main character energy, no cap)But, Avoid appearing overly playful or flippant.No Korean or Chinese letters.
@@ -136,12 +136,12 @@ ${JSON.stringify(submission.saju_data, null, 2)}
 === 1500-CHARACTER INTERPRETATION (from Stage 1) ===
 ${contextInterpretation}
 
-=== FREE 9 FACTS ALREADY PROVIDED (DO NOT REPEAT) ===
+=== FREE 3 FACTS ALREADY PROVIDED (DO NOT REPEAT) ===
 ${JSON.stringify(freeFacts, null, 2)}
 
 === YOUR TASK ===
 Based on all the context above, generate 90 NEW facts that:
-1. Expand deeply on the themes introduced in the 9 free facts
+1. Expand deeply on the themes introduced in the 3 free facts
 2. Never contradict or repeat the free facts
 3. Maintain narrative consistency with the established "Life Persona"
 4. Cover all 9 premium themes (10 facts each)
@@ -332,7 +332,7 @@ Generate the 90 facts now as a JSON array.`
         throw new Error('No JSON array found in response')
       }
       
-      // JSON 문자열 정제 (불필요한 whitespace 제거)
+      // JSON 문자열 정제 (불필���한 whitespace 제거)
       const jsonString = jsonMatch[1].trim()
       console.log('[v0] Extracted JSON length:', jsonString.length)
       
