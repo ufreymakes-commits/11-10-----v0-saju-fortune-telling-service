@@ -450,7 +450,7 @@ Generate both the 90 main facts and the 3 hidden cards now as a single JSON obje
       return NextResponse.json({ error: 'Failed to parse AI response' }, { status: 500 })
     }
 
-    // 8. DB에 저장 (mainFacts + hiddenCards를 함께 저장)
+    // 8. DB에 저장
     const { error: insertError } = await supabase
       .from('reports')
       .insert({
@@ -458,7 +458,6 @@ Generate both the 90 main facts and the 3 hidden cards now as a single JSON obje
         payment_id: payment.id,
         section_key: 'paid_full',
         facts: paidFacts,
-        hidden_cards: hiddenCards,
         is_free: false,
       })
 
@@ -483,11 +482,10 @@ Generate both the 90 main facts and the 3 hidden cards now as a single JSON obje
       console.error('[v0] Failed to save paid_report_url:', urlUpdateError)
     }
 
-    console.log(`[v0] Successfully generated ${paidFacts.length} paid facts and ${hiddenCards.length} hidden cards for ${submission.name}`)
+    console.log(`[v0] Successfully generated ${paidFacts.length} paid facts for ${submission.name}`)
 
     return NextResponse.json({
       facts: paidFacts,
-      hiddenCards: hiddenCards,
       cached: false,
     })
 
