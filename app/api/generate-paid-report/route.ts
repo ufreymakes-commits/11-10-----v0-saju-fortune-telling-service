@@ -451,7 +451,6 @@ Generate both the 90 main facts and the 3 hidden cards now as a single JSON obje
     }
 
     // 8. DB에 저장
-    {
     const { error: insertError } = await supabase
       .from('reports')
       .insert({
@@ -489,7 +488,6 @@ Generate both the 90 main facts and the 3 hidden cards now as a single JSON obje
       facts: paidFacts,
       cached: false,
     })
-    }
 
   } catch (error) {
     console.error('[v0] Generate paid report error:', error)
