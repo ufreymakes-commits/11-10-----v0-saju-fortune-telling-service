@@ -444,6 +444,7 @@ Generate both the 90 main facts and the 3 hidden cards now as a single JSON obje
     })
 
   } catch (error) {
+    // Keep route-level failures inside the handler response.
     console.error('[v0] Generate paid report error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
