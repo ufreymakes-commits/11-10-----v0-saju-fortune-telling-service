@@ -7,10 +7,10 @@ import type { Fact } from '@/lib/types'
 export const maxDuration = 300
 
 /**
- * 유료 레포트 생성 API (90개 사실)
- * 
+ * 유료 레포트 생성 API (90개 사실 + 3개 히든 카드)
+ *
  * 흐름:
- * 1. submissionId로 DB 조회 (사주데이터 + 무료 9개 사실 + 1500자 해설)
+ * 1. submissionId로 DB 조회 (사주데이터 + 무료 3개 사실 + 1500자 해설)
  * 2. 모든 context를 Gemini에 주입
  * 3. 90개 사실 생성 (중복 없음, 일관성 유지)
  * 4. DB에 저장 (is_free: false)
