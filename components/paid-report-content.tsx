@@ -48,6 +48,7 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
   const [copied, setCopied] = useState(false)
   const [openSections, setOpenSections] = useState<Record<number, boolean>>({})
   const [paidReport, setPaidReport] = useState<any>(initialPaidReport)
+  const [hiddenCards, setHiddenCards] = useState<any[]>(initialPaidReport?.hidden_cards || [])
   const [isGenerating, setIsGenerating] = useState(!initialPaidReport)
   const [generateError, setGenerateError] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
@@ -74,7 +75,8 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
           throw new Error(err.error || `HTTP ${res.status}`)
         }
         const data = await res.json()
-        setPaidReport({ facts: data.facts })
+        setPaidReport({ facts: data.facts, hidden_cards: data.hiddenCards })
+        setHiddenCards(data.hiddenCards || [])
       } catch (e: any) {
         setGenerateError(e.message || 'Failed to generate report')
       } finally {
@@ -292,6 +294,33 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
           )
         })}
       </div>
+
+      {/* 3 Premium Hidden Cards */}
+      {hiddenCards.length > 0 && (
+        <div className="mt-8">
+          <div className="text-center mb-4">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Premium Hidden Cards</p>
+            <h3 className="text-sm font-semibold text-foreground mt-1">Your 3 Secret Cosmic Readings</h3>
+          </div>
+          <div className="space-y-4">
+            {hiddenCards.map((card: any, idx: number) => (
+              <div key={idx} className="bg-card border border-primary/30 rounded-xl p-4 shadow-lg shadow-primary/10 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-primary/0 via-primary to-primary/0" />
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center">
+                    <span className="text-xs font-bold text-primary">{idx + 1}</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[10px] uppercase tracking-wider text-primary/70 mb-0.5">{card.theme}</p>
+                    <p className="text-xs font-semibold text-foreground mb-2">{card.title}</p>
+                    <p className="text-xs text-foreground/80 leading-relaxed">{card.content}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Store Products */}
       <div className="mt-8">

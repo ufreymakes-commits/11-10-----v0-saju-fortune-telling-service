@@ -418,7 +418,7 @@ Generate both the 90 main facts and the 3 hidden cards now as a single JSON obje
       // 이미 존재하면 update
       const { error } = await supabase
         .from('reports')
-        .update({ facts: paidFacts, payment_id: payment.id })
+        .update({ facts: paidFacts, payment_id: payment.id, hidden_cards: hiddenCards.length > 0 ? hiddenCards : undefined })
         .eq('id', existing.id)
       insertError = error
     } else {
@@ -430,6 +430,7 @@ Generate both the 90 main facts and the 3 hidden cards now as a single JSON obje
           payment_id: payment.id,
           section_key: 'paid_full',
           facts: paidFacts,
+          ...(hiddenCards.length > 0 ? { hidden_cards: hiddenCards } : {}),
           is_free: false,
         })
       insertError = error
@@ -460,6 +461,7 @@ Generate both the 90 main facts and the 3 hidden cards now as a single JSON obje
 
     return NextResponse.json({
       facts: paidFacts,
+      hiddenCards,
       cached: false,
     })
 

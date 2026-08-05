@@ -13,7 +13,7 @@ export async function GET(request: Request) {
 
   const { data, error } = await supabase
     .from('reports')
-    .select('facts')
+    .select('facts, hidden_cards')
     .eq('submission_id', submissionId)
     .eq('section_key', 'paid_full')
     .order('created_at', { ascending: false })
@@ -25,5 +25,5 @@ export async function GET(request: Request) {
     return NextResponse.json({ ready: false }, { status: 200 })
   }
 
-  return NextResponse.json({ ready: true, facts: data.facts })
+  return NextResponse.json({ ready: true, facts: data.facts, hiddenCards: data.hidden_cards || [] })
 }
