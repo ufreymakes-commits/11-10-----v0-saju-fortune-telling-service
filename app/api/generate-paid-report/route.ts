@@ -404,16 +404,36 @@ Generate both the 90 main facts and the 3 hidden cards now as a single JSON obje
       return NextResponse.json({ error: 'Failed to parse AI response' }, { status: 500 })
     }
       
-    // 8. DB에 저장
-    const { error: insertError } = await supabase
+    // 8. DB에 저장 (중복 방지: 기존 paid_full 있으면 upsert)
+    const { data: existing } = await supabase
       .from('reports')
-      .insert({
-        submission_id: submissionId,
-        payment_id: payment.id,
-        section_key: 'paid_full',
-        facts: paidFacts,
-        is_free: false,
-      })
+      .select('id')
+      .eq('submission_id', submissionId)
+      .eq('section_key', 'paid_full')
+      .limit(1)
+      .maybeSingle()
+
+    let insertError
+    if (existing?.id) {
+      // 이미 존재하면 update
+      const { error } = await supabase
+        .from('reports')
+        .update({ facts: paidFacts, payment_id: payment.id })
+        .eq('id', existing.id)
+      insertError = error
+    } else {
+      // 없으면 insert
+      const { error } = await supabase
+        .from('reports')
+        .insert({
+          submission_id: submissionId,
+          payment_id: payment.id,
+          section_key: 'paid_full',
+          facts: paidFacts,
+          is_free: false,
+        })
+      insertError = error
+    }
 
     if (insertError) {
       console.error('[v0] Failed to save paid report:', insertError)

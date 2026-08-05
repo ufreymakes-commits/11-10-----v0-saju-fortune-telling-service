@@ -16,7 +16,9 @@ export async function GET(request: Request) {
     .select('facts')
     .eq('submission_id', submissionId)
     .eq('section_key', 'paid_full')
-    .single()
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   if (error || !data?.facts) {
     // Not ready yet
