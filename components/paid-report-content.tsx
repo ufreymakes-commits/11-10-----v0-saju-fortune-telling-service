@@ -44,14 +44,45 @@ const elementColors: Record<string, string> = {
 }
 const maxScore = 120
 
-export function PaidReportContent({ submission, paidReport }: PaidReportContentProps) {
+export function PaidReportContent({ submission, paidReport: initialPaidReport }: PaidReportContentProps) {
   const [copied, setCopied] = useState(false)
   const [openSections, setOpenSections] = useState<Record<number, boolean>>({})
+  const [paidReport, setPaidReport] = useState<any>(initialPaidReport)
+  const [isGenerating, setIsGenerating] = useState(!initialPaidReport)
+  const [generateError, setGenerateError] = useState<string | null>(null)
+  const [retryCount, setRetryCount] = useState(0)
 
   useScreenshotDetect('/paid-report')
 
   const submissionId = (submission as any).id as string
   const sections: any[] = paidReport?.facts && Array.isArray(paidReport.facts) ? paidReport.facts : []
+
+  // Auto-generate paid report if not yet available, or on retry
+  useEffect(() => {
+    if (initialPaidReport && retryCount === 0) return
+    if (!isGenerating) return
+    async function generate() {
+      setGenerateError(null)
+      try {
+        const res = await fetch('/api/generate-paid-report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ submissionId }),
+        })
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}))
+          throw new Error(err.error || `HTTP ${res.status}`)
+        }
+        const data = await res.json()
+        setPaidReport({ facts: data.facts })
+      } catch (e: any) {
+        setGenerateError(e.message || 'Failed to generate report')
+      } finally {
+        setIsGenerating(false)
+      }
+    }
+    generate()
+  }, [submissionId, retryCount, isGenerating, initialPaidReport])
   const sajuData = (submission.saju_data || {}) as SajuData
 
   const rawStem = sajuData?.dayPillar?.stem || '갑'
@@ -190,6 +221,27 @@ export function PaidReportContent({ submission, paidReport }: PaidReportContentP
 
       {/* Arrow hint */}
       <p className="text-center text-[11px] text-muted-foreground/60 mb-2">Tap the arrow below to open each section of your report</p>
+
+      {/* Generating state */}
+      {isGenerating && (
+        <div className="flex flex-col items-center justify-center py-16 gap-4">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-muted-foreground text-center">Generating your 99 facts report...<br /><span className="text-xs text-muted-foreground/60">This may take up to 3 minutes. Please keep this page open.</span></p>
+        </div>
+      )}
+
+      {/* Error state */}
+      {generateError && !isGenerating && (
+        <div className="flex flex-col items-center justify-center py-10 gap-3">
+          <p className="text-sm text-destructive text-center">Report generation failed: {generateError}</p>
+          <button
+            onClick={() => { setGenerateError(null); setIsGenerating(true); setRetryCount(c => c + 1); }}
+            className="text-xs px-4 py-2 bg-primary text-primary-foreground rounded-lg"
+          >
+            Try Again
+          </button>
+        </div>
+      )}
 
       {/* Sections with toggle */}
       <div className="space-y-4">
