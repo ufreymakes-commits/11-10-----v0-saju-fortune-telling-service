@@ -300,7 +300,7 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
         <div className="mt-8">
           <div className="text-center mb-4">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Premium Hidden Cards</p>
-            <h3 className="text-sm font-semibold text-foreground mt-1">Your 3 Secret Cosmic Readings</h3>
+            <h3 className="text-sm font-semibold text-foreground mt-1">6 Last Things I Want to Tell You..</h3>
           </div>
           <div className="space-y-4">
             {hiddenCards.map((card: any, idx: number) => (
