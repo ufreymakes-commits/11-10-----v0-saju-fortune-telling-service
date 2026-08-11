@@ -25,5 +25,5 @@ export async function GET(request: Request) {
     return NextResponse.json({ ready: false }, { status: 200 })
   }
 
-  return NextResponse.json({ ready: true, facts: data.facts, hiddenCards: data.hidden_cards || [] })
+  return NextResponse.json({ ready: true, facts: data.facts, vipCards: data.hidden_cards || [] })
 }

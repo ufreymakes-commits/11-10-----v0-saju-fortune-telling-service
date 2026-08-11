@@ -48,7 +48,7 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
   const [copied, setCopied] = useState(false)
   const [openSections, setOpenSections] = useState<Record<number, boolean>>({})
   const [paidReport, setPaidReport] = useState<any>(initialPaidReport)
-  const [hiddenCards, setHiddenCards] = useState<any[]>(initialPaidReport?.hidden_cards || [])
+  const [vipCards, setVipCards] = useState<any[]>(initialPaidReport?.hidden_cards || [])
   const [isGenerating, setIsGenerating] = useState(!initialPaidReport)
   const [generateError, setGenerateError] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
@@ -75,8 +75,8 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
           throw new Error(err.error || `HTTP ${res.status}`)
         }
         const data = await res.json()
-        setPaidReport({ facts: data.facts, hidden_cards: data.hiddenCards })
-        setHiddenCards(data.hiddenCards || [])
+        setPaidReport({ facts: data.facts, hidden_cards: data.vipCards })
+        setVipCards(data.vipCards || [])
       } catch (e: any) {
         setGenerateError(e.message || 'Failed to generate report')
       } finally {
@@ -295,15 +295,15 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
         })}
       </div>
 
-      {/* 3 Premium Hidden Cards */}
-      {hiddenCards.length > 0 && (
+      {/* 6 VIP Master Cards */}
+      {vipCards.length > 0 && (
         <div className="mt-8">
           <div className="text-center mb-4">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Premium Hidden Cards</p>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">VIP Master Cards</p>
             <h3 className="text-sm font-semibold text-foreground mt-1">6 Last Things I Want to Tell You..</h3>
           </div>
           <div className="space-y-4">
-            {hiddenCards.map((card: any, idx: number) => (
+            {vipCards.map((card: any, idx: number) => (
               <div key={idx} className="bg-card border border-primary/30 rounded-xl p-4 shadow-lg shadow-primary/10 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-primary/0 via-primary to-primary/0" />
                 <div className="flex items-start gap-3">

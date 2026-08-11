@@ -7,12 +7,12 @@ import type { Fact } from '@/lib/types'
 export const maxDuration = 300
 
 /**
- * 유료 레포트 생성 API (90개 사실 + 3개 히든 카드)
+ * 유료 레포트 생성 API (90개 사실 + 6개 VIP 마스터 카드)
  *
  * 흐름:
  * 1. submissionId로 DB 조회 (사주데이터 + 무료 3개 사실 + 1500자 해설)
  * 2. 모든 context를 Gemini에 주입
- * 3. 90개 사실 생성 (중복 없음, 일관성 유지)
+ * 3. 90개 사실 + 6개 VIP 마스터 카드 생성 (중복 없음, 일관성 유지)
  * 4. DB에 저장 (is_free: false)
  */
 
@@ -216,33 +216,51 @@ And please, you need to include these 3 sentences for 'everyone'. Because we mas
 - Your wealth flow timing and secret talents are already mapped out like ***** Ready to see your future from this angle? (explain in details)
 
 ========================================
-AFTER THE 90 CARDS, GENERATE 3 PREMIUM HIDDEN CARDS:
+AFTER THE 90 CARDS, GENERATE 6 "VIP MASTER CARDS":
 ========================================
 
-AFTER successfully generating the 90 main facts, you MUST ALSO generate EXACTLY 3 additional "Premium Hidden Cards" based on the following themes:
+AFTER successfully generating the 90 main facts, you MUST generate EXACTLY 6 "VIP Master Cards". These 6 cards act as the ultimate wrap-up dossier, integrating all previous insights into one profound, life-changing message.
 
-[Card 1: The Quantum Leap Trigger (Your Cosmic Cheat Code)]
-- Data to use: Yongshin (Useful God), Heeshin (Favorable God), and powerful Sinsal (Heavenly Stars like Cheoneul, Guiin, Yeokma, etc.).
-- Concept: What is the exact, hyper-specific action or environment that will instantly level up their life? Do they need to move far away? Do they need to use their precision element? Give them an actionable, highly specific strategy that acts as their universal cheat code for explosive success.
-- Length: Around 200-250 characters
+CRITICAL VIP RULES (MANDATORY):
+1. "The Brutal & Warm Mentor Persona": Act as a brutally honest but deeply caring Saju Master. Deliver sharp, hard-hitting facts (Reality Checks) about their flaws, but immediately follow up with warm, practical, and empowering solutions.
+2. "Cohesive Storytelling": The 6 cards must NOT read as disjointed facts. They must flow as one continuous, dramatic narrative (Intro -> Conflict -> Climax -> Resolution).
+3. "The Ultimate Nature Metaphor": You MUST establish a cinematic nature metaphor based on their Day Master (Self) and their strongest/missing elements (e.g., "A fertile soil lacking trees," "A raging river hitting a solid rock"). Introduce this in Card 1 and bring it back in Card 6 for a poetic conclusion.
+4. "The Reality Check Rule": You MUST expose their fatal flaw, toxic habit, or relationship blind spot caused by their chart's imbalance. Do not sugarcoat their stubbornness or self-sabotage.
+5. "Length Constraint": Each card's content MUST be strictly between 250 and 300 characters. Make every word dense, punchy, and profound.
 
-[Card 2: The Inevitable Destiny (Your Ultimate Mission)]
-- Data to use: Gyeokguk (Structure), Dominant Elements, and overall balance of the chart.
-- Concept: What is their irreplaceable superpower? Frame their past hardships as necessary training for their fated destiny. Declare the ultimate masterpiece they are meant to achieve in this lifetime. Make it sound epic and inevitable.
-- Length: Around 200-250 characters
+THE 6 VIP CARDS ARCHITECTURE:
 
-[Card 3: The Master Fortune Compass (Comprehensive Remedy & Cheers)]
-- Data to use: Day Master, Excess/Missing elements, and Yongshin (Useful God).
-- Concept: Provide a comprehensive summary of their chart using beautiful nature metaphors. Acknowledge the struggles caused by their missing/excess elements, but reframe them as greatest potential. Give highly practical, daily lifestyle tips based on their Yongshin. End with powerful, heartwarming cheer.
-- Length: Around 200-250 characters
+[Card 1: The Raw Canvas (Your Core Metaphor)]
+- Data to use: Day Master (Core identity), Dominant Element & overall elemental balance including hidden stems (Overwhelming energy), and Missing/void elements (The void/thirst).
+- Concept: Establish the overarching nature metaphor. Combine their Day Master with their most extreme elemental imbalance. Paint a vivid, cinematic picture of their soul's landscape based on these core variables.
 
-These 3 cards should be returned SEPARATELY after the 90 main facts array.
+[Card 2: The Self-Sabotage Trap (Your Reality Check)]
+- Data to use: Wonjin, Hyeong, Hae, Pa (Relationship/Psychological clashes), Strength/Weakness grade (Stubbornness level), and the behavioral impact of missing elements vs. dominant element.
+- Concept: Deliver the brutal truth. What is their fatal flaw, toxic stubbornness, or relationship blind spot? Explain exactly how their specific structural Saju imbalance makes them their own worst enemy.
+
+[Card 3: The Hidden Arsenal (Your True Superpower)]
+- Data to use: Gyeokguk (Core talent structure), Sinsal details (Focus on intense stars like Hyeonchim, Geopsal, Baekho, etc.), and Gilseong (Heavenly aids like Taegeuk-Guiin, Cheoneul-Guiin).
+- Concept: Reframe the excess energy, intensity, or "curse" from Card 2 into their greatest weapon. How can they weaponize their extreme traits (e.g., hyper-sensitivity, overwhelming force, intense stubbornness) to absolutely dominate their field?
+
+[Card 4: The Quantum Trigger (The Missing Puzzle Piece)]
+- Data to use: Yongshin, Eokbu-Yongshin, and Johu-Yongshin (The ultimate balancing elements).
+- Concept: Focus purely on their Yongshin elements. Give them ONE hyper-specific, actionable life hack or behavioral shift (The Trigger) that aligns with their Yongshin (e.g., specific environment, mindset, or daily habit) to instantly balance their chart and attract explosive luck.
+
+[Card 5: The Karmic Blueprint (Why You Had to Bleed)]
+- Data to use: Daewoon (Contrast past Daewoon with the current/future Daewoon), Gongmang (Early voids), and core trauma insights.
+- Concept: Be the empathetic mentor. Explain why their past hardships, inner voids, or early struggles were structurally necessary based on their Daewoon flow. Frame their pain as the exact training required to handle their fated destiny.
+
+[Card 6: The Final Mandate (Your Masterpiece Awaits)]
+- Data to use: User's Name, Day Master, Yongshin, and Yeonwoon (Specifically looking at the exact stems/branches of upcoming years 2026-2030).
+- Concept: The heartwarming finale. Bring back the Nature Metaphor from Card 1, but describe it in its fully realized, blooming state using their upcoming favorable Annual Luck (Yeonwoon). Give a powerful, life-affirming cheer for their future.
+
+These 6 cards should be returned SEPARATELY after the 90 main facts array.
 
 OUTPUT JSON STRUCTURE - ABSOLUTELY CRITICAL:
 You MUST return EXACTLY 9 sections with EXACTLY 10 cards each = 90 total cards. 
 DO NOT return fewer cards. The user PAID for 90 facts. Returning less is unacceptable.
 
-Then, APPEND the 3 Premium Hidden Cards as a separate object.
+Then, APPEND the 6 VIP Master Cards as a separate array named "vipCards".
 
 FINAL JSON STRUCTURE (single valid JSON object):
 {
@@ -265,29 +283,47 @@ FINAL JSON STRUCTURE (single valid JSON object):
     },
     ... (repeat this EXACT structure for all 9 sections, each with EXACTLY 10 cards.)
   ],
-  "hiddenCards": [
+  "vipCards": [
     {
       "id": 1,
-      "theme": "The Quantum Leap Trigger",
-      "title": "[Write a strategic, empowering title]",
-      "content": "[200-250 characters of hyper-specific actionable reading...]"
+      "theme": "The Raw Canvas",
+      "title": "[Write a poetic nature-based title]",
+      "content": "[250-300 characters following the rules...]"
     },
     {
       "id": 2,
-      "theme": "The Inevitable Destiny",
-      "title": "[Write an epic, cinematic title]",
-      "content": "[200-250 characters of profound, life-affirming reading...]"
+      "theme": "The Self-Sabotage Trap",
+      "title": "[Write a sharp, reality-check title]",
+      "content": "[250-300 characters following the rules...]"
     },
     {
       "id": 3,
-      "theme": "The Master Fortune Compass",
-      "title": "[Write an empowering, metaphorical title]",
-      "content": "[200-250 characters of comprehensive, practical, and heartwarming reading...]"
+      "theme": "The Hidden Arsenal",
+      "title": "[Write a strategic, empowering title]",
+      "content": "[250-300 characters following the rules...]"
+    },
+    {
+      "id": 4,
+      "theme": "The Quantum Trigger",
+      "title": "[Write an actionable, specific title]",
+      "content": "[250-300 characters following the rules...]"
+    },
+    {
+      "id": 5,
+      "theme": "The Karmic Blueprint",
+      "title": "[Write a deep, empathetic title]",
+      "content": "[250-300 characters following the rules...]"
+    },
+    {
+      "id": 6,
+      "theme": "The Final Mandate",
+      "title": "[Write an epic, cinematic title]",
+      "content": "[250-300 characters following the rules...]"
     }
   ]
 }
 
-Generate both the 90 main facts and the 3 hidden cards now as a single JSON object.`
+Generate both the 90 main facts and the 6 VIP cards now as a single JSON object.`
 
     // 6. Gemini API 호출 with retry logic (최대 3번 시도)
     console.log('[v0] Calling Gemini API...')
@@ -338,7 +374,7 @@ Generate both the 90 main facts and the 3 hidden cards now as a single JSON obje
 
     // 7. JSON 파싱 (더 유연한 형식 지원)
     let paidFacts: Fact[] = []
-    let hiddenCards: Array<{ id: number; theme: string; title: string; content: string }> = []
+    let vipCards: Array<{ id: number; theme: string; title: string; content: string }> = []
     try {
       // 시도 1: ```json ... ``` 형식 (줄바꿈 포함)
       let jsonMatch = rawResponse.match(/```json\n([\s\S]*?)\n```/)
@@ -385,17 +421,18 @@ Generate both the 90 main facts and the 3 hidden cards now as a single JSON obje
       
       const parsedData = JSON.parse(jsonString)
       
-      // mainFacts와 hiddenCards 추출
+      // mainFacts와 vipCards 추출
       if (Array.isArray(parsedData)) {
         // 구형식: 배열 직접 반환 (호환성)
         paidFacts = parsedData
       } else if (parsedData.mainFacts && Array.isArray(parsedData.mainFacts)) {
-        // 신형식: { mainFacts: [...], hiddenCards: [...] }
+        // 신형식: { mainFacts: [...], vipCards: [...] }
         paidFacts = parsedData.mainFacts
-        hiddenCards = parsedData.hiddenCards || []
+        // vipCards가 우선, 구버전 응답(hiddenCards)도 호환 처리
+        vipCards = parsedData.vipCards || parsedData.hiddenCards || []
       }
       
-      console.log('[v0] Successfully parsed', paidFacts.length, 'main facts and', hiddenCards.length, 'hidden cards')
+      console.log('[v0] Successfully parsed', paidFacts.length, 'main facts and', vipCards.length, 'VIP cards')
       
     } catch (parseError) {
       console.error('[v0] Failed to parse Gemini response:', parseError)
@@ -418,11 +455,11 @@ Generate both the 90 main facts and the 3 hidden cards now as a single JSON obje
       // 이미 존재하면 update
       const { error } = await supabase
         .from('reports')
-        .update({ facts: paidFacts, payment_id: payment.id, hidden_cards: hiddenCards.length > 0 ? hiddenCards : undefined })
+        .update({ facts: paidFacts, payment_id: payment.id, hidden_cards: vipCards.length > 0 ? vipCards : undefined })
         .eq('id', existing.id)
       insertError = error
     } else {
-      // 없으면 insert
+      // 없으면 insert (hidden_cards 컬럼에 6개 VIP 마스터 카드를 저장)
       const { error } = await supabase
         .from('reports')
         .insert({
@@ -430,7 +467,7 @@ Generate both the 90 main facts and the 3 hidden cards now as a single JSON obje
           payment_id: payment.id,
           section_key: 'paid_full',
           facts: paidFacts,
-          ...(hiddenCards.length > 0 ? { hidden_cards: hiddenCards } : {}),
+          ...(vipCards.length > 0 ? { hidden_cards: vipCards } : {}),
           is_free: false,
         })
       insertError = error
@@ -461,7 +498,7 @@ Generate both the 90 main facts and the 3 hidden cards now as a single JSON obje
 
     return NextResponse.json({
       facts: paidFacts,
-      hiddenCards,
+      vipCards,
       cached: false,
     })
 
