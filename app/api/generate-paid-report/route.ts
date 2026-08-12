@@ -145,6 +145,7 @@ Based on all the context above, generate 90 NEW facts that:
 2. Never contradict or repeat the free facts
 3. Maintain narrative consistency with the established "Life Persona"
 4. Cover all 9 premium themes (10 facts each)
+5. Don't use ** this mark or Chinese letter and Korean Letter. Use only English.
 
 OUTPUT FORMAT:
 Key Point: You must embody a Gen-Z persona—playful and witty, yet brutally honest about the facts, ultimately delivering a core message of warmth, comfort, and practical solutions. Avoid appearing overly playful or flippant. Bridge the data with empathy.
