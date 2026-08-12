@@ -219,40 +219,40 @@ And please, you need to include these 3 sentences for 'everyone'. Because we mas
 AFTER THE 90 CARDS, GENERATE 6 "VIP MASTER CARDS":
 ========================================
 
-AFTER successfully generating the 90 main facts, you MUST generate EXACTLY 6 "VIP Master Cards". These 6 cards act as the ultimate wrap-up dossier, integrating all previous insights into one profound, life-changing message.
+AFTER successfully generating the 90 main facts, you MUST generate EXACTLY 6 "VIP Master Cards".
+WARNING: Absolutely NO vague, poetic, or generic self-help statements (e.g., "embrace your inner forest", "your time will come"). Every card MUST be hyper-specific, hard-hitting, brutally honest, and packed with practical solutions derived DIRECTLY from their raw JSON variables.
 
 CRITICAL VIP RULES (MANDATORY):
-1. "The Brutal & Warm Mentor Persona": Act as a brutally honest but deeply caring Saju Master. Deliver sharp, hard-hitting facts (Reality Checks) about their flaws, but immediately follow up with warm, practical, and empowering solutions.
-2. "Cohesive Storytelling": The 6 cards must NOT read as disjointed facts. They must flow as one continuous, dramatic narrative (Intro -> Conflict -> Climax -> Resolution).
-3. "The Ultimate Nature Metaphor": You MUST establish a cinematic nature metaphor based on their Day Master (Self) and their strongest/missing elements (e.g., "A fertile soil lacking trees," "A raging river hitting a solid rock"). Introduce this in Card 1 and bring it back in Card 6 for a poetic conclusion.
-4. "The Reality Check Rule": You MUST expose their fatal flaw, toxic habit, or relationship blind spot caused by their chart's imbalance. Do not sugarcoat their stubbornness or self-sabotage.
-5. "Length Constraint": Each card's content MUST be strictly between 250 and 300 characters. Make every word dense, punchy, and profound.
+1. "Zero Vagueness Policy": Do NOT use abstract metaphors without immediately translating them into concrete real-world actions, habits, or relationship behaviors.
+2. "The Brutal Reality Check": Unforgivingly expose their toxic habits, stubbornness, or emotional blind spots caused by wonjin, hyeong, or missing/excess elements.
+3. "Actionable Life Hacks": Instead of just naming elements like "Wood" or "Metal", instruct them on EXACT physical actions (e.g., "Set a strict 7 AM wakeup routine", "Cut off people who trigger your overthinking", "Get certified in a specialized skill").
+4. "Length Constraint": Each card's content MUST be strictly between 250 and 300 characters.
 
 THE 6 VIP CARDS ARCHITECTURE:
 
-[Card 1: The Raw Canvas (Your Core Metaphor)]
-- Data to use: Day Master (Core identity), Dominant Element & overall elemental balance including hidden stems (Overwhelming energy), and Missing/void elements (The void/thirst).
-- Concept: Establish the overarching nature metaphor. Combine their Day Master with their most extreme elemental imbalance. Paint a vivid, cinematic picture of their soul's landscape based on these core variables.
+[Card 1: The Raw Canvas (Your Core Saju Identity)]
+- Data to use: dayMaster, dominantElement (and its percentage), tenGods.missing.
+- Requirement: Define their exact life setting using a sharp nature dynamic. State clearly what element is suffocating them and what element they are starving for in plain, unvarnished terms.
 
-[Card 2: The Self-Sabotage Trap (Your Reality Check)]
-- Data to use: Wonjin, Hyeong, Hae, Pa (Relationship/Psychological clashes), Strength/Weakness grade (Stubbornness level), and the behavioral impact of missing elements vs. dominant element.
-- Concept: Deliver the brutal truth. What is their fatal flaw, toxic stubbornness, or relationship blind spot? Explain exactly how their specific structural Saju imbalance makes them their own worst enemy.
+[Card 2: The Self-Sabotage Trap (Your Toxic Reality Check)]
+- Data to use: wonjin, hyeong, hae, sinGangSinYak.grade, tenGods.missing.
+- Requirement: Expose their worst habit or relationship pattern. Call out their specific flaw—such as faking politeness while silently cutting people off, perfectionism leading to zero execution, or passive-aggressive emotional outbursts. No sugarcoating.
 
-[Card 3: The Hidden Arsenal (Your True Superpower)]
-- Data to use: Gyeokguk (Core talent structure), Sinsal details (Focus on intense stars like Hyeonchim, Geopsal, Baekho, etc.), and Gilseong (Heavenly aids like Taegeuk-Guiin, Cheoneul-Guiin).
-- Concept: Reframe the excess energy, intensity, or "curse" from Card 2 into their greatest weapon. How can they weaponize their extreme traits (e.g., hyper-sensitivity, overwhelming force, intense stubbornness) to absolutely dominate their field?
+[Card 3: The Hidden Arsenal (Your Monetizable Superpower)]
+- Data to use: gyeokguk, sinsalDetails (e.g., 현침살, 겁살), gilseong (태극귀인, 천을귀인).
+- Requirement: Take the toxic trait from Card 2 and show them how to monetize or channel it into professional dominance. Tell them exactly what kind of expert/leader role or sharp skill will turn their weakness into cash and authority.
 
-[Card 4: The Quantum Trigger (The Missing Puzzle Piece)]
-- Data to use: Yongshin, Eokbu-Yongshin, and Johu-Yongshin (The ultimate balancing elements).
-- Concept: Focus purely on their Yongshin elements. Give them ONE hyper-specific, actionable life hack or behavioral shift (The Trigger) that aligns with their Yongshin (e.g., specific environment, mindset, or daily habit) to instantly balance their chart and attract explosive luck.
+[Card 4: The Quantum Trigger (Your Immediate Action Plan)]
+- Data to use: yongsin, eokbuYongsin.
+- Requirement: Provide 2-3 hyper-specific, practical daily habits or lifestyle rules based on their Yongshin. Do NOT say "cultivate Wood energy"—say "force yourself into a strict morning routine, track your goals in writing, and take control of your environment."
 
-[Card 5: The Karmic Blueprint (Why You Had to Bleed)]
-- Data to use: Daewoon (Contrast past Daewoon with the current/future Daewoon), Gongmang (Early voids), and core trauma insights.
-- Concept: Be the empathetic mentor. Explain why their past hardships, inner voids, or early struggles were structurally necessary based on their Daewoon flow. Frame their pain as the exact training required to handle their fated destiny.
+[Card 5: The Karmic Blueprint (Why Your Past Was Hell)]
+- Data to use: daewoon (past vs current transition), gongmang, early pillar clashes.
+- Requirement: Reframe their past emotional voids or family/relationship trauma as a structural necessity. Explain logically why their chart required that pain to break their naive expectations and build their current bulletproof resilience.
 
-[Card 6: The Final Mandate (Your Masterpiece Awaits)]
-- Data to use: User's Name, Day Master, Yongshin, and Yeonwoon (Specifically looking at the exact stems/branches of upcoming years 2026-2030).
-- Concept: The heartwarming finale. Bring back the Nature Metaphor from Card 1, but describe it in its fully realized, blooming state using their upcoming favorable Annual Luck (Yeonwoon). Give a powerful, life-affirming cheer for their future.
+[Card 6: The Final Mandate (Your Exact Timeline & Destiny)]
+- Data to use: User's Name, dayMaster, yongsin, yeonwoon (Specifically cite upcoming years like 2026, 2028, etc.).
+- Requirement: Give a precise roadmap for the next 3-5 years based on yeonwoon. Tell them when to hold back and when to go all-in. End with a grounded, powerful boost of confidence.
 
 These 6 cards should be returned SEPARATELY after the 90 main facts array.
 
@@ -287,38 +287,38 @@ FINAL JSON STRUCTURE (single valid JSON object):
     {
       "id": 1,
       "theme": "The Raw Canvas",
-      "title": "[Write a poetic nature-based title]",
-      "content": "[250-300 characters following the rules...]"
+      "title": "[Sharp, direct title about their core nature]",
+      "content": "[250-300 characters of hard-hitting, concrete reality check...]"
     },
     {
       "id": 2,
       "theme": "The Self-Sabotage Trap",
-      "title": "[Write a sharp, reality-check title]",
-      "content": "[250-300 characters following the rules...]"
+      "title": "[Brutally honest title exposing their fatal flaw]",
+      "content": "[250-300 characters calling out their exact toxic behavior...]"
     },
     {
       "id": 3,
       "theme": "The Hidden Arsenal",
-      "title": "[Write a strategic, empowering title]",
-      "content": "[250-300 characters following the rules...]"
+      "title": "[Empowering title on how to monetize their flaw]",
+      "content": "[250-300 characters showing exact career/skill leverage...]"
     },
     {
       "id": 4,
       "theme": "The Quantum Trigger",
-      "title": "[Write an actionable, specific title]",
-      "content": "[250-300 characters following the rules...]"
+      "title": "[Practical, actionable title with clear lifestyle rules]",
+      "content": "[250-300 characters with 2-3 hyper-specific habits to build...]"
     },
     {
       "id": 5,
       "theme": "The Karmic Blueprint",
-      "title": "[Write a deep, empathetic title]",
-      "content": "[250-300 characters following the rules...]"
+      "title": "[Empathetic, logical title reframing past pain]",
+      "content": "[250-300 characters explaining why past struggles happened...]"
     },
     {
       "id": 6,
       "theme": "The Final Mandate",
-      "title": "[Write an epic, cinematic title]",
-      "content": "[250-300 characters following the rules...]"
+      "title": "[Timeline-based title referencing specific years]",
+      "content": "[250-300 characters with concrete timing and roadmap...]"
     }
   ]
 }
