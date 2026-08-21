@@ -93,7 +93,10 @@ function buildAllSajuData(
       
       // 합충 정보
       hapChungSummary: saju.hapChungSummary || '',
-      hapChungAdjustmentDetails: saju.hapChungAdjustmentDetails || []
+      hapChungAdjustmentDetails: saju.hapChungAdjustmentDetails || [],
+      
+      // 결혼/연애 타이밍 (이미 코드로 확정 계산된 결과 - 재계산 금지, 그대로 인용만 할 것)
+      marriageTiming: saju.marriageTiming || null
     }
   }
 
@@ -447,17 +450,25 @@ IMPORTANT - Title format rules:
 제목 (영어로): "Your Timeline Together and Marriage Opportunities"
 
 내용 지침:
-시기 지정: daewoon과 yeonwoon을 매칭하여 결혼운이 들어오는 시기를 연도로 명확히 집어줍니다. 최근 과거의 10년부터 앞으로의 10년 중 가장 유력한 연도들을 몇개 뽑아 정확하게 근거와 함께 짚어냅니다. 이별수가 있다면, '이별수가 있다' 라고 단정지어 이야기 하기 보다는, 특정 연도에 거리감이 생기거나 갈등이 일어날 수 있으니 지혜롭게 해결하는 방법에 대해서 이야기를 초점 맞추어 서술합니다. 이 분들이 만약 결혼하게 된다면 서로에게 어떤 부부가 될지 귀엽게 상상해봅니다. 출산으로 아이가 들어오는 운이 보인다면, 출산 연도를 암시해도 좋겠습니다. 출산이 꼭 아이가 아니더라도, 건물이나 업에서의 좋은 결과물이 될 수도 있겠지만요.
+시기 지정 (CRITICAL - 프롬프트 상단에 제공된 "결혼/연애 타이밍 계산값" 데이터를 그대로 인용, daewoon/yeonwoon을 다시 매칭해서 직접 재계산하지 말 것):
+- 2026년 이후 미래 시기: 두 사람 각각의 bestMeetingYear/bestMarriageYear와 isPast가 false인 candidates만 사용합니다. 두 사람의 유력 연도가 겹치거나 가까우면 그 시너지를 강조하고, 다르면 각자의 흐름이 언제 마주치는지 설명합니다. 만약 두 사람 중 한쪽 혹은 양쪽 모두의 미래 최강 신호가 결혼급이 아니라면(카테고리가 "무자"/"과다"이거나 신호가 도화/식신 같은 단순 연애성 신호일 뿐이거나 bestMarriageYear가 null인 경우), 이를 인정하면서 해당 연도의 에너지가 결혼이 아니라 무엇으로 나타날 수 있는지 재해석합니다 — 예: 큰 계약이나 사업 파트너십, 함께하는 큰 프로젝트, 출산/가족 확장, 이주, 또는 관계에서 의미 있는 다른 전환점. 이 재해석은 반드시 해당 연도의 실제 십신/오행 신호에 근거해야 하며, 막연한 추측이 아니어야 합니다.
+- 과거의 인상적인 시기: 두 사람 각각의 pastBestMeetingYear/pastBestMarriageYear와 isPast가 true인 candidates를 활용해 최근 과거 10년 중 짚고 넘어갈 인상적인 연애 관련 시기를 한두 개씩 짚어줍니다. 그 해에 각자에게 구체적으로 어떤 일이 있었을지 함께 상상하며 서술합니다.
+- 이별수가 있다면, '이별수가 있다' 라고 단정지어 이야기 하기 보다는, 특정 연도에 거리감이 생기거나 갈등이 일어날 수 있으니 지혜롭게 해결하는 방법에 대해서 이야기를 초점 맞추어 서술합니다.
+- 이 분들이 만약 결혼하게 된다면 서로에게 어떤 부부가 될지 귀엽게 상상해봅니다. windowNote가 있다면 그 의미를 자연스럽게 문장에 녹여내되 그대로 인용하지는 않습니다.
 
 섹션 7: 최종 관계 타입
 CRITICAL: 제목은 반드시 다음 4개 중 하나만 정확히 작성: "Soulmate Type" / "Complementary Type" / "Effort-Required Type" / "Karmic Type"
 
 ��용 지���:
-운명의 파동: 향후 30년의 daewoon 흐름을 분석하여 두 사람의 에너지의 상승장과 하락장이 어떻게 교차하는지 보여줍니다. 사주 궁합보다 중요한 것은 배려"임을 강조하는 따뜻한 조언과 함께, 상대의 에너지를 통해 고객과 상대 파트너 각각의 삶에서 어떤 영역(재물, 명예, 공부 등)이 확장되는지 구체적인 개운 액션 플랜을 제시하며 마무리합니다.
+운명의 파동: 향후 30년의 daewoon 흐름을 분석하여 두 사람의 에너지의 상승장과 하락장이 어떻게 교차하는지 보여줍니다. 사주 궁합보다 중요한 것은 배려"임을 강조하는 따뜻한 조언과 함께, 상대의 에너지를 통해 고객과 상대 파트너 각각의 삶에서 어떤 영역(재물, 명��, 공부 등)이 확장되는지 구체적인 개운 액션 플랜을 제시하며 마무리합니다.
 관계 정의: 위 4가지 타입 중 최종 타입을 본문에서도 명확히 설명합니다.
 현실 점검 및 처방: 구체적인 개운 액션 플랜을 제시하며 감동적으로 이 관계에 대해서 서술하며 마무리합니다. 누구에게나 들어맞을 절대 뻔한 소리나 두루뭉실한 소리는 금지!
 
 Names: ${submission.person_a_name} & ${submission.person_b_name}
+
+결혼/연애 타이밍 계산값 (섹션 6 작성 시 반드시 이 값만 사용, 절대 재계산하거나 새로운 연도를 만들지 말 것):
+${submission.person_a_name}: ${JSON.stringify(allSajuData.personA.marriageTiming)}
+${submission.person_b_name}: ${JSON.stringify(allSajuData.personB.marriageTiming)}
 
 Stage 1 Context:
 ${contextInterpretation}
