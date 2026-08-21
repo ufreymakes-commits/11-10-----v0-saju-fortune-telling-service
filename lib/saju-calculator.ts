@@ -2,7 +2,7 @@
 // Complete analysis including all advanced calculations
 
 import type { BirthInfo, SajuData } from './types'
-import { runFullAnalysis, calculateElementScores, calculateElementScoresWithHiddenStems, calculateElementScoresWithHapChung, countElementsWithHiddenStems, countElementsBasic } from './saju/core-calculator'
+import { runFullAnalysis, calculateElementScoresWithHiddenStems, countElementsBasic } from './saju/core-calculator'
 import {
   calcTwelveStars,
   calcTwelveSinsal,
@@ -266,46 +266,23 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     hourBranch as string | null
   )
   
-  // === 오행 개수 계산 (지장간 포함) - 잠재적 욕구 표시용 ===
-  const elementCounts = countElementsWithHiddenStems(fp)
-  
-  // === 오행 개수 계산 (지장간 미포함) - 천간/지지만 ===
+  // === 오행 "존재감" 계산 (지장간 미포함) - 오행분포(오각형)용 ===
+  // 사주 8글자에 겉으로 드러난 오행의 단순 개수. 어떤 오행이 많이/적게 존재하는지 보여주는 보조 지표.
   const elementCountBasic = countElementsBasic(fp)
   
-  // === 오행 점수 계산 (수치론 점수 방식: 총 120점) ===
-  // 천간: 각 10점, 지지: 연지 10점, 월지 30점, 일지 20점, 시지 20점
-  const elementScores = calculateElementScores(fp)
-  
-  // === 지장간 포함 오행 점수 계산 ===
-  // 천간 + 지지 본기 + 지장간 (본기 50%, 중기 30%, 말기 20%)
+  // === 오행 "영향력" 계산 (지장간 포함, 가중 점수) - 실제 해석의 메인 근거 ===
+  // 천간/지지 가중치 + 지장간을 반영한 오행 세력. 오행 강약·성향 해석 시 우선적으로 사용.
   const elementScoresWithHiddenStems = calculateElementScoresWithHiddenStems(fp)
   
-  // === 합충 반영 오행 점수 계산 ===
-  const hapChungAnalysis = calculateElementScoresWithHapChung(
-    fp,
-    allStems,
-    allBranches
-  )
-  
-  // 기본 점수 (지장간 미포함) - 천간 + 지지만
-  const elementBalance = {
-    wood: elementScores['목'] || 0,
-    fire: elementScores['화'] || 0,
-    earth: elementScores['토'] || 0,
-    metal: elementScores['금'] || 0,
-    water: elementScores['수'] || 0
+  const elementCountBasicEnglish = {
+    wood: elementCountBasic['목'] || 0,
+    fire: elementCountBasic['화'] || 0,
+    earth: elementCountBasic['토'] || 0,
+    metal: elementCountBasic['금'] || 0,
+    water: elementCountBasic['수'] || 0
   }
   
-  // 오행 한글 키 (기본)
-  const elementBalanceKorean = {
-    목: elementScores['목'] || 0,
-    화: elementScores['화'] || 0,
-    토: elementScores['토'] || 0,
-    금: elementScores['금'] || 0,
-    수: elementScores['수'] || 0
-  }
-  
-  // 지장간 포함 점수
+  // 지장간 포함 점수 (해석의 메인 근거)
   const elementBalanceWithHiddenStems = {
     wood: elementScoresWithHiddenStems['목'] || 0,
     fire: elementScoresWithHiddenStems['화'] || 0,
@@ -320,23 +297,6 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     토: elementScoresWithHiddenStems['토'] || 0,
     금: elementScoresWithHiddenStems['금'] || 0,
     수: elementScoresWithHiddenStems['수'] || 0
-  }
-  
-  // 합충 반영 점수
-  const elementBalanceAdjusted = {
-    wood: hapChungAnalysis.adjustedScores['목'] || 0,
-    fire: hapChungAnalysis.adjustedScores['화'] || 0,
-    earth: hapChungAnalysis.adjustedScores['토'] || 0,
-    metal: hapChungAnalysis.adjustedScores['금'] || 0,
-    water: hapChungAnalysis.adjustedScores['수'] || 0
-  }
-  
-  const elementBalanceAdjustedKorean = {
-    목: hapChungAnalysis.adjustedScores['목'] || 0,
-    화: hapChungAnalysis.adjustedScores['화'] || 0,
-    토: hapChungAnalysis.adjustedScores['토'] || 0,
-    금: hapChungAnalysis.adjustedScores['금'] || 0,
-    수: hapChungAnalysis.adjustedScores['수'] || 0
   }
   
   return {
@@ -370,8 +330,9 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     dayMaster: dayStemHanja,
     dayMasterKorean: dayStem,
     
-    // 오행 개수 (지장간 미포함 - 천간/지지만)
-    elementCountBasic: {
+    // 오행 "존재감" (지장간 미포함 - 단순 개수) - 오행분포(오각형) 표시용, 보조 근거
+    elementCountBasic: elementCountBasicEnglish,
+    elementCountBasicKorean: {
       목: elementCountBasic['목'] || 0,
       화: elementCountBasic['화'] || 0,
       토: elementCountBasic['토'] || 0,
@@ -379,25 +340,12 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
       수: elementCountBasic['수'] || 0
     },
     
-    // 오행 개수 (지장간 포함 - 잠재적 욕구)
-    elementCount: {
-      목: elementCounts['목'] || 0,
-      화: elementCounts['화'] || 0,
-      토: elementCounts['토'] || 0,
-      금: elementCounts['금'] || 0,
-      수: elementCounts['수'] || 0
-    },
-    
-    // 오행 점수 (수치론 120점 - 월령 중심 - 가�� 정확)
-    elementBalance,
-    elementBalanceKorean,
-    dominantElement: Object.entries(elementBalance).reduce((a, b) => 
-      a[1] > b[1] ? a : b
-    )[0],
-    
-    // 오행 (지장간 포함 점수) - 참고용
+    // 오행 "영향력" (지장간 포함 - 가중 점수) - 모든 해석의 메인 근거
     elementBalanceWithHiddenStems,
     elementBalanceWithHiddenStemsKorean,
+    dominantElement: Object.entries(elementBalanceWithHiddenStems).reduce((a, b) => 
+      a[1] > b[1] ? a : b
+    )[0],
     
     // 12운성
     twelveStars: twelveStars.map(ts => ({

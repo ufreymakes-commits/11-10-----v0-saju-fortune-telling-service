@@ -210,32 +210,42 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
 
       {/* Five Elements Score Table */}
       <div className="bg-card border border-border rounded-xl p-4 mb-6 shadow-lg shadow-primary/5">
-        <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-2 text-center">Your Five Elements Balance</h2>
-        <p className="text-[10px] text-muted-foreground/60 text-center mb-3">Based on 8 characters (4 pillars x 2), with weighted scoring on Month Branch. Excludes hidden stems.</p>
+        <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-2 text-center">Your Five Elements Distribution</h2>
+        <p className="text-[10px] text-muted-foreground/60 text-center mb-3">Based on 8 characters (4 pillars x 2). Simple count of visible elements, excludes hidden stems.</p>
         <div className="space-y-2">
-          {Object.entries(sajuData.elementBalance || {}).map(([element, score]) => {
+          {(() => {
             const elementColors: Record<string, string> = {
-              Wood: 'bg-green-500',
-              Fire: 'bg-red-500',
-              Earth: 'bg-yellow-600',
-              Metal: 'bg-gray-400',
-              Water: 'bg-blue-500'
+              wood: 'bg-green-500',
+              fire: 'bg-red-500',
+              earth: 'bg-yellow-600',
+              metal: 'bg-gray-400',
+              water: 'bg-blue-500'
             }
-            const maxScore = 120
-            const percentage = (Number(score) / maxScore) * 100
-            return (
-              <div key={element} className="flex items-center gap-3">
-                <span className="text-xs text-foreground w-12 flex-shrink-0">{element}</span>
-                <div className="flex-1 h-4 bg-background/50 rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full ${elementColors[element] || 'bg-primary'} transition-all duration-500`}
-                    style={{ width: `${percentage}%` }}
-                  />
+            const elementLabels: Record<string, string> = {
+              wood: 'Wood',
+              fire: 'Fire',
+              earth: 'Earth',
+              metal: 'Metal',
+              water: 'Water'
+            }
+            const counts = sajuData.elementCountBasic || {}
+            const total = Object.values(counts).reduce((sum: number, v) => sum + (Number(v) || 0), 0) || 1
+            return Object.entries(counts).map(([element, score]) => {
+              const percentage = (Number(score) / total) * 100
+              return (
+                <div key={element} className="flex items-center gap-3">
+                  <span className="text-xs text-foreground w-12 flex-shrink-0">{elementLabels[element] || element}</span>
+                  <div className="flex-1 h-4 bg-background/50 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full ${elementColors[element] || 'bg-primary'} transition-all duration-500`}
+                      style={{ width: `${percentage}%` }}
+                    />
+                  </div>
+                  <span className="text-xs text-muted-foreground w-8 text-right">{score}</span>
                 </div>
-                <span className="text-xs text-muted-foreground w-8 text-right">{score}</span>
-              </div>
-            )
-          })}
+              )
+            })
+          })()}
         </div>
         {/* Yongsin Display */}
         <div className="mt-4 pt-3 border-t border-border/30 text-center">

@@ -68,7 +68,7 @@ export function runSajuTests() {
       console.log(`[v0] ✓ Calculation success`)
       console.log(`[v0]   - Day Master: ${result.dayMaster} (${result.dayMasterKorean})`)
       console.log(`[v0]   - 4 Pillars: ${result.yearPillar.fullNameKorean} ${result.monthPillar.fullNameKorean} ${result.dayPillar.fullNameKorean} ${result.hourPillar?.fullNameKorean || 'N/A'}`)
-      console.log(`[v0]   - Element balance: ${result.elementBalanceKorean?.목}목 ${result.elementBalanceKorean?.화}화 ${result.elementBalanceKorean?.토}토 ${result.elementBalanceKorean?.금}금 ${result.elementBalanceKorean?.수}수`)
+      console.log(`[v0]   - Element strength (w/ hidden stems): ${result.elementBalanceWithHiddenStemsKorean?.목}목 ${result.elementBalanceWithHiddenStemsKorean?.화}화 ${result.elementBalanceWithHiddenStemsKorean?.토}토 ${result.elementBalanceWithHiddenStemsKorean?.금}금 ${result.elementBalanceWithHiddenStemsKorean?.수}수`)
       console.log(`[v0]   - 12운성 개수: ${result.twelveStars?.length || 0}`)
       console.log(`[v0]   - 십신 보유: ${result.tenGods?.present?.join(', ') || 'none'}`)
       console.log(`[v0]   - 신강/신약: ${result.sinGangSinYak?.grade} (${result.sinGangSinYak?.ratio}%)`)

@@ -113,12 +113,11 @@ export async function POST(request: Request) {
       energyGrade: saju_data.sinGangSinYak?.grade || '',
       energyRatio: saju_data.sinGangSinYak?.ratio || 0,
 
-      // 오행 개수 (2가지)
-      elementCountBasic: saju_data.elementCountBasic || {}, // 지장간 미포함 - 천간/지지만
-      elementCountWithHidden: saju_data.elementCount || {}, // 지장간 포함 - 잠재적 욕구
+      // 오행 "존재감" (지장간 미포함 - 단순 개수) - 보조 근거
+      elementCountBasic: saju_data.elementCountBasicKorean || {},
 
-      // 오행 점수 (수치론 120점 - 월령 중심 - 가장 정확)
-      elementScore: saju_data.elementBalanceKorean || {},
+      // 오행 "영향력" (지장간 포함 - 가중 점수) - 해석의 메인 근거
+      elementBalanceWithHiddenStems: saju_data.elementBalanceWithHiddenStemsKorean || {},
       dominantElement: saju_data.dominantElement || '',
 
       // 십신 (개수 포함 + 위치별)
@@ -722,7 +721,7 @@ For example:
 ---
 
 FYI
-1990-2030 Ganji: 庚午,辛未,壬申,癸酉,甲戌,乙亥,丙子,丁丑,戊寅,己卯,庚辰,辛巳,壬午,癸未,甲申,乙酉,丙戌,丁亥,戊子,己丑,庚寅,辛卯,壬辰,癸巳,甲午,乙未,丙申,丁酉,戊戌,己亥,庚子,辛丑,壬寅,癸卯,甲辰,乙巳,丙午,丁未,戊申,己酉,庚戌
+1990-2030 Ganji: 庚午,辛未,壬申,癸酉,甲戌,乙亥,丙子,丁丑,戊寅,己卯,庚辰,辛巳,壬午,癸未,甲申,乙酉,丙戌,丁亥,戊子,己丑,庚寅,辛卯,壬辰,癸巳,甲午,乙未,丙申,丁酉,戊戌,己亥,庚子,辛丑,壬寅,癸卯,甲辰,乙巳,丙��,丁未,戊申,己酉,庚戌
 
 Respond ONLY in JSON format.`
 
@@ -731,7 +730,7 @@ Respond ONLY in JSON format.`
 [STAGE 1: 11가지 체크포인트 심화 분석]
 ===========================================
 
-[🚨 절대 주의사항: 속도와 압축이 생명이다! 🚨]
+[��� 절대 주의사항: 속도와 압축이 생명이다! 🚨]
 이것은 유저에게 보여줄 텍스트가 아니라 Stage 2를 위한 '내부 뼈대(Skeleton) 데이터'다. 
 절대 줄글이나 서술형 문장으로 설명하지 마라. 전체 텍스트 분량은 반드시 300자 이내로 압축하라. 
 모든 항목의 분석 결과는 **최대 3개의 단어(핵심 키워드) 또는 10자 이내의 짧은 구문**으로만 도출하라.
@@ -913,12 +912,12 @@ Language: English only.
       yongsinElement = hanja2Element[firstElement]
       console.log(`[v0] Gemini: Converted yongsin ${firstElement} to ${yongsinElement}`)
     } else if (!['Water', 'Fire', 'Wood', 'Metal', 'Earth'].includes(yongsinElement)) {
-      // 알 수 없는 형식이면 element balance에서 가장 부족한 오행을 yongsin으로 사용
-      const elementBalance = saju_data?.elementBalance || {}
+      // 알 수 없는 형식이면 오행 영향력(지장간 포함)에서 가장 부족한 오행을 yongsin으로 사용
+      const elementBalance = saju_data?.elementBalanceWithHiddenStems || {}
       const elements = ['Water', 'Fire', 'Wood', 'Metal', 'Earth']
       const weakest = elements.reduce((min, el) => (elementBalance[el.toLowerCase()] || 0) < (elementBalance[min.toLowerCase()] || 0) ? el : min, elements[0])
       yongsinElement = weakest
-      console.log(`[v0] Gemini: Unknown yongsin format, derived from element balance: ${yongsinElement}`)
+      console.log(`[v0] Gemini: Unknown yongsin format, derived from element strength: ${yongsinElement}`)
     }
 
     console.log(`[v0] Gemini: Final yongsinElement: ${yongsinElement} (balanced season: ${isBalancedSeason})`)

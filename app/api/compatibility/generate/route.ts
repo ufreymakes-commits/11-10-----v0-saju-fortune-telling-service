@@ -32,12 +32,11 @@ function buildAllSajuData(
       energyGrade: (saju.sinGangSinYak as any)?.grade || '',
       energyRatio: (saju.sinGangSinYak as any)?.ratio || 0,
       
-      // 오행 개수
-      elementCountBasic: saju.elementCountBasic || {},
-      elementCountWithHidden: saju.elementCount || {},
+      // 오행 "존재감" (지장간 미포함 - 단순 개수) - 보조 근거
+      elementCountBasic: saju.elementCountBasicKorean || {},
       
-      // 오행 점수
-      elementScore: saju.elementBalanceKorean || {},
+      // 오행 "영향력" (지장간 포함 - 가중 점수) - 해석의 메인 근거
+      elementBalanceWithHiddenStems: saju.elementBalanceWithHiddenStemsKorean || {},
       dominantElement: saju.dominantElement || '',
       
       // 십신

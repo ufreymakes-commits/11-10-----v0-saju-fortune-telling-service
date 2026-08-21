@@ -25,15 +25,13 @@ export interface SajuData {
   dayMaster: string
   dayMasterKorean?: string
   
-  // 오행 개수 (지장간 미포함 - 천간/지지만)
-  elementCountBasic?: { 목: number; 화: number; 토: number; 금: number; 수: number }
+  // 오행 "존재감" (지장간 미포함 - 단순 개수) - 오행분포(오각형) 표시용, 보조 근거
+  elementCountBasic?: { wood: number; fire: number; earth: number; metal: number; water: number }
+  elementCountBasicKorean?: { 목: number; 화: number; 토: number; 금: number; 수: number }
   
-  // 오행 개수 (지장간 포함 - 잠재적 욕구)
-  elementCount?: { 목: number; 화: number; 토: number; 금: number; 수: number }
-  
-  // 오행 점수 (수치론 120점 - 월령 중심 - 가장 정확)
-  elementBalance: { wood: number; fire: number; earth: number; metal: number; water: number }
-  elementBalanceKorean?: { 목: number; 화: number; 토: number; 금: number; 수: number }
+  // 오행 "영향력" (지장간 포함 - 가중 점수) - 모든 해석의 메인 근거
+  elementBalanceWithHiddenStems: { wood: number; fire: number; earth: number; metal: number; water: number }
+  elementBalanceWithHiddenStemsKorean?: { 목: number; 화: number; 토: number; 금: number; 수: number }
   dominantElement: string
   
   // 12운성
@@ -259,7 +257,7 @@ export interface InsightBlueprint {
   counterfactualKey: string // "이게 바뀌면 이 주장은 무너짐" (e.g. "if Water=0 and Metal=95")
   
   // 포인터 (최종 문장에 표기할 데이��� 참조 위치)
-  pointerHints: string[] // ["sinGangSinYak.grade", "elementBalanceAdjusted.wood", ...]
+  pointerHints: string[] // ["sinGangSinYak.grade", "elementBalanceWithHiddenStems.wood", ...]
   
   // 용신 주의사항
   yongsinNote?: string // yongsin.exists=false면 ���기에 대체 설명
