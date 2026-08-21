@@ -43,7 +43,7 @@ MANDATORY REQUIREMENTS:
 - EXACTLY 9 sections (numbered 01-09)
 - EXACTLY 10 cards per section (no more, no less)
 - TOTAL = 90 cards (this is non-negotiable)
-- Each card's "content" field: Max 160 characters including spaces
+- Each card's "content" field: Max 220 characters including spaces
 - Be compact but meaningful - core insight only
 - No need for title/theme per card
 - Maintain Gen-Z tone, warmth, and practical advice
