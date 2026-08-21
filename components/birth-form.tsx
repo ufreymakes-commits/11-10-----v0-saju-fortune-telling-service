@@ -19,6 +19,7 @@ import { COUNTRIES, REFERRAL_SOURCES } from '@/lib/types'
 import { CitySearch } from '@/components/city-search'
 import type { City } from '@/lib/city-search'
 import { inferTimezone } from '@/lib/city-search'
+import { isValidEmail } from '@/lib/validation'
 
 interface FormErrors {
   name?: string
@@ -96,8 +97,8 @@ export function BirthForm() {
     
     if (!formData.email.trim()) {
       newErrors.email = 'Please enter your email address'
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-      newErrors.email = 'Please enter a valid email address'
+    } else if (!isValidEmail(formData.email)) {
+      newErrors.email = 'Please enter a valid email address (e.g. name@example.com)'
     }
     
     if (!formData.birthDate) {

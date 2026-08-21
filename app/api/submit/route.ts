@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { calculateSaju } from '@/lib/saju-calculator'
 import { runSajuTests } from '@/lib/saju-test'
 import type { BirthInfo } from '@/lib/types'
+import { isValidEmail } from '@/lib/validation'
 
 export async function POST(request: Request) {
   try {
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
       )
     }
     
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!isValidEmail(email)) {
       return NextResponse.json(
         { error: 'Invalid email address' },
         { status: 400 }
