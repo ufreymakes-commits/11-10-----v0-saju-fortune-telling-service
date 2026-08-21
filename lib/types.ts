@@ -2,6 +2,7 @@
 
 export interface BirthInfo {
   name: string
+  email?: string
   birthDate: string // YYYY-MM-DD
   birthCountry: string
   birthTime?: string // HH:mm
@@ -139,6 +140,7 @@ export interface SajuData {
 export interface Submission {
   id: string
   name: string
+  email?: string
   birth_date: string
   birth_country: string
   birth_time?: string

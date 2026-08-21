@@ -9,14 +9,21 @@ export async function POST(request: Request) {
     const body = await request.json()
     
     const { 
-      name, birthDate, birthCountry, birthTime, gender, referralSource,
+      name, email, birthDate, birthCountry, birthTime, gender, referralSource,
       birthCity, timezone, longitude, latitude 
     } = body
     
     // Validate required fields
-    if (!name || !birthDate || !birthCountry || !gender || !referralSource) {
+    if (!name || !email || !birthDate || !birthCountry || !gender || !referralSource) {
       return NextResponse.json(
         { error: 'Missing required fields' },
+        { status: 400 }
+      )
+    }
+    
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json(
+        { error: 'Invalid email address' },
         { status: 400 }
       )
     }
@@ -27,6 +34,7 @@ export async function POST(request: Request) {
     // Calculate Saju data
     const birthInfo: BirthInfo = {
       name,
+      email,
       birthDate,
       birthCountry,
       birthTime: birthTime || undefined,
@@ -58,6 +66,7 @@ export async function POST(request: Request) {
       .from('submissions')
       .insert({
         name,
+        email,
         birth_date: birthDate,
         birth_country: birthCountry,
         birth_time: birthTime || null,

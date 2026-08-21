@@ -22,6 +22,7 @@ import { inferTimezone } from '@/lib/city-search'
 
 interface FormErrors {
   name?: string
+  email?: string
   birthDate?: string
   birthCountry?: string
   gender?: string
@@ -75,6 +76,7 @@ export function BirthForm() {
   
   const [formData, setFormData] = useState({
     name: '',
+    email: '',
     birthDate: '',
     birthCountry: '',
     birthTime: '',
@@ -90,6 +92,12 @@ export function BirthForm() {
     
     if (!formData.name.trim()) {
       newErrors.name = 'Please enter your name'
+    }
+    
+    if (!formData.email.trim()) {
+      newErrors.email = 'Please enter your email address'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      newErrors.email = 'Please enter a valid email address'
     }
     
     if (!formData.birthDate) {
@@ -179,6 +187,21 @@ export function BirthForm() {
             aria-invalid={!!errors.name}
           />
           {errors.name && <FieldError>{errors.name}</FieldError>}
+        </Field>
+
+        {/* Email */}
+        <Field>
+          <FieldLabel htmlFor="email" className="text-gray-800 font-medium">Email Address</FieldLabel>
+          <Input
+            id="email"
+            type="email"
+            placeholder="Enter your email address"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            className="bg-white border-gray-300 focus:border-primary text-gray-900 placeholder:text-purple-300"
+            aria-invalid={!!errors.email}
+          />
+          {errors.email && <FieldError>{errors.email}</FieldError>}
         </Field>
 
         {/* Birth Date */}
