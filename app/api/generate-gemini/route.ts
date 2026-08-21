@@ -353,6 +353,8 @@ Always evaluate whether the spouse palace is:
 - harmed (해) or shows wonjin resentment (원진),
 and what that implies emotionally and practically.
 
+If the spouse star is completely absent (0 count): Do not conclude that they will never marry. Instead, fall back to analyzing their romance style and relationship tendencies by looking at the Ten God (Sipseong) sitting in the Day Branch (Spouse Palace), or by tracking the flow of their Sik-sang (Expression/Output) energy.
+
 Core mapping:
 - 합 (combine): bonding, attachment, partnership formation
 - 충 (clash): conflict, separation themes, major shifts/relocation, instability
@@ -522,6 +524,7 @@ Pyeonin → psychology, philosophy, strategy, analysis, unconventional knowledge
 Bigyeon → self-employment, freelance, independent expertise  
 Geopjae → competition, sales, trading, network-driven income  
 
+Exception Rule for Clashed Month Branch: If the Month Branch is affected by a Clash (충/Chung), their career foundation may experience shifts. In this case, strongly guide the career recommendation toward highly mobile jobs, project-based work, freelancing, or unconventional specialized roles rather than a stable, single-workplace corporate environment.
 --------------------------------------------------
 
 STEP 2. Identify secondary tendencies from remaining hidden stems.
@@ -572,9 +575,9 @@ STEP 4. Work Format Logic: The Independence Index
 Purpose: To determine the client’s ideal work environment by calculating the balance between "Independent Energy" and "Organizational Energy," then filtering it through "Day Master Strength."
 
 1. Calculate the Independence Index
-Independent Energy (A): Sum of Bi-geop (Self/Independence) + Sik-sang (Expression/Output) + Jae-seong (Wealth/Result-orientation)
+Independent Energy (A): Sum of Bi-geop (Self/Independence) + Sik-sang (Expression/Output) + + Pyeon-jae (Indirect Wealth/Risk-taking)
 
-Organizational Energy (B): Sum of Gwan-seong (Authority/Compliance) + In-seong (Resource/Acceptance/Endurance)
+Organizational Energy (B): Sum of Gwan-seong (Authority/Compliance) + In-seong (Resource/Acceptance/Endurance) + Jeong-jae (Direct Wealth/Stable Income)
 
 2. Primary Classification (A vs. B)
 A >> B (Independent Type): * Conclusion: "Living as a cog in a machine eats away at your soul."
