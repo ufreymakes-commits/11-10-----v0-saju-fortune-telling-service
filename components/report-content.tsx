@@ -228,10 +228,11 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
               metal: 'Metal',
               water: 'Water'
             }
-            const counts = sajuData.elementCountBasic || {}
+            const counts: Record<string, number> = sajuData.elementCountBasic || {}
             const total = Object.values(counts).reduce((sum: number, v) => sum + (Number(v) || 0), 0) || 1
             return Object.entries(counts).map(([element, score]) => {
-              const percentage = (Number(score) / total) * 100
+              const scoreNumber = Number(score) || 0
+              const percentage = (scoreNumber / total) * 100
               return (
                 <div key={element} className="flex items-center gap-3">
                   <span className="text-xs text-foreground w-12 flex-shrink-0">{elementLabels[element] || element}</span>
@@ -241,7 +242,7 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
                       style={{ width: `${percentage}%` }}
                     />
                   </div>
-                  <span className="text-xs text-muted-foreground w-8 text-right">{score}</span>
+                  <span className="text-xs text-muted-foreground w-8 text-right">{scoreNumber}</span>
                 </div>
               )
             })

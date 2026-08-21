@@ -157,10 +157,11 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
         <p className="text-[10px] text-muted-foreground/60 text-center mb-3">Based on 8 characters (4 pillars x 2). Simple count of visible elements, excludes hidden stems.</p>
         <div className="space-y-2">
           {(() => {
-            const counts = sajuData.elementCountBasic || {}
+            const counts: Record<string, number> = sajuData.elementCountBasic || {}
             const total = Object.values(counts).reduce((sum: number, v) => sum + (Number(v) || 0), 0) || 1
             return Object.entries(counts).map(([element, score]) => {
-              const percentage = (Number(score) / total) * 100
+              const scoreNumber = Number(score) || 0
+              const percentage = (scoreNumber / total) * 100
               return (
                 <div key={element} className="flex items-center gap-3">
                   <span className="text-xs text-foreground w-12 flex-shrink-0">{elementLabels[element] || element}</span>
@@ -170,7 +171,7 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
                       style={{ width: `${percentage}%` }}
                     />
                   </div>
-                  <span className="text-xs text-muted-foreground w-8 text-right">{score}</span>
+                  <span className="text-xs text-muted-foreground w-8 text-right">{scoreNumber}</span>
                 </div>
               )
             })

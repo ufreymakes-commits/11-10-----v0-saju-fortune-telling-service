@@ -730,7 +730,7 @@ Respond ONLY in JSON format.`
 [STAGE 1: 11가지 체크포인트 심화 분석]
 ===========================================
 
-[��� 절대 주의사항: 속도와 압축이 생명이다! 🚨]
+[��� 절대 주의사항: 속���와 압축이 생명이다! 🚨]
 이것은 유저에게 보여줄 텍스트가 아니라 Stage 2를 위한 '내부 뼈대(Skeleton) 데이터'다. 
 절대 줄글이나 서술형 문장으로 설명하지 마라. 전체 텍스트 분량은 반드시 300자 이내로 압축하라. 
 모든 항목의 분석 결과는 **최대 3개의 단어(핵심 키워드) 또는 10자 이내의 짧은 구문**으로만 도출하라.
@@ -913,7 +913,7 @@ Language: English only.
       console.log(`[v0] Gemini: Converted yongsin ${firstElement} to ${yongsinElement}`)
     } else if (!['Water', 'Fire', 'Wood', 'Metal', 'Earth'].includes(yongsinElement)) {
       // 알 수 없는 형식이면 오행 영향력(지장간 포함)에서 가장 부족한 오행을 yongsin으로 사용
-      const elementBalance = saju_data?.elementBalanceWithHiddenStems || {}
+      const elementBalance: Record<string, number> = saju_data?.elementBalanceWithHiddenStems || {}
       const elements = ['Water', 'Fire', 'Wood', 'Metal', 'Earth']
       const weakest = elements.reduce((min, el) => (elementBalance[el.toLowerCase()] || 0) < (elementBalance[min.toLowerCase()] || 0) ? el : min, elements[0])
       yongsinElement = weakest
