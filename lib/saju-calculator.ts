@@ -2,7 +2,7 @@
 // Complete analysis including all advanced calculations
 
 import type { BirthInfo, SajuData } from './types'
-import { runFullAnalysis, calculateElementScoresWithHiddenStems, countElementsBasic } from './saju/core-calculator'
+import { runFullAnalysis, calculateElementScoresWithHiddenStems, countElementsBasic, calculateYeonWoon } from './saju/core-calculator'
 import {
   calcTwelveStars,
   calcTwelveSinsal,
@@ -313,8 +313,24 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     dayStem
   )
   
-  // 연운
+  // 연운 (리포트 상단 표기용: 현재 ~ +9년)
   const yeonwoonMapped = analysis.yeonwoon.map(y => ({
+    year: y.year,
+    stem: y.stem,
+    branch: y.branch,
+    fullName: `${koreanStemToHanja(y.stem)}${koreanBranchToHanja(y.branch)}`
+  }))
+  
+  // 결혼 타이밍 전용 연운 범위: 성인이 된 시점(만 19세)부터 현재+9년까지
+  // → 이미 성인기를 지나온 사람(예: 1996년생)의 경우 과거의 결혼/인연 시기도 함께 짚어줘야 하므로
+  //   "현재 ~ +9년"만 보는 리포트 상단용 yeonwoon과 별도로 넓은 범위를 계산한다.
+  const birthYearForTiming = date.getFullYear()
+  const currentYearForTiming = new Date().getFullYear()
+  const adultYear = birthYearForTiming + 19
+  const timingRangeStart = Math.min(adultYear, currentYearForTiming)
+  const timingRangeEnd = currentYearForTiming + 9
+  const timingYearCount = timingRangeEnd - timingRangeStart + 1
+  const yeonwoonForTiming = calculateYeonWoon(timingRangeStart, timingYearCount).map(y => ({
     year: y.year,
     stem: y.stem,
     branch: y.branch,
@@ -332,9 +348,10 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     monthBranch,
     hourStem,
     hourBranch,
-    birthYear: date.getFullYear(),
+    birthYear: birthYearForTiming,
+    currentYear: currentYearForTiming,
     daewoon: daewoonEnriched,
-    yeonwoon: yeonwoonMapped
+    yeonwoon: yeonwoonForTiming
   })
   
   return {

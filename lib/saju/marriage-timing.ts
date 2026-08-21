@@ -69,6 +69,7 @@ export interface MarriageTimingCandidate {
   meetingScore: number
   marriageScore: number
   type: 'meeting' | 'marriage' | 'both' | 'candidate'
+  isPast: boolean // 현재 연도 기준 이미 지난 해인지 여부 (이미 지난 해라면 "있었을 시기"로 서술)
 }
 
 export interface MarriageTimingResult {
@@ -79,8 +80,13 @@ export interface MarriageTimingResult {
   spouseStarTenGods: string[]
   spouseStarCount: number
   spouseStarPositions: string[]
+  // 미래(현재 연도 포함) 기준 유력 시기 - "앞으로의" 인연/결혼 타이밍
   bestMeetingYear: MarriageTimingCandidate | null
   bestMarriageYear: MarriageTimingCandidate | null
+  // 과거(현재 연도 이전) 기준 유력했던 시기 - 이미 지나온 인연/결혼 타이밍 (성인 이후 ~ 작년까지)
+  // 1996년생처럼 이미 성인기를 지나온 사람의 경우, 과거에 이미 강한 신호가 있었을 수 있으므로 별도 제공
+  pastBestMeetingYear: MarriageTimingCandidate | null
+  pastBestMarriageYear: MarriageTimingCandidate | null
   candidates: MarriageTimingCandidate[]
   windowNote: string | null
 }
@@ -133,6 +139,7 @@ export function calculateMarriageTiming(params: {
   hourStem: string | null
   hourBranch: string | null
   birthYear: number
+  currentYear?: number
   daewoon: DaewoonEntry[]
   yeonwoon: YeonwoonEntry[]
 }): MarriageTimingResult {
@@ -141,6 +148,7 @@ export function calculateMarriageTiming(params: {
     yearStem, yearBranch, monthStem, monthBranch,
     hourStem, hourBranch, birthYear, daewoon, yeonwoon
   } = params
+  const currentYear = params.currentYear ?? new Date().getFullYear()
 
   const spouseStarTenGods = gender === 'female' ? ['정관', '편관'] : ['정재', '편재']
   const siksangTenGods = ['식신', '상관']
@@ -287,33 +295,69 @@ export function calculateMarriageTiming(params: {
       score: meetingScore + marriageScore,
       meetingScore,
       marriageScore,
-      type: 'candidate'
+      type: 'candidate',
+      isPast: y.year < currentYear
     })
   })
 
   candidates.sort((a, b) => b.score - a.score || a.year - b.year)
 
-  const meetingSorted = [...candidates].filter(c => c.meetingScore > 0).sort((a, b) => b.meetingScore - a.meetingScore || a.year - b.year)
-  // 결혼 유력 시기는 실제 배우자성 신호(천간/지지, 세운 또는 대운)가 있어야 함 - 합(연애)만으로는 결혼 시기로 보지 않음
-  const marriageSorted = [...candidates]
-    .filter(c => c.marriageScore > 0 && c.signals.some(s => s.includes('배우자성')))
-    .sort((a, b) => b.marriageScore - a.marriageScore || a.year - b.year)
+  const futureCandidates = candidates.filter(c => !c.isPast)
+  const pastCandidates = candidates.filter(c => c.isPast)
 
-  const bestMeetingYear: MarriageTimingCandidate | null = meetingSorted[0]
-    ? { ...meetingSorted[0], type: 'meeting' }
+  // 결혼 유력 시기는 실제 배우자성 신호(천간/지지, 세운 또는 대운)가 있어야 함 - 합(연애)만으로는 결혼 시기로 보지 않음
+  const hasSpouseStarSignal = (c: MarriageTimingCandidate) => c.signals.some(s => s.includes('배우자성'))
+
+  const pickBest = (
+    pool: MarriageTimingCandidate[],
+    scoreKey: 'meetingScore' | 'marriageScore',
+    requireSpouseStar: boolean
+  ): MarriageTimingCandidate | null => {
+    const filtered = pool
+      .filter(c => c[scoreKey] > 0 && (!requireSpouseStar || hasSpouseStarSignal(c)))
+      .sort((a, b) => b[scoreKey] - a[scoreKey] || a.year - b.year)
+    return filtered[0] ?? null
+  }
+
+  const bestMeetingYearRaw = pickBest(futureCandidates, 'meetingScore', false)
+  const bestMarriageYearRaw = pickBest(futureCandidates, 'marriageScore', true)
+  const pastBestMeetingYearRaw = pickBest(pastCandidates, 'meetingScore', false)
+  const pastBestMarriageYearRaw = pickBest(pastCandidates, 'marriageScore', true)
+
+  const bestMeetingYear: MarriageTimingCandidate | null = bestMeetingYearRaw
+    ? { ...bestMeetingYearRaw, type: 'meeting' }
     : null
-  const bestMarriageYear: MarriageTimingCandidate | null = marriageSorted[0]
-    ? { ...marriageSorted[0], type: 'marriage' }
+  const bestMarriageYear: MarriageTimingCandidate | null = bestMarriageYearRaw
+    ? { ...bestMarriageYearRaw, type: 'marriage' }
+    : null
+  const pastBestMeetingYear: MarriageTimingCandidate | null = pastBestMeetingYearRaw
+    ? { ...pastBestMeetingYearRaw, type: 'meeting' }
+    : null
+  const pastBestMarriageYear: MarriageTimingCandidate | null = pastBestMarriageYearRaw
+    ? { ...pastBestMarriageYearRaw, type: 'marriage' }
     : null
 
   if (bestMeetingYear && bestMarriageYear && bestMeetingYear.year === bestMarriageYear.year) {
     bestMeetingYear.type = 'both'
     bestMarriageYear.type = 'both'
   }
+  if (pastBestMeetingYear && pastBestMarriageYear && pastBestMeetingYear.year === pastBestMarriageYear.year) {
+    pastBestMeetingYear.type = 'both'
+    pastBestMarriageYear.type = 'both'
+  }
 
-  const windowNote = !bestMarriageYear
-    ? '제공된 기간(현재 ~ +9년) 내에는 배우자성이 뚜렷하게 들어오는 세운/대운이 없습니다. 다음 대운 시기를 함께 참고하세요.'
-    : null
+  let windowNote: string | null = null
+  if (!bestMarriageYear && !pastBestMarriageYear) {
+    windowNote = '제공된 기간 내에는 배우자성이 뚜렷하게 들어오는 세운/대운이 없습니다. 다음 대운 시기를 함께 참고하세요.'
+  } else if (!bestMarriageYear && pastBestMarriageYear) {
+    windowNote = `앞으로 ${currentYear + 9}년까지는 배우자성이 뚜렷하게 들어오는 시기가 없어, 과거 ${pastBestMarriageYear.year}년(${pastBestMarriageYear.ganziKorean}) 전후가 원국상 가장 유력했던 시기였습니다. 다음 대운으로 넘어가는 시점을 함께 참고하세요.`
+  }
+
+  // 상위 후보는 미래/과거를 구분해 각각 최대 6개까지 노출 (한쪽 시기가 점수로 다른 쪽을 가리지 않도록)
+  const candidatesOut = [
+    ...futureCandidates.slice(0, 6),
+    ...pastCandidates.slice(0, 6)
+  ].sort((a, b) => a.year - b.year)
 
   return {
     category,
@@ -325,7 +369,9 @@ export function calculateMarriageTiming(params: {
     spouseStarPositions,
     bestMeetingYear,
     bestMarriageYear,
-    candidates: candidates.slice(0, 6),
+    pastBestMeetingYear,
+    pastBestMarriageYear,
+    candidates: candidatesOut,
     windowNote
   }
 }

@@ -747,7 +747,7 @@ Respond ONLY in JSON format.`
 2. 에너지 과부하 (가장 강한 오행/십신)
 3. 사회적 유전자 (격국)
 4. [Career Deep-Dive]: 시스템 프롬프트의 Career logic Step 1~8을 적용한 'Structural Core'와 'Talent & Aura' 분석. 3개 이상의 구체적 직업군 명시.
-5. [Romance & Spouse]: 배우자 성(Star)의 안정성/일지(배우자궁)의 합·충 역동성/파트너의 바이브(Vibe)만 새로 분석하라. 연애/결혼 타이밍(연도)은 이미 marriageTiming 필드에 결정론적으로 계산되어 있으니 절대 재계산하거나 새로운 연도를 만들지 말고, 그 값(category, bestMeetingYear, bestMarriageYear)을 그대로 인용하라.
+5. [Romance & Spouse]: 배우자 성(Star)의 안정성/일지(배우자궁)의 합·충 역동성/파트너의 바이브(Vibe)만 새로 분석하라. 연애/결혼 타이밍(연도)은 이미 marriageTiming 필드에 결정론적으로 계산되어 있으니 절대 재계산하거나 새로운 연도를 만들지 말고, 그 값을 그대로 인용하라. 사용자가 이미 성인기를 지난 경우(예: 현재 나이 25세 이상) bestMeetingYear/bestMarriageYear(앞으로의 시기)뿐 아니라 pastBestMeetingYear/pastBestMarriageYear(이미 지나온 시기)도 함께 확인하여, 과거에 유력했던 시기가 있었다면 "이미 지나온 시기"로 자연스럽게 언급하라. bestMarriageYear가 null이고 pastBestMarriageYear만 있다면 windowNote 내용을 반영해 서술하라.
 6. 심리적 갈증 (없는 오행/십신)
 7. 핵심 흉터 (형충/공망/원진)
 8. 숨겨진 무기 (신살/귀인)
@@ -781,7 +781,7 @@ OUTPUT FORMAT (JSON ONLY):
     "spouse_star_presence": "배우자 성의 가시성(Heavenly Stem/Hidden Stem/Absent) 분석 (단, 최대 3단어 키워드로 압축)",
     "spouse_palace_dynamic": "일지의 합/충/해/원진을 통한 결혼 생활의 역동성 분석 (단, 최대 3단어 키워드로 압축)",
     "partner_vibe": "오행과 십신에 근거한 파트너의 성향과 이미지 (단, 최대 3단어 키워드로 압축)",
-    "timing_logic": "marriageTiming 필드 값을 그대로 인용 (재계산 금지). 형식 예: '2028-2030 인연, 2034-2035 결혼' 처럼 bestMeetingYear.year와 bestMarriageYear.year를 짧게 표기. 둘 중 하나가 null이면 category와 recommendedTiming으로 대체 표기"
+    "timing_logic": "marriageTiming 필드 값을 그대로 인용 (재계산 금지). 형식 예: '2028-2030 인연, 2034-2035 결혼'처럼 bestMeetingYear.year와 bestMarriageYear.year를 짧게 표기. 둘 다 null이고 pastBestMeetingYear/pastBestMarriageYear가 있다면 '2019-2020 인연 있었음, 2022 결혼 유력했음'처럼 과거형으로 표기. 전부 null이면 category와 recommendedTiming으로 대체 표기"
   },
   "psychological_thirst": {
     "missing_element": "...",
