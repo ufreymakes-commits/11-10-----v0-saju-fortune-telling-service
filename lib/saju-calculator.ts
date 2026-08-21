@@ -29,6 +29,7 @@ import {
 } from './saju/advanced'
 import { STEMS, BRANCHES, STEM_TO_ELEMENT } from './saju/constants'
 import { calculateMarriageTiming } from './saju/marriage-timing'
+import { calculateDecadeFortune } from './saju/decade-fortune'
 
 // Heavenly Stems in Hanja (천간 한자)
 const STEMS_HANJA = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸']
@@ -354,6 +355,19 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     yeonwoon: yeonwoonForTiming
   })
   
+  // === 대운 곡선 & 연도별 하이라이트 (결정론적 계산 - AI가 재계산하지 않고 그대로 인용) ===
+  const decadeFortune = calculateDecadeFortune({
+    gender: daeyunGender,
+    dayStem,
+    dayBranch,
+    monthBranch,
+    yearBranch,
+    hourBranch,
+    birthYear: birthYearForTiming,
+    isDayMasterStrong: sinGangSinYak.ratio >= 50,
+    daewoon: daewoonEnriched
+  })
+  
   return {
     // 4주 (한자)
     yearPillar: {
@@ -468,10 +482,12 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     // 연운
     yeonwoon: yeonwoonMapped,
     
-    // 결혼/연애 타이밍 (결정론적 계산 결과 - 리포트에서는 이 값을 그대로 인용만 할 것)
-    marriageTiming
+  // 결혼/연애 타이밍 (결정론적 계산 결과 - 리포트에서는 이 값을 그대로 인용만 할 것)
+    marriageTiming,
+    // 대운 곡선 & 연도별 하이라이트 (결정론적 계산 결과 - 리포트에서는 이 값을 그대로 인용만 할 것)
+    decadeFortune
   }
-}
+  }
 
 // Helper function to get element description
 export function getElementDescription(element: string): string {

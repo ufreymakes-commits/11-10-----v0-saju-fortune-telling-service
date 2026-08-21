@@ -1,6 +1,7 @@
 // Sajume Types
 
 import type { MarriageTimingResult } from './saju/marriage-timing'
+import type { DecadeFortuneResult } from './saju/decade-fortune'
 
 export interface BirthInfo {
   name: string
@@ -136,6 +137,9 @@ export interface SajuData {
   
   // 결혼/연애 타이밍 (결정론적 계산 결과 - AI가 재계산하지 않고 그대로 인용)
   marriageTiming?: MarriageTimingResult
+  
+  // 대운 곡선 & 연도별 하이라이트 (결정론적 계산 결과 - AI가 재계산하지 않고 그대로 인용)
+  decadeFortune?: DecadeFortuneResult
   
   // Deprecated (이전 호환성)
   luckyElement?: string

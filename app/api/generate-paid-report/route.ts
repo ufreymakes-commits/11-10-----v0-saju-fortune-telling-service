@@ -2,17 +2,18 @@ import { NextResponse } from 'next/server'
 import { generateText } from 'ai'
 import { createClient } from '@/lib/supabase/server'
 import type { Fact } from '@/lib/types'
+import { calculateDecadeFortune } from '@/lib/saju/decade-fortune'
 
 // Vercel Hobby 플랜 최대 60초
 export const maxDuration = 300
 
 /**
- * 유료 레포트 생성 API (90개 사실 + 6개 VIP 마스터 카드)
+ * 유료 레포트 생성 API (90개 사실 + 대운 하이라이트 연도 카드)
  *
  * 흐름:
  * 1. submissionId로 DB 조회 (사주데이터 + 무료 3개 사실 + 1500자 해설)
- * 2. 모든 context를 Gemini에 주입
- * 3. 90개 사실 + 6개 VIP 마스터 카드 생성 (중복 없음, 일관성 유지)
+ * 2. saju_data.decadeFortune(결정론적 계산 결과)와 모든 context를 Gemini에 주입
+ * 3. 90개 사실 생성 + decadeFortune의 하이라이트 연도마다 6개 필드 서술 생성 (AI는 점수/연도를 재계산하지 않음)
  * 4. DB에 저장 (is_free: false)
  */
 
@@ -116,6 +117,45 @@ export async function POST(request: Request) {
 
     console.log(`[v0] Found ${freeReports.length} free report sections, total ${freeFacts.length} free facts`)
 
+    // 레거시 submission 호환: saju_data에 decadeFortune이 없으면(구버전 계산 결과) 즉석으로 계산해 채워 넣는다.
+    // 새 submission은 calculateSaju()가 이미 decadeFortune을 포함해 저장하므로 이 분기를 타지 않는다.
+    if (submission.saju_data && !submission.saju_data.decadeFortune) {
+      try {
+        const sd = submission.saju_data
+        // pillar.stem/branch는 한자로 저장되어 있으므로, decade-fortune.ts가 요구하는 한글 간지는
+        // fullNameKorean(예: "갑자")에서 분리해 사용한다.
+        const dayKorean = sd.dayPillar?.fullNameKorean || ''
+        const monthKorean = sd.monthPillar?.fullNameKorean || ''
+        const yearKorean = sd.yearPillar?.fullNameKorean || ''
+        const hourKorean = sd.hourPillar?.fullNameKorean || ''
+        const dayStem = dayKorean.charAt(0)
+        const dayBranch = dayKorean.charAt(1)
+        const monthBranch = monthKorean.charAt(1)
+        const yearBranch = yearKorean.charAt(1)
+        const hourBranch = hourKorean.charAt(1) || null
+        const birthYear = new Date(submission.birth_date).getFullYear()
+        if (dayStem && dayBranch && monthBranch && yearBranch && Array.isArray(sd.daewoon) && sd.sinGangSinYak) {
+          submission.saju_data = {
+            ...sd,
+            decadeFortune: calculateDecadeFortune({
+              gender: submission.gender === 'female' ? 'female' : 'male',
+              dayStem,
+              dayBranch,
+              monthBranch,
+              yearBranch,
+              hourBranch,
+              birthYear,
+              isDayMasterStrong: sd.sinGangSinYak.ratio >= 50,
+              daewoon: sd.daewoon
+            })
+          }
+          console.log('[v0] Computed decadeFortune on the fly for legacy submission')
+        }
+      } catch (fallbackError) {
+        console.error('[v0] Failed to compute fallback decadeFortune:', fallbackError)
+      }
+    }
+
     console.log(`[v0] Generating 90 paid facts for ${submission.name}`)
     console.log('[v0] Context injection summary:')
     console.log('[v0] - Saju data fields:', Object.keys(submission.saju_data || {}).length)
@@ -132,6 +172,12 @@ Birth Country: ${submission.birth_country}
 
 Four Pillars (四柱):
 ${JSON.stringify(submission.saju_data, null, 2)}
+
+=== PRE-COMPUTED DECADE FORTUNE (decadeFortune) — DO NOT RECALCULATE ===
+This is the exact same object as saju_data.decadeFortune above, isolated here so you don't miss it.
+Every score, tag, and highlight year below is final. Your only task for this object is to narrate
+each highlightYears[] entry into the 6 required text fields following the Mapping Rules.
+${JSON.stringify(submission.saju_data?.decadeFortune, null, 2)}
 
 === 1500-CHARACTER INTERPRETATION (from Stage 1) ===
 ${contextInterpretation}
@@ -220,51 +266,103 @@ And please, you need to include these 3 sentences for 'everyone'. Because we mas
 - Your wealth flow timing and secret talents are already mapped out like ***** Ready to see your future from this angle? (explain in details)
 
 ========================================
-AFTER THE 90 CARDS, GENERATE 6 "VIP MASTER CARDS":
+AFTER THE 90 CARDS, GENERATE THE DECADE FORTUNE HIGHLIGHT CARDS:
 ========================================
 
-AFTER successfully generating the 90 main facts, you MUST generate EXACTLY 6 "VIP Master Cards".
-WARNING: Absolutely NO vague, poetic, or generic self-help statements (e.g., "embrace your inner forest", "your time will come"). Every card MUST be hyper-specific, hard-hitting, brutally honest, and packed with practical solutions derived DIRECTLY from their raw JSON variables.
+AFTER successfully generating the 90 main facts, you MUST generate highlight-year cards for the
+pre-computed \`decadeFortune\` object inside \`saju_data\`. This object already contains, for EVERY
+Daewoon (10-year period) from birth to ~90 years old, a deterministic overall score (상/중/하) and
+2-3 already-selected highlight years with their Ten God / 12-Star / Hap-Chung signals. You do NOT
+recompute, invent, or second-guess any score, year, or signal. Your ONLY job is to turn each already
+selected highlight year into 6 short natural-language fields by strictly following the IF-THEN
+mapping rules below.
 
-CRITICAL VIP RULES (MANDATORY):
-1. "Zero Vagueness Policy": Do NOT use abstract metaphors without immediately translating them into concrete real-world actions, habits, or relationship behaviors.
-2. "The Brutal Reality Check": Unforgivingly expose their toxic habits, stubbornness, or emotional blind spots caused by wonjin, hyeong, or missing/excess elements.
-3. "Actionable Life Hacks": Instead of just naming elements like "Wood" or "Metal", instruct them on EXACT physical actions (e.g., "Set a strict 7 AM wakeup routine", "Cut off people who trigger your overthinking", "Get certified in a specialized skill").
-4. "Length Constraint": Each card's content MUST be strictly between 250 and 300 characters.
+======================================================
+[SYSTEM: HOROSCOPE LIFELINE & HIGHLIGHT MAPPING RULES]
+======================================================
+You are a precise Saju lifecycle analyzer. Your task is to narrate a lifetime timeline (Daewoon) and
+its 2-3 highlight years (Yeonwoon) per decade. You MUST strictly map the data using the following
+IF-THEN rules. Do NOT invent interpretations outside these rules. Maintain the "Gen-Z wise friend"
+persona in the final output.
 
-THE 6 VIP CARDS ARCHITECTURE:
+[RULE 1: OVERALL SCORE - ALREADY COMPUTED, DO NOT RECALCULATE]
+Each decade's \`score\` field and each highlight year's \`score\` field in \`decadeFortune\` is already
+one of 상 (High) / 중 (Medium) / 하 (Low), computed from Eokbu Yongshin (Favorable Elements) and the
+12 Stars (Strength). Simply read and narrate this value — never override it based on your own
+impression of the chart.
 
-[Card 1: The Raw Canvas (Your Core Saju Identity)]
-- Data to use: dayMaster, dominantElement (and its percentage), tenGods.missing.
-- Requirement: Define their exact life setting using a sharp nature dynamic. State clearly what element is suffocating them and what element they are starving for in plain, unvarnished terms.
+[RULE 2: WHY THESE YEARS WERE SELECTED - ALREADY COMPUTED, DO NOT RESELECT]
+Each highlight year's \`tags\` array (turning_point / romance / turbulence) and \`signals\` array
+already tell you why that specific year was chosen out of the 10-year Daewoon. Use these tags and
+signals as the factual basis for your narration; do not pick different years or claim different
+reasons.
 
-[Card 2: The Self-Sabotage Trap (Your Toxic Reality Check)]
-- Data to use: wonjin, hyeong, hae, sinGangSinYak.grade, tenGods.missing.
-- Requirement: Expose their worst habit or relationship pattern. Call out their specific flaw—such as faking politeness while silently cutting people off, perfectionism leading to zero execution, or passive-aggressive emotional outbursts. No sugarcoating.
+[RULE 3: CAREER & WEALTH MAPPING (By Age & Ten Gods)]
+Use the highlight year's \`isBeforeAdult\` flag and its \`stemTenGod\`/\`branchTenGod\` values.
 
-[Card 3: The Hidden Arsenal (Your Monetizable Superpower)]
-- Data to use: gyeokguk, sinsalDetails (e.g., 현침살, 겁살), gilseong (태극귀인, 천을귀인).
-- Requirement: Take the toxic trait from Card 2 and show them how to monetize or channel it into professional dominance. Tell them exactly what kind of expert/leader role or sharp skill will turn their weakness into cash and authority.
+IF isBeforeAdult is true (age < 20, focus on Study/Talent):
+- In-seong (인성, Resource): Peak academic focus, strong concentration, favor from teachers.
+- Sik-sang (식상, Output): Creative explosion, discovering physical/artistic talents, hard to sit still.
+- Gwan-seong (관성, Authority): Taking leadership roles (class president), stress from strict rules.
+- Bi-geop (비겁, Self) / Jae-seong (재성, Wealth): Distractions from study, focusing on peer groups or early hustle.
 
-[Card 4: The Quantum Trigger (Your Immediate Action Plan)]
-- Data to use: yongsin, eokbuYongsin.
-- Requirement: Provide 2-3 hyper-specific, practical daily habits or lifestyle rules based on their Yongshin. Do NOT say "cultivate Wood energy"—say "force yourself into a strict morning routine, track your goals in writing, and take control of your environment."
+IF isBeforeAdult is false (age >= 20, focus on Job/Money):
+- Jae-seong (재성, Wealth): Strong cash flow, investment opportunities, successful job hunting.
+- Gwan-seong (관성, Authority): Promotion, leveling up in status, taking on heavy organizational responsibilities.
+- Sik-sang (식상, Output): Starting a side-hustle, launching new projects, creative independence.
+- Bi-geop (비겁, Self): Collaboration or fierce competition. If isDayMasterStrong is true: beware of losing money to others. If false: great teamwork and networking.
+- In-seong (인성, Resource): Gaining certifications, signing important contracts, real estate documentation.
 
-[Card 5: The Karmic Blueprint (Why Your Past Was Hell)]
-- Data to use: daewoon (past vs current transition), gongmang, early pillar clashes.
-- Requirement: Reframe their past emotional voids or family/relationship trauma as a structural necessity. Explain logically why their chart required that pain to break their naive expectations and build their current bulletproof resilience.
+[RULE 4: HUMAN RELATIONSHIPS MAPPING]
+- IF Bi-geop (비겁): Theme is friends and colleagues.
+- IF In-seong (인성): Theme is mentors, bosses, or parents.
+- IF Sik-sang (식상): Theme is juniors, subordinates, or children.
+- IF the year's \`tags\` array includes "turbulence" (a Chung or Wonjin signal is present): Output a warning -> "Miscommunications are highly likely. Keep emotional distance and avoid unnecessary arguments this year."
 
-[Card 6: The Final Mandate (Your Exact Timeline & Destiny)]
-- Data to use: User's Name, dayMaster, yongsin, yeonwoon (Specifically cite upcoming years like 2026, 2028, etc.).
-- Requirement: Give a precise roadmap for the next 3-5 years based on yeonwoon. Tell them when to hold back and when to go all-in. End with a grounded, powerful boost of confidence.
+[RULE 5: ROMANCE & LOVE MAPPING]
+- IF the year's \`tags\` includes "romance" because of a Sik-sang signal: Magnetic energy is high. Active flirting and dating phase (The Meeting).
+- IF the year's \`tags\` includes "romance" because of a Hap-with-Day-Branch signal: A stable person enters your personal space.
+- IF Female AND the year's \`tags\` includes "romance" because of a Gwan-seong (spouse star) signal: Serious, commitment-ready partner enters.
+- IF Male AND the year's \`tags\` includes "romance" because of a Jae-seong (spouse star) signal: Serious, commitment-ready partner enters.
+- IF the year's \`tags\` does NOT include "romance" at all: do not fabricate a romance narrative — briefly say this year's energy is not centered on romance.
 
-These 6 cards should be returned SEPARATELY after the 90 main facts array.
+[RULE 6: HEALTH & ENERGY MAPPING]
+- Identify the most EXCESSIVE or COMPLETELY MISSING element in the natal chart from \`elementBalanceWithHiddenStems\`.
+- IF the highlight year's \`twelveStar\` is 병(Byeong/Sickness), 사(Sa/Death), 묘(Myo/Tomb), or 절(Jeol/Cut):
+  -> Output a Health Warning based on the vulnerable element:
+     * Wood (목): Liver, spine, burnout.
+     * Fire (화): Heart, blood pressure, stress.
+     * Earth (토): Stomach, digestion, skin.
+     * Metal (금): Lungs, respiratory, joints.
+     * Water (수): Kidneys, hormones, reproductive system.
+  -> Advice: "Your physical battery is draining faster than usual. Prioritize deep rest, immune care, and mental detox over hustle."
+- IF the highlight year's \`twelveStar\` is NOT one of those four: give a lighter, energy-maintenance-focused note instead of a warning.
+
+[RULE 7: FINAL ADVICE (Based on the year's already-computed score)]
+- IF score is 상 (High): "The wind is at your back. Stop overthinking and go all-in. High risk brings high reward right now."
+- IF score is 하 (Low): "This is a mandatory pit-stop. Do not force expansion. Focus on leveling up your hidden skills, saving money, and protecting your peace."
+- IF score is 중 (Medium): "A bridging period. Balance is key—take calculated risks but keep a safety net."
+(Rewrite each of the above in your own Gen-Z wise-friend voice rather than quoting it verbatim, but keep the same underlying advice for that score.)
+
+[OUTPUT FORMAT EXPECTATION PER HIGHLIGHT YEAR]
+For every highlight year across every decade in \`decadeFortune.decades[].highlightYears[]\`, produce
+exactly these 6 text fields, each 100-160 characters (including spaces), in the Gen-Z wise-friend
+tone, written in English only (no Korean/Chinese characters):
+1. overallVibe — Overall Vibe & Score narration (state High/Medium/Low in plain words per Rule 1).
+2. careerWealth — Career/Wealth narration per Rule 3.
+3. relationships — Relationships narration per Rule 4.
+4. romance — Romance narration per Rule 5.
+5. health — Health narration per Rule 6.
+6. coreAdvice — Core Advice narration per Rule 7.
+
+Do NOT skip any highlight year. Do NOT add, remove, or reorder decades or highlight years — use
+exactly the years and order given in \`decadeFortune\`.
 
 OUTPUT JSON STRUCTURE - ABSOLUTELY CRITICAL:
 You MUST return EXACTLY 9 sections with EXACTLY 10 cards each = 90 total cards. 
 DO NOT return fewer cards. The user PAID for 90 facts. Returning less is unacceptable.
 
-Then, APPEND the 6 VIP Master Cards as a separate array named "vipCards".
+Then, APPEND the decade fortune highlight narrations as a separate array named "decadeFortuneCards".
 
 FINAL JSON STRUCTURE (single valid JSON object):
 {
@@ -287,47 +385,24 @@ FINAL JSON STRUCTURE (single valid JSON object):
     },
     ... (repeat this EXACT structure for all 9 sections, each with EXACTLY 10 cards.)
   ],
-  "vipCards": [
+  "decadeFortuneCards": [
     {
-      "id": 1,
-      "theme": "The Raw Canvas",
-      "title": "[Sharp, direct title about their core nature]",
-      "content": "[250-300 characters of hard-hitting, concrete reality check...]"
-    },
-    {
-      "id": 2,
-      "theme": "The Self-Sabotage Trap",
-      "title": "[Brutally honest title exposing their fatal flaw]",
-      "content": "[250-300 characters calling out their exact toxic behavior...]"
-    },
-    {
-      "id": 3,
-      "theme": "The Hidden Arsenal",
-      "title": "[Empowering title on how to monetize their flaw]",
-      "content": "[250-300 characters showing exact career/skill leverage...]"
-    },
-    {
-      "id": 4,
-      "theme": "The Quantum Trigger",
-      "title": "[Practical, actionable title with clear lifestyle rules]",
-      "content": "[250-300 characters with 2-3 hyper-specific habits to build...]"
-    },
-    {
-      "id": 5,
-      "theme": "The Karmic Blueprint",
-      "title": "[Empathetic, logical title reframing past pain]",
-      "content": "[250-300 characters explaining why past struggles happened...]"
-    },
-    {
-      "id": 6,
-      "theme": "The Final Mandate",
-      "title": "[Timeline-based title referencing specific years]",
-      "content": "[250-300 characters with concrete timing and roadmap...]"
+      "startAge": 0,
+      "endAge": 9,
+      "year": 2004,
+      "age": 8,
+      "overallVibe": "[100-160 chars]",
+      "careerWealth": "[100-160 chars]",
+      "relationships": "[100-160 chars]",
+      "romance": "[100-160 chars]",
+      "health": "[100-160 chars]",
+      "coreAdvice": "[100-160 chars]"
     }
+    ... (one object per highlight year, for every decade in decadeFortune.decades, in the same order)
   ]
 }
 
-Generate both the 90 main facts and the 6 VIP cards now as a single JSON object.`
+Generate both the 90 main facts and the decadeFortuneCards now as a single JSON object.`
 
     // 6. Gemini API 호출 with retry logic (최대 3번 시도)
     console.log('[v0] Calling Gemini API...')
@@ -378,7 +453,18 @@ Generate both the 90 main facts and the 6 VIP cards now as a single JSON object.
 
     // 7. JSON 파싱 (더 유연한 형식 지원)
     let paidFacts: Fact[] = []
-    let vipCards: Array<{ id: number; theme: string; title: string; content: string }> = []
+    let decadeFortuneCards: Array<{
+      startAge: number
+      endAge: number
+      year: number
+      age: number
+      overallVibe: string
+      careerWealth: string
+      relationships: string
+      romance: string
+      health: string
+      coreAdvice: string
+    }> = []
     try {
       // 시도 1: ```json ... ``` 형식 (줄바꿈 포함)
       let jsonMatch = rawResponse.match(/```json\n([\s\S]*?)\n```/)
@@ -425,18 +511,17 @@ Generate both the 90 main facts and the 6 VIP cards now as a single JSON object.
       
       const parsedData = JSON.parse(jsonString)
       
-      // mainFacts와 vipCards 추출
+      // mainFacts와 decadeFortuneCards 추출
       if (Array.isArray(parsedData)) {
         // 구형식: 배열 직접 반환 (호환성)
         paidFacts = parsedData
       } else if (parsedData.mainFacts && Array.isArray(parsedData.mainFacts)) {
-        // 신형식: { mainFacts: [...], vipCards: [...] }
+        // 신형식: { mainFacts: [...], decadeFortuneCards: [...] }
         paidFacts = parsedData.mainFacts
-        // vipCards가 우선, 구버전 응답(hiddenCards)도 호환 처리
-        vipCards = parsedData.vipCards || parsedData.hiddenCards || []
+        decadeFortuneCards = parsedData.decadeFortuneCards || []
       }
       
-      console.log('[v0] Successfully parsed', paidFacts.length, 'main facts and', vipCards.length, 'VIP cards')
+      console.log('[v0] Successfully parsed', paidFacts.length, 'main facts and', decadeFortuneCards.length, 'decade fortune cards')
       
     } catch (parseError) {
       console.error('[v0] Failed to parse Gemini response:', parseError)
@@ -459,11 +544,11 @@ Generate both the 90 main facts and the 6 VIP cards now as a single JSON object.
       // 이미 존재하면 update
       const { error } = await supabase
         .from('reports')
-        .update({ facts: paidFacts, payment_id: payment.id, hidden_cards: vipCards.length > 0 ? vipCards : undefined })
+        .update({ facts: paidFacts, payment_id: payment.id, hidden_cards: decadeFortuneCards.length > 0 ? decadeFortuneCards : undefined })
         .eq('id', existing.id)
       insertError = error
     } else {
-      // 없으면 insert (hidden_cards 컬럼에 6개 VIP 마스터 카드를 저장)
+      // 없으면 insert (hidden_cards 컬럼에 대운 하이라이트 연도 카드를 저장 - 컬럼명은 레거시, 내용은 decadeFortuneCards)
       const { error } = await supabase
         .from('reports')
         .insert({
@@ -471,7 +556,7 @@ Generate both the 90 main facts and the 6 VIP cards now as a single JSON object.
           payment_id: payment.id,
           section_key: 'paid_full',
           facts: paidFacts,
-          ...(vipCards.length > 0 ? { hidden_cards: vipCards } : {}),
+          ...(decadeFortuneCards.length > 0 ? { hidden_cards: decadeFortuneCards } : {}),
           is_free: false,
         })
       insertError = error
@@ -502,7 +587,7 @@ Generate both the 90 main facts and the 6 VIP cards now as a single JSON object.
 
     return NextResponse.json({
       facts: paidFacts,
-      vipCards,
+      decadeFortuneCards,
       cached: false,
     })
 
