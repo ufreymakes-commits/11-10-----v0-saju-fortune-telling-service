@@ -15,6 +15,18 @@ export interface BirthInfo {
   latitude?: number // Birth location latitude
 }
 
+export interface MarriageTimingCandidate {
+  year: number
+  ganzi: string
+  ganziKorean: string
+  source: 'yeonwoon' | 'daewoon'
+  signals: string[]
+  score: number
+  meetingScore: number
+  marriageScore: number
+  type: 'meeting' | 'marriage' | 'both' | 'candidate'
+}
+
 export interface SajuData {
   // 4주 (한자)
   yearPillar: { stem: string; branch: string; fullName?: string; fullNameKorean?: string }
@@ -131,6 +143,21 @@ export interface SajuData {
   
   // 연운
   yeonwoon?: Array<{ year: number; stem: string; branch: string; fullName?: string }>
+  
+  // 결혼/연애 타이밍 (결정론적 계산 결과 - AI가 재계산하지 않고 그대로 인용)
+  marriageTiming?: {
+    category: '조기 결혼' | '적정/보통' | '만혼 추천' | '과다' | '무자'
+    condition: string
+    recommendedTiming: string
+    advice: string
+    spouseStarTenGods: string[]
+    spouseStarCount: number
+    spouseStarPositions: string[]
+    bestMeetingYear: MarriageTimingCandidate | null
+    bestMarriageYear: MarriageTimingCandidate | null
+    candidates: MarriageTimingCandidate[]
+    windowNote: string | null
+  }
   
   // Deprecated (이전 호환성)
   luckyElement?: string

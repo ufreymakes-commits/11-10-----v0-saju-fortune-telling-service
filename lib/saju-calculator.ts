@@ -28,6 +28,7 @@ import {
   enrichDaeWoonWithTenGodsAndStars
 } from './saju/advanced'
 import { STEMS, BRANCHES, STEM_TO_ELEMENT } from './saju/constants'
+import { calculateMarriageTiming } from './saju/marriage-timing'
 
 // Heavenly Stems in Hanja (천간 한자)
 const STEMS_HANJA = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸']
@@ -299,6 +300,42 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     수: elementScoresWithHiddenStems['수'] || 0
   }
   
+  // 대운 (정확한 계산) + 십신/12운성 추가
+  const daewoonEnriched = enrichDaeWoonWithTenGodsAndStars(
+    calcDaeyun(
+      date,
+      birthInfo.gender === '여' || birthInfo.gender === 'female' ? 'female' : 'male',
+      yearStem,
+      monthStem,
+      monthBranch
+    ),
+    dayStem
+  )
+  
+  // 연운
+  const yeonwoonMapped = analysis.yeonwoon.map(y => ({
+    year: y.year,
+    stem: y.stem,
+    branch: y.branch,
+    fullName: `${koreanStemToHanja(y.stem)}${koreanBranchToHanja(y.branch)}`
+  }))
+  
+  // === 결혼/연애 타이밍 (결정론적 계산 - AI가 재계산하지 않고 그대로 인용) ===
+  const marriageTiming = calculateMarriageTiming({
+    gender: birthInfo.gender === '여' || birthInfo.gender === 'female' ? 'female' : 'male',
+    dayStem,
+    dayBranch,
+    yearStem,
+    yearBranch,
+    monthStem,
+    monthBranch,
+    hourStem,
+    hourBranch,
+    birthYear: date.getFullYear(),
+    daewoon: daewoonEnriched,
+    yeonwoon: yeonwoonMapped
+  })
+  
   return {
     // 4주 (한자)
     yearPillar: {
@@ -408,24 +445,13 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     hybridTwelveSinsal,
     
     // 대운 (정확한 계산) + 십신/12운성 추가
-    daewoon: enrichDaeWoonWithTenGodsAndStars(
-      calcDaeyun(
-        date,
-        birthInfo.gender === '여' || birthInfo.gender === 'female' ? 'female' : 'male',
-        yearStem,
-        monthStem,
-        monthBranch
-      ),
-      dayStem
-    ),
+    daewoon: daewoonEnriched,
     
     // 연운
-    yeonwoon: analysis.yeonwoon.map(y => ({
-      year: y.year,
-      stem: y.stem,
-      branch: y.branch,
-      fullName: `${koreanStemToHanja(y.stem)}${koreanBranchToHanja(y.branch)}`
-    }))
+    yeonwoon: yeonwoonMapped,
+    
+    // 결혼/연애 타이밍 (결정론적 계산 결과 - 리포트에서는 이 값을 그대로 인용만 할 것)
+    marriageTiming
   }
 }
 

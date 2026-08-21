@@ -216,7 +216,10 @@ export async function POST(request: Request) {
       hapChungSummary: saju_data.hapChungSummary || '',
 
       // 합충 조정 상세 내역 (오행 점��� 변화)
-      hapChungAdjustmentDetails: saju_data.hapChungAdjustmentDetails || saju_data.elementAdjustmentHistory || []
+      hapChungAdjustmentDetails: saju_data.hapChungAdjustmentDetails || saju_data.elementAdjustmentHistory || [],
+
+      // 결혼/연애 타이밍 (이미 코드로 확정 계산된 결과 - 재계산 금지, 그대로 인용만 할 것)
+      marriageTiming: saju_data.marriageTiming || null
     }
 
     console.log('[v0] Gemini: ===== COMPLETE CUSTOMER DATA FOR GEMINI 1.5 PRO =====')
@@ -744,7 +747,7 @@ Respond ONLY in JSON format.`
 2. 에너지 과부하 (가장 강한 오행/십신)
 3. 사회적 유전자 (격국)
 4. [Career Deep-Dive]: 시스템 프롬프트의 Career logic Step 1~8을 적용한 'Structural Core'와 'Talent & Aura' 분석. 3개 이상의 구체적 직업군 명시.
-5. [Romance & Spouse]: 연애 Rule A~I를 적용하여 배우자 성(Star)의 위치, 배우자 궁(Palace)의 안정성, 파트너의 바이브(Vibe) 분석. 2026년 전후 10년 중에서 중요한 연애/결혼 관련 대운 타이밍 표기.
+5. [Romance & Spouse]: 배우자 성(Star)의 안정성/일지(배우자궁)의 합·충 역동성/파트너의 바이브(Vibe)만 새로 분석하라. 연애/결혼 타이밍(연도)은 이미 marriageTiming 필드에 결정론적으로 계산되어 있으니 절대 재계산하거나 새로운 연도를 만들지 말고, 그 값(category, bestMeetingYear, bestMarriageYear)을 그대로 인용하라.
 6. 심리적 갈증 (없는 오행/십신)
 7. 핵심 흉터 (형충/공망/원진)
 8. 숨겨진 무기 (신살/귀인)
@@ -778,7 +781,7 @@ OUTPUT FORMAT (JSON ONLY):
     "spouse_star_presence": "배우자 성의 가시성(Heavenly Stem/Hidden Stem/Absent) 분석 (단, 최대 3단어 키워드로 압축)",
     "spouse_palace_dynamic": "일지의 합/충/해/원진을 통한 결혼 생활의 역동성 분석 (단, 최대 3단어 키워드로 압축)",
     "partner_vibe": "오행과 십신에 근거한 파트너의 성향과 이미지 (단, 최대 3단어 키워드로 압축)",
-    "timing_logic": "인카운터(Meeting)와 현출(Manifestation)의 시기적 단서 (단, 연도와 핵심 키워드만 짧게)"
+    "timing_logic": "marriageTiming 필드 값을 그대로 인용 (재계산 금지). 형식 예: '2028-2030 인연, 2034-2035 결혼' 처럼 bestMeetingYear.year와 bestMarriageYear.year를 짧게 표기. 둘 중 하나가 null이면 category와 recommendedTiming으로 대체 표기"
   },
   "psychological_thirst": {
     "missing_element": "...",
@@ -870,7 +873,7 @@ Language: English only.
 
     // ===== Yongsin 처리 로직 =====
     // 조후 ���도에 따라 조후용신 또는 억부용신 선택
-    // 생년월일에서 계절 파악해서 조후 정도 판단
+    // 생년월일에서 계절 파악해서 조후 정��� 판단
     const month = parseInt(birth_date.split('-')[1])
     const isBalancedSeason = [3, 4, 9, 10].includes(month) // 봄/가을
 
