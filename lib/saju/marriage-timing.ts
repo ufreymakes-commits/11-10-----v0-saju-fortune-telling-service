@@ -299,8 +299,12 @@ export function calculateMarriageTiming(params: {
     .filter(c => c.marriageScore > 0 && c.signals.some(s => s.includes('배우자성')))
     .sort((a, b) => b.marriageScore - a.marriageScore || a.year - b.year)
 
-  const bestMeetingYear = meetingSorted[0] ? { ...meetingSorted[0], type: 'meeting' as const } : null
-  const bestMarriageYear = marriageSorted[0] ? { ...marriageSorted[0], type: 'marriage' as const } : null
+  const bestMeetingYear: MarriageTimingCandidate | null = meetingSorted[0]
+    ? { ...meetingSorted[0], type: 'meeting' }
+    : null
+  const bestMarriageYear: MarriageTimingCandidate | null = marriageSorted[0]
+    ? { ...marriageSorted[0], type: 'marriage' }
+    : null
 
   if (bestMeetingYear && bestMarriageYear && bestMeetingYear.year === bestMarriageYear.year) {
     bestMeetingYear.type = 'both'

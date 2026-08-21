@@ -301,10 +301,11 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
   }
   
   // 대운 (정확한 계산) + 십신/12운성 추가
+  const daeyunGender: 'male' | 'female' = birthInfo.gender === 'female' ? 'female' : 'male'
   const daewoonEnriched = enrichDaeWoonWithTenGodsAndStars(
     calcDaeyun(
       date,
-      birthInfo.gender === '여' || birthInfo.gender === 'female' ? 'female' : 'male',
+      daeyunGender,
       yearStem,
       monthStem,
       monthBranch
@@ -322,7 +323,7 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
   
   // === 결혼/연애 타이밍 (결정론적 계산 - AI가 재계산하지 않고 그대로 인용) ===
   const marriageTiming = calculateMarriageTiming({
-    gender: birthInfo.gender === '여' || birthInfo.gender === 'female' ? 'female' : 'male',
+    gender: daeyunGender,
     dayStem,
     dayBranch,
     yearStem,
