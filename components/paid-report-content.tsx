@@ -194,14 +194,14 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
 
       {/* Day Master Card — horizontal layout */}
       <div className="bg-card border border-border rounded-xl p-4 mb-6 shadow-lg shadow-primary/5">
-        <p className="text-[10px] text-muted-foreground mb-3 text-center uppercase tracking-wider">Your Day Master (일간)</p>
+        <p className="text-[10px] text-muted-foreground mb-3 text-center uppercase tracking-wider">Your Day Master</p>
         <div className="flex gap-4 items-center">
           {/* Left: image + name */}
           <div className="flex flex-col items-center flex-shrink-0 w-24">
             <div className="relative w-20 h-20 mb-2">
               <Image
                 src={character?.imagePath || '/images/characters-collection.png'}
-                alt={`${dayMasterKorean} character`}
+                alt={`${character?.themeTitle || dayMasterHanja} character`}
                 fill
                 className="object-contain drop-shadow-lg"
                 priority
@@ -209,7 +209,7 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
               />
             </div>
             <p className={`text-sm font-bold text-center leading-tight ${character?.color || 'text-foreground'}`}>
-              {dayMasterHanja} {dayMasterKorean}
+              {dayMasterHanja}
             </p>
             <p className="text-[10px] text-muted-foreground text-center">{character?.element || ''}</p>
           </div>
@@ -314,7 +314,9 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
       </div>
 
       {/* Your Life Eras — one themed season card per decade */}
-      {decadeFortune && Array.isArray(decadeFortune.decades) && decadeFortune.decades.length > 0 && (
+      {/* Gated behind !isGenerating: the season titles/emojis and 6 category paragraphs are AI-generated
+          and live in paidReport.hidden_cards, so this section has nothing real to show until generation finishes. */}
+      {!isGenerating && decadeFortune && Array.isArray(decadeFortune.decades) && decadeFortune.decades.length > 0 && (
         <div className="mt-8">
           <div className="text-center mb-4">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Your Lifeline</p>
@@ -338,7 +340,7 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
                         Season {decadeIdx + 1}: {seasonTitle} <span aria-hidden="true">{seasonEmoji}</span>
                       </h4>
                       <p className="text-[10px] text-muted-foreground mt-0.5">
-                        Age {decade.startAge}–{decade.endAge} <span className="text-muted-foreground/60">({decade.startYear}–{decade.endYear})</span> · {decade.ganzi} · {decade.ganziKorean} 대운
+                        Age {decade.startAge}–{decade.endAge} <span className="text-muted-foreground/60">({decade.startYear}–{decade.endYear})</span> · {decade.ganzi} Cycle
                       </p>
                     </div>
                     <button
