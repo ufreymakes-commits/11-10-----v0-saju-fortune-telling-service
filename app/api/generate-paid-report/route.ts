@@ -274,9 +274,9 @@ the pre-computed \`decadeFortune\` object inside \`saju_data\`. This object alre
 Daewoon (10-year period) from birth to ~90 years old, a deterministic overall score (상/중/하) and,
 for 5 categories (career/wealth, relationships, romance, health, encouragement/caution), up to 2
 already-selected "candidate years" with their Ten God / 12-Star / Hap-Chung reason. You do NOT
-recompute, invent, or second-guess any score or candidate year. Your ONLY job is to weave the
-already-selected candidate years into 6 flowing paragraphs per decade by strictly following the
-IF-THEN mapping rules below.
+recompute, invent, or second-guess any score or candidate year. Your job is to (a) name this decade
+as a "season" with a short evocative title + one emoji, and (b) weave the already-selected candidate
+years into 6 flowing paragraphs per decade — by strictly following the IF-THEN mapping rules below.
 
 ======================================================
 [SYSTEM: HOROSCOPE LIFELINE & HIGHLIGHT MAPPING RULES]
@@ -286,6 +286,19 @@ ONE cohesive card per 10-year decade, citing only the specific years already sel
 MUST strictly map the data using the following IF-THEN rules. Do NOT invent interpretations outside
 these rules, and do NOT cite any year that does not appear in that decade's candidate-year arrays.
 Maintain the "Gen-Z wise friend" persona in the final output.
+
+[RULE 0: SEASON TITLE & EMOJI - CREATIVE, BUT GROUNDED IN THE DATA]
+Give this decade a short evocative "season" name (2-4 words, title case, English, no colon inside
+it) that captures its dominant theme, plus ONE emoji that fits it. Base the theme on: the decade's
+\`score\`, its dominant candidate-year categories (e.g. mostly careerYears -> an ambition/建설 theme;
+mostly romanceYears -> a connection theme; mostly cautionYears with "caution" polarity -> a
+rest/consolidation theme), and \`isYouthDecade\`. Do NOT always default to positive-sounding names —
+a 하 (Low) decade dominated by caution years should get an honest, still-dignified name like "Quiet
+Reset" or "Winter Roots" 🌱 rather than a falsely upbeat one, and a 상 (High) decade dominated by
+career/romance signals can get an energetic name like "High Tide" 🌊 or "Open Road" 🛣️. Vary the
+vocabulary and emoji across decades for the same person — never reuse the same title or emoji twice
+for one person's set of decades. Keep it punchy and metaphor-driven (nature, seasons, tides, roads,
+weather), not literal ("Good Career Decade" is bad; "High Tide" is good).
 
 [RULE 1: OVERALL SCORE - ALREADY COMPUTED, DO NOT RECALCULATE]
 Each decade's \`score\` field in \`decadeFortune\` is already one of 상 (High) / 중 (Medium) / 하 (Low),
@@ -350,18 +363,19 @@ your year to try" call-outs; caution entries (Chung/Wonjin) are explicit "slow d
 yourself" call-outs. Name the specific years.
 
 [OUTPUT FORMAT EXPECTATION PER DECADE]
-For every decade in \`decadeFortune.decades[]\`, produce exactly ONE card with these 6 text fields,
-each 150-260 characters (including spaces), in the Gen-Z wise-friend tone, written in English only
-(no Korean/Chinese characters). Naturally weave in the specific years from that category's candidate
-array (never invent a year not present in the data):
-1. overallVibe — Overall flow of this whole decade (state High/Medium/Low in plain words per Rule 1),
-   using a nature/metaphor tied to the customer's chart, mostly framed positively since cautions are
-   covered in the other 5 fields below.
-2. careerWealth — Career/Wealth narration per Rule 3, citing careerYears.
-3. relationships — Family/friends/workplace narration per Rule 4, citing relationshipYears.
-4. romance — Romance narration per Rule 5, citing romanceYears (or explicitly noting none).
-5. health — Health narration per Rule 6, citing healthYears.
-6. coreAdvice — Encouragement + caution narration per Rule 7, citing cautionYears.
+For every decade in \`decadeFortune.decades[]\`, produce exactly ONE card with these 8 fields, written
+in English only (no Korean/Chinese characters). Naturally weave in the specific years from that
+category's candidate array (never invent a year not present in the data):
+1. seasonTitle — 2-4 word evocative season name per Rule 0 (e.g. "High Tide", "Quiet Reset").
+2. seasonEmoji — exactly ONE emoji matching seasonTitle per Rule 0.
+3. overallVibe — Overall flow of this whole decade (state High/Medium/Low in plain words per Rule 1),
+   using a nature/metaphor tied to the customer's chart and echoing the seasonTitle, mostly framed
+   positively since cautions are covered in the other fields below. 150-260 characters.
+4. careerWealth — Career/Wealth narration per Rule 3, citing careerYears. 150-260 characters.
+5. relationships — Family/friends/workplace narration per Rule 4, citing relationshipYears. 150-260 characters.
+6. romance — Romance narration per Rule 5, citing romanceYears (or explicitly noting none). 150-260 characters.
+7. health — Health narration per Rule 6, citing healthYears. 150-260 characters.
+8. coreAdvice — Encouragement + caution narration per Rule 7, citing cautionYears. 150-260 characters.
 
 Do NOT skip any decade. Do NOT add, remove, or reorder decades — produce exactly one card per
 decade, in the same order as \`decadeFortune.decades\`.
@@ -400,6 +414,8 @@ FINAL JSON STRUCTURE (single valid JSON object):
       "endAge": 9,
       "startYear": 1996,
       "endYear": 2005,
+      "seasonTitle": "[2-4 word evocative name]",
+      "seasonEmoji": "[single emoji]",
       "overallVibe": "[150-260 chars]",
       "careerWealth": "[150-260 chars]",
       "relationships": "[150-260 chars]",
@@ -467,6 +483,8 @@ Generate both the 90 main facts and the decadeFortuneCards now as a single JSON 
       endAge: number
       startYear: number
       endYear: number
+      seasonTitle: string
+      seasonEmoji: string
       overallVibe: string
       careerWealth: string
       relationships: string

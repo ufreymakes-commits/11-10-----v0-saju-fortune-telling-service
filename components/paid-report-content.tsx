@@ -4,12 +4,10 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { CheckCircleIcon, LinkIcon, CheckIcon, ChevronDownIcon, DownloadIcon } from 'lucide-react'
-import { AreaChart, Area, XAxis, YAxis, ReferenceLine } from 'recharts'
 import type { Submission, SajuData } from '@/lib/types'
 import { getDayMasterCharacter } from '@/lib/day-master-characters'
 import { track } from '@/hooks/use-track'
 import { useScreenshotDetect } from '@/hooks/use-screenshot-detect'
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart'
 
 interface PaidReportContentProps {
   submission: Submission
@@ -101,19 +99,9 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
   const character = getDayMasterCharacter(dayMasterKorean)
   const quote = DAY_MASTER_QUOTE[dayMasterKorean] || ''
 
-  // 대운 곡선 & 하이라이트 연도 (결정론적 계산 결과: sajuData.decadeFortune)
+  // 대운(10년) 시대 구분 (결정론적 계산 결과: sajuData.decadeFortune)
   const decadeFortune = (sajuData as any)?.decadeFortune
-  const decadeScoreToNumber: Record<string, number> = { '하': 1, '중': 2, '상': 3 }
-  const decadeChartData = (decadeFortune?.decades || []).map((d: any) => ({
-    label: `${d.startAge}s`,
-    startAge: d.startAge,
-    endAge: d.endAge,
-    ganzi: d.ganzi,
-    ganziKorean: d.ganziKorean,
-    score: d.score,
-    scoreValue: decadeScoreToNumber[d.score] || 2,
-  }))
-  // AI가 서술한 6개 카테고리 문단(decadeFortuneCards)을 대운의 startAge 기준으로 매칭
+  // AI가 서술한 시즌 타이틀/이모지 + 6개 카테고리 문단(decadeFortuneCards)을 대운의 startAge 기준으로 매칭
   const decadeFortuneCardByStartAge = new Map<number, any>(
     (decadeFortuneCards || []).map((c: any) => [c.startAge, c])
   )
@@ -325,94 +313,34 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
         })}
       </div>
 
-      {/* Decade Fortune Curve + Yearly Highlights */}
-      {decadeFortune && decadeChartData.length > 0 && (
+      {/* Your Life Eras — one themed season card per decade */}
+      {decadeFortune && Array.isArray(decadeFortune.decades) && decadeFortune.decades.length > 0 && (
         <div className="mt-8">
           <div className="text-center mb-4">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Your Lifeline</p>
-            <h3 className="text-sm font-semibold text-foreground mt-1">Decade-by-Decade Fortune Curve</h3>
-            <p className="text-[11px] text-muted-foreground/70 mt-1">From birth to your 90s — each decade&apos;s overall wave, and the years worth watching closely.</p>
+            <h3 className="text-sm font-semibold text-foreground mt-1">Your Life Eras</h3>
+            <p className="text-[11px] text-muted-foreground/70 mt-1">From birth to your 90s — every decade has its own season. Here&apos;s yours.</p>
           </div>
 
-          {/* Curve chart */}
-          <div className="bg-card border border-border rounded-xl p-4 mb-4 shadow-lg shadow-primary/5">
-            <ChartContainer
-              config={{ scoreValue: { label: 'Fortune', color: 'var(--color-primary)' } } as ChartConfig}
-              className="aspect-auto h-[180px] w-full"
-            >
-              <AreaChart data={decadeChartData} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="decadeFortuneGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0.02} />
-                  </linearGradient>
-                </defs>
-                <XAxis
-                  dataKey="label"
-                  tickLine={false}
-                  axisLine={false}
-                  fontSize={10}
-                  interval={0}
-                />
-                <YAxis hide domain={[0.5, 3.5]} />
-                <ReferenceLine y={2} stroke="var(--color-border)" strokeDasharray="3 3" />
-                <ChartTooltip
-                  cursor={false}
-                  content={
-                    <ChartTooltipContent
-                      labelFormatter={(_, payload) => {
-                        const p = payload?.[0]?.payload
-                        return p ? `Age ${p.startAge}–${p.endAge} · ${p.ganzi}` : ''
-                      }}
-                      formatter={(_, __, item) => {
-                        const p = (item as any)?.payload
-                        return p ? [p.score === '상' ? 'High' : p.score === '하' ? 'Low' : 'Medium', 'Fortune'] : []
-                      }}
-                    />
-                  }
-                />
-                <Area
-                  type="monotone"
-                  dataKey="scoreValue"
-                  stroke="var(--color-primary)"
-                  strokeWidth={2}
-                  fill="url(#decadeFortuneGradient)"
-                  dot={{ r: 3, fill: 'var(--color-primary)', strokeWidth: 0 }}
-                />
-              </AreaChart>
-            </ChartContainer>
-            <div className="flex items-center justify-center gap-4 mt-2 text-[10px] text-muted-foreground">
-              <span>High</span>
-              <span>·</span>
-              <span>Medium</span>
-              <span>·</span>
-              <span>Low</span>
-            </div>
-          </div>
-
-          {/* Per-decade highlight years */}
+          {/* Per-decade season cards */}
           <div className="space-y-3">
             {decadeFortune.decades.map((decade: any, decadeIdx: number) => {
               const decadeKey = 1000 + decadeIdx
               const isOpen = !!openSections[decadeKey]
-              const scoreStyle: Record<string, string> = {
-                '상': 'text-primary bg-primary/15',
-                '중': 'text-muted-foreground bg-muted',
-                '하': 'text-destructive bg-destructive/15',
-              }
-              const scoreLabel: Record<string, string> = { '상': 'High', '중': 'Medium', '하': 'Low' }
+              const cardText = decadeFortuneCardByStartAge.get(decade.startAge)
+              const seasonTitle = cardText?.seasonTitle || 'Unfolding Chapter'
+              const seasonEmoji = cardText?.seasonEmoji || '✨'
               return (
                 <div key={decadeIdx} className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
                   <div className="bg-muted border-b border-border px-4 py-3 flex items-center gap-2">
                     <div className="flex-1">
                       <h4 className="text-sm font-semibold text-foreground">
-                        Age {decade.startAge}–{decade.endAge} <span className="text-muted-foreground/60 font-normal">({decade.startYear}–{decade.endYear})</span>
+                        Season {decadeIdx + 1}: {seasonTitle} <span aria-hidden="true">{seasonEmoji}</span>
                       </h4>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">{decade.ganzi} · {decade.ganziKorean} 대운</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">
+                        Age {decade.startAge}–{decade.endAge} <span className="text-muted-foreground/60">({decade.startYear}–{decade.endYear})</span> · {decade.ganzi} · {decade.ganziKorean} 대운
+                      </p>
                     </div>
-                    <span className={`text-[10px] font-semibold px-2 py-1 rounded-full ${scoreStyle[decade.score] || scoreStyle['중']}`}>
-                      {scoreLabel[decade.score] || 'Medium'}
-                    </span>
                     <button
                       onClick={() => toggleSection(decadeKey)}
                       aria-label={isOpen ? 'Collapse decade' : 'Expand decade'}
