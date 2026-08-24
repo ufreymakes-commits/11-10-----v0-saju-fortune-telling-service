@@ -197,11 +197,16 @@ Based on all the context above, generate 96 NEW facts that:
 3. Maintain narrative consistency with the established "Life Persona"
 4. Cover all 9 premium themes — sections 01, 07, 09 get 10 facts each; sections 02, 03, 04, 05, 06, 08
    get 11 facts each (10 regular + 1 "Truth Bomb" card, see the TRUTH BOMB CARD rule below)
-5. Don't use ** this mark or any Chinese/Korean character — including a single hanja element symbol
-   like "土/火/水/金/木" or a single Ten God/Ganzi character in quotes or parentheses (e.g. do NOT write
-   "Earth (土)" or "'甲' (direct wealth)"). Translate every one of these into plain English inline
-   instead (e.g. "Earth energy" or "the direct wealth energy"). This applies to ALL 96 cards, not just
-   the Truth Bomb cards. Use only English, in every single card, with no exceptions.
+5. Don't use ** this mark. Never write an actual Chinese hanja or Korean Hangul character anywhere in
+   any of the 96 cards or the closing letter (no 土/火/水/金/木, no 己/甲/etc., no Hangul) — the output
+   must be 100% Latin script. This does NOT mean dropping the Saju terminology itself: every Day
+   Master, element, Ten God, and Sinsal/relational term (Wonjinsal, Hyeong, Chung, Hap, etc.) should
+   still be named using its ROMANIZED form, exactly like the style already modeled in section 01 below
+   ("Gi-to", "Mi-to", "Zi-mi Wonjin-Sal"). Whenever you introduce one of these romanized terms, follow
+   it with a short plain-English gloss in parentheses the first time it's used in that card, e.g.
+   "Gi-to (Earth)", "Wonjinsal (Clash)", "'甲' -> "Gap (direct wealth)"" — never the bare hanja/Hangul
+   character alone, and never the romanized term with zero gloss on first use either. This rule applies
+   to ALL 96 cards, not just the Truth Bomb cards.
 
 OUTPUT FORMAT:
 Key Point: You must embody a Gen-Z persona—playful and witty, yet brutally honest about the facts, ultimately delivering a core message of warmth, comfort, and practical solutions. Avoid appearing overly playful or flippant. Bridge the data with empathy.
@@ -309,11 +314,12 @@ real comfort or a real fix is what makes a paid report feel worth paying for.
   never leave the reader on the harsh part. The comfort must feel earned and specific to the chart,
   not a generic "but it's okay!" tack-on.
 - Same format as every other card: ONE paragraph, HARD MAX 220 characters including spaces (count
-  before finalizing — if it runs long, cut words, don't add more). English only. This means every
-  Saju/Ten-God term must be translated into plain English inline (e.g. write "a tendency to
-  undervalue your partner's efforts" — never write the Korean phrase itself, not even in quotes).
-  Same warm Gen-Z wise-friend voice as the rest of the report — the difference from other cards is
-  the precision of the observation, not the tone, and NEVER the presence of non-English script.
+  before finalizing — if it runs long, cut words, don't add more). Follow Rule 5 above for any
+  Saju/Ten-God/Sinsal term: use its romanized form with a short English gloss in parentheses on first
+  use (e.g. "a tendency toward Jae-Da-Sin-Yak (Overwhelming Wealth, Weak Self)"), never the bare
+  hanja/Hangul character. Same warm Gen-Z wise-friend voice as the rest of the report — the difference
+  from other cards is the precision of the observation, not the tone, and NEVER the presence of a raw
+  Chinese/Korean character.
 - Do not contradict anything already stated elsewhere in that section or in the free 3 facts.
 
 ========================================
@@ -322,8 +328,11 @@ CLOSING LETTER RULE — one standalone letter after all 96 cards:
 After the 96 main cards, write exactly ONE closing letter (field name \`closingLetter\`). HARD LIMIT:
 550-650 characters including spaces — count the characters before finalizing, and if your draft runs
 long, cut sentences/clauses until it fits inside this range rather than submitting a longer letter.
-This is not a soft target: a letter over 650 characters is a failed output. English only, no
-Korean/Chinese characters — translate every Saju term into plain English inline. This is the single most
+This is not a soft target: a letter over 650 characters is a failed output. This letter should read
+as flowing, plain-English prose — avoid naming specific Saju/Ten-God terms here at all if you can
+express the same idea through the nature metaphor instead; if you must name one, follow Rule 5 (
+romanized form + a short English gloss in parentheses), and never write a raw Chinese/Korean
+character. This is the single most
 emotionally resonant piece of the entire report — it should read like a warm, perceptive friend who
 truly sees this person, not a summary of facts already stated. Follow this arc, in flowing prose (not
 labeled sections):
