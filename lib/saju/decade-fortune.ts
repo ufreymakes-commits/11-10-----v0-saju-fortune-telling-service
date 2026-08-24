@@ -1,14 +1,16 @@
 // ================================================================
-// 대운 곡선 & 연도별 하이라이트 계산 (결정론적 로직 - AI 추론 아님)
+// 대운 곡선 & 카테고리별 근거 연도 계산 (결정론적 로직 - AI 추론 아님)
 // ================================================================
 // [1단계] 신강/신약에 따라 유리한 십신(용신) 그룹과 불리한 십신(기신) 그룹을 확정
 // [2단계] 대운(8구간, 출생~약 90세) 각각의 점수(상/중/하)를 용신 여부 + 12운성 강약으로 계산
-// [3단계] 각 대운 10년 안에서 "전환점/연애·결혼/충·원진 격동" 조건에 해당하는 연도만
-//         추려 2~3개의 하이라이트 연도로 선정하고, 그 연도의 점수와 근거(signals)를 남긴다
+// [3단계] 각 대운 10년 안의 매해(세운)를 계산해, 5개 카테고리(커리어/재물, 인간관계, 연애,
+//         건강, 응원·주의)마다 "왜 그 해가 좋거나 주의해야 하는지"를 뒷받침하는 연도를
+//         최대 2개씩(호재 1개 + 주의 1개 우선) 골라 근거(reason)와 함께 남긴다.
 //
 // 이 모듈의 출력은 saju_data.decadeFortune에 저장되며,
-// AI(유료 리포트 생성 프롬프트)는 여기서 이미 결정된 score/tags/signals를 바탕으로
-// 100~160자 문장만 작성하고, 점수나 연도 자체를 새로 만들어내지 않는다.
+// AI(유료 리포트 생성 프롬프트)는 대운(10년) 단위로 이미 결정된 score와 카테고리별 근거 연도를
+// 바탕으로 "종합/커리어·재물/인간관계/연애/건강/응원·주의" 6개 문단만 작성하고,
+// 점수나 근거 연도 자체를 새로 만들어내지 않는다.
 // ================================================================
 
 import { calculateYeonWoon } from './core-calculator'
@@ -16,6 +18,7 @@ import { getTwelveStar } from './advanced'
 
 type Gender = 'male' | 'female'
 export type FortuneScore = '상' | '중' | '하'
+export type YearPolarity = 'favorable' | 'caution'
 
 // 십신 테이블 (일간 기준) - marriage-timing.ts와 동일한 로컬 정의 (범용 문자열 키 조회용)
 const TEN_GODS_TABLE: Record<string, Record<string, string>> = {
@@ -117,18 +120,34 @@ function scoreFromGroupAndStar(
   return '중'
 }
 
-export interface DecadeYearHighlight {
+// 대운 10년 안의 낱개 연도(세운) 계산 결과 - 카테고리 후보 선정에 쓰이는 내부 작업용 타입
+interface YearWorking {
   year: number
   age: number
-  isBeforeAdult: boolean // age < 20 → AI가 학업/재능 위주로 커리어 항목을 서술해야 함
   ganzi: string
   ganziKorean: string
-  stemTenGod: string
-  branchTenGod: string
+  stemGroup: string
+  branchGroup: string
   twelveStar: string
-  score: FortuneScore
-  tags: Array<'turning_point' | 'romance' | 'turbulence'>
-  signals: string[]
+  yearScore: FortuneScore
+  turningPoint: boolean
+  romanceReasons: string[]
+  turbulenceReason: string | null
+}
+
+interface CategoryCandidate {
+  y: YearWorking
+  polarity: YearPolarity
+  reason: string
+}
+
+export interface CategoryYearNote {
+  year: number
+  age: number
+  ganzi: string
+  ganziKorean: string
+  polarity: YearPolarity
+  reason: string
 }
 
 export interface DecadePeriod {
@@ -143,7 +162,14 @@ export interface DecadePeriod {
   stemTenGod: string
   twelveStar: string
   score: FortuneScore
-  highlightYears: DecadeYearHighlight[]
+  // 이 대운의 중간 나이가 20세 미만이면 true → AI가 커리어 카테고리를 학업/재능 위주로 서술해야 함
+  isYouthDecade: boolean
+  // 카테고리별 근거 연도 (최대 2개씩, 호재 1개 + 주의 1개 우선 선정) - AI는 여기 있는 연도만 인용
+  careerYears: CategoryYearNote[]
+  relationshipYears: CategoryYearNote[]
+  romanceYears: CategoryYearNote[]
+  healthYears: CategoryYearNote[]
+  cautionYears: CategoryYearNote[]
 }
 
 export interface DecadeFortuneResult {
@@ -152,6 +178,35 @@ export interface DecadeFortuneResult {
   unfavorableTenGodGroups: string[]
   primaryFavorableGroup: string // 위 배열의 1번째 (전환점 판정 기준)
   decades: DecadePeriod[]
+}
+
+const SCORE_RANK: Record<FortuneScore, number> = { '상': 2, '중': 1, '하': 0 }
+
+// 후보 중 호재(favorable) 1개 + 주의(caution) 1개를 우선 뽑고, 자리가 남으면 같은 극성에서 더 채운다.
+// (연도 순으로 정렬해 최종 반환 - AI 문장에서 "몇년도, 몇년도" 식으로 시간순 언급하기 쉽게)
+function pickBalancedYears(candidates: CategoryCandidate[], max = 2): CategoryYearNote[] {
+  const favorable = candidates
+    .filter(c => c.polarity === 'favorable')
+    .sort((a, b) => (SCORE_RANK[b.y.yearScore] - SCORE_RANK[a.y.yearScore]) || (a.y.year - b.y.year))
+  const caution = candidates
+    .filter(c => c.polarity === 'caution')
+    .sort((a, b) => (SCORE_RANK[a.y.yearScore] - SCORE_RANK[b.y.yearScore]) || (a.y.year - b.y.year))
+
+  const picked: CategoryCandidate[] = []
+  if (favorable[0]) picked.push(favorable[0])
+  if (caution[0]) picked.push(caution[0])
+  for (const pool of [favorable, caution]) {
+    for (const c of pool) {
+      if (picked.length >= max) break
+      if (!picked.includes(c)) picked.push(c)
+    }
+    if (picked.length >= max) break
+  }
+
+  return picked
+    .sort((a, b) => a.y.year - b.y.year)
+    .slice(0, max)
+    .map(c => ({ year: c.y.year, age: c.y.age, ganzi: c.y.ganzi, ganziKorean: c.y.ganziKorean, polarity: c.polarity, reason: c.reason }))
 }
 
 export function calculateDecadeFortune(params: {
@@ -185,6 +240,7 @@ export function calculateDecadeFortune(params: {
   const decades: DecadePeriod[] = daewoon.map(d => {
     const stemGroup = TEN_GOD_GROUP[d.tenGod] || ''
     const score = scoreFromGroupAndStar(stemGroup, d.twelveStar, favorableTenGodGroups, unfavorableTenGodGroups)
+    const isYouthDecade = (d.startAge + d.endAge) / 2 < 20
 
     const startYear = birthYear + d.startAge
     const endYear = birthYear + d.endAge
@@ -192,83 +248,115 @@ export function calculateDecadeFortune(params: {
     const yearsInDecade = calculateYeonWoon(startYear, yearCount)
 
     // ==========================================================
-    // [2단계] 연도별 태그/점수 산출 (RULE 2~ RULE 5의 판정 조건)
+    // [2단계] 대운 10년 안 매해(세운)의 십신/12운성/합충원진 신호를 계산
     // ==========================================================
-    const yearCandidates: DecadeYearHighlight[] = yearsInDecade.map(y => {
+    const yearsWorking: YearWorking[] = yearsInDecade.map(y => {
       const age = y.year - birthYear
       const stemTenGod = getSipsin(dayStem, y.stem)
       const branchTenGod = getSipsin(dayStem, getBongi(y.branch))
       const twelveStar = getTwelveStar(dayStem, y.branch)
-      const stemGroupOfYear = TEN_GOD_GROUP[stemTenGod] || ''
-      const branchGroupOfYear = TEN_GOD_GROUP[branchTenGod] || ''
-      const yearScore = scoreFromGroupAndStar(stemGroupOfYear, twelveStar, favorableTenGodGroups, unfavorableTenGodGroups)
+      const stemGroup = TEN_GOD_GROUP[stemTenGod] || ''
+      const branchGroup = TEN_GOD_GROUP[branchTenGod] || ''
+      const yearScore = scoreFromGroupAndStar(stemGroup, twelveStar, favorableTenGodGroups, unfavorableTenGodGroups)
 
-      const tags: DecadeYearHighlight['tags'] = []
-      const signals: string[] = []
+      // 전환점: 그 해가 1순위 용신(primaryFavorableGroup)을 포함하는지
+      const turningPoint = stemGroup === primaryFavorableGroup || branchGroup === primaryFavorableGroup
 
-      // RULE 2.1 — The Turning Point: 그 해가 1순위 용신(primaryFavorableGroup)을 포함하는지
-      if (stemGroupOfYear === primaryFavorableGroup || branchGroupOfYear === primaryFavorableGroup) {
-        tags.push('turning_point')
-        signals.push(`용신(${primaryFavorableGroup}) 도래`)
-      }
-
-      // RULE 2.2 / RULE 5 — The Romance: 식상 출현, 일지와 합, 성별에 맞는 배우자성 출현
+      // 연애: 식상 출현 / 일지와 합 / 성별에 맞는 배우자성 출현
+      const romanceReasons: string[] = []
       const siksangAppears = stemTenGod === '식신' || stemTenGod === '상관' || branchTenGod === '식신' || branchTenGod === '상관'
       const hapWithDayBranch = hasHapWithDayBranch(dayBranch, y.branch)
       const spouseStarGroup = gender === 'female' ? '관성' : '재성'
-      const spouseStarAppears = stemGroupOfYear === spouseStarGroup || branchGroupOfYear === spouseStarGroup
+      const spouseStarAppears = stemGroup === spouseStarGroup || branchGroup === spouseStarGroup
+      if (siksangAppears) romanceReasons.push('식상 출현 — 매력/설렘 상승기')
+      if (hapWithDayBranch) romanceReasons.push('일지와 합 — 인연이 들어오는 흐름')
+      if (spouseStarAppears) romanceReasons.push(`배우자성(${spouseStarGroup}) 출현 — 진지한 상대`)
 
-      if (siksangAppears) signals.push('식상 출현 — 매력/설렘 상승기')
-      if (hapWithDayBranch) signals.push('일지와 합 — 인연이 들어오는 흐름')
-      if (spouseStarAppears) signals.push(`배우자성(${spouseStarGroup}) 출현 — 진지한 상대`)
-      if (siksangAppears || hapWithDayBranch || spouseStarAppears) tags.push('romance')
-
-      // RULE 2.3 — The Turbulence: 월지 또는 일지와 충/원진
+      // 격동: 월지 또는 일지와 충/원진
       const chungWithMonth = isBranchPairMatch(JIJI_CHUNG, y.branch, monthBranch)
       const chungWithDay = isBranchPairMatch(JIJI_CHUNG, y.branch, dayBranch)
       const wonjinWithMonth = isBranchPairMatch(WONJIN_PAIRS, y.branch, monthBranch)
       const wonjinWithDay = isBranchPairMatch(WONJIN_PAIRS, y.branch, dayBranch)
+      let turbulenceReason: string | null = null
       if (chungWithMonth || chungWithDay) {
-        tags.push('turbulence')
-        signals.push(`${chungWithMonth ? '월지' : '일지'}와 충 — 갈등/변동 주의`)
+        turbulenceReason = `${chungWithMonth ? '월지' : '일지'}와 충 — 갈등/변동 주의`
       } else if (wonjinWithMonth || wonjinWithDay) {
-        tags.push('turbulence')
-        signals.push(`${wonjinWithMonth ? '월지' : '일지'}와 원진 — 오해/거리감 주의`)
+        turbulenceReason = `${wonjinWithMonth ? '월지' : '일지'}와 원진 — 오해/거리감 주의`
       }
 
       return {
         year: y.year,
         age,
-        isBeforeAdult: age < 20,
         ganzi: toHanjaGanzi(y.stem, y.branch),
         ganziKorean: `${y.stem}${y.branch}`,
-        stemTenGod,
-        branchTenGod,
+        stemGroup,
+        branchGroup,
         twelveStar,
-        score: yearScore,
-        tags,
-        signals
+        yearScore,
+        turningPoint,
+        romanceReasons,
+        turbulenceReason
       }
     })
 
     // ==========================================================
-    // [3단계] 대운 10년 안에서 2~3개 하이라이트 연도만 선정
+    // [3단계] 5개 카테고리별 근거 연도 선정 (각 최대 2개, 호재+주의 우선)
     // ==========================================================
-    const scoreRank: Record<FortuneScore, number> = { '상': 2, '중': 1, '하': 0 }
-    const tagged = yearCandidates.filter(y => y.tags.length > 0)
-    tagged.sort((a, b) => (b.tags.length - a.tags.length) || (scoreRank[b.score] - scoreRank[a.score]) || (a.year - b.year))
 
-    let highlightYears = tagged.slice(0, 3)
-    if (highlightYears.length < 2) {
-      // 태그가 거의 없는 조용한 대운이라면, 그 안에서 점수가 가장 극단적인 연도로 최소 2개를 보충
-      const remaining = yearCandidates.filter(y => !highlightYears.includes(y))
-      remaining.sort((a, b) => Math.abs(scoreRank[b.score] - 1) - Math.abs(scoreRank[a.score] - 1) || a.year - b.year)
-      for (const candidate of remaining) {
-        if (highlightYears.length >= 2) break
-        highlightYears.push(candidate)
-      }
-      highlightYears.sort((a, b) => a.year - b.year)
-    }
+    // 커리어/재물: 관성 또는 재성이 뚜렷하게 유리/불리로 작용하는 해만 후보
+    const careerCandidates: CategoryCandidate[] = yearsWorking
+      .map(y => {
+        const group = [y.stemGroup, y.branchGroup].find(g => g === '관성' || g === '재성')
+        if (!group) return null
+        if (favorableTenGodGroups.includes(group)) {
+          return { y, polarity: 'favorable' as YearPolarity, reason: `${group} 기운 유리 + 12운성 ${y.twelveStar}` }
+        }
+        if (unfavorableTenGodGroups.includes(group)) {
+          return { y, polarity: 'caution' as YearPolarity, reason: `${group} 기운 부담 + 12운성 ${y.twelveStar}` }
+        }
+        return null
+      })
+      .filter((v): v is CategoryCandidate => v !== null)
+    const careerYears = pickBalancedYears(careerCandidates)
+
+    // 인간관계(가족/친구/직장): 비겁(친구·동료) / 인성(부모·상사) / 식상(후배·자녀) + 충·원진 발생 시 주의
+    const relationshipCandidates: CategoryCandidate[] = yearsWorking
+      .map(y => {
+        if (y.turbulenceReason) return { y, polarity: 'caution' as YearPolarity, reason: y.turbulenceReason }
+        const group = [y.stemGroup, y.branchGroup].find(g => g === '비겁' || g === '인성' || g === '식상')
+        if (!group) return null
+        const theme = group === '비겁' ? '친구·동료' : group === '인성' ? '부모·상사' : '후배·자녀'
+        if (favorableTenGodGroups.includes(group)) {
+          return { y, polarity: 'favorable' as YearPolarity, reason: `${theme} 관계(${group}) 원만 + 12운성 ${y.twelveStar}` }
+        }
+        return null
+      })
+      .filter((v): v is CategoryCandidate => v !== null)
+    const relationshipYears = pickBalancedYears(relationshipCandidates)
+
+    // 연애: 기존 로맨스 신호(식상/합/배우자성) 재사용 - 신호가 없으면 빈 배열(AI가 "이 대운은 연애 중심 흐름이 아님"으로 서술)
+    const romanceCandidates: CategoryCandidate[] = yearsWorking
+      .filter(y => y.romanceReasons.length > 0)
+      .map(y => ({ y, polarity: 'favorable' as YearPolarity, reason: y.romanceReasons.join(' / ') }))
+    const romanceYears = pickBalancedYears(romanceCandidates)
+
+    // 건강: 12운성 강(활력 좋음) / 약(컨디션 관리 필요)
+    const healthCandidates: CategoryCandidate[] = yearsWorking
+      .map(y => {
+        if (STRONG_TWELVE_STARS.includes(y.twelveStar)) return { y, polarity: 'favorable' as YearPolarity, reason: `12운성 ${y.twelveStar} — 활력 좋음` }
+        if (WEAK_TWELVE_STARS.includes(y.twelveStar)) return { y, polarity: 'caution' as YearPolarity, reason: `12운성 ${y.twelveStar} — 컨디션 관리 필요` }
+        return null
+      })
+      .filter((v): v is CategoryCandidate => v !== null)
+    const healthYears = pickBalancedYears(healthCandidates)
+
+    // 응원/주의: 1순위 용신 도래(도전해볼 타이밍) + 충/원진 격동(주의해야 할 타이밍)
+    const cautionCandidates: CategoryCandidate[] = []
+    yearsWorking.forEach(y => {
+      if (y.turningPoint) cautionCandidates.push({ y, polarity: 'favorable', reason: `용신(${primaryFavorableGroup}) 도래 — 도전해볼 타이밍` })
+      if (y.turbulenceReason) cautionCandidates.push({ y, polarity: 'caution', reason: y.turbulenceReason })
+    })
+    const cautionYears = pickBalancedYears(cautionCandidates)
 
     return {
       startAge: d.startAge,
@@ -282,7 +370,12 @@ export function calculateDecadeFortune(params: {
       stemTenGod: d.tenGod,
       twelveStar: d.twelveStar,
       score,
-      highlightYears
+      isYouthDecade,
+      careerYears,
+      relationshipYears,
+      romanceYears,
+      healthYears,
+      cautionYears
     }
   })
 

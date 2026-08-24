@@ -13,7 +13,7 @@ export const maxDuration = 300
  * 흐름:
  * 1. submissionId로 DB 조회 (사주데이터 + 무료 3개 사실 + 1500자 해설)
  * 2. saju_data.decadeFortune(결정론적 계산 결과)와 모든 context를 Gemini에 주입
- * 3. 90개 사실 생성 + decadeFortune의 하이라이트 연도마다 6개 필드 서술 생성 (AI는 점수/연도를 재계산하지 않음)
+ * 3. 90개 사실 생성 + decadeFortune의 대운(10년)마다 6개 카테고리 문단 생성 (AI는 점수/연도를 재계산하지 않음)
  * 4. DB에 저장 (is_free: false)
  */
 
@@ -175,8 +175,8 @@ ${JSON.stringify(submission.saju_data, null, 2)}
 
 === PRE-COMPUTED DECADE FORTUNE (decadeFortune) — DO NOT RECALCULATE ===
 This is the exact same object as saju_data.decadeFortune above, isolated here so you don't miss it.
-Every score, tag, and highlight year below is final. Your only task for this object is to narrate
-each highlightYears[] entry into the 6 required text fields following the Mapping Rules.
+Every decade's score and every category's candidate years below are final. Your only task for this
+object is to write ONE set of 6 category paragraphs PER DECADE (not per year) following the Mapping Rules.
 ${JSON.stringify(submission.saju_data?.decadeFortune, null, 2)}
 
 === 1500-CHARACTER INTERPRETATION (from Stage 1) ===
@@ -266,103 +266,112 @@ And please, you need to include these 3 sentences for 'everyone'. Because we mas
 - Your wealth flow timing and secret talents are already mapped out like ***** Ready to see your future from this angle? (explain in details)
 
 ========================================
-AFTER THE 90 CARDS, GENERATE THE DECADE FORTUNE HIGHLIGHT CARDS:
+AFTER THE 90 CARDS, GENERATE THE DECADE FORTUNE CARDS (ONE PER DECADE):
 ========================================
 
-AFTER successfully generating the 90 main facts, you MUST generate highlight-year cards for the
-pre-computed \`decadeFortune\` object inside \`saju_data\`. This object already contains, for EVERY
-Daewoon (10-year period) from birth to ~90 years old, a deterministic overall score (상/중/하) and
-2-3 already-selected highlight years with their Ten God / 12-Star / Hap-Chung signals. You do NOT
-recompute, invent, or second-guess any score, year, or signal. Your ONLY job is to turn each already
-selected highlight year into 6 short natural-language fields by strictly following the IF-THEN
-mapping rules below.
+AFTER successfully generating the 90 main facts, you MUST generate exactly ONE card PER DECADE for
+the pre-computed \`decadeFortune\` object inside \`saju_data\`. This object already contains, for EVERY
+Daewoon (10-year period) from birth to ~90 years old, a deterministic overall score (상/중/하) and,
+for 5 categories (career/wealth, relationships, romance, health, encouragement/caution), up to 2
+already-selected "candidate years" with their Ten God / 12-Star / Hap-Chung reason. You do NOT
+recompute, invent, or second-guess any score or candidate year. Your ONLY job is to weave the
+already-selected candidate years into 6 flowing paragraphs per decade by strictly following the
+IF-THEN mapping rules below.
 
 ======================================================
 [SYSTEM: HOROSCOPE LIFELINE & HIGHLIGHT MAPPING RULES]
 ======================================================
-You are a precise Saju lifecycle analyzer. Your task is to narrate a lifetime timeline (Daewoon) and
-its 2-3 highlight years (Yeonwoon) per decade. You MUST strictly map the data using the following
-IF-THEN rules. Do NOT invent interpretations outside these rules. Maintain the "Gen-Z wise friend"
-persona in the final output.
+You are a precise Saju lifecycle analyzer. Your task is to narrate a lifetime timeline (Daewoon) as
+ONE cohesive card per 10-year decade, citing only the specific years already selected for you. You
+MUST strictly map the data using the following IF-THEN rules. Do NOT invent interpretations outside
+these rules, and do NOT cite any year that does not appear in that decade's candidate-year arrays.
+Maintain the "Gen-Z wise friend" persona in the final output.
 
 [RULE 1: OVERALL SCORE - ALREADY COMPUTED, DO NOT RECALCULATE]
-Each decade's \`score\` field and each highlight year's \`score\` field in \`decadeFortune\` is already
-one of 상 (High) / 중 (Medium) / 하 (Low), computed from Eokbu Yongshin (Favorable Elements) and the
-12 Stars (Strength). Simply read and narrate this value — never override it based on your own
-impression of the chart.
+Each decade's \`score\` field in \`decadeFortune\` is already one of 상 (High) / 중 (Medium) / 하 (Low),
+computed from Eokbu Yongshin (Favorable Elements) and the 12 Stars (Strength). Simply read and
+narrate this value — never override it based on your own impression of the chart.
 
-[RULE 2: WHY THESE YEARS WERE SELECTED - ALREADY COMPUTED, DO NOT RESELECT]
-Each highlight year's \`tags\` array (turning_point / romance / turbulence) and \`signals\` array
-already tell you why that specific year was chosen out of the 10-year Daewoon. Use these tags and
-signals as the factual basis for your narration; do not pick different years or claim different
-reasons.
+[RULE 2: WHICH YEARS TO CITE - ALREADY COMPUTED, DO NOT RESELECT]
+Each decade has 5 candidate-year arrays: \`careerYears\`, \`relationshipYears\`, \`romanceYears\`,
+\`healthYears\`, \`cautionYears\`. Each entry has \`year\`, \`age\`, \`polarity\` ("favorable" or "caution"),
+and \`reason\`. When writing a category's paragraph, cite ONLY the years from that category's own
+array (e.g. only \`careerYears\` inside \`careerWealth\`). If an array is empty, do not invent a year —
+say that decade's energy for that theme is calm/steady with no single standout year.
 
-[RULE 3: CAREER & WEALTH MAPPING (By Age & Ten Gods)]
-Use the highlight year's \`isBeforeAdult\` flag and its \`stemTenGod\`/\`branchTenGod\` values.
+[RULE 3: CAREER & WEALTH MAPPING (careerWealth field, uses careerYears + isYouthDecade)]
+Use the decade's \`isYouthDecade\` flag to set the frame, then cite \`careerYears\` entries by year:
+- IF isYouthDecade is true (this decade is mostly under 20, focus on Study/Talent): frame favorable
+  years as peak focus, creative breakthroughs, or leadership opportunities (class president, talent
+  discovery); frame caution years as distraction from study or peer-group pressure.
+- IF isYouthDecade is false (adult decade, focus on Job/Money): frame favorable years as strong cash
+  flow, promotions, side-hustle launches, or important contracts; frame caution years as overspending,
+  workplace conflict, or a period to consolidate rather than expand.
+- Always mention the specific year(s) from \`careerYears\` by name when citing them.
 
-IF isBeforeAdult is true (age < 20, focus on Study/Talent):
-- In-seong (인성, Resource): Peak academic focus, strong concentration, favor from teachers.
-- Sik-sang (식상, Output): Creative explosion, discovering physical/artistic talents, hard to sit still.
-- Gwan-seong (관성, Authority): Taking leadership roles (class president), stress from strict rules.
-- Bi-geop (비겁, Self) / Jae-seong (재성, Wealth): Distractions from study, focusing on peer groups or early hustle.
+[RULE 4: HUMAN RELATIONSHIPS MAPPING (relationships field, uses relationshipYears)]
+Cite \`relationshipYears\` entries. A caution entry (from Chung/Wonjin turbulence) means:
+miscommunication is likely that year — advise keeping emotional distance and avoiding unnecessary
+arguments. A favorable entry means smooth energy with friends/colleagues, mentors/parents, or
+juniors/children (the \`reason\` field tells you which). If the array is empty, say this decade's
+relationships stay fairly stable without one dramatic year.
 
-IF isBeforeAdult is false (age >= 20, focus on Job/Money):
-- Jae-seong (재성, Wealth): Strong cash flow, investment opportunities, successful job hunting.
-- Gwan-seong (관성, Authority): Promotion, leveling up in status, taking on heavy organizational responsibilities.
-- Sik-sang (식상, Output): Starting a side-hustle, launching new projects, creative independence.
-- Bi-geop (비겁, Self): Collaboration or fierce competition. If isDayMasterStrong is true: beware of losing money to others. If false: great teamwork and networking.
-- In-seong (인성, Resource): Gaining certifications, signing important contracts, real estate documentation.
+[RULE 5: ROMANCE & LOVE MAPPING (romance field, uses romanceYears)]
+Cite \`romanceYears\` entries (always favorable when present) using their \`reason\`: Sik-sang signal =
+magnetic/flirty energy and active dating phase; Hap-with-Day-Branch signal = a stable person enters
+your life; spouse-star signal (관성 for female, 재성 for male) = a serious, commitment-ready partner.
+IF \`romanceYears\` is empty: do not fabricate a romance narrative — briefly say this decade's energy
+isn't centered on romance and point the reader toward the career/relationship themes instead.
 
-[RULE 4: HUMAN RELATIONSHIPS MAPPING]
-- IF Bi-geop (비겁): Theme is friends and colleagues.
-- IF In-seong (인성): Theme is mentors, bosses, or parents.
-- IF Sik-sang (식상): Theme is juniors, subordinates, or children.
-- IF the year's \`tags\` array includes "turbulence" (a Chung or Wonjin signal is present): Output a warning -> "Miscommunications are highly likely. Keep emotional distance and avoid unnecessary arguments this year."
+[RULE 6: HEALTH & ENERGY MAPPING (health field, uses healthYears)]
+Identify the most EXCESSIVE or COMPLETELY MISSING element in the natal chart from
+\`elementBalanceWithHiddenStems\`. For each caution entry in \`healthYears\` (weak 12-Star year), output
+a Health Warning based on that vulnerable element, and cite the specific year:
+   * Wood (목): Liver, spine, burnout.
+   * Fire (화): Heart, blood pressure, stress.
+   * Earth (토): Stomach, digestion, skin.
+   * Metal (금): Lungs, respiratory, joints.
+   * Water (수): Kidneys, hormones, reproductive system.
+Advice for caution years: "Your physical battery is draining faster than usual. Prioritize deep rest,
+immune care, and mental detox over hustle." For favorable entries (strong 12-Star year), give a
+lighter, energy-is-good note instead of a warning, citing that year. If \`healthYears\` is empty,
+give a general, lightly reassuring note without naming a specific year.
 
-[RULE 5: ROMANCE & LOVE MAPPING]
-- IF the year's \`tags\` includes "romance" because of a Sik-sang signal: Magnetic energy is high. Active flirting and dating phase (The Meeting).
-- IF the year's \`tags\` includes "romance" because of a Hap-with-Day-Branch signal: A stable person enters your personal space.
-- IF Female AND the year's \`tags\` includes "romance" because of a Gwan-seong (spouse star) signal: Serious, commitment-ready partner enters.
-- IF Male AND the year's \`tags\` includes "romance" because of a Jae-seong (spouse star) signal: Serious, commitment-ready partner enters.
-- IF the year's \`tags\` does NOT include "romance" at all: do not fabricate a romance narrative — briefly say this year's energy is not centered on romance.
+[RULE 7: ENCOURAGEMENT & CAUTION MAPPING (coreAdvice field, uses cautionYears + decade score)]
+This is the decade's closing "cheer + watch out" paragraph. Start from the decade's \`score\` for
+overall tone:
+- IF score is 상 (High): the wind is at your back — go for it, high risk brings high reward now.
+- IF score is 하 (Low): a mandatory pit-stop — don't force expansion, level up hidden skills, save
+  money, protect your peace.
+- IF score is 중 (Medium): a bridging period — balance calculated risks with a safety net.
+(Rewrite in your own Gen-Z wise-friend voice, not verbatim, but keep the same underlying advice.)
+Then cite \`cautionYears\`: favorable entries ("turning point" years) are explicit "go for it, this is
+your year to try" call-outs; caution entries (Chung/Wonjin) are explicit "slow down and protect
+yourself" call-outs. Name the specific years.
 
-[RULE 6: HEALTH & ENERGY MAPPING]
-- Identify the most EXCESSIVE or COMPLETELY MISSING element in the natal chart from \`elementBalanceWithHiddenStems\`.
-- IF the highlight year's \`twelveStar\` is 병(Byeong/Sickness), 사(Sa/Death), 묘(Myo/Tomb), or 절(Jeol/Cut):
-  -> Output a Health Warning based on the vulnerable element:
-     * Wood (목): Liver, spine, burnout.
-     * Fire (화): Heart, blood pressure, stress.
-     * Earth (토): Stomach, digestion, skin.
-     * Metal (금): Lungs, respiratory, joints.
-     * Water (수): Kidneys, hormones, reproductive system.
-  -> Advice: "Your physical battery is draining faster than usual. Prioritize deep rest, immune care, and mental detox over hustle."
-- IF the highlight year's \`twelveStar\` is NOT one of those four: give a lighter, energy-maintenance-focused note instead of a warning.
+[OUTPUT FORMAT EXPECTATION PER DECADE]
+For every decade in \`decadeFortune.decades[]\`, produce exactly ONE card with these 6 text fields,
+each 150-260 characters (including spaces), in the Gen-Z wise-friend tone, written in English only
+(no Korean/Chinese characters). Naturally weave in the specific years from that category's candidate
+array (never invent a year not present in the data):
+1. overallVibe — Overall flow of this whole decade (state High/Medium/Low in plain words per Rule 1),
+   using a nature/metaphor tied to the customer's chart, mostly framed positively since cautions are
+   covered in the other 5 fields below.
+2. careerWealth — Career/Wealth narration per Rule 3, citing careerYears.
+3. relationships — Family/friends/workplace narration per Rule 4, citing relationshipYears.
+4. romance — Romance narration per Rule 5, citing romanceYears (or explicitly noting none).
+5. health — Health narration per Rule 6, citing healthYears.
+6. coreAdvice — Encouragement + caution narration per Rule 7, citing cautionYears.
 
-[RULE 7: FINAL ADVICE (Based on the year's already-computed score)]
-- IF score is 상 (High): "The wind is at your back. Stop overthinking and go all-in. High risk brings high reward right now."
-- IF score is 하 (Low): "This is a mandatory pit-stop. Do not force expansion. Focus on leveling up your hidden skills, saving money, and protecting your peace."
-- IF score is 중 (Medium): "A bridging period. Balance is key—take calculated risks but keep a safety net."
-(Rewrite each of the above in your own Gen-Z wise-friend voice rather than quoting it verbatim, but keep the same underlying advice for that score.)
-
-[OUTPUT FORMAT EXPECTATION PER HIGHLIGHT YEAR]
-For every highlight year across every decade in \`decadeFortune.decades[].highlightYears[]\`, produce
-exactly these 6 text fields, each 100-160 characters (including spaces), in the Gen-Z wise-friend
-tone, written in English only (no Korean/Chinese characters):
-1. overallVibe — Overall Vibe & Score narration (state High/Medium/Low in plain words per Rule 1).
-2. careerWealth — Career/Wealth narration per Rule 3.
-3. relationships — Relationships narration per Rule 4.
-4. romance — Romance narration per Rule 5.
-5. health — Health narration per Rule 6.
-6. coreAdvice — Core Advice narration per Rule 7.
-
-Do NOT skip any highlight year. Do NOT add, remove, or reorder decades or highlight years — use
-exactly the years and order given in \`decadeFortune\`.
+Do NOT skip any decade. Do NOT add, remove, or reorder decades — produce exactly one card per
+decade, in the same order as \`decadeFortune.decades\`.
 
 OUTPUT JSON STRUCTURE - ABSOLUTELY CRITICAL:
 You MUST return EXACTLY 9 sections with EXACTLY 10 cards each = 90 total cards. 
 DO NOT return fewer cards. The user PAID for 90 facts. Returning less is unacceptable.
 
-Then, APPEND the decade fortune highlight narrations as a separate array named "decadeFortuneCards".
+Then, APPEND the decade fortune cards as a separate array named "decadeFortuneCards" — exactly ONE
+object per decade (8 total, matching \`decadeFortune.decades.length\`).
 
 FINAL JSON STRUCTURE (single valid JSON object):
 {
@@ -389,16 +398,16 @@ FINAL JSON STRUCTURE (single valid JSON object):
     {
       "startAge": 0,
       "endAge": 9,
-      "year": 2004,
-      "age": 8,
-      "overallVibe": "[100-160 chars]",
-      "careerWealth": "[100-160 chars]",
-      "relationships": "[100-160 chars]",
-      "romance": "[100-160 chars]",
-      "health": "[100-160 chars]",
-      "coreAdvice": "[100-160 chars]"
+      "startYear": 1996,
+      "endYear": 2005,
+      "overallVibe": "[150-260 chars]",
+      "careerWealth": "[150-260 chars]",
+      "relationships": "[150-260 chars]",
+      "romance": "[150-260 chars]",
+      "health": "[150-260 chars]",
+      "coreAdvice": "[150-260 chars]"
     }
-    ... (one object per highlight year, for every decade in decadeFortune.decades, in the same order)
+    ... (one object per decade in decadeFortune.decades, in the same order, using that decade's own startAge/endAge/startYear/endYear)
   ]
 }
 
@@ -456,8 +465,8 @@ Generate both the 90 main facts and the decadeFortuneCards now as a single JSON 
     let decadeFortuneCards: Array<{
       startAge: number
       endAge: number
-      year: number
-      age: number
+      startYear: number
+      endYear: number
       overallVibe: string
       careerWealth: string
       relationships: string
@@ -548,7 +557,7 @@ Generate both the 90 main facts and the decadeFortuneCards now as a single JSON 
         .eq('id', existing.id)
       insertError = error
     } else {
-      // 없으면 insert (hidden_cards 컬럼에 대운 하이라이트 연도 카드를 저장 - 컬럼명은 레거시, 내용은 decadeFortuneCards)
+      // 없으면 insert (hidden_cards 컬럼에 대운별 6개 카테고리 카드를 저장 - 컬럼명은 레거시, 내용은 decadeFortuneCards)
       const { error } = await supabase
         .from('reports')
         .insert({

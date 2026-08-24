@@ -113,9 +113,9 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
     score: d.score,
     scoreValue: decadeScoreToNumber[d.score] || 2,
   }))
-  // AI가 서술한 6개 필드(decadeFortuneCards)를 연도(year) 기준으로 매칭
-  const decadeFortuneCardByYear = new Map<number, any>(
-    (decadeFortuneCards || []).map((c: any) => [c.year, c])
+  // AI가 서술한 6개 카테고리 문단(decadeFortuneCards)을 대운의 startAge 기준으로 매칭
+  const decadeFortuneCardByStartAge = new Map<number, any>(
+    (decadeFortuneCards || []).map((c: any) => [c.startAge, c])
   )
 
   useEffect(() => {
@@ -423,34 +423,47 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
                   </div>
 
                   {isOpen && (
-                    <div className="p-4 space-y-3">
-                      {decade.highlightYears.map((hy: any, hyIdx: number) => {
-                        const cardText = decadeFortuneCardByYear.get(hy.year)
+                    <div className="p-4">
+                      {(() => {
+                        const cardText = decadeFortuneCardByStartAge.get(decade.startAge)
+                        if (!cardText) {
+                          return <p className="text-[11px] text-muted-foreground/60 italic">Details unavailable for this decade.</p>
+                        }
+                        const categories: Array<{ key: string; label: string; text: string; years: any[] }> = [
+                          { key: 'overallVibe', label: 'Overall Flow', text: cardText.overallVibe, years: [] },
+                          { key: 'careerWealth', label: 'Career & Wealth', text: cardText.careerWealth, years: decade.careerYears || [] },
+                          { key: 'relationships', label: 'Relationships', text: cardText.relationships, years: decade.relationshipYears || [] },
+                          { key: 'romance', label: 'Romance', text: cardText.romance, years: decade.romanceYears || [] },
+                          { key: 'health', label: 'Health', text: cardText.health, years: decade.healthYears || [] },
+                          { key: 'coreAdvice', label: 'Cheer & Caution', text: cardText.coreAdvice, years: decade.cautionYears || [] },
+                        ]
                         return (
-                          <div key={hyIdx} className="bg-background/30 border border-border/50 rounded-lg p-3">
-                            <div className="flex items-center justify-between mb-2">
-                              <p className="text-xs font-semibold text-foreground">
-                                {hy.year} <span className="text-muted-foreground/60 font-normal">(Age {hy.age})</span> · {hy.ganzi}
-                              </p>
-                              <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full ${scoreStyle[hy.score] || scoreStyle['중']}`}>
-                                {scoreLabel[hy.score] || 'Medium'}
-                              </span>
-                            </div>
-                            {cardText ? (
-                              <div className="space-y-1.5">
-                                <p className="text-[11px] text-foreground/90 leading-relaxed"><span className="text-primary/80 font-medium">Overall: </span>{cardText.overallVibe}</p>
-                                <p className="text-[11px] text-foreground/90 leading-relaxed"><span className="text-primary/80 font-medium">Career/Wealth: </span>{cardText.careerWealth}</p>
-                                <p className="text-[11px] text-foreground/90 leading-relaxed"><span className="text-primary/80 font-medium">Relationships: </span>{cardText.relationships}</p>
-                                <p className="text-[11px] text-foreground/90 leading-relaxed"><span className="text-primary/80 font-medium">Romance: </span>{cardText.romance}</p>
-                                <p className="text-[11px] text-foreground/90 leading-relaxed"><span className="text-primary/80 font-medium">Health: </span>{cardText.health}</p>
-                                <p className="text-[11px] text-foreground/90 leading-relaxed"><span className="text-primary/80 font-medium">Advice: </span>{cardText.coreAdvice}</p>
+                          <div className="space-y-4">
+                            {categories.map(cat => (
+                              <div key={cat.key} className="bg-background/30 border border-border/50 rounded-lg p-3">
+                                <div className="flex items-center justify-between gap-2 mb-1.5">
+                                  <p className="text-[10px] uppercase tracking-wider text-primary/80 font-semibold">{cat.label}</p>
+                                  {cat.years.length > 0 && (
+                                    <div className="flex items-center gap-1">
+                                      {cat.years.map((yr: any, yrIdx: number) => (
+                                        <span
+                                          key={yrIdx}
+                                          className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${
+                                            yr.polarity === 'favorable' ? 'text-primary bg-primary/15' : 'text-destructive bg-destructive/15'
+                                          }`}
+                                        >
+                                          {yr.year}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                                <p className="text-[11px] text-foreground/90 leading-relaxed">{cat.text}</p>
                               </div>
-                            ) : (
-                              <p className="text-[11px] text-muted-foreground/60 italic">Details unavailable for this year.</p>
-                            )}
+                            ))}
                           </div>
                         )
-                      })}
+                      })()}
                     </div>
                   )}
                 </div>
