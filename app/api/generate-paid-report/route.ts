@@ -266,6 +266,29 @@ And please, you need to include these 3 sentences for 'everyone'. Because we mas
 - Your wealth flow timing and secret talents are already mapped out like ***** Ready to see your future from this angle? (explain in details)
 
 ========================================
+CROSS-SECTION CONSISTENCY RULE — 90 CARDS (sections 04, 07, 09) vs. DECADE FORTUNE / "Your Life Eras":
+========================================
+Sections 04 (Career Motion), 07 (Future Self Sneak Peek: A Letter from 2030), and 09 (The Next
+Chapter: Your 2026+ Level-up Roadmap) all narrate future timing that OVERLAPS in years with the
+per-decade Season cards you will generate from \`decadeFortune\` below (the "Your Life Eras" section
+in the UI). These two outputs will be shown on the same report page, so they MUST NOT contradict
+each other for the same years:
+- The overall score (상/중/하) for whichever decade covers "now" and "the next 10 years" in
+  \`decadeFortune.decades\` is the single source of truth for how that period feels overall. Sections
+  04/07/09 must describe consistent tone for that stretch of years — e.g. do NOT call a decade
+  scored 하 (Low) a guaranteed "peak period" in section 09, and do NOT call a decade scored 상 (High)
+  a "forced rest period" in section 07.
+- If a specific future year appears in BOTH a 90-card section (04/07/09) and one of the decade's
+  candidate-year arrays (careerYears/relationshipYears/romanceYears/healthYears/cautionYears), the
+  reason/theme you give that year in the 90 cards must match the reason/polarity already computed
+  for it in \`decadeFortune\` (e.g. don't call 2027 a breakout wealth year in section 04 if
+  \`decadeFortune\` already flags 2027 as a \`cautionYears\` entry with polarity "caution").
+- Sections 04/07/09 should go deeper and more specific (exact career fields, a vivid "letter from
+  2030" narrative, hyper-personalized advice) rather than repeating the Life Eras season card
+  word-for-word — treat Life Eras as the big-picture season/vibe, and 04/07/09 as the detailed
+  zoom-in, but never let the zoom-in disagree with the big picture.
+
+========================================
 AFTER THE 90 CARDS, GENERATE THE DECADE FORTUNE CARDS (ONE PER DECADE):
 ========================================
 
@@ -285,7 +308,10 @@ You are a precise Saju lifecycle analyzer. Your task is to narrate a lifetime ti
 ONE cohesive card per 10-year decade, citing only the specific years already selected for you. You
 MUST strictly map the data using the following IF-THEN rules. Do NOT invent interpretations outside
 these rules, and do NOT cite any year that does not appear in that decade's candidate-year arrays.
-Maintain the "Gen-Z wise friend" persona in the final output.
+Maintain the "Gen-Z wise friend" persona in the final output. Remember the CROSS-SECTION CONSISTENCY
+RULE above: whichever decade here covers "now" and "the next 10 years" must stay tonally consistent
+with what you already wrote in sections 04/07/09 of the 90 main facts — do not contradict that
+decade's score or any shared year's polarity.
 
 [RULE 0: SEASON TITLE & EMOJI - CREATIVE, BUT GROUNDED IN THE DATA]
 Give this decade a short evocative "season" name (2-4 words, title case, English, no colon inside
