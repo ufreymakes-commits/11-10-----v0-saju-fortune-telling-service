@@ -470,9 +470,16 @@ Generate both the 90 main facts and the decadeFortuneCards now as a single JSON 
           model: 'google/gemini-2.5-flash',
           system: PAID_REPORT_SYSTEM_PROMPT,
           prompt: userPrompt,
-          maxOutputTokens: 16000,
+          // 90 main-fact cards + up to 9 decade cards (8 text fields each incl. seasonTitle/seasonEmoji)
+          // routinely exceeds 16k output tokens and gets silently truncated mid-JSON. Raised with headroom.
+          maxOutputTokens: 32000,
           temperature: 0,
         })
+        // finishReason === 'length' means the model hit maxOutputTokens and was cut off mid-JSON —
+        // treat this the same as a failure so we retry instead of handing truncated JSON to the parser.
+        if (result.finishReason === 'length') {
+          throw new Error(`Response truncated by maxOutputTokens (finishReason: length, ${result.text.length} chars)`)
+        }
         rawResponse = result.text
         console.log(`[v0] Gemini API succeeded on attempt ${attempt}`)
         break // 성공하면 루프 종료
