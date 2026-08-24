@@ -197,7 +197,11 @@ Based on all the context above, generate 96 NEW facts that:
 3. Maintain narrative consistency with the established "Life Persona"
 4. Cover all 9 premium themes — sections 01, 07, 09 get 10 facts each; sections 02, 03, 04, 05, 06, 08
    get 11 facts each (10 regular + 1 "Truth Bomb" card, see the TRUTH BOMB CARD rule below)
-5. Don't use ** this mark. Never write an actual Chinese hanja or Korean Hangul character anywhere in
+5. NEVER wrap any word or phrase in ** markdown bold markers, anywhere in any card or the closing
+   letter — not around years ("2031"), not around phrases ("career growth"), not around anything. The
+   renderer displays these fields as plain text, so a literal "**" would show up as two asterisk
+   characters on the page. If you want to emphasize a year or phrase, just write it in plain text with
+   no wrapping characters at all. Never write an actual Chinese hanja or Korean Hangul character anywhere in
    any of the 96 cards or the closing letter (no 土/火/水/金/木, no 己/甲/etc., no Hangul) — the output
    must be 100% Latin script. This does NOT mean dropping the Saju terminology itself: every Day
    Master, element, Ten God, and Sinsal/relational term (Wonjinsal, Hyeong, Chung, Hap, etc.) should
@@ -205,8 +209,12 @@ Based on all the context above, generate 96 NEW facts that:
    ("Gi-to", "Mi-to", "Zi-mi Wonjin-Sal"). Whenever you introduce one of these romanized terms, follow
    it with a short plain-English gloss in parentheses the first time it's used in that card, e.g.
    "Gi-to (Earth)", "Wonjinsal (Clash)", "'甲' -> "Gap (direct wealth)"" — never the bare hanja/Hangul
-   character alone, and never the romanized term with zero gloss on first use either. This rule applies
-   to ALL 96 cards, not just the Truth Bomb cards.
+   character alone, and never the romanized term with zero gloss on first use either. The romanized
+   term ALWAYS sits outside the parentheses, and the gloss ALWAYS sits inside them — never collapse
+   both into the parentheses. WRONG: "a missing (Sik-Sin - Eating God)" or "your (Hyeon-Chim-Sal -
+   Sharp Needle)" (term name is missing entirely, gloss uses "-" inside the parens). RIGHT: "a missing
+   Sik-Sin (Eating God)" or "your Hyeon-Chim-Sal (Sharp Needle)". This rule applies to ALL 96 cards,
+   not just the Truth Bomb cards.
 
 OUTPUT FORMAT:
 Key Point: You must embody a Gen-Z persona—playful and witty, yet brutally honest about the facts, ultimately delivering a core message of warmth, comfort, and practical solutions. Avoid appearing overly playful or flippant. Bridge the data with empathy.
@@ -560,6 +568,40 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
         const sentenceEnd = closingLetter.lastIndexOf('.', CLOSING_LETTER_MAX)
         closingLetter = sentenceEnd > 400 ? closingLetter.slice(0, sentenceEnd + 1) : closingLetter.slice(0, CLOSING_LETTER_MAX)
         console.warn(`[v0] Closing letter exceeded ${CLOSING_LETTER_MAX} chars, trimmed to ${closingLetter.length}`)
+      }
+
+      // Safety net: two more formatting slips the model can make despite explicit prompt rules.
+      function fixFormattingArtifacts(text: string): string {
+        let result = text
+        // (a) Strip stray "**" markdown-bold markers — the renderer shows these as literal asterisks
+        // since card text is rendered as plain text, not markdown.
+        result = result.replace(/\*\*/g, '')
+        // (b) Fix "(Romanized-Term - Gloss)" where the romanized term got trapped inside the
+        // parentheses with the gloss instead of sitting outside it, e.g. "a missing (Sik-Sin - Eating
+        // God)" -> "a missing Sik-Sin (Eating God)". Only matches a capitalized, hyphenated Saju-style
+        // term name followed by " - " and a gloss, so it won't touch unrelated parentheticals.
+        result = result.replace(/\(([A-Z][a-zA-Z]*(?:-[A-Za-z]+)+)\s*-\s*([^()]+)\)/g, '$1 ($2)')
+        return result
+      }
+      let formattingFixed = 0
+      paidFacts = paidFacts.map((section: any) => ({
+        ...section,
+        cards: Array.isArray(section.cards)
+          ? section.cards.map((card: any) => {
+              if (typeof card?.content === 'string' && (card.content.includes('**') || /\([A-Z][a-zA-Z]*(?:-[A-Za-z]+)+\s*-\s*[^()]+\)/.test(card.content))) {
+                formattingFixed++
+                return { ...card, content: fixFormattingArtifacts(card.content) }
+              }
+              return card
+            })
+          : section.cards,
+      }))
+      if (closingLetter.includes('**') || /\([A-Z][a-zA-Z]*(?:-[A-Za-z]+)+\s*-\s*[^()]+\)/.test(closingLetter)) {
+        formattingFixed++
+        closingLetter = fixFormattingArtifacts(closingLetter)
+      }
+      if (formattingFixed > 0) {
+        console.warn(`[v0] Fixed markdown-asterisk or misplaced-term-gloss formatting in ${formattingFixed} field(s)`)
       }
 
     } catch (parseError) {
