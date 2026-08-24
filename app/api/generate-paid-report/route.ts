@@ -304,16 +304,22 @@ real comfort or a real fix is what makes a paid report feel worth paying for.
 - In the same paragraph, pivot immediately to genuine comfort and/or one concrete, actionable fix —
   never leave the reader on the harsh part. The comfort must feel earned and specific to the chart,
   not a generic "but it's okay!" tack-on.
-- Same format as every other card: ONE paragraph, max 220 characters including spaces, English only,
-  no Korean/Chinese characters, same warm Gen-Z wise-friend voice as the rest of the report — the
-  difference from other cards is the precision of the observation, not the tone.
+- Same format as every other card: ONE paragraph, HARD MAX 220 characters including spaces (count
+  before finalizing — if it runs long, cut words, don't add more). English only. This means every
+  Saju/Ten-God term must be translated into plain English inline (e.g. write "a tendency to
+  undervalue your partner's efforts" — never write the Korean phrase itself, not even in quotes).
+  Same warm Gen-Z wise-friend voice as the rest of the report — the difference from other cards is
+  the precision of the observation, not the tone, and NEVER the presence of non-English script.
 - Do not contradict anything already stated elsewhere in that section or in the free 3 facts.
 
 ========================================
 CLOSING LETTER RULE — one standalone letter after all 96 cards:
 ========================================
-After the 96 main cards, write exactly ONE closing letter (field name \`closingLetter\`), 550-650
-characters including spaces, English only, no Korean/Chinese characters. This is the single most
+After the 96 main cards, write exactly ONE closing letter (field name \`closingLetter\`). HARD LIMIT:
+550-650 characters including spaces — count the characters before finalizing, and if your draft runs
+long, cut sentences/clauses until it fits inside this range rather than submitting a longer letter.
+This is not a soft target: a letter over 650 characters is a failed output. English only, no
+Korean/Chinese characters — translate every Saju term into plain English inline. This is the single most
 emotionally resonant piece of the entire report — it should read like a warm, perceptive friend who
 truly sees this person, not a summary of facts already stated. Follow this arc, in flowing prose (not
 labeled sections):
@@ -487,7 +493,40 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
       }
       
       console.log('[v0] Successfully parsed', paidFacts.length, 'main facts and a closing letter of', closingLetter.length, 'chars')
-      
+
+      // Safety net: despite explicit prompt rules, the model can still slip in a stray Korean/Chinese
+      // phrase (e.g. quoting a Ten God term in Hangul) or overrun the closing letter's length. Rather
+      // than ship untranslated script to English readers, strip any CJK characters here as a last
+      // resort, and hard-trim an overlong closing letter at the last sentence boundary.
+      const CJK_REGEX = /[\u3131-\uD79D\u4E00-\u9FFF]+/g
+      let cjkStripped = 0
+      paidFacts = paidFacts.map((section: any) => ({
+        ...section,
+        cards: Array.isArray(section.cards)
+          ? section.cards.map((card: any) => {
+              if (typeof card?.content === 'string' && CJK_REGEX.test(card.content)) {
+                cjkStripped++
+                return { ...card, content: card.content.replace(CJK_REGEX, '').replace(/\s{2,}/g, ' ').trim() }
+              }
+              return card
+            })
+          : section.cards,
+      }))
+      if (CJK_REGEX.test(closingLetter)) {
+        cjkStripped++
+        closingLetter = closingLetter.replace(CJK_REGEX, '').replace(/\s{2,}/g, ' ').trim()
+      }
+      if (cjkStripped > 0) {
+        console.warn(`[v0] Stripped stray CJK characters from ${cjkStripped} field(s) despite English-only prompt rule`)
+      }
+
+      const CLOSING_LETTER_MAX = 700
+      if (closingLetter.length > CLOSING_LETTER_MAX) {
+        const sentenceEnd = closingLetter.lastIndexOf('.', CLOSING_LETTER_MAX)
+        closingLetter = sentenceEnd > 400 ? closingLetter.slice(0, sentenceEnd + 1) : closingLetter.slice(0, CLOSING_LETTER_MAX)
+        console.warn(`[v0] Closing letter exceeded ${CLOSING_LETTER_MAX} chars, trimmed to ${closingLetter.length}`)
+      }
+
     } catch (parseError) {
       console.error('[v0] Failed to parse Gemini response:', parseError)
       console.error('[v0] Raw response preview:', rawResponse.substring(0, 500))
