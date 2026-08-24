@@ -54,7 +54,7 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
   const [copied, setCopied] = useState(false)
   const [openSections, setOpenSections] = useState<Record<number, boolean>>({})
   const [paidReport, setPaidReport] = useState<any>(initialPaidReport)
-  const [decadeFortuneCards, setDecadeFortuneCards] = useState<any[]>(initialPaidReport?.hidden_cards || [])
+  const [closingLetter, setClosingLetter] = useState<string>(initialPaidReport?.hidden_cards?.closingLetter || '')
   const [isGenerating, setIsGenerating] = useState(!initialPaidReport)
   const [generateError, setGenerateError] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
@@ -81,8 +81,8 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
           throw new Error(err.error || `HTTP ${res.status}`)
         }
         const data = await res.json()
-        setPaidReport({ facts: data.facts, hidden_cards: data.decadeFortuneCards })
-        setDecadeFortuneCards(data.decadeFortuneCards || [])
+        setPaidReport({ facts: data.facts, hidden_cards: { closingLetter: data.closingLetter } })
+        setClosingLetter(data.closingLetter || '')
       } catch (e: any) {
         setGenerateError(e.message || 'Failed to generate report')
       } finally {
@@ -98,13 +98,6 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
   const dayMasterHanja = KOREAN_TO_HANJA_STEM[dayMasterKorean] || rawStem
   const character = getDayMasterCharacter(dayMasterKorean)
   const quote = DAY_MASTER_QUOTE[dayMasterKorean] || ''
-
-  // 대운(10년) 시대 구분 (결정론적 계산 결과: sajuData.decadeFortune)
-  const decadeFortune = (sajuData as any)?.decadeFortune
-  // AI가 서술한 시즌 타이틀/이모지 + 6개 카테고리 문단(decadeFortuneCards)을 대운의 startAge 기준으로 매칭
-  const decadeFortuneCardByStartAge = new Map<number, any>(
-    (decadeFortuneCards || []).map((c: any) => [c.startAge, c])
-  )
 
   useEffect(() => {
     track('view_paid_report', '/paid-report')
@@ -265,7 +258,16 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
 
       {/* Sections with toggle */}
       <div className="space-y-4">
-        {sections.map((section: any, sectionIndex: number) => {
+        {(() => {
+          // Sections now have variable card counts (10 or 11), so card numbering must be a running
+          // counter across all prior sections rather than a fixed `sectionIndex * 10` offset.
+          let runningCount = 0
+          const sectionStartNums = sections.map((section: any) => {
+            const startNum = runningCount + 1
+            runningCount += Array.isArray(section.cards) ? section.cards.length : 0
+            return startNum
+          })
+          return sections.map((section: any, sectionIndex: number) => {
           const isOpen = !!openSections[sectionIndex]
           return (
             <div key={sectionIndex} className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
@@ -294,7 +296,7 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
                 <div className="p-4">
                   <div className="space-y-2">
                     {section.cards && section.cards.map((card: any, cardIdx: number) => {
-                      const globalNum = sectionIndex * 10 + cardIdx + 1
+                      const globalNum = sectionStartNums[sectionIndex] + cardIdx
                       return (
                         <div
                           key={cardIdx}
@@ -310,95 +312,23 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
               )}
             </div>
           )
-        })}
+          })
+        })()}
       </div>
 
-      {/* Your Life Eras — one themed season card per decade */}
-      {/* Gated behind !isGenerating: the season titles/emojis and 6 category paragraphs are AI-generated
-          and live in paidReport.hidden_cards, so this section has nothing real to show until generation finishes. */}
-      {!isGenerating && decadeFortune && Array.isArray(decadeFortune.decades) && decadeFortune.decades.length > 0 && (
+      {/* Closing Letter — a single deeply personal letter replacing the old "Your Life Eras" section */}
+      {/* Gated behind !isGenerating: closingLetter is AI-generated and lives in paidReport.hidden_cards,
+          so this section has nothing real to show until generation finishes. */}
+      {!isGenerating && closingLetter && (
         <div className="mt-8">
           <div className="text-center mb-4">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Your Lifeline</p>
-            <h3 className="text-sm font-semibold text-foreground mt-1">Your Life Eras</h3>
-            <p className="text-[11px] text-muted-foreground/70 mt-1">From birth to your 90s — every decade has its own season. Here&apos;s yours.</p>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">From Your Sajume Reader</p>
+            <h3 className="text-sm font-semibold text-foreground mt-1">Your Closing Letter</h3>
           </div>
-
-          {/* Per-decade season cards */}
-          <div className="space-y-3">
-            {decadeFortune.decades.map((decade: any, decadeIdx: number) => {
-              const decadeKey = 1000 + decadeIdx
-              const isOpen = !!openSections[decadeKey]
-              const cardText = decadeFortuneCardByStartAge.get(decade.startAge)
-              const seasonTitle = cardText?.seasonTitle || 'Unfolding Chapter'
-              const seasonEmoji = cardText?.seasonEmoji || '✨'
-              return (
-                <div key={decadeIdx} className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
-                  <div className="bg-muted border-b border-border px-4 py-3 flex items-center gap-2">
-                    <div className="flex-1">
-                      <h4 className="text-sm font-semibold text-foreground">
-                        Season {decadeIdx + 1}: {seasonTitle} <span aria-hidden="true">{seasonEmoji}</span>
-                      </h4>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">
-                        Age {decade.startAge}–{decade.endAge} <span className="text-muted-foreground/60">({decade.startYear}–{decade.endYear})</span> · {decade.ganzi} Cycle
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => toggleSection(decadeKey)}
-                      aria-label={isOpen ? 'Collapse decade' : 'Expand decade'}
-                      className="p-1.5 rounded-lg hover:bg-background/50 transition-colors"
-                    >
-                      <ChevronDownIcon className={`w-5 h-5 text-muted-foreground transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
-                    </button>
-                  </div>
-
-                  {isOpen && (
-                    <div className="p-4">
-                      {(() => {
-                        const cardText = decadeFortuneCardByStartAge.get(decade.startAge)
-                        if (!cardText) {
-                          return <p className="text-[11px] text-muted-foreground/60 italic">Details unavailable for this decade.</p>
-                        }
-                        const categories: Array<{ key: string; label: string; text: string; years: any[] }> = [
-                          { key: 'overallVibe', label: 'Overall Flow', text: cardText.overallVibe, years: [] },
-                          { key: 'careerWealth', label: 'Career & Wealth', text: cardText.careerWealth, years: decade.careerYears || [] },
-                          { key: 'relationships', label: 'Relationships', text: cardText.relationships, years: decade.relationshipYears || [] },
-                          { key: 'romance', label: 'Romance', text: cardText.romance, years: decade.romanceYears || [] },
-                          { key: 'health', label: 'Health', text: cardText.health, years: decade.healthYears || [] },
-                          { key: 'coreAdvice', label: 'Cheer & Caution', text: cardText.coreAdvice, years: decade.cautionYears || [] },
-                        ]
-                        return (
-                          <div className="space-y-4">
-                            {categories.map(cat => (
-                              <div key={cat.key} className="bg-background/30 border border-border/50 rounded-lg p-3">
-                                <div className="flex items-center justify-between gap-2 mb-1.5">
-                                  <p className="text-[10px] uppercase tracking-wider text-primary/80 font-semibold">{cat.label}</p>
-                                  {cat.years.length > 0 && (
-                                    <div className="flex items-center gap-1">
-                                      {cat.years.map((yr: any, yrIdx: number) => (
-                                        <span
-                                          key={yrIdx}
-                                          className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${
-                                            yr.polarity === 'favorable' ? 'text-primary bg-primary/15' : 'text-destructive bg-destructive/15'
-                                          }`}
-                                        >
-                                          {yr.year}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                                <p className="text-[11px] text-foreground/90 leading-relaxed">{cat.text}</p>
-                              </div>
-                            ))}
-                          </div>
-                        )
-                      })()}
-                    </div>
-                  )}
-                </div>
-              )
-            })}
+          <div className="bg-card border border-primary/20 rounded-xl p-6 shadow-lg shadow-primary/5">
+            <p className="font-serif italic text-[13px] text-foreground/90 leading-relaxed text-pretty whitespace-pre-line">
+              {closingLetter}
+            </p>
           </div>
         </div>
       )}

@@ -8,12 +8,12 @@ import { calculateDecadeFortune } from '@/lib/saju/decade-fortune'
 export const maxDuration = 300
 
 /**
- * 유료 레포트 생성 API (90개 사실 + 대운 하이라이트 연도 카드)
+ * 유료 레포트 생성 API (96개 사실 + 총평 편지)
  *
  * 흐름:
  * 1. submissionId로 DB 조회 (사주데이터 + 무료 3개 사실 + 1500자 해설)
- * 2. saju_data.decadeFortune(결정론적 계산 결과)와 모든 context를 Gemini에 주입
- * 3. 90개 사실 생성 + decadeFortune의 대운(10년)마다 6개 카테고리 문단 생성 (AI는 점수/연도를 재계산하지 않음)
+ * 2. saju_data.decadeFortune(결정론적 계산 결과)를 04/07/09 섹션의 톤 일치를 위한 그라운딩 컨텍스트로만 주입
+ * 3. 96개 사실 생성(02/03/04/05/06/08 섹션은 11개째 카드로 "Truth Bomb" 포함) + 96개 카드 아래 총평 편지(closingLetter) 1개 생성
  * 4. DB에 저장 (is_free: false)
  */
 
@@ -42,14 +42,16 @@ TONE AND STYLE (mandatory):
 
 MANDATORY REQUIREMENTS:
 - EXACTLY 9 sections (numbered 01-09)
-- EXACTLY 10 cards per section (no more, no less)
-- TOTAL = 90 cards (this is non-negotiable)
+- Sections 01, 07, 09 have EXACTLY 10 cards each
+- Sections 02, 03, 04, 05, 06, 08 have EXACTLY 11 cards each (the 11th is a "Truth Bomb" card, see rules below)
+- TOTAL = 96 cards (this is non-negotiable)
 - Each card's "content" field: Max 220 characters including spaces
 - Be compact but meaningful - core insight only
 - No need for title/theme per card
 - Maintain Gen-Z tone, warmth, and practical advice
+- After the 96 cards, also write one standalone "closingLetter" per the CLOSING LETTER rules below
 
-Return ONLY a valid JSON array of 90 fact objects. No markdown, no explanations outside the JSON.`
+Return ONLY a valid JSON object with "mainFacts" and "closingLetter". No markdown, no explanations outside the JSON.`
 
 export async function POST(request: Request) {
   try {
@@ -76,7 +78,7 @@ export async function POST(request: Request) {
     // 2. 기존 유료 레포트 확인 (section_key='paid_full'만 유효한 캐시)
     const { data: existingPaidReport } = await supabase
       .from('reports')
-      .select('facts')
+      .select('facts, hidden_cards')
       .eq('submission_id', submissionId)
       .eq('section_key', 'paid_full')
       .single()
@@ -85,6 +87,7 @@ export async function POST(request: Request) {
       console.log('[v0] Paid report already exists (paid_full), returning cached version')
       return NextResponse.json({
         facts: existingPaidReport.facts,
+        closingLetter: existingPaidReport.hidden_cards?.closingLetter || '',
         cached: true
       })
     }
@@ -156,7 +159,7 @@ export async function POST(request: Request) {
       }
     }
 
-    console.log(`[v0] Generating 90 paid facts for ${submission.name}`)
+    console.log(`[v0] Generating 96 paid facts for ${submission.name}`)
     console.log('[v0] Context injection summary:')
     console.log('[v0] - Saju data fields:', Object.keys(submission.saju_data || {}).length)
     console.log('[v0] - Context interpretation length:', contextInterpretation.length, 'chars')
@@ -173,10 +176,12 @@ Birth Country: ${submission.birth_country}
 Four Pillars (四柱):
 ${JSON.stringify(submission.saju_data, null, 2)}
 
-=== PRE-COMPUTED DECADE FORTUNE (decadeFortune) — DO NOT RECALCULATE ===
+=== PRE-COMPUTED DECADE FORTUNE (decadeFortune) — SILENT GROUNDING CONTEXT ONLY, DO NOT OUTPUT ===
 This is the exact same object as saju_data.decadeFortune above, isolated here so you don't miss it.
-Every decade's score and every category's candidate years below are final. Your only task for this
-object is to write ONE set of 6 category paragraphs PER DECADE (not per year) following the Mapping Rules.
+Every decade's score (상/중/하) and candidate years below are final and already computed — you do NOT
+recalculate them and you do NOT output any card or section based on this object directly. Its only
+purpose is to keep sections 04, 07, and 09 tonally consistent (see the CROSS-SECTION CONSISTENCY RULE
+below) with whichever decade covers "now" and "the next 10 years" for this customer.
 ${JSON.stringify(submission.saju_data?.decadeFortune, null, 2)}
 
 === 1500-CHARACTER INTERPRETATION (from Stage 1) ===
@@ -186,11 +191,12 @@ ${contextInterpretation}
 ${JSON.stringify(freeFacts, null, 2)}
 
 === YOUR TASK ===
-Based on all the context above, generate 90 NEW facts that:
+Based on all the context above, generate 96 NEW facts that:
 1. Expand deeply on the themes introduced in the 3 free facts
 2. Never contradict or repeat the free facts
 3. Maintain narrative consistency with the established "Life Persona"
-4. Cover all 9 premium themes (10 facts each)
+4. Cover all 9 premium themes — sections 01, 07, 09 get 10 facts each; sections 02, 03, 04, 05, 06, 08
+   get 11 facts each (10 regular + 1 "Truth Bomb" card, see the TRUTH BOMB CARD rule below)
 5. Don't use ** this mark or Chinese letter and Korean Letter. Use only English.
 
 OUTPUT FORMAT:
@@ -266,152 +272,79 @@ And please, you need to include these 3 sentences for 'everyone'. Because we mas
 - Your wealth flow timing and secret talents are already mapped out like ***** Ready to see your future from this angle? (explain in details)
 
 ========================================
-CROSS-SECTION CONSISTENCY RULE — 90 CARDS (sections 04, 07, 09) vs. DECADE FORTUNE / "Your Life Eras":
+CROSS-SECTION CONSISTENCY RULE — Sections 04, 07, 09 vs. the pre-computed decadeFortune:
 ========================================
 Sections 04 (Career Motion), 07 (Future Self Sneak Peek: A Letter from 2030), and 09 (The Next
-Chapter: Your 2026+ Level-up Roadmap) all narrate future timing that OVERLAPS in years with the
-per-decade Season cards you will generate from \`decadeFortune\` below (the "Your Life Eras" section
-in the UI). These two outputs will be shown on the same report page, so they MUST NOT contradict
-each other for the same years:
-- The overall score (상/중/하) for whichever decade covers "now" and "the next 10 years" in
-  \`decadeFortune.decades\` is the single source of truth for how that period feels overall. Sections
-  04/07/09 must describe consistent tone for that stretch of years — e.g. do NOT call a decade
-  scored 하 (Low) a guaranteed "peak period" in section 09, and do NOT call a decade scored 상 (High)
-  a "forced rest period" in section 07.
-- If a specific future year appears in BOTH a 90-card section (04/07/09) and one of the decade's
+Chapter: Your 2026+ Level-up Roadmap) all narrate future timing. The pre-computed \`decadeFortune\`
+object above is silent grounding context ONLY — you never output anything from it directly — but
+these three sections must stay tonally consistent with it for whichever decade covers "now" and
+"the next 10 years":
+- The overall score (상/중/하) for that decade in \`decadeFortune.decades\` is the single source of
+  truth for how that period feels overall. Do NOT call a decade scored 하 (Low) a guaranteed "peak
+  period" in section 09, and do NOT call a decade scored 상 (High) a "forced rest period" in section 07.
+- If a specific future year you mention in 04/07/09 also appears in one of that decade's
   candidate-year arrays (careerYears/relationshipYears/romanceYears/healthYears/cautionYears), the
-  reason/theme you give that year in the 90 cards must match the reason/polarity already computed
-  for it in \`decadeFortune\` (e.g. don't call 2027 a breakout wealth year in section 04 if
-  \`decadeFortune\` already flags 2027 as a \`cautionYears\` entry with polarity "caution").
-- Sections 04/07/09 should go deeper and more specific (exact career fields, a vivid "letter from
-  2030" narrative, hyper-personalized advice) rather than repeating the Life Eras season card
-  word-for-word — treat Life Eras as the big-picture season/vibe, and 04/07/09 as the detailed
-  zoom-in, but never let the zoom-in disagree with the big picture.
+  reason/theme you give that year must match the reason/polarity already computed for it (e.g. don't
+  call 2027 a breakout wealth year in section 04 if \`decadeFortune\` already flags 2027 as a
+  \`cautionYears\` entry with polarity "caution").
 
 ========================================
-AFTER THE 90 CARDS, GENERATE THE DECADE FORTUNE CARDS (ONE PER DECADE):
+TRUTH BOMB CARD RULE — the 11th card in sections 02, 03, 04, 05, 06, 08:
 ========================================
+Sections 02 (Inner Child Era), 03 (Present Energy), 04 (Career Motion), 05 (Money Flow), 06 (Love &
+Endgame), and 08 (Lucky Environment/Health) each get one extra 11th card called the "Truth Bomb."
+This is the one card per section allowed to lead with an unflinching, specific truth before pivoting
+to comfort — it exists because generic praise gets old, and a sharp, accurate observation followed by
+real comfort or a real fix is what makes a paid report feel worth paying for.
+- Name ONE specific, real behavioral pattern or blind spot that is actually visible in this
+  customer's chart data for that section's theme (a real Ten God imbalance, a real clash/combo, a
+  real missing element — not a vague, could-apply-to-anyone statement like "you can be moody").
+- State it plainly in the first part of the paragraph, without hedging or softening language up
+  front (this is the one card in the whole report allowed to open bluntly).
+- In the same paragraph, pivot immediately to genuine comfort and/or one concrete, actionable fix —
+  never leave the reader on the harsh part. The comfort must feel earned and specific to the chart,
+  not a generic "but it's okay!" tack-on.
+- Same format as every other card: ONE paragraph, max 220 characters including spaces, English only,
+  no Korean/Chinese characters, same warm Gen-Z wise-friend voice as the rest of the report — the
+  difference from other cards is the precision of the observation, not the tone.
+- Do not contradict anything already stated elsewhere in that section or in the free 3 facts.
 
-AFTER successfully generating the 90 main facts, you MUST generate exactly ONE card PER DECADE for
-the pre-computed \`decadeFortune\` object inside \`saju_data\`. This object already contains, for EVERY
-Daewoon (10-year period) from birth to ~90 years old, a deterministic overall score (상/중/하) and,
-for 5 categories (career/wealth, relationships, romance, health, encouragement/caution), up to 2
-already-selected "candidate years" with their Ten God / 12-Star / Hap-Chung reason. You do NOT
-recompute, invent, or second-guess any score or candidate year. Your job is to (a) name this decade
-as a "season" with a short evocative title + one emoji, and (b) weave the already-selected candidate
-years into 6 flowing paragraphs per decade — by strictly following the IF-THEN mapping rules below.
-
-======================================================
-[SYSTEM: HOROSCOPE LIFELINE & HIGHLIGHT MAPPING RULES]
-======================================================
-You are a precise Saju lifecycle analyzer. Your task is to narrate a lifetime timeline (Daewoon) as
-ONE cohesive card per 10-year decade, citing only the specific years already selected for you. You
-MUST strictly map the data using the following IF-THEN rules. Do NOT invent interpretations outside
-these rules, and do NOT cite any year that does not appear in that decade's candidate-year arrays.
-Maintain the "Gen-Z wise friend" persona in the final output. Remember the CROSS-SECTION CONSISTENCY
-RULE above: whichever decade here covers "now" and "the next 10 years" must stay tonally consistent
-with what you already wrote in sections 04/07/09 of the 90 main facts — do not contradict that
-decade's score or any shared year's polarity.
-
-[RULE 0: SEASON TITLE & EMOJI - CREATIVE, BUT GROUNDED IN THE DATA]
-Give this decade a short evocative "season" name (2-4 words, title case, English, no colon inside
-it) that captures its dominant theme, plus ONE emoji that fits it. Base the theme on: the decade's
-\`score\`, its dominant candidate-year categories (e.g. mostly careerYears -> an ambition/建설 theme;
-mostly romanceYears -> a connection theme; mostly cautionYears with "caution" polarity -> a
-rest/consolidation theme), and \`isYouthDecade\`. Do NOT always default to positive-sounding names —
-a 하 (Low) decade dominated by caution years should get an honest, still-dignified name like "Quiet
-Reset" or "Winter Roots" 🌱 rather than a falsely upbeat one, and a 상 (High) decade dominated by
-career/romance signals can get an energetic name like "High Tide" 🌊 or "Open Road" 🛣️. Vary the
-vocabulary and emoji across decades for the same person — never reuse the same title or emoji twice
-for one person's set of decades. Keep it punchy and metaphor-driven (nature, seasons, tides, roads,
-weather), not literal ("Good Career Decade" is bad; "High Tide" is good).
-
-[RULE 1: OVERALL SCORE - ALREADY COMPUTED, DO NOT RECALCULATE]
-Each decade's \`score\` field in \`decadeFortune\` is already one of 상 (High) / 중 (Medium) / 하 (Low),
-computed from Eokbu Yongshin (Favorable Elements) and the 12 Stars (Strength). Simply read and
-narrate this value — never override it based on your own impression of the chart.
-
-[RULE 2: WHICH YEARS TO CITE - ALREADY COMPUTED, DO NOT RESELECT]
-Each decade has 5 candidate-year arrays: \`careerYears\`, \`relationshipYears\`, \`romanceYears\`,
-\`healthYears\`, \`cautionYears\`. Each entry has \`year\`, \`age\`, \`polarity\` ("favorable" or "caution"),
-and \`reason\`. When writing a category's paragraph, cite ONLY the years from that category's own
-array (e.g. only \`careerYears\` inside \`careerWealth\`). If an array is empty, do not invent a year —
-say that decade's energy for that theme is calm/steady with no single standout year.
-
-[RULE 3: CAREER & WEALTH MAPPING (careerWealth field, uses careerYears + isYouthDecade)]
-Use the decade's \`isYouthDecade\` flag to set the frame, then cite \`careerYears\` entries by year:
-- IF isYouthDecade is true (this decade is mostly under 20, focus on Study/Talent): frame favorable
-  years as peak focus, creative breakthroughs, or leadership opportunities (class president, talent
-  discovery); frame caution years as distraction from study or peer-group pressure.
-- IF isYouthDecade is false (adult decade, focus on Job/Money): frame favorable years as strong cash
-  flow, promotions, side-hustle launches, or important contracts; frame caution years as overspending,
-  workplace conflict, or a period to consolidate rather than expand.
-- Always mention the specific year(s) from \`careerYears\` by name when citing them.
-
-[RULE 4: HUMAN RELATIONSHIPS MAPPING (relationships field, uses relationshipYears)]
-Cite \`relationshipYears\` entries. A caution entry (from Chung/Wonjin turbulence) means:
-miscommunication is likely that year — advise keeping emotional distance and avoiding unnecessary
-arguments. A favorable entry means smooth energy with friends/colleagues, mentors/parents, or
-juniors/children (the \`reason\` field tells you which). If the array is empty, say this decade's
-relationships stay fairly stable without one dramatic year.
-
-[RULE 5: ROMANCE & LOVE MAPPING (romance field, uses romanceYears)]
-Cite \`romanceYears\` entries (always favorable when present) using their \`reason\`: Sik-sang signal =
-magnetic/flirty energy and active dating phase; Hap-with-Day-Branch signal = a stable person enters
-your life; spouse-star signal (관성 for female, 재성 for male) = a serious, commitment-ready partner.
-IF \`romanceYears\` is empty: do not fabricate a romance narrative — briefly say this decade's energy
-isn't centered on romance and point the reader toward the career/relationship themes instead.
-
-[RULE 6: HEALTH & ENERGY MAPPING (health field, uses healthYears)]
-Identify the most EXCESSIVE or COMPLETELY MISSING element in the natal chart from
-\`elementBalanceWithHiddenStems\`. For each caution entry in \`healthYears\` (weak 12-Star year), output
-a Health Warning based on that vulnerable element, and cite the specific year:
-   * Wood (목): Liver, spine, burnout.
-   * Fire (화): Heart, blood pressure, stress.
-   * Earth (토): Stomach, digestion, skin.
-   * Metal (금): Lungs, respiratory, joints.
-   * Water (수): Kidneys, hormones, reproductive system.
-Advice for caution years: "Your physical battery is draining faster than usual. Prioritize deep rest,
-immune care, and mental detox over hustle." For favorable entries (strong 12-Star year), give a
-lighter, energy-is-good note instead of a warning, citing that year. If \`healthYears\` is empty,
-give a general, lightly reassuring note without naming a specific year.
-
-[RULE 7: ENCOURAGEMENT & CAUTION MAPPING (coreAdvice field, uses cautionYears + decade score)]
-This is the decade's closing "cheer + watch out" paragraph. Start from the decade's \`score\` for
-overall tone:
-- IF score is 상 (High): the wind is at your back — go for it, high risk brings high reward now.
-- IF score is 하 (Low): a mandatory pit-stop — don't force expansion, level up hidden skills, save
-  money, protect your peace.
-- IF score is 중 (Medium): a bridging period — balance calculated risks with a safety net.
-(Rewrite in your own Gen-Z wise-friend voice, not verbatim, but keep the same underlying advice.)
-Then cite \`cautionYears\`: favorable entries ("turning point" years) are explicit "go for it, this is
-your year to try" call-outs; caution entries (Chung/Wonjin) are explicit "slow down and protect
-yourself" call-outs. Name the specific years.
-
-[OUTPUT FORMAT EXPECTATION PER DECADE]
-For every decade in \`decadeFortune.decades[]\`, produce exactly ONE card with these 8 fields, written
-in English only (no Korean/Chinese characters). Naturally weave in the specific years from that
-category's candidate array (never invent a year not present in the data):
-1. seasonTitle — 2-4 word evocative season name per Rule 0 (e.g. "High Tide", "Quiet Reset").
-2. seasonEmoji — exactly ONE emoji matching seasonTitle per Rule 0.
-3. overallVibe — Overall flow of this whole decade (state High/Medium/Low in plain words per Rule 1),
-   using a nature/metaphor tied to the customer's chart and echoing the seasonTitle, mostly framed
-   positively since cautions are covered in the other fields below. 150-260 characters.
-4. careerWealth — Career/Wealth narration per Rule 3, citing careerYears. 150-260 characters.
-5. relationships — Family/friends/workplace narration per Rule 4, citing relationshipYears. 150-260 characters.
-6. romance — Romance narration per Rule 5, citing romanceYears (or explicitly noting none). 150-260 characters.
-7. health — Health narration per Rule 6, citing healthYears. 150-260 characters.
-8. coreAdvice — Encouragement + caution narration per Rule 7, citing cautionYears. 150-260 characters.
-
-Do NOT skip any decade. Do NOT add, remove, or reorder decades — produce exactly one card per
-decade, in the same order as \`decadeFortune.decades\`.
+========================================
+CLOSING LETTER RULE — one standalone letter after all 96 cards:
+========================================
+After the 96 main cards, write exactly ONE closing letter (field name \`closingLetter\`), 550-650
+characters including spaces, English only, no Korean/Chinese characters. This is the single most
+emotionally resonant piece of the entire report — it should read like a warm, perceptive friend who
+truly sees this person, not a summary of facts already stated. Follow this arc, in flowing prose (not
+labeled sections):
+1. Open by naming ONE real struggle this customer likely carries, drawn from the chart's actual core
+   tension (e.g. an overwhelming element with no outlet, a Day Master fighting to hold its ground, a
+   clash between two pillars) — acknowledge how exhausting or lonely that struggle has likely been,
+   using the customer's name (${submission.name}) once here. Example tone: naming a specific
+   quiet suffering ("the lonely nights spent trying to prove you're enough") rather than a generic
+   compliment.
+2. Explain WHY, using one vivid nature/metaphor tied to the actual chart structure already
+   established elsewhere in the report (Day Master strength, dominant/missing element, or a key
+   clash/combo) — e.g. fertile soil with no dam to hold an overwhelming flood of water. This metaphor
+   must be internally consistent with what sections 01 and 08 already said about their elements.
+3. Name 2-3 concrete strengths in plain, specific language grounded in the chart (e.g. "you draw
+   people to you effortlessly," "money finds its way to you more than most," "you can turn a crisis
+   into an opening no one else sees") — not vague praise.
+4. Name 1-2 concrete growth points or blind spots in plain, kind language (e.g. "your moods can swing
+   harder than you'd like," "you start strong but can lose the thread before the finish," "you give
+   too much before you've learned who deserves it") — grounded in the same chart signals used
+   elsewhere in the report, not invented from nothing.
+5. Close with warmth: a short, genuine note of encouragement that leaves the reader feeling truly
+   understood, not just informed.
+Do NOT contradict anything already stated in the 96 cards or the free 3 facts — this letter is the
+emotional summary of everything already established, not a new analysis.
 
 OUTPUT JSON STRUCTURE - ABSOLUTELY CRITICAL:
-You MUST return EXACTLY 9 sections with EXACTLY 10 cards each = 90 total cards. 
-DO NOT return fewer cards. The user PAID for 90 facts. Returning less is unacceptable.
+You MUST return EXACTLY 9 sections. Sections 01, 07, 09 have EXACTLY 10 cards. Sections 02, 03, 04,
+05, 06, 08 have EXACTLY 11 cards (10 regular + 1 Truth Bomb, as the LAST card in that section's array).
+TOTAL = 96 cards. DO NOT return fewer cards. The user PAID for 96 facts. Returning less is unacceptable.
 
-Then, APPEND the decade fortune cards as a separate array named "decadeFortuneCards" — exactly ONE
-object per decade (8 total, matching \`decadeFortune.decades.length\`).
+Then, APPEND the closing letter as a single string field named "closingLetter".
 
 FINAL JSON STRUCTURE (single valid JSON object):
 {
@@ -432,28 +365,13 @@ FINAL JSON STRUCTURE (single valid JSON object):
         { "content": "" }
       ]
     },
-    ... (repeat this EXACT structure for all 9 sections, each with EXACTLY 10 cards.)
+    ... (repeat this EXACT structure for all 9 sections — 10 cards for sections 01/07/09, 11 cards
+    for sections 02/03/04/05/06/08 with the 11th card being that section's Truth Bomb.)
   ],
-  "decadeFortuneCards": [
-    {
-      "startAge": 0,
-      "endAge": 9,
-      "startYear": 1996,
-      "endYear": 2005,
-      "seasonTitle": "[2-4 word evocative name]",
-      "seasonEmoji": "[single emoji]",
-      "overallVibe": "[150-260 chars]",
-      "careerWealth": "[150-260 chars]",
-      "relationships": "[150-260 chars]",
-      "romance": "[150-260 chars]",
-      "health": "[150-260 chars]",
-      "coreAdvice": "[150-260 chars]"
-    }
-    ... (one object per decade in decadeFortune.decades, in the same order, using that decade's own startAge/endAge/startYear/endYear)
-  ]
+  "closingLetter": "[550-650 character closing letter following the CLOSING LETTER RULE above]"
 }
 
-Generate both the 90 main facts and the decadeFortuneCards now as a single JSON object.`
+Generate the 96 main facts and the closingLetter now as a single JSON object.`
 
     // 6. Gemini API 호출 with retry logic (최대 3번 시도)
     console.log('[v0] Calling Gemini API...')
@@ -511,20 +429,7 @@ Generate both the 90 main facts and the decadeFortuneCards now as a single JSON 
 
     // 7. JSON 파싱 (더 유연한 형식 지원)
     let paidFacts: Fact[] = []
-    let decadeFortuneCards: Array<{
-      startAge: number
-      endAge: number
-      startYear: number
-      endYear: number
-      seasonTitle: string
-      seasonEmoji: string
-      overallVibe: string
-      careerWealth: string
-      relationships: string
-      romance: string
-      health: string
-      coreAdvice: string
-    }> = []
+    let closingLetter = ''
     try {
       // 시도 1: ```json ... ``` 형식 (줄바꿈 포함)
       let jsonMatch = rawResponse.match(/```json\n([\s\S]*?)\n```/)
@@ -571,17 +476,17 @@ Generate both the 90 main facts and the decadeFortuneCards now as a single JSON 
       
       const parsedData = JSON.parse(jsonString)
       
-      // mainFacts와 decadeFortuneCards 추출
+      // mainFacts와 closingLetter 추출
       if (Array.isArray(parsedData)) {
         // 구형식: 배열 직접 반환 (호환성)
         paidFacts = parsedData
       } else if (parsedData.mainFacts && Array.isArray(parsedData.mainFacts)) {
-        // 신형식: { mainFacts: [...], decadeFortuneCards: [...] }
+        // 신형식: { mainFacts: [...], closingLetter: "..." }
         paidFacts = parsedData.mainFacts
-        decadeFortuneCards = parsedData.decadeFortuneCards || []
+        closingLetter = typeof parsedData.closingLetter === 'string' ? parsedData.closingLetter.trim() : ''
       }
       
-      console.log('[v0] Successfully parsed', paidFacts.length, 'main facts and', decadeFortuneCards.length, 'decade fortune cards')
+      console.log('[v0] Successfully parsed', paidFacts.length, 'main facts and a closing letter of', closingLetter.length, 'chars')
       
     } catch (parseError) {
       console.error('[v0] Failed to parse Gemini response:', parseError)
@@ -604,11 +509,11 @@ Generate both the 90 main facts and the decadeFortuneCards now as a single JSON 
       // 이미 존재하면 update
       const { error } = await supabase
         .from('reports')
-        .update({ facts: paidFacts, payment_id: payment.id, hidden_cards: decadeFortuneCards.length > 0 ? decadeFortuneCards : undefined })
+        .update({ facts: paidFacts, payment_id: payment.id, hidden_cards: closingLetter ? { closingLetter } : undefined })
         .eq('id', existing.id)
       insertError = error
     } else {
-      // 없으면 insert (hidden_cards 컬럼에 대운별 6개 카테고리 카드를 저장 - 컬럼명은 레거시, 내용은 decadeFortuneCards)
+      // 없으면 insert (hidden_cards 컬럼에 총평 편지를 저장 - 컬럼명은 레거시, 내용은 closingLetter)
       const { error } = await supabase
         .from('reports')
         .insert({
@@ -616,7 +521,7 @@ Generate both the 90 main facts and the decadeFortuneCards now as a single JSON 
           payment_id: payment.id,
           section_key: 'paid_full',
           facts: paidFacts,
-          ...(decadeFortuneCards.length > 0 ? { hidden_cards: decadeFortuneCards } : {}),
+          ...(closingLetter ? { hidden_cards: { closingLetter } } : {}),
           is_free: false,
         })
       insertError = error
@@ -647,7 +552,7 @@ Generate both the 90 main facts and the decadeFortuneCards now as a single JSON 
 
     return NextResponse.json({
       facts: paidFacts,
-      decadeFortuneCards,
+      closingLetter,
       cached: false,
     })
 
