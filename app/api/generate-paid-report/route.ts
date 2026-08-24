@@ -197,7 +197,11 @@ Based on all the context above, generate 96 NEW facts that:
 3. Maintain narrative consistency with the established "Life Persona"
 4. Cover all 9 premium themes — sections 01, 07, 09 get 10 facts each; sections 02, 03, 04, 05, 06, 08
    get 11 facts each (10 regular + 1 "Truth Bomb" card, see the TRUTH BOMB CARD rule below)
-5. Don't use ** this mark or Chinese letter and Korean Letter. Use only English.
+5. Don't use ** this mark or any Chinese/Korean character — including a single hanja element symbol
+   like "土/火/水/金/木" or a single Ten God/Ganzi character in quotes or parentheses (e.g. do NOT write
+   "Earth (土)" or "'甲' (direct wealth)"). Translate every one of these into plain English inline
+   instead (e.g. "Earth energy" or "the direct wealth energy"). This applies to ALL 96 cards, not just
+   the Truth Bomb cards. Use only English, in every single card, with no exceptions.
 
 OUTPUT FORMAT:
 Key Point: You must embody a Gen-Z persona—playful and witty, yet brutally honest about the facts, ultimately delivering a core message of warmth, comfort, and practical solutions. Avoid appearing overly playful or flippant. Bridge the data with empathy.
@@ -495,29 +499,51 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
       console.log('[v0] Successfully parsed', paidFacts.length, 'main facts and a closing letter of', closingLetter.length, 'chars')
 
       // Safety net: despite explicit prompt rules, the model can still slip in a stray Korean/Chinese
-      // phrase (e.g. quoting a Ten God term in Hangul) or overrun the closing letter's length. Rather
-      // than ship untranslated script to English readers, strip any CJK characters here as a last
-      // resort, and hard-trim an overlong closing letter at the last sentence boundary.
-      const CJK_REGEX = /[\u3131-\uD79D\u4E00-\u9FFF]+/g
+      // character (e.g. a single hanja element like "Earth (土)" or a quoted Ten God term like "'甲'").
+      // Simply deleting the CJK character leaves an empty, broken wrapper behind ("Earth ()", "''"),
+      // which reads worse than the original problem. So instead: (a) drop the ENTIRE parenthetical or
+      // quoted group if it contains a CJK character (rather than leaving an empty shell), (b) strip any
+      // remaining stray CJK characters, then (c) clean up the punctuation/spacing debris left behind.
+      const CJK_CHAR = '[\\u3131-\\uD79D\\u4E00-\\u9FFF]'
+      const CJK_TEST = new RegExp(CJK_CHAR)
+      function sanitizeCJKArtifacts(text: string): string {
+        let result = text
+        // Drop a whole "(...)" group if any CJK character appears inside it, including one trailing
+        // comma/space (so "Earth (), is grounded" -> "Earth is grounded", not "Earth , is grounded").
+        result = result.replace(new RegExp(`\\s*\\([^()]*${CJK_CHAR}[^()]*\\)\\s*,?`, 'g'), ' ')
+        // Drop a whole quoted "'...'" or "\"...\"" group if any CJK character appears inside it.
+        result = result.replace(new RegExp(`['"\u2018\u2019\u201C\u201D][^'"\u2018\u2019\u201C\u201D]*${CJK_CHAR}[^'"\u2018\u2019\u201C\u201D]*['"\u2018\u2019\u201C\u201D]`, 'g'), '')
+        // Strip any remaining stray CJK characters that weren't wrapped in ()/quotes.
+        result = result.replace(new RegExp(CJK_CHAR, 'g'), '')
+        // Clean up leftover debris: empty parens/quotes, double spaces, space before punctuation.
+        result = result
+          .replace(/\(\s*\)/g, '')
+          .replace(/["'][\s]*["']/g, '')
+          .replace(/\s{2,}/g, ' ')
+          .replace(/\s+([,.;!?])/g, '$1')
+          .replace(/,\s*,/g, ',')
+          .trim()
+        return result
+      }
       let cjkStripped = 0
       paidFacts = paidFacts.map((section: any) => ({
         ...section,
         cards: Array.isArray(section.cards)
           ? section.cards.map((card: any) => {
-              if (typeof card?.content === 'string' && CJK_REGEX.test(card.content)) {
+              if (typeof card?.content === 'string' && CJK_TEST.test(card.content)) {
                 cjkStripped++
-                return { ...card, content: card.content.replace(CJK_REGEX, '').replace(/\s{2,}/g, ' ').trim() }
+                return { ...card, content: sanitizeCJKArtifacts(card.content) }
               }
               return card
             })
           : section.cards,
       }))
-      if (CJK_REGEX.test(closingLetter)) {
+      if (CJK_TEST.test(closingLetter)) {
         cjkStripped++
-        closingLetter = closingLetter.replace(CJK_REGEX, '').replace(/\s{2,}/g, ' ').trim()
+        closingLetter = sanitizeCJKArtifacts(closingLetter)
       }
       if (cjkStripped > 0) {
-        console.warn(`[v0] Stripped stray CJK characters from ${cjkStripped} field(s) despite English-only prompt rule`)
+        console.warn(`[v0] Sanitized stray CJK characters/wrappers from ${cjkStripped} field(s) despite English-only prompt rule`)
       }
 
       const CLOSING_LETTER_MAX = 700
