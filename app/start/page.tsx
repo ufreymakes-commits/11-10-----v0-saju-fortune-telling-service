@@ -92,10 +92,10 @@ export default function StartPage() {
           </p>
           <div className="max-w-sm mx-auto rounded-2xl overflow-hidden border border-purple-500/30 shadow-2xl">
             <Image
-              src="/images/saju-preview.jpg"
+              src="/images/saju-preview.png"
               alt="Saju Report Preview"
-              width={400}
-              height={800}
+              width={480}
+              height={868}
               className="w-full h-auto"
             />
           </div>
