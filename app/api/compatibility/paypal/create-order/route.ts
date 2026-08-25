@@ -1,13 +1,6 @@
 import { NextResponse } from 'next/server'
+import { getPayPalConfig } from '@/lib/paypal'
 import { createAdminClient } from '@/lib/supabase/server'
-
-function getPayPalConfig() {
-  const USE_SANDBOX = process.env.PAYPAL_MODE === 'sandbox'
-  const clientId = USE_SANDBOX ? process.env.paypalclientidSandbox : process.env.PAYPAL_CLIENT_ID
-  const clientSecret = USE_SANDBOX ? process.env.paypalsecretkeySandbox : process.env.PAYPAL_CLIENT_SECRET
-  const apiUrl = USE_SANDBOX ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com'
-  return { clientId, clientSecret, apiUrl }
-}
 
 async function getPayPalAccessToken() {
   const { clientId, clientSecret, apiUrl } = getPayPalConfig()
