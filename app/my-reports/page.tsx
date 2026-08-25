@@ -121,7 +121,7 @@ export default async function MyReportsPage() {
               return (
                 <Link
                   key={payment.id}
-                  href={`/report/${payment.submission_id}`}
+                  href={`/report/${payment.submission_id}/paid`}
                   className="group block bg-card border border-border hover:border-primary/40 rounded-xl p-4 transition-all hover:bg-primary/5"
                 >
                   <div className="flex items-start justify-between gap-3">

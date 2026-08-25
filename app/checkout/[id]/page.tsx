@@ -47,7 +47,7 @@ export default async function CheckoutPage({ params }: PageProps) {
     .single()
   
   if (payment) {
-    redirect(`/report/${id}`)
+    redirect(`/report/${id}/paid`)
   }
   
   return (

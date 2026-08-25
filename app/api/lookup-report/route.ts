@@ -48,7 +48,7 @@ export async function POST(request: Request) {
         .select('id, name, birth_date, paid_report_url, created_at')
         .ilike('name', `%${firstName}%`)
         .eq('birth_date', birthDate)
-        .eq('country', country)
+        .eq('birth_country', country)
         .not('paid_report_url', 'is', null)
         .order('created_at', { ascending: false })
         .limit(5)
