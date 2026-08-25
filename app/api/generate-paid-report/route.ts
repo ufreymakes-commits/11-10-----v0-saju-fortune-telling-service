@@ -334,9 +334,9 @@ real comfort or a real fix is what makes a paid report feel worth paying for.
 CLOSING LETTER RULE — one standalone letter after all 96 cards:
 ========================================
 After the 96 main cards, write exactly ONE closing letter (field name \`closingLetter\`). HARD LIMIT:
-550-650 characters including spaces — count the characters before finalizing, and if your draft runs
+800 characters including spaces — count the characters before finalizing, and if your draft runs
 long, cut sentences/clauses until it fits inside this range rather than submitting a longer letter.
-This is not a soft target: a letter over 650 characters is a failed output. This letter should read
+This is not a soft target: a letter over 800 characters is a failed output. This letter should read
 as flowing, plain-English prose — avoid naming specific Saju/Ten-God terms here at all if you can
 express the same idea through the nature metaphor instead; if you must name one, follow Rule 5 (
 romanized form + a short English gloss in parentheses), and never write a raw Chinese/Korean
