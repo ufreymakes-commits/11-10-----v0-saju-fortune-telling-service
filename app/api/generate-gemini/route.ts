@@ -709,7 +709,7 @@ This must be based on his or her saju data.
 
 (Critical Mapping Rule)
 
-Always map the Five Elements (木 Fire 土 金 水) into Ten Gods (십성) strictly according to the client’s Day Master (일간). 
+Always map the Five Elements (��� Fire 土 金 水) into Ten Gods (십성) strictly according to the client’s Day Master (일간). 
 
 - Never assume that Wood = Wealth, Fire = Resource, etc. 
 - This mapping changes with each Day Master.
@@ -822,14 +822,20 @@ ${JSON.stringify(allSajuData, null, 2)}
     console.log('[v0] Gemini: stage1SystemPrompt length =', stage1SystemPrompt.length, 'chars')
     console.log('[v0] Gemini: stage1UserPrompt length =', stage1UserPrompt.length, 'chars')
 
+    const stage1StartedAt = Date.now()
     const stage1Result = await generateText({
       model: 'google/gemini-2.5-flash',
       system: stage1SystemPrompt,
       prompt: stage1UserPrompt,
       temperature: 0,
-      maxTokens: 3000
+      maxOutputTokens: 4500,
+      providerOptions: {
+        google: { thinkingConfig: { thinkingBudget: 0 } },
+        vertex: { thinkingConfig: { thinkingBudget: 0 } },
+      },
     })
 
+    console.log(`[v0] Gemini: Stage 1 done in ${Date.now() - stage1StartedAt}ms, finishReason=${stage1Result.finishReason}`)
     console.log('[v0] Gemini: Stage 1 response received, parsing...')
     console.log('[v0] Gemini: Raw response length:', stage1Result.text.length)
 
@@ -872,7 +878,7 @@ Language: English only.
 `
 
     // ===== Yongsin 처리 로직 =====
-    // 조후 ���도에 따라 조후용신 또는 억부용신 선택
+    // 조후 �����도에 따라 조후용신 또는 억부용신 선택
     // 생년월일에서 계절 파악해서 조후 정��� 판단
     const month = parseInt(birth_date.split('-')[1])
     const isBalancedSeason = [3, 4, 9, 10].includes(month) // 봄/가을
@@ -982,16 +988,21 @@ OUTPUT FORMAT (JSON ONLY):
       }))
     })
 
+    const stage2StartedAt = Date.now()
     const stage2Result = await generateObject({
       model: 'google/gemini-2.5-flash',
       schema: factSchema,
       system: stage2SystemPrompt,
       prompt: stage2UserPrompt,
       temperature: 0,
-      maxTokens: 8000
+      maxOutputTokens: 4000,
+      providerOptions: {
+        google: { thinkingConfig: { thinkingBudget: 0 } },
+        vertex: { thinkingConfig: { thinkingBudget: 0 } },
+      },
     })
 
-    console.log(`[v0] Gemini: Stage 2 completed, generated ${stage2Result.object.facts.length} facts`)
+    console.log(`[v0] Gemini: Stage 2 done in ${Date.now() - stage2StartedAt}ms, generated ${stage2Result.object.facts.length} facts`)
 
     // Force exactly 3 facts (gemini-2.5-flash sometimes generates more)
     const rawFacts = stage2Result.object.facts.slice(0, 3)
