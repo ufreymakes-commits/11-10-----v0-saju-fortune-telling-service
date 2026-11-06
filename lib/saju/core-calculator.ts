@@ -437,18 +437,11 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
   // 일주: 야자시 보정된 날짜 기준
   const dayPillar = getDayPillar(dayCalcYear, dayCalcMonth, dayCalcDay);
 
-  // 시주 계산
-  // 한국은 30분 보정을 원래 입력 시간에 적용 (진태양시 보정 없이)
-  // 다른 나라는 진태양시(solarTime) 기준
+  // 시주: 연/월/일주와 동일하게 모든 국가를 진태양시 기준으로 계산
+  // (한국도 표준시 135도와 서울 약 127도 차이로 약 -32분 보정이 필요함)
   let hourPillar: Pillar | null = null;
   if (hour !== undefined) {
-    if (country === 'KR') {
-      // 한국: 입력 시간으로 시주 계산 (30분 보정은 getHourBranchIndex에서 적용)
-      hourPillar = getHourPillar(dayPillar.stem, localHour, localMinute, country);
-    } else {
-      // 다른 나라: 진태양시 기준
-      hourPillar = getHourPillar(dayPillar.stem, solarTime.hour, solarTime.minute, country);
-    }
+    hourPillar = getHourPillar(dayPillar.stem, solarTime.hour, solarTime.minute, country);
   }
 
   return {
