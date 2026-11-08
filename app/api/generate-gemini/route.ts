@@ -845,7 +845,8 @@ ${JSON.stringify(allSajuData, null, 2)}
       system: stage1SystemPrompt,
       prompt: stage1UserPrompt,
       temperature: 0,
-      maxTokens: 3000
+      maxOutputTokens: 4000,
+      providerOptions: { google: { thinkingConfig: { thinkingBudget: 0 } } }
     })
 
     console.log('[v0] Gemini: Stage 1 response received, parsing...')
@@ -898,7 +899,7 @@ Language: English only.
     let selectedYongsin = 'your lucky element'
 
     if (isBalancedSeason && saju_data.eokbuYongsin) {
-      // 조후가 원만하면 억부용신 선택
+      // 조후가 ��만하면 억부용신 선택
       selectedYongsin = saju_data.eokbuYongsin
     } else if (!isBalancedSeason && saju_data.johuYongsin) {
       // 조후가 심각하면 조후용신 선택
@@ -980,7 +981,7 @@ Example: "Hey ${name}, ..." for the first fact, and "${name}, remember that..." 
 
 [🚫 절대 주의사항 (결제 전환율을 위한 필수 제약)]
 - 현재의 구체적 상황(예: 너 지금 솔로지?)이나 미래에 대한 구체적 예언을 절대 하지 말 것. 틀리면 고객이 즉각 이탈함. 철저히 '행동 패턴'과 '심리 기질'에만 집중할 것.
-- 2번(Career Path): 직업명(예: Project Manager, Doctor 등)은 아직 언급하지 말되, 잘 어울리는 산업 분야에 대해서는 언급 해도 됨!(예시: Education, Medical, Food, UX, Tech, Contents, Consulting 등등..) 고객이 어떤 '업무 환경(구조적 적합성)'에서 스트레스를 받고, 어떤 '일하는 방식과 분야(재능적 두각)'에서 가장 빛나는지 그 패턴을 이 사람의 사주 해설지를 확인한 후 구체적이고 사실적으로 묘사할 것.
+- 2번(Career Path): 직업명(예: Project Manager, Doctor 등)은 아직 언급하지 말되, 잘 어울리는 산업 분야에 대해��는 언급 해도 됨!(예시: Education, Medical, Food, UX, Tech, Contents, Consulting 등등..) 고객이 어떤 '업무 환경(구조적 적합성)'에서 스트레스를 받고, 어떤 '일하는 방식과 분야(재능적 두각)'에서 가장 빛나는지 그 패턴을 이 사람의 사주 해설지를 확인한 후 구체적이고 사실적으로 묘사할 것.
 - 3번(Life Turning소 Points): 어떤 종류의 터닝포인트인지는 구체적으로 얘기해주되, 구체적인 연도나 나이를 절대로 스포일러 하지 말 것! (예: 2026년에 조심해라, 38살에 만난다 등 금지).대신 예를 들어 "몇년 안에 ~ 이런 터닝포인트가 다가오고 있고, ~이런 문제를 해결하게 된다."등의 강력한 호기심(Curiosity Gap)만 유발하여 유료 결제를 유도할 것.
 
 === 심화 분석 보고서 ===
@@ -1016,7 +1017,8 @@ OUTPUT FORMAT (JSON ONLY):
       system: stage2SystemPrompt,
       prompt: stage2UserPrompt,
       temperature: 0,
-      maxTokens: 8000
+      maxOutputTokens: 3000,
+      providerOptions: { google: { thinkingConfig: { thinkingBudget: 0 } } }
     })
 
     console.log(`[v0] Gemini: Stage 2 completed, generated ${stage2Result.object.facts.length} facts`)
