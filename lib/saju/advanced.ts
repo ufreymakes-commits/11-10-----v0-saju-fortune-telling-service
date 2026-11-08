@@ -1,3 +1,4 @@
+import { getJeolgiForYear } from "./jeolgi"
 // ================================================================
 // advanced.ts — 사주 심화 분석 (extra_advanced.js 정확한 포팅)
 // ================================================================
@@ -206,7 +207,8 @@ export function calcJijiSamhap(
   
   JIJI_SAMHAP.forEach(([group, result]) => {
     const found = group.filter(b => branches.includes(b))
-    if (found.length >= 2) {
+    // 전문가 기준: 반합은 왕지(자오묘유)를 포함한 짝만 인정 (인술·사축·신진·해미 등 생지+묘지 짝은 제외)
+    if (found.length === 3 || (found.length === 2 && found.some(b => "자오묘유".includes(b)))) {
       const desc = found.map(b => `${labels[branches.indexOf(b)]}${b}`).join("+")
       results.push(`${desc}→${result}(${found.length === 3 ? "삼합" : "반합"})`)
     }
@@ -235,9 +237,10 @@ export function calcJijiBanghap(
   
   JIJI_BANGHAP.forEach(([group, result]) => {
     const found = group.filter(b => branches.includes(b))
-    if (found.length >= 2) {
+    // 전문가 기준: 방합은 세 글자가 모두 있을 때만 표시 (부분 방합 없음)
+    if (found.length === 3) {
       const desc = found.map(b => `${labels[branches.indexOf(b)]}${b}`).join("+")
-      results.push(`${desc}→${result}(${found.length === 3 ? "방합" : "방합(부분)"})`)
+      results.push(`${desc}→${result}(방합)`)
     }
   })
   
@@ -357,11 +360,8 @@ export function calcHyeong(
   
   // 자형 (같은 지지가 2개 이상)
   const selfPunish = ["진", "오", "유", "해"]
-  selfPunish.forEach(b => {
-    if (branches.filter(x => x === b).length >= 2) {
-      results.push(`자형(${b}${b})`)
-    }
-  })
+  // 전문가 기준: 자형은 표시하지 않음 (#15 午午에서 미표시 확인, 표본 1건)
+  void selfPunish
   
   return results
 }
@@ -563,56 +563,23 @@ function getTenGodType(dayElem: string, targetElem: string): string {
 }
 
 export function calcSinGangSinYak(
-  dayStem: string,
-  monthBranch: string,
-  yearStem: string,
-  monthStem: string,
-  _dayStemAgain: string,
-  hourStem: string | null,
-  yearBranch: string,
-  dayBranch: string,
-  hourBranch: string | null
+  dayStem: string, monthBranch: string, yearStem: string, monthStem: string, _d: string,
+  hourStem: string | null, yearBranch: string, dayBranch: string, hourBranch: string | null
 ): { grade: string; ratio: number } {
+  // [후보 규칙] 일간 제외 7칸(천간3 + 지지4 본기)에서 비겁+인성 vs 나머지
+  const MAIN: Record<string, string> = { 자:'계',축:'기',인:'갑',묘:'을',진:'무',사:'병',오:'정',미:'기',신:'경',유:'신',술:'무',해:'임' }
   const dayElem = getStemElem(dayStem)
-  let support = 0
-  let weaken = 0
-  
-  function add(elem: string, weight: number) {
-    const type = getTenGodType(dayElem, elem)
-    if (type === "비겁" || type === "인성") support += weight
-    else if (type === "식상" || type === "재성" || type === "관성") weaken += weight
+  let sup = 0, tot = 0
+  const slots = [yearStem, monthStem, hourStem, MAIN[yearBranch], MAIN[monthBranch], MAIN[dayBranch], hourBranch ? MAIN[hourBranch] : null]
+  for (const st of slots) {
+    if (!st) continue
+    tot++
+    const t = getTenGodType(dayElem, getStemElem(st))
+    if (t === "비겁" || t === "인성") sup++
   }
-  
-  // 천간 (일간 제외)
-  const stems = [yearStem, monthStem, hourStem].filter(Boolean) as string[]
-  stems.forEach(s => add(getStemElem(s), 1))
-  
-  // 지지 + 지장간
-  const branchWeights = [1, 2, 1, hourBranch ? 0.5 : 0]
-  const branches = [yearBranch, monthBranch, dayBranch, hourBranch]
-  
-  branches.forEach((b, i) => {
-    if (!b) return
-    add(getBranchElem(b), branchWeights[i])
-    const hidden = HIDDEN_STEMS_EX[b] || []
-    hidden.forEach(h => add(getStemElem(h), branchWeights[i] * 0.5))
-  })
-  
-  const total = support + weaken
-  if (total === 0) return { grade: "계산불가", ratio: 0 }
-  
-  const ratio = support / total
-  let grade: string
-  
-  if (ratio >= 0.85) grade = "극왕"
-  else if (ratio >= 0.70) grade = "태강"
-  else if (ratio >= 0.58) grade = "신강"
-  else if (ratio >= 0.50) grade = "중화신강"
-  else if (ratio >= 0.42) grade = "중화신약"
-  else if (ratio >= 0.30) grade = "신약"
-  else if (ratio >= 0.15) grade = "태약"
-  else grade = "극약"
-  
+  if (!tot) return { grade: "계산불가", ratio: 0 }
+  const ratio = sup / tot
+  const grade = ratio >= 0.7 ? "태강" : ratio >= 0.5 ? "신강" : ratio >= 0.3 ? "신약" : "태약"
   return { grade, ratio: Math.round(ratio * 100) }
 }
 
@@ -1460,6 +1427,13 @@ export function calcAllSinsal(
     (hourStem && hourBranch && TAEGEUK_MAP[hourStem]?.includes(hourBranch))
   if (hasTaegeuk) sinsalList.push("태극귀인")
 
+  // [패치] 정답지가 쓰는 신살 연결 (판정 함수는 기존 것 그대로 사용)
+  if (checkHongyeomSal(dayStem, branches)) sinsalList.push("홍염살")
+  if (checkGwimunssal(yearBranch, monthBranch, dayBranch, hourBranch)) sinsalList.push("귀문관살")
+  const _pil: [string, string | null][] = [[yearStem, yearBranch], [monthStem, monthBranch], [dayStem, dayBranch], [hourStem || '', hourBranch]]
+  if (_pil.some(([s, b]) => s && b && checkBaekhoSal(s, b))) sinsalList.push("백호살")
+  if (checkUicheouibSal(dayStem, dayBranch)) sinsalList.push("의처의부살")
+
   return sinsalList
 }
 
@@ -1653,7 +1627,8 @@ export function calcDaeyun(
   gender: string,
   yearStem: string,
   monthStem: string,
-  monthBranch: string
+  monthBranch: string,
+  clock?: { y: number; m: number; d: number; h: number; mi: number }
 ): Array<{ startAge: number; endAge: number; stem: string; branch: string; fullName: string }> {
   const stems = ["갑", "을", "병", "정", "무", "기", "경", "신", "임", "계"]
   const branches = ["자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해"]
@@ -1733,6 +1708,25 @@ export function calcDaeyun(
 
   const year = birthDate.getUTCFullYear()
   const allJeolgi: Array<{ date: Date; name: string }> = []
+  // 출생 시각(시계 기준)과 실제 절입 시각(jeolgi 데이터)으로 계산 — 아래 수기 표(일부 연도만 존재)는 clock 없을 때만 사용
+  let exactStartAge: number | null = null
+  if (clock) {
+    const JEOL_IDX = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]
+    const wall = Date.UTC(clock.y, clock.m - 1, clock.d, clock.h, clock.mi)
+    const times: number[] = []
+    for (const yy of [clock.y - 1, clock.y, clock.y + 1]) {
+      const e = getJeolgiForYear(yy)
+      if (e) JEOL_IDX.forEach(i => times.push(e.terms[i].getTime()))
+    }
+    times.sort((a, b) => a - b)
+    const next = times.find(t => t > wall)
+    const prev = [...times].reverse().find(t => t <= wall)
+    const target = isForward ? next : prev
+    if (target !== undefined) {
+      const days = Math.abs(target - wall) / 86400000
+      exactStartAge = Math.max(1, Math.round(days / 3))   // 전문가 기준: 3일=1년, 반올림, 최소 1
+    }
+  }
   
   for (let y of [year - 1, year, year + 1]) {
     if (IPJEOL_MAP[y]) {
@@ -1769,7 +1763,7 @@ export function calcDaeyun(
     diffHours = (birthDate.getTime() - prevJeolgi.date.getTime()) / (1000 * 60 * 60)
   }
 
-  let startAge = Math.round(diffHours / 72)
+  let startAge = exactStartAge ?? Math.round(diffHours / 72)
   if (startAge === 0) startAge = 1   // 최소 1세 보장
   // startAge는 0~9 범위가 일반적이지만, 절기 간격에 따라 다양할 수 있음
 

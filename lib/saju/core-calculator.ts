@@ -93,6 +93,8 @@ export interface BirthInfo {
    * - false/undefined: 사용자가 기억하는 현지 시간 그대로 입력 (새 서비스, 기본값)
    */
   skipDSTCorrection?: boolean;
+  /** 야자시: 'apply'(기본) = 23~24시에도 일주는 그날 유지(시주 천간만 다음날 기준) / 'none' = 23시부터 다음날 일주 */
+  yajasi?: 'apply' | 'none';
 }
 
 // 절기 데이터는 jeolgi.ts에서 로드됨 (1900-2059)
@@ -127,8 +129,8 @@ export function getHourBranchIndex(hour: number, minute: number = 0, countryCode
 // 월지 계산 (절기 기준)
 // ================================================================
 
-export function getMonthBranch(year: number, month: number, day: number, hour: number = 0): Branch {
-  const utcDate = new Date(Date.UTC(year, month - 1, day, hour, 0, 0));
+export function getMonthBranch(year: number, month: number, day: number, hour: number = 0, minute: number = 0): Branch {
+  const utcDate = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
   const branchIndex = getMonthBranchFromSolarTerm(utcDate);
   return BRANCHES[branchIndex];
 }
@@ -235,8 +237,8 @@ export function getDayPillar(year: number, month: number, day: number): Pillar {
 // 연주 계산
 // ================================================================
 
-export function getYearPillar(year: number, month: number, day: number, hour: number = 0): Pillar {
-  const utcDate = new Date(Date.UTC(year, month - 1, day, hour, 0, 0));
+export function getYearPillar(year: number, month: number, day: number, hour: number = 0, minute: number = 0): Pillar {
+  const utcDate = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
   const actualYear = getSajuYear(utcDate);
   const index = ((actualYear - 1984) % 60 + 60) % 60;
   const pillar = SIXTY_JIAZI[index];
@@ -290,6 +292,7 @@ export function getHourPillar(dayStem: Stem, hour: number, minute: number = 0, c
 
 export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
   const { year, month, day, hour, minute, country, skipDSTCorrection, timezone, longitude } = birthInfo;
+  const yajasi = birthInfo.yajasi ?? 'apply';
   
   // IANA timezone이 제공된 경우 → Luxon으로 직접 처리 (TIMEZONE_OFFSETS 불필요)
   // country 코드가 TIMEZONE_OFFSETS에 없는 경우도 커버됨 (예: "US", "New York" 등)
@@ -405,44 +408,43 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
   // 야자시 보정: 23시 ���후는 다음 날로 처리 (일주 계산용)
   // ================================================================
   
-  // 야자시 보정 (일주 계산용)
-  let dayCalcYear = solarTime.year;
-  let dayCalcMonth = solarTime.month;
-  let dayCalcDay = solarTime.day;
-  
-  if (solarTime.hour >= 23) {
-    const nextDate = new Date(solarTime.year, solarTime.month - 1, solarTime.day + 1);
-    dayCalcYear = nextDate.getFullYear();
-    dayCalcMonth = nextDate.getMonth() + 1;
-    dayCalcDay = nextDate.getDate();
-  }
+  // [전문가 기준 — 정답지 사이트 결과로 확정]
+  //  1) 시각 보정 = (출생지 경도 - 표준자오선) x 4분. 균시차 없음. 서울도 동일 공식(-32.1분).
+  //  2) 연/월주(절입 판정) = 실제 순간(UTC 기준)을 절입 시각과 비교 (보정 시각 아님)
+  //  3) 일주 = 시계상 출생 날짜. 보정으로 자정을 넘겨 전날이 돼도 일주는 시계 날짜 유지
+  //  4) 시주 = 보정된 시각. 보정시각 23시 이후면 시주 천간은 다음날 일간 기준
+  //  5) 야자시 미적용: 시계 날짜와 보정 날짜가 같고 보정시각이 23시 이후일 때만 일주를 다음날로
+  const lonForCorr = actualLongitude ?? 126.978
+  const corrMin = lonForCorr * 4 - resolvedOffset * 60
+  const clk = new Date(stdYear, stdMonth - 1, stdDay, stdHour, stdMinute, 0)
+  const cor = new Date(clk.getTime() + Math.round(corrMin * 60000))
+  const corY = cor.getFullYear(), corM = cor.getMonth() + 1, corD = cor.getDate(), corH = cor.getHours(), corMin2 = cor.getMinutes()
+  const isKR = country === 'KR'
 
-  // 연주: 진태양시 기준
-  const yearPillar = getYearPillar(
-    solarTime.year,
-    solarTime.month,
-    solarTime.day,
-    solarTime.hour
-  );
+  // 연/월주: UTC 순간 → 한국 표준시(절입표 기준)로 환산해서 비교
+  const kst = new Date(utcDate.getTime() + 9 * 3600000)
+  const ymSrc = { y: kst.getUTCFullYear(), m: kst.getUTCMonth() + 1, d: kst.getUTCDate(), h: kst.getUTCHours(), mi: kst.getUTCMinutes() }
+  const yearPillar = getYearPillar(ymSrc.y, ymSrc.m, ymSrc.d, ymSrc.h, ymSrc.mi)
+  const monthBranch = getMonthBranch(ymSrc.y, ymSrc.m, ymSrc.d, ymSrc.h, ymSrc.mi)
+  const monthPillar = getMonthPillar(yearPillar.stem, monthBranch)
 
-  // 월주: 진태양시 기준
-  const monthBranch = getMonthBranch(
-    solarTime.year,
-    solarTime.month,
-    solarTime.day,
-    solarTime.hour
-  );
-  const monthPillar = getMonthPillar(yearPillar.stem, monthBranch);
+  const clockDay = new Date(stdYear, stdMonth - 1, stdDay)
+  const corDay = new Date(corY, corM - 1, corD)
+  const dayDiff = Math.round((corDay.getTime() - clockDay.getTime()) / 86400000)   // -1: 보정으로 전날, 0: 같은 날, 1: 다음날
+  let dayBase = clockDay
+  if (yajasi === 'none' && (dayDiff === 1 || (dayDiff === 0 && corH >= 23))) dayBase = new Date(stdYear, stdMonth - 1, stdDay + 1)
+  const dayPillar = getDayPillar(dayBase.getFullYear(), dayBase.getMonth() + 1, dayBase.getDate())
 
-  // 일주: 야자시 보정된 날짜 기준
-  const dayPillar = getDayPillar(dayCalcYear, dayCalcMonth, dayCalcDay);
-
-  // 시주: 연/월/일주와 동일하게 모든 국가를 진태양시 기준으로 계산
-  // (한국도 표준시 135도와 서울 약 127도 차이로 약 -32분 보정이 필요함)
-  let hourPillar: Pillar | null = null;
+  let hourPillar: Pillar | null = null
   if (hour !== undefined) {
-    hourPillar = getHourPillar(dayPillar.stem, solarTime.hour, solarTime.minute, country);
+    let stemBase = dayPillar.stem
+    if ((corH >= 23 && dayDiff === 0) || dayDiff === 1) {
+      const nx = new Date(stdYear, stdMonth - 1, stdDay + 1)
+      stemBase = getDayPillar(nx.getFullYear(), nx.getMonth() + 1, nx.getDate()).stem
+    }
+    hourPillar = getHourPillar(stemBase, corH, corMin2, country)
   }
+  void isKR
 
   return {
     year: yearPillar,
@@ -512,7 +514,7 @@ export function calculateElementScoresWithHiddenStems(fourPillars: FourPillars):
     ],
     '사': [
       { stem: '병', weight: 'main' },
-      { stem: '소', weight: 'middle' },
+      { stem: '경', weight: 'middle' },
       { stem: '무', weight: 'minor' }
     ],
     '오': [{ stem: '정', weight: 'main' }],

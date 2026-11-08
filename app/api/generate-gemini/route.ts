@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import type { SajuData, Fact } from '@/lib/types'
 import { headers } from 'next/headers'
+import { buildSkeleton } from '@/lib/saju/skeleton'
 
 // SAJU_MASTERPIECE_GUIDE 연결 해제됨 - 필요시 다시 import 가능
 // import { SAJU_MASTERPIECE_GUIDE } from '@/lib/saju/masterpiece'
@@ -87,6 +88,21 @@ export async function POST(request: Request) {
       .map(([name, count]) => name + " (" + count + "개)")
       .join(', ')
 
+    // ===== 전문가 기준 확정값 (lib/saju/expert-core.ts · expert-sinsal.ts · skeleton.ts) =====
+    // 새로 계산된 submission 에만 있음. 옛 저장본은 expert 가 없어서 null 로 두고 기존 방식 유지.
+    let expertFacts: any = null
+    try {
+      if ((saju_data as any).expert) {
+        expertFacts = {
+          note: 'Pre-calculated FINAL facts. Do not recompute strength, yongsin, gyeokguk, shinsal or relations.',
+          skeleton: buildSkeleton(saju_data, gender === 'female' ? 'female' : 'male'),
+          shinsalByPillar: (saju_data as any).expertSinsal || {}
+        }
+      }
+    } catch (e) {
+      console.error('[v0] Gemini: expertFacts build failed (continuing without):', e)
+    }
+
     const allSajuData = {
       // 기본 정보
       name,
@@ -159,7 +175,8 @@ export async function POST(request: Request) {
       gongmang: saju_data.gongmang || [],
 
       // 신살 (모두 포함 - 상세)
-      spirits: saju_data.spirits || [],
+      spirits: (saju_data.spirits || []).filter((s: string) => s !== '천덕귀인' && s !== '월덕귀인'),
+      expertFacts: expertFacts,
       sinsalDetails: saju_data.sinsalDetails || [],
       sinsalSummary: saju_data.sinsalSummary || '',
       sinsalCombinedGuide: saju_data.sinsalCombinedGuide || '',
@@ -278,6 +295,7 @@ ${JSON.stringify(allSajuData, null, 2)}
     // 사용자가 이 프롬프트를 직접 수정할 수 있습니다
     const stage1SystemPrompt = `You will make a report with this 'pre-calculated Saju', DO NOT Calculate again.
 Just use these to make a interpretion for the 9 facts report. 
+If "expertFacts" is present in the data, treat its values (day master strength grade, yongsin, gyeokguk, shinsal, skeleton) as FINAL pre-calculated facts and never override them with your own judgement.
 This year is 2026 (Just in case).
 
 [Primary Reference Saju Interpretion logic]
@@ -709,7 +727,7 @@ This must be based on his or her saju data.
 
 (Critical Mapping Rule)
 
-Always map the Five Elements (��� Fire 土 金 水) into Ten Gods (십성) strictly according to the client’s Day Master (일간). 
+Always map the Five Elements (木 Fire 土 金 水) into Ten Gods (십성) strictly according to the client’s Day Master (일간). 
 
 - Never assume that Wood = Wealth, Fire = Resource, etc. 
 - This mapping changes with each Day Master.
@@ -822,20 +840,14 @@ ${JSON.stringify(allSajuData, null, 2)}
     console.log('[v0] Gemini: stage1SystemPrompt length =', stage1SystemPrompt.length, 'chars')
     console.log('[v0] Gemini: stage1UserPrompt length =', stage1UserPrompt.length, 'chars')
 
-    const stage1StartedAt = Date.now()
     const stage1Result = await generateText({
       model: 'google/gemini-2.5-flash',
       system: stage1SystemPrompt,
       prompt: stage1UserPrompt,
       temperature: 0,
-      maxOutputTokens: 4500,
-      providerOptions: {
-        google: { thinkingConfig: { thinkingBudget: 0 } },
-        vertex: { thinkingConfig: { thinkingBudget: 0 } },
-      },
+      maxTokens: 3000
     })
 
-    console.log(`[v0] Gemini: Stage 1 done in ${Date.now() - stage1StartedAt}ms, finishReason=${stage1Result.finishReason}`)
     console.log('[v0] Gemini: Stage 1 response received, parsing...')
     console.log('[v0] Gemini: Raw response length:', stage1Result.text.length)
 
@@ -878,7 +890,7 @@ Language: English only.
 `
 
     // ===== Yongsin 처리 로직 =====
-    // 조후 �����도에 따라 조후용신 또는 억부용신 선택
+    // 조후 ���도에 따라 조후용신 또는 억부용신 선택
     // 생년월일에서 계절 파악해서 조후 정��� 판단
     const month = parseInt(birth_date.split('-')[1])
     const isBalancedSeason = [3, 4, 9, 10].includes(month) // 봄/가을
@@ -933,6 +945,16 @@ Language: English only.
     }
 
     console.log(`[v0] Gemini: Final yongsinElement: ${yongsinElement} (balanced season: ${isBalancedSeason})`)
+    // 전문가 기준 억부용신이 있으면 그것을 우선 사용 (기존 문자열 파싱은 항상 '가장 약한 오행'으로 빠지는 문제가 있었음)
+    if (expertFacts && (saju_data as any).expert?.eokYong?.length) {
+      const KO2EN: Record<string, string> = { 목: 'Wood', 화: 'Fire', 토: 'Earth', 금: 'Metal', 수: 'Water' }
+      const toGroup: Record<string, string> = expertFacts.skeleton.elementToGroup
+      const el = Object.keys(toGroup).find((k) => toGroup[k] === (saju_data as any).expert.eokYong[0])
+      if (el && KO2EN[el]) {
+        yongsinElement = KO2EN[el]
+        console.log(`[v0] Gemini: yongsin from expert eokbu = ${yongsinElement}`)
+      }
+    }
     // resolvedYongsin will be set after Fact 8 is generated; initialize with computed value
     let resolvedYongsin = yongsinElement
 
@@ -988,21 +1010,16 @@ OUTPUT FORMAT (JSON ONLY):
       }))
     })
 
-    const stage2StartedAt = Date.now()
     const stage2Result = await generateObject({
       model: 'google/gemini-2.5-flash',
       schema: factSchema,
       system: stage2SystemPrompt,
       prompt: stage2UserPrompt,
       temperature: 0,
-      maxOutputTokens: 4000,
-      providerOptions: {
-        google: { thinkingConfig: { thinkingBudget: 0 } },
-        vertex: { thinkingConfig: { thinkingBudget: 0 } },
-      },
+      maxTokens: 8000
     })
 
-    console.log(`[v0] Gemini: Stage 2 done in ${Date.now() - stage2StartedAt}ms, generated ${stage2Result.object.facts.length} facts`)
+    console.log(`[v0] Gemini: Stage 2 completed, generated ${stage2Result.object.facts.length} facts`)
 
     // Force exactly 3 facts (gemini-2.5-flash sometimes generates more)
     const rawFacts = stage2Result.object.facts.slice(0, 3)

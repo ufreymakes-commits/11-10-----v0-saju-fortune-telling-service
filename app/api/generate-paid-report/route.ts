@@ -148,7 +148,7 @@ export async function POST(request: Request) {
               yearBranch,
               hourBranch,
               birthYear,
-              isDayMasterStrong: sd.sinGangSinYak.ratio >= 50,
+              isDayMasterStrong: (sd as any).expert ? !!(sd as any).expert.strong : sd.sinGangSinYak.ratio >= 50, // 새 계산(expert)이 있으면 그 기준, 옛 저장본은 기존 기준
               daewoon: sd.daewoon
             })
           }

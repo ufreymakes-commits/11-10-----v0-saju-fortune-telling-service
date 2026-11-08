@@ -82,7 +82,8 @@ export function BirthForm() {
     birthCountry: '',
     birthTime: '',
     gender: '',
-    referralSource: ''
+    referralSource: '',
+    yajasi: 'apply'
   })
   
   // New: City selection for precise timezone/longitude
@@ -335,6 +336,41 @@ export function BirthForm() {
           <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">
             <span className="font-bold">Sajume automatically calculates Daylight Saving Time.</span>{" And if you don't know the birth time, just submit as a blank. It's more accurate if you have an exact time though."}
           </p>
+
+          {/* 야자시 질문: 시계 시각이 11 PM 대일 때만 표시 */}
+          {(() => {
+            const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(formData.birthDate || '')
+            const isLateNight = !!formData.birthTime?.startsWith('11:') && formData.birthTime.includes('PM')
+            if (!m || !isLateNight) return null
+            const d0 = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]))
+            const d1 = new Date(d0.getTime() + 86400000)
+            const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
+            return (
+              <div className="mt-3 rounded-lg border border-purple-200 bg-purple-50/60 p-3">
+                <p className="text-xs text-gray-700 leading-relaxed mb-2">
+                  You were born between 11 PM and midnight. Traditions differ on when the day changes.
+                </p>
+                <RadioGroup
+                  value={formData.yajasi}
+                  onValueChange={(value) => setFormData({ ...formData, yajasi: value })}
+                  className="flex flex-col gap-2"
+                >
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="apply" id="yajasi-apply" />
+                    <label htmlFor="yajasi-apply" className="text-sm cursor-pointer text-gray-800">
+                      Count as {fmt(d0)} (the same night)
+                    </label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="none" id="yajasi-none" />
+                    <label htmlFor="yajasi-none" className="text-sm cursor-pointer text-gray-800">
+                      Count as {fmt(d1)} (the day changes at 11 PM)
+                    </label>
+                  </div>
+                </RadioGroup>
+              </div>
+            )
+          })()}
         </Field>
 
         {/* Gender */}

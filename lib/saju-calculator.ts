@@ -30,6 +30,9 @@ import {
 import { STEMS, BRANCHES, STEM_TO_ELEMENT } from './saju/constants'
 import { calculateMarriageTiming } from './saju/marriage-timing'
 import { calculateDecadeFortune } from './saju/decade-fortune'
+import { adjacentOnly } from './saju/adjacency'
+import { analyzeExpert } from './saju/expert-core'
+import { calcExpertSinsal } from './saju/expert-sinsal'
 
 // Heavenly Stems in Hanja (천간 한자)
 const STEMS_HANJA = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸']
@@ -128,7 +131,8 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     // 새 필드: 도시 선택 시 정밀 진태양시 계산에 사용
     timezone: birthInfo.timezone,
     longitude: birthInfo.longitude,
-    latitude: birthInfo.latitude
+    latitude: birthInfo.latitude,
+    yajasi: (birthInfo as any).yajasi
   })
   
   const fp = analysis.fourPillars
@@ -214,14 +218,11 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
   )
   
   // === 신강/신약 ===
-  const sinGangSinYak = calcSinGangSinYak(
-    dayStem as any, monthBranch as any,
-    yearStem as any, monthStem as any, dayStem as any, hourStem as any,
-    yearBranch as any, dayBranch as any, hourBranch as any
-  )
+  const expert = analyzeExpert({ yearStem, yearBranch, monthStem, monthBranch, dayStem, dayBranch, hourStem, hourBranch })
+  const sinGangSinYak = { grade: expert.grade, ratio: expert.support }
   
   // === 용신 ===
-  const eokbuYongsin = getEokbuYongsin(dayStem as any, sinGangSinYak.ratio >= 50)
+  const eokbuYongsin = `${expert.eokName}: 용신 ${expert.eokYong.join('·')} / 희신 ${expert.eokHee.join('·')}`
   const johuYongsin = calcJohuYongsin(dayStem as any, monthBranch as any)
   
   // === 격국 ===
@@ -309,7 +310,8 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
       daeyunGender,
       yearStem,
       monthStem,
-      monthBranch
+      monthBranch,
+      { y: date.getFullYear(), m: date.getMonth() + 1, d: date.getDate(), h: hour ?? 12, mi: minute ?? 0 }
     ),
     dayStem
   )
@@ -364,7 +366,7 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     yearBranch,
     hourBranch,
     birthYear: birthYearForTiming,
-    isDayMasterStrong: sinGangSinYak.ratio >= 50,
+    isDayMasterStrong: expert.strong,
     daewoon: daewoonEnriched
   })
   
@@ -412,9 +414,14 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     // 오행 "영향력" (지장간 포함 - 가중 점수) - 모든 해석의 메인 근거
     elementBalanceWithHiddenStems,
     elementBalanceWithHiddenStemsKorean,
-    dominantElement: Object.entries(elementBalanceWithHiddenStems).reduce((a, b) => 
-      a[1] > b[1] ? a : b
-    )[0],
+    dominantElement: (() => {
+      const m: Record<string, string> = { 목: 'wood', 화: 'fire', 토: 'earth', 금: 'metal', 수: 'water' }
+      const els = ['목', '화', '토', '금', '수']
+      const mx = Math.max(...els.map((e) => elementCountBasic[e as '목'] || 0))
+      const tied = els.filter((e) => (elementCountBasic[e as '목'] || 0) === mx)
+      tied.sort((a, b) => (elementScoresWithHiddenStems[b as '목'] || 0) - (elementScoresWithHiddenStems[a as '목'] || 0))
+      return m[tied[0]]
+    })(),
     
     // 12운성
     twelveStars: twelveStars.map(ts => ({
@@ -426,22 +433,28 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     // 십신 (각 위치별 + 보유/부재)
     tenGods: {
       present: analysis.tenGods.present,
-      missing: analysis.tenGods.missing,
+      missing: (() => {
+        const all = ['비견', '겁재', '식신', '상관', '편재', '정재', '편관', '정관', '편인', '정인']
+        const bp: any = (analysis.tenGods as any).byPosition
+        const seen = new Set(Object.entries(bp).filter(([k]) => k !== 'dayStem').map(([, v]) => v as string))
+        return all.filter((g) => !seen.has(g))
+      })(),
+      ...({ missingIncludingHidden: analysis.tenGods.missing } as any),
       details: analysis.tenGods.details,
-      byPosition: analysis.tenGods.byPosition
+      byPosition: (analysis.tenGods as any).byPosition
     },
     
     // 관계식
-    cheongganHap,
-    jijiYughap,
-    jijiSamhap,
-    jijiBanghap,
-    cheongganChung,
-    jijiChung,
-    hyeong,
-    pa,
-    hae,
-    wonjin,
+    cheongganHap: adjacentOnly(cheongganHap as any) as any,
+    jijiYughap: adjacentOnly(jijiYughap as any) as any,
+    jijiSamhap: adjacentOnly(jijiSamhap as any) as any,
+    jijiBanghap: adjacentOnly(jijiBanghap as any) as any,
+    cheongganChung: adjacentOnly(cheongganChung as any) as any,
+    jijiChung: adjacentOnly(jijiChung as any) as any,
+    hyeong: adjacentOnly(hyeong as any) as any,
+    pa: adjacentOnly(pa as any) as any,
+    hae: adjacentOnly(hae as any) as any,
+    wonjin: adjacentOnly(wonjin as any) as any,
     
     // 길성
     gilseong,
@@ -460,7 +473,9 @@ export function calculateSaju(birthInfo: BirthInfo): SajuData {
     johuYongsin,
     
     // 격국
-    gyeokguk,
+    gyeokguk: expert.gyeok,
+    expert,
+    expertSinsal: calcExpertSinsal({ 시: { stem: hourStem ?? '', branch: hourBranch ?? '' }, 일: { stem: dayStem, branch: dayBranch }, 월: { stem: monthStem, branch: monthBranch }, 연: { stem: yearStem, branch: yearBranch } }),
     
     // 신살 (기본)
     spirits,

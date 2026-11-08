@@ -16,9 +16,12 @@ export interface BirthInfo {
   timezone?: string // IANA timezone (e.g., "Asia/Seoul", "America/New_York")
   longitude?: number // Birth location longitude for true solar time
   latitude?: number // Birth location latitude
+  yajasi?: 'apply' | 'none' // 야자시 적용(기본)/미적용
 }
 
 export interface SajuData {
+  expert?: any // 전문가 기준 신강신약·억부·격국 (expert-core.ts)
+  expertSinsal?: Record<string, string[]> // 전문가 기준 신살 (시/일/월/연별)
   // 4주 (한자)
   yearPillar: { stem: string; branch: string; fullName?: string; fullNameKorean?: string }
   monthPillar: { stem: string; branch: string; fullName?: string; fullNameKorean?: string }

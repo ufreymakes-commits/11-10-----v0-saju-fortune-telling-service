@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     
     const { 
       name, email, birthDate, birthCountry, birthTime, gender, referralSource,
-      birthCity, timezone, longitude, latitude 
+      birthCity, timezone, longitude, latitude, yajasi 
     } = body
     
     // Validate required fields
@@ -44,7 +44,9 @@ export async function POST(request: Request) {
       birthCity: birthCity || undefined,
       timezone: timezone || undefined,
       longitude: longitude || undefined,
-      latitude: latitude || undefined
+      latitude: latitude || undefined,
+      // 야자시: 'none'(미적용)만 명시적으로 선택된 경우, 그 외는 기본 'apply'
+      yajasi: yajasi === 'none' ? 'none' : 'apply'
     }
     
     const sajuData = calculateSaju(birthInfo)
