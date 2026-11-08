@@ -415,7 +415,7 @@ export function calculateFourPillars(birthInfo: BirthInfo): FourPillars {
   //  4) 시주 = 보정된 시각. 보정시각 23시 이후면 시주 천간은 다음날 일간 기준
   //  5) 야자시 미적용: 시계 날짜와 보정 날짜가 같고 보정시각이 23시 이후일 때만 일주를 다음날로
   const lonForCorr = actualLongitude ?? 126.978
-  const corrMin = lonForCorr * 4 - resolvedOffset * 60 + calculateEoT(stdYear, stdMonth, stdDay)
+  const corrMin = lonForCorr * 4 - resolvedOffset * 60
   const clk = new Date(stdYear, stdMonth - 1, stdDay, stdHour, stdMinute, 0)
   const cor = new Date(clk.getTime() + Math.round(corrMin * 60000))
   const corY = cor.getFullYear(), corM = cor.getMonth() + 1, corD = cor.getDate(), corH = cor.getHours(), corMin2 = cor.getMinutes()
