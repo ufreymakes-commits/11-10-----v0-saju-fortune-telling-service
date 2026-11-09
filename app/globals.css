@@ -163,48 +163,6 @@
     animation: float 4s ease-in-out infinite;
   }
 
-  .tarot-card-float {
-    position: relative;
-    border-color: oklch(0.62 0.18 295 / 0.36);
-    box-shadow: 0 10px 24px oklch(0.42 0.16 295 / 0.12), 0 0 0 1px oklch(0.74 0.16 320 / 0.12) inset;
-    animation: tarot-float 6s ease-in-out infinite;
-  }
-
-  .tarot-card-float::before {
-    content: '';
-    position: absolute;
-    inset: 5px;
-    border: 1px solid oklch(0.7 0.15 320 / 0.2);
-    border-radius: 0.7rem;
-    pointer-events: none;
-  }
-
-  .cta-shimmer {
-    position: relative;
-    isolation: isolate;
-    overflow: hidden;
-  }
-
-  .cta-shimmer::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: linear-gradient(110deg, transparent 20%, oklch(1 0 0 / 0.5) 45%, transparent 70%);
-    transform: translateX(-120%);
-    animation: cta-shimmer 2.4s linear infinite;
-    pointer-events: none;
-  }
-
-  @keyframes tarot-float {
-    0%, 100% { transform: translateY(0) rotate(-0.25deg); }
-    50% { transform: translateY(-4px) rotate(0.25deg); }
-  }
-
-  @keyframes cta-shimmer {
-    to { transform: translateX(120%); }
-  }
-  
   @keyframes marquee {
     from { transform: translateX(0); }
     to { transform: translateX(-50%); }
@@ -284,5 +242,65 @@
   * {
     box-shadow: none !important;
     text-shadow: none !important;
+  }
+}
+
+/* Tarot-style floating card (Four Pillars) */
+.tarot-card-float {
+  position: relative;
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    linear-gradient(135deg, oklch(0.78 0.14 85), oklch(0.62 0.2 300), oklch(0.78 0.16 340), oklch(0.78 0.14 85)) border-box;
+  box-shadow:
+    0 14px 32px oklch(0.45 0.18 295 / 0.22),
+    0 0 24px oklch(0.75 0.15 330 / 0.18);
+  animation: tarot-float 5s ease-in-out infinite;
+}
+
+.tarot-card-float::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px solid oklch(0.78 0.14 85 / 0.55);
+  border-radius: 0.6rem;
+  pointer-events: none;
+}
+
+@keyframes tarot-float {
+  0%, 100% { transform: translateY(0); box-shadow: 0 10px 24px oklch(0.45 0.18 295 / 0.18), 0 0 20px oklch(0.75 0.15 330 / 0.14); }
+  50% { transform: translateY(-8px); box-shadow: 0 22px 36px oklch(0.45 0.18 295 / 0.26), 0 0 30px oklch(0.75 0.15 330 / 0.28); }
+}
+
+/* Continuous light sweep across the PayPal button */
+.cta-shimmer {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.cta-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 45%;
+  z-index: 1;
+  background: linear-gradient(105deg, transparent 0%, oklch(1 0 0 / 0.65) 50%, transparent 100%);
+  transform: translateX(-130%) skewX(-18deg);
+  animation: cta-shimmer 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes cta-shimmer {
+  0% { transform: translateX(-130%) skewX(-18deg); }
+  70%, 100% { transform: translateX(330%) skewX(-18deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tarot-card-float,
+  .cta-shimmer::after {
+    animation: none;
   }
 }
