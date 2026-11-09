@@ -329,17 +329,18 @@ Example: "${submission.name},...", for the first fact and, ${submission.name}, r
 
 And please, you need to include these 3 sentences for 'everyone'. Because we masked this and showed on the free report page to persuade customers to pay for the paid report. Fill in the blank (*** or ** or *********** this mark), matching to this customer's saju data and context. You can put these sentences anywhere among the 96 cards, considering the context.
 - The main theme of your ${reportYear} is *** . (Ground *** in finalFacts: this year's stem/branch ten gods + the current luck cycle in FINAL FACTS.luckCycles.current. Name ONE opportunity and ONE thing to be careful about.)
-- Your love luck peaks around ${lovePeakTeaserYear}. The reason is [exactly ONE concrete reason]. Your partner tends to feel like [energy type]. (See the LOVE PEAK RULE below.)
+- Your love luck peaks around ${lovePeakTeaserYear}. The reason is [exactly ONE concrete reason]. Your partner tends to feel like [energy type]. (The free page blurs only ${lovePeakTeaserYear}; in the paid report follow the LOVE PEAK RULE below, including the two-year wording when peak.status is "past".)
 - Your wealth flow timing and secret talents are already mapped out like ***** (Ground in decadeFortune score/years and the strongest ten-god group. Give a specific year range and a specific talent.)
 
 LOVE PEAK RULE (applies to the teaser sentence above and to Section 06 Card 10):
 finalFacts.lovePeak = { window, peak, upcomingPeak }.
 - peak = the strongest love-signal year between age 19 and 39. upcomingPeak = the strongest one still ahead.
-- Teaser sentence: if peak.status is "future" or "this year", use peak.year. Otherwise use upcomingPeak.year and write "your next strongest love window is around 20XX". Never invent a year.
-- Give exactly ONE concrete reason: the first item of that year's reasonsEn, in plain language (e.g. "because the year's Direct Officer combines with your Day Master"). Do not list several reasons, and do not output raw scores.
+- If peak.status is "future" or "this year": write only peak.year, with ONE reason.
+- If peak.status is "past": write both years in the paid report sentence: "Your love luck peaked around {peak.year} (age {peak.age}), and your next strongest window is around {upcomingPeak.year} (age {upcomingPeak.age})." Give ONE reason for each year (the first item of each year's reasonsEn). Write the past year with warmth, as something the customer likely remembers ("a year when something important may have settled into place"), never as a claim about a specific event.
+- Years always come from finalFacts.lovePeak. The model must not choose or alter them. Never invent a year.
+- Each reason is the first item of that year's reasonsEn, in plain language (e.g. "because the year's Direct Officer combines with your Day Master"). Do not list several reasons per year, and do not output raw scores.
 - Say "love luck is strongest" / "the chance of a meaningful connection is highest". Never say "you will meet your spouse that year". Never guess the partner's job; describe the partner's energy (calm / bold / witty / steady) from romanceFacts.spouseStarElement and palace.tenGodEn.
 - Add ONE warm sentence, once only (teaser sentence or Card 10, not both): "If it isn't a romantic partner, this can also arrive as a new family member, a precious friend, or even a pet that changes your days."
-- If peak.status is "past" and the customer would find it odd, add one gentle sentence in Section 06 that this earlier window already shaped how they love, then move on to the upcoming one.
 - If lovePeak is null, use the most positive-tone year in romanceFacts.yearLuck and one reason from it.
 
 ========================================
