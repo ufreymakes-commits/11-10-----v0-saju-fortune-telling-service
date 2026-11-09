@@ -1,7 +1,7 @@
 // 유료 리포트 프롬프트용 "정리된 사주 데이터". 옛 필드(조후 문자열, 옛 신살, 옛 강도 %, 과거 중심 결혼 타이밍)를 제거하고
 // 전문가 기준 확정값만 남겨 LLM 에게 모순 없는 단일 근거를 준다.
 import { STEM_PRONUNCIATION, TEN_GODS_ENGLISH, STEM_TO_ELEMENT, ELEMENTS, ELEMENT_ENGLISH } from './constants'
-import { yearGanzi, yearNickname } from './romance'
+import { yearGanzi, yearNickname, buildLovePeak } from './romance'
 
 const GROUPS = ['비겁', '식상', '재성', '관성', '인성'] as const
 const SELF_GODS = ['비견', '겁재', '정인', '편인']   // 월지가 이 십성이면 득령(月令을 얻음)
@@ -19,7 +19,7 @@ export function signalToEnglish(sig: string): string | null {
   return null
 }
 
-export function buildPaidContext(saju: any, gender: 'male' | 'female', reportYear: number) {
+export function buildPaidContext(saju: any, gender: 'male' | 'female', reportYear: number, birthYear?: number) {
   const sd = JSON.parse(JSON.stringify(saju ?? {}))
   // 옛/모순 필드 제거 (설명은 route 의 이전 단계 메모 참고)
   for (const k of ['johuYongsin', 'spirits', 'sinsalDetails', 'sinsalSummary', 'sinsalCombinedGuide', 'hapChungSummary', 'hapChungAdjustmentDetails', 'elementAdjustmentHistory', 'marriageTiming', 'sinGangSinYak', 'decadeFortune', 'gilseong']) delete sd[k]
@@ -56,11 +56,7 @@ export function buildPaidContext(saju: any, gender: 'male' | 'female', reportYea
   }
   // 신살: 전문가 기준 슬롯별 + 12신살 (옛 spirits 오탐 제거)
   finalFacts.sinsalByPillar = saju?.expertSinsal ?? null
-  // 결혼 타이밍: 미래의 "가장 강한 해" 하나만 (무료 페이지 티저 문장용)
-  const mt = saju?.marriageTiming
-  const fut = (c: any) => c && typeof c.year === 'number' && c.year >= reportYear
-  const peak = fut(mt?.bestMeetingYear) ? mt.bestMeetingYear : fut(mt?.bestMarriageYear) ? mt.bestMarriageYear
-    : (mt?.candidates || []).filter(fut).sort((a: any, b: any) => b.score - a.score)[0] ?? null
-  finalFacts.lovePeak = peak ? { year: peak.year, ganziEn: yearGanzi(peak.year), reasonsEn: (peak.signals || []).map(signalToEnglish).filter(Boolean) } : null
+  // 연애운 정점: 만 19~39세 구간에서 점수가 가장 높은 해 (romance.ts buildLovePeak). 옛 marriageTiming 은 사용하지 않는다.
+  finalFacts.lovePeak = buildLovePeak(saju, gender, reportYear, birthYear)
   return { sajuForPrompt: sd, finalFacts }
 }

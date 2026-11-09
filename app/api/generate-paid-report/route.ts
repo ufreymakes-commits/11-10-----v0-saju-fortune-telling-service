@@ -170,10 +170,11 @@ export async function POST(request: Request) {
     const reportYear = Math.max(new Date().getFullYear(), 2026)
     const reportGender: 'male' | 'female' = submission.gender === 'female' ? 'female' : 'male'
 
+    const birthYear = Number(String(submission.birth_date).slice(0, 4)) || undefined
+
     let romanceFacts: any = null
     try {
       if (submission.saju_data?.expert) {
-        const birthYear = Number(String(submission.birth_date).slice(0, 4)) || undefined
         romanceFacts = buildRomanceFacts(submission.saju_data, reportGender, reportYear, birthYear)
       }
     } catch (e) {
@@ -183,12 +184,18 @@ export async function POST(request: Request) {
     let sajuForPrompt: any = submission.saju_data
     let finalFacts: any = null
     try {
-      const built = buildPaidContext(submission.saju_data, reportGender, reportYear)
+      const built = buildPaidContext(submission.saju_data, reportGender, reportYear, birthYear)
       sajuForPrompt = built.sajuForPrompt
       finalFacts = built.finalFacts
     } catch (e) {
       console.error('[v0] buildPaidContext failed (falling back to raw saju_data):', e)
     }
+
+    const lovePeakData = finalFacts?.lovePeak
+    const lovePeakTeaserYear: number | string =
+      lovePeakData?.peak && (lovePeakData.peak.status === 'future' || lovePeakData.peak.status === 'this year')
+        ? lovePeakData.peak.year
+        : lovePeakData?.upcomingPeak?.year ?? lovePeakData?.peak?.year ?? '20xx'
 
     // 5. Gemini에 전체 context 주입
     const userPrompt = `
@@ -292,8 +299,9 @@ Example: "${submission.name},...", for the first fact and, ${submission.name}, r
 * Fact Logic: Go beyond simple "Dating (Dohwa/Siksang)" and analyze the stability of "Marriage (Spouse Star/Palace)" and the specific vibe of the partner (Elemental characteristics).
 * - Do not give generic marriage advice to a student, and do not treat a 40-year-old's relationship as a "first crush." Always consider the customer's age and Daewoon all together.
 * CRITICAL - Timing must come only from \`finalFacts.lovePeak\` and \`romanceFacts\` (never recalculate or invent years):
-  - Card 10 (the spouse-window card) follows the LOVE PEAK RULE below: the year is \`finalFacts.lovePeak.year\`, with exactly ONE reason, and no guess about the partner's job.
-  - Do not mention any other future relationship year unless it is listed in \`romanceFacts.yearLuck\`. Describe it as a stronger or calmer period for love, never as a guaranteed event.
+  - Card 10 (the spouse-window card) follows the LOVE PEAK RULE below (same rule as the teaser sentence), with exactly ONE reason and no guess about the partner's job.
+  - This year, next year and the year after: keep using \`romanceFacts.yearLuck\`. Use \`finalFacts.lovePeak\` only for the teaser sentence and Card 10.
+  - Do not mention any other future relationship year unless it is listed in \`romanceFacts.yearLuck\` or is the lovePeak year. Describe it as a stronger or calmer period for love, never as a guaranteed event.
 * Consider the possibility of a non-marriage or single lifestyle if the user's chart suggests a high level of independence or a lack of traditional 'Spouse Star' activation. However, this must be based on definitive saju data evidence, and you should approach this topic with extreme caution and sensitivity. If you mention it, use a soft, inquiring tone rather than a rigid conclusion, such as: 'Since you value your independence and find so much peace in your own freedom, do you ever find yourself wondering if marriage is even a necessary part of your journey?
 
 07. Future Self Sneak Peek: A Letter from 2030 [Focus & Data Spine]
@@ -321,12 +329,18 @@ Example: "${submission.name},...", for the first fact and, ${submission.name}, r
 
 And please, you need to include these 3 sentences for 'everyone'. Because we masked this and showed on the free report page to persuade customers to pay for the paid report. Fill in the blank (*** or ** or *********** this mark), matching to this customer's saju data and context. You can put these sentences anywhere among the 96 cards, considering the context.
 - The main theme of your ${reportYear} is *** . (Ground *** in finalFacts: this year's stem/branch ten gods + the current luck cycle in FINAL FACTS.luckCycles.current. Name ONE opportunity and ONE thing to be careful about.)
-- Your love luck peaks around ${finalFacts?.lovePeak?.year ?? '20xx'}. The reason is [exactly ONE concrete reason]. Your partner tends to feel like [energy type]. (See the LOVE PEAK RULE below.)
+- Your love luck peaks around ${lovePeakTeaserYear}. The reason is [exactly ONE concrete reason]. Your partner tends to feel like [energy type]. (See the LOVE PEAK RULE below.)
 - Your wealth flow timing and secret talents are already mapped out like ***** (Ground in decadeFortune score/years and the strongest ten-god group. Give a specific year range and a specific talent.)
 
-LOVE PEAK RULE (applies to the sentence above and to Section 06 Card 10):
-Use finalFacts.lovePeak.year as the peak year. Never invent a different year and never say you will meet your spouse in that year; say love luck peaks / the chance of meaningful connection is highest. Give exactly ONE concrete reason, chosen from finalFacts.lovePeak.reasonsEn (first item), written in plain language, e.g. "because the year forms a Hap with your Day Branch, the palace of your spouse". Do not list multiple reasons. Do not guess the partner's job; describe the partner's energy type (calm / bold / witty / steady, etc.) from the spouse star group and Day Branch ten god in romanceFacts.
-If finalFacts.lovePeak is null: write "Your love luck is steadier than flashy; the strongest signal is [the single most positive-toned romanceFacts.yearLuck item from the next 3 years, with its single reason]" and use the year of that item.
+LOVE PEAK RULE (applies to the teaser sentence above and to Section 06 Card 10):
+finalFacts.lovePeak = { window, peak, upcomingPeak }.
+- peak = the strongest love-signal year between age 19 and 39. upcomingPeak = the strongest one still ahead.
+- Teaser sentence: if peak.status is "future" or "this year", use peak.year. Otherwise use upcomingPeak.year and write "your next strongest love window is around 20XX". Never invent a year.
+- Give exactly ONE concrete reason: the first item of that year's reasonsEn, in plain language (e.g. "because the year's Direct Officer combines with your Day Master"). Do not list several reasons, and do not output raw scores.
+- Say "love luck is strongest" / "the chance of a meaningful connection is highest". Never say "you will meet your spouse that year". Never guess the partner's job; describe the partner's energy (calm / bold / witty / steady) from romanceFacts.spouseStarElement and palace.tenGodEn.
+- Add ONE warm sentence, once only (teaser sentence or Card 10, not both): "If it isn't a romantic partner, this can also arrive as a new family member, a precious friend, or even a pet that changes your days."
+- If peak.status is "past" and the customer would find it odd, add one gentle sentence in Section 06 that this earlier window already shaped how they love, then move on to the upcoming one.
+- If lovePeak is null, use the most positive-tone year in romanceFacts.yearLuck and one reason from it.
 
 ========================================
 CROSS-SECTION CONSISTENCY RULE — Sections 04, 07, 09 vs. the pre-computed decadeFortune:

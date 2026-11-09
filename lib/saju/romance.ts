@@ -151,3 +151,65 @@ export function buildRomanceFacts(saju: any, gender: 'male' | 'female', nowYear:
     yearLuck: years,
   }
 }
+
+// ---------------------------------------------------------------------------
+// 연애운 정점 (만 19~39세 구간에서 점수가 가장 높은 해). 가중치는 추정값이며 경쟁사 연애 샘플로 검증 예정.
+// ---------------------------------------------------------------------------
+export const LOVE_WINDOW = { fromAge: 19, toAge: 39 }
+const POS_EN: Record<string, string> = { 일지: 'Day Branch (the spouse palace)', 일간: 'Day Master', 월지: 'Month Branch', 연지: 'Year Branch', 시지: 'Hour Branch', 월간: 'Month Stem', 연간: 'Year Stem', 시간: 'Hour Stem', 원국: 'natal chart' }
+const posEn = (w: string) => w.split('·').map((x) => POS_EN[x] ?? x).join(' and your ')
+const BAD_HEAVY = ['지충', '형', '원진', '천간충']
+
+export function scoreLoveYear(saju: any, gender: 'male' | 'female', y: number, daewoonOf: (y: number) => any) {
+  const dm: string = saju.dayPillar.fullNameKorean[0]
+  const d = (p: any) => [p.fullNameKorean[0], p.fullNameKorean[1]]
+  const [ys, yb] = d(saju.yearPillar), [ms, mb] = d(saju.monthPillar), [ds, db] = d(saju.dayPillar), [hs, hb] = d(saju.hourPillar)
+  const natal = { stems: { 연간: ys, 월간: ms, 일간: ds, 시간: hs } as Record<string, string>, branches: { 연지: yb, 월지: mb, 일지: db, 시지: hb } as Record<string, string> }
+  const spouseGroup = SPOUSE_GROUP[gender]
+  const g = yearGanzi(y)
+  const rels = relationsOf(g[0], g[1], natal)
+  const stemGod = tenGod(dm, g[0]), branchGod = tenGod(dm, MAIN[g[1]])
+  const stemGroup = group(dm, g[0]), branchGroup = group(dm, MAIN[g[1]])
+  let score = 0
+  const plus: { w: number; text: string }[] = []
+  const minus: string[] = []
+  for (const r of rels.filter((x) => /일지|일간/.test(x.with))) {
+    if (r.polarity === 'good') {
+      score += 3
+      const text = r.with === '일간' && r.type === '천간합'
+        ? `the year's ${TEN_GODS_ENGLISH[stemGod]} stem (${ROMAN(g[0])}) combines with your Day Master, forming ${r.en}`
+        : `the year forms ${r.en} with your ${posEn(r.with)}`
+      plus.push({ w: 3 + (stemGroup === spouseGroup ? 0.5 : 0), text })
+    } else if (r.polarity === 'bad') {
+      score -= BAD_HEAVY.includes(r.type) ? 3 : 2
+      minus.push(`${r.en} with your ${posEn(r.with)}`)
+    }
+  }
+  if (stemGroup === spouseGroup) { score += 2; plus.push({ w: 2, text: `the year's Heavenly Stem carries your spouse star, ${TEN_GODS_ENGLISH[stemGod]}` }) }
+  if (branchGroup === spouseGroup) { score += 1; plus.push({ w: 1, text: `the year's Earthly Branch carries your spouse star, ${TEN_GODS_ENGLISH[branchGod]}` }) }
+  if (stemGroup === '식상' || branchGroup === '식상') { score += 1; plus.push({ w: 0.9, text: `an expression star (${TEN_GODS_ENGLISH[stemGroup === '식상' ? stemGod : branchGod]}) arrives, which lifts charm and openness` }) }
+  const dw = daewoonOf(y)
+  if (dw) {
+    const ds2 = dw.ganziKorean?.[0] ?? dw.stem, db2 = dw.ganziKorean?.[1] ?? dw.branch
+    if (ds2 && group(dm, ds2) === spouseGroup) { score += 1; plus.push({ w: 0.8, text: `your luck cycle at that time also carries the spouse star` }) }
+    if (ds2 && db2) for (const r of relationsOf(ds2, db2, natal).filter((x) => /일지/.test(x.with))) score += r.polarity === 'good' ? 1 : r.polarity === 'bad' ? -1 : 0
+  }
+  plus.sort((a, b) => b.w - a.w)
+  return { year: y, ganzi: g, ganziEn: ROMAN(g[0]) + '-' + ROMAN(g[1]), score, reasonsEn: plus.map((p) => p.text), cautionsEn: minus }
+}
+
+export function buildLovePeak(saju: any, gender: 'male' | 'female', reportYear: number, birthYear?: number) {
+  if (!saju?.dayPillar || !birthYear) return null
+  const decs: any[] | undefined = saju.decadeFortune?.decades
+  const daewoonOf = (y: number) => decs?.find((x) => x.startYear <= y && y < x.endYear) ?? null
+  const from = birthYear + LOVE_WINDOW.fromAge, to = birthYear + LOVE_WINDOW.toAge
+  const rows: ReturnType<typeof scoreLoveYear>[] = []
+  for (let y = from; y <= to; y++) rows.push(scoreLoveYear(saju, gender, y, daewoonOf))
+  const pick = (arr: typeof rows) => arr.length ? arr.reduce((b, r) => (r.score > b.score || (r.score === b.score && Math.abs(r.year - reportYear) < Math.abs(b.year - reportYear)) ? r : b)) : null
+  const peak = pick(rows)
+  // 앞으로의 정점: 창 안의 남은 해, 창이 끝났다면 앞으로 5년
+  const futureRows = rows.filter((r) => r.year >= reportYear)
+  const upcoming = pick(futureRows.length ? futureRows : [0, 1, 2, 3, 4].map((k) => scoreLoveYear(saju, gender, reportYear + k, daewoonOf)))
+  const mk = (r: any) => r && ({ year: r.year, age: r.year - birthYear, ganziEn: r.ganziEn, score: r.score, status: r.year < reportYear ? 'past' : r.year === reportYear ? 'this year' : 'future', reasonsEn: r.reasonsEn.slice(0, 2), cautionsEn: r.cautionsEn })
+  return { window: { fromYear: from, toYear: to, fromAge: LOVE_WINDOW.fromAge, toAge: LOVE_WINDOW.toAge }, peak: mk(peak), upcomingPeak: mk(upcoming), note: 'Heuristic score (not validated against an expert). Use only as "strongest signal in the chart", never as a prediction.' }
+}
