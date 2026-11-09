@@ -397,7 +397,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
       {/* Teaser Facts 10, 11, 12 with blur */}
       <div className="mb-6">
         <p className="text-xs text-left mb-2 bg-gradient-to-r from-purple-500 to-fuchsia-500 bg-clip-text text-transparent font-medium">
-          From your ideal career path to when you&apos;ll meet your soulmate!
+          From your ideal career path to when your love luck peaks!
         </p>
         <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
           <span className="bg-gradient-to-r from-purple-500 to-fuchsia-500 bg-clip-text text-transparent">Hidden VIP Insights</span>
@@ -420,7 +420,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
             <div className="flex gap-2">
               <span className="text-muted-foreground font-bold text-sm">5</span>
               <p className="text-foreground/90 text-xs leading-relaxed font-bold">
-                💍 The period from 20<span className="blur-[5px] select-none bg-primary/20 px-1">xx</span> to 20<span className="blur-[5px] select-none bg-primary/20 px-1">xx</span> is the best time to meet your spouse. Your spouse will probably be in charge of <span className="blur-[5px] select-none bg-primary/20 px-2">role here</span> and work as a <span className="blur-[5px] select-none bg-primary/20 px-2">job title</span>.
+                💍 Your love luck peaks around 20<span className="blur-[5px] select-none bg-primary/20 px-1">xx</span>, when <span className="blur-[5px] select-none bg-primary/20 px-2">reason here</span>. Your partner tends to feel <span className="blur-[5px] select-none bg-primary/20 px-2">energy type</span>.
               </p>
             </div>
           </div>

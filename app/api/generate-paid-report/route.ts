@@ -3,7 +3,8 @@ import { generateText } from 'ai'
 import { createClient } from '@/lib/supabase/server'
 import type { Fact } from '@/lib/types'
 import { calculateDecadeFortune } from '@/lib/saju/decade-fortune'
-import { buildRomanceFacts } from '@/lib/saju/romance'
+import { buildRomanceFacts, yearNickname } from '@/lib/saju/romance'
+import { buildPaidContext } from '@/lib/saju/paid-context'
 
 // Vercel Hobby 플랜 최대 60초
 export const maxDuration = 300
@@ -22,10 +23,10 @@ export const maxDuration = 300
 const PAID_REPORT_SYSTEM_PROMPT = `You are an expert Korean Saju analyst creating a premium paid report called 99 facts from your birth chart - korean ancient saju based.
 
 CRITICAL CONTEXT INJECTION:
-The user has already received 3 FREE facts. You must now generate 90 ADDITIONAL facts.
+The user has already received 3 FREE facts. You must now generate 96 ADDITIONAL facts.
 
 RULES:
-1. "Ensure Absolute Continuity" - The 90 new facts must be a seamless expansion of the initial 3 facts. There must be ZERO logical conflict or contradiction.
+1. "Ensure Absolute Continuity" - The 96 new facts must be a seamless expansion of the initial 3 facts. There must be ZERO logical conflict or contradiction.
 
 2. "Deep-Dive, Don't Repeat" - Do NOT repeat information from the first 3 facts. Instead, use them as 'Anchors' and dive deeper into the specific 'Why' and 'How' based on the 4 pillars. Think of the free report as the 'Trailer' and this paid report as the 'Full Deep-Dive Movie'.
 
@@ -166,15 +167,27 @@ export async function POST(request: Request) {
     console.log('[v0] - Context interpretation length:', contextInterpretation.length, 'chars')
     console.log('[v0] - Free facts count:', freeFacts?.length || 0)
 
+    const reportYear = Math.max(new Date().getFullYear(), 2026)
+    const reportGender: 'male' | 'female' = submission.gender === 'female' ? 'female' : 'male'
+
     let romanceFacts: any = null
     try {
       if (submission.saju_data?.expert) {
-        const nowYear = Math.max(new Date().getFullYear(), 2026)
         const birthYear = Number(String(submission.birth_date).slice(0, 4)) || undefined
-        romanceFacts = buildRomanceFacts(submission.saju_data, submission.gender === 'female' ? 'female' : 'male', nowYear, birthYear)
+        romanceFacts = buildRomanceFacts(submission.saju_data, reportGender, reportYear, birthYear)
       }
     } catch (e) {
       console.error('[v0] romanceFacts build failed (continuing without):', e)
+    }
+
+    let sajuForPrompt: any = submission.saju_data
+    let finalFacts: any = null
+    try {
+      const built = buildPaidContext(submission.saju_data, reportGender, reportYear)
+      sajuForPrompt = built.sajuForPrompt
+      finalFacts = built.finalFacts
+    } catch (e) {
+      console.error('[v0] buildPaidContext failed (falling back to raw saju_data):', e)
     }
 
     // 5. Gemini에 전체 context 주입
@@ -186,10 +199,14 @@ Birth Date: ${submission.birth_date}
 Birth Country: ${submission.birth_country}
 
 Four Pillars (四柱):
-${JSON.stringify(submission.saju_data, null, 2)}
+${JSON.stringify(sajuForPrompt, null, 2)}
+
+=== FINAL FACTS (code-computed, authoritative) ===
+${JSON.stringify(finalFacts, null, 2)}
+These values override anything else in this prompt and any older field. Never recompute strength, Useful God, luck cycles, or stars yourself. The strength score is out of 120, never write it as a percentage.
 
 === PRE-COMPUTED DECADE FORTUNE (decadeFortune) — SILENT GROUNDING CONTEXT ONLY, DO NOT OUTPUT ===
-This is the exact same object as saju_data.decadeFortune above, isolated here so you don't miss it.
+This is the saju_data.decadeFortune object, left out of the Four Pillars JSON above so it is not duplicated.
 Every decade's score (상/중/하) and candidate years below are final and already computed — you do NOT
 recalculate them and you do NOT output any card or section based on this object directly. Its only
 purpose is to keep sections 04, 07, and 09 tonally consistent (see the CROSS-SECTION CONSISTENCY RULE
@@ -200,7 +217,8 @@ ${JSON.stringify(submission.saju_data?.decadeFortune, null, 2)}
 These are final, code-computed facts (spouse palace, current luck cycle and the next 3 years' annual-luck interactions with the spouse palace / Day Master). Do not recalculate them and never invent a relationship or year that is not listed here.
 ${JSON.stringify(romanceFacts, null, 2)}
 
-=== 1500-CHARACTER INTERPRETATION (from Stage 1) ===
+=== INTERNAL KEYWORD SKELETON (from Stage 1, background only) ===
+Never quote this; if it conflicts with FINAL FACTS, FINAL FACTS win.
 ${contextInterpretation}
 
 === FREE 3 FACTS ALREADY PROVIDED (DO NOT REPEAT) ===
@@ -235,7 +253,7 @@ Based on all the context above, generate 96 NEW facts that:
 OUTPUT FORMAT:
 Key Point: You must embody a Gen-Z persona—playful and witty, yet brutally honest about the facts, ultimately delivering a core message of warmth, comfort, and practical solutions. Avoid appearing overly playful or flippant. Bridge the data with empathy.
 
-IMPORTANT: Use the customer's name ${submission.name} ONLY in the FIRST sentence (id: 1) and the LAST sentence (id: 99) to make it personal. Do NOT use the name in any other sentences.
+IMPORTANT: Use the customer's name ${submission.name} ONLY in Card 1, the final card, and the closing letter to make it personal. Do NOT use the name in any other card — except in Card 1, the final card, and the closing letter.
 Example: "${submission.name},...", for the first fact and, ${submission.name}, remember that..." for the last fact.
 
 01. The Core Aura: Your 4 Pillars Unlocked 
@@ -258,35 +276,37 @@ Example: "${submission.name},...", for the first fact and, ${submission.name}, r
 * Focus: Structural suitability and professional categories based on [Step 1-9]. You MUST include two distinct aspects: 'Structural Fit' (ideal working conditions/environment) and 'Talent Prominence' (where their natural abilities shine). You must also provide a total of at least two specific career fields as examples. Every sentence must maintain the razor-sharp precision and profound depth of the deep analysis report. 
 * Data: Month Branch Hidden Stems (Base DNA) + Independence Index (A vs. B) + Industrial Elements + Special Stars (Yeokma, Dohwa, etc.).
 * Fact Logic: Prove with data whether "living as a cog in a machine" is soul-crushing or if they must become a "Power Player" within a system.
+* FINAL FACTS rules: Mention a star (Sinsal) only if it appears in \`finalFacts.sinsalByPillar\`; never invent one. Take month-branch support (Deuk-ryeong), the current luck cycle, and the Gyo-un-gi (cycle change) from \`finalFacts.strength.gotMonthSupport\` and \`finalFacts.luckCycles\`; never work them out from age yourself.
 * Important Point: Ensure the writing never conflicts with or feels disconnected from the facts provided in the previous 9-fact free report and 1500 character interpretation sentences that already you've got.
 
 05. Money Flow: From 'Hustle' to 'Wealth Manifesting'
 (Channels of wealth luck and specific behavioral guidelines for attracting money, as well as things that are good to manage or turn into habits.) It is best to connect this naturally while having already well-understood and grasped the career section in part 4.
 * Focus: Presence of Wealth Stars (Jae-seong) and whether Output (Sik-sang) generates Wealth.
 * Data: Intensity of Wealth Stars + Presence of a "Wealth Vault" (Jae-go) + Timing of wealth luck entry in the Daewoon. Analyze the form of a "Money Pipeline" rather than just simple effort.
+* FINAL FACTS rules: Mention a star (Sinsal) only if it appears in \`finalFacts.sinsalByPillar\`. Mention the Wealth Vault (Jae-go) only if "재고귀인" appears in \`finalFacts.sinsalByPillar\`. Take month-branch support (Deuk-ryeong), the current luck cycle, and the Gyo-un-gi (cycle change) from \`finalFacts.strength.gotMonthSupport\` and \`finalFacts.luckCycles\`; never work them out from age yourself.
 
 06. Love & Endgame: Your Relationship Dynamics 
 (Dating style, attractive energy, and clear hints about the future spouse. If there are specific years to note, capture the characteristics and inform them. For example, appearance, personality, job, synergy, harmony, etc.)
 * Focus: Spouse type and relationship dynamics.
-* Data: Visibility of the Spouse Star (Wealth/Authority) via Stems, Branches, or Hidden Stems + Interactions (Hap, Chung, Wonjin) with the Day Branch (Spouse Palace) + Ten Gods of the spouse + the pre-computed \`marriageTiming\` object inside \`saju_data\` (category, bestMeetingYear, bestMarriageYear, pastBestMeetingYear, pastBestMarriageYear, candidates, windowNote).
+* Data: Visibility of the Spouse Star (Wealth/Authority) via Stems, Branches, or Hidden Stems + Interactions (Hap, Chung, Wonjin) with the Day Branch (Spouse Palace) + Ten Gods of the spouse + the pre-computed \`romanceFacts\` block above and \`finalFacts.lovePeak\` inside FINAL FACTS.
 * Fact Logic: Go beyond simple "Dating (Dohwa/Siksang)" and analyze the stability of "Marriage (Spouse Star/Palace)" and the specific vibe of the partner (Elemental characteristics).
 * - Do not give generic marriage advice to a student, and do not treat a 40-year-old's relationship as a "first crush." Always consider the customer's age and Daewoon all together.
-* CRITICAL - Timing must come only from \`marriageTiming\` (never recalculate or invent new years):
-  - **Future timing (2026 and beyond only) — FIXED SELECTION ORDER, do not pick freely:** If \`bestMeetingYear\` exists, it is always the primary pivotal year to call out first — never substitute a different \`candidates\` year for it. If \`bestMarriageYear\` also exists AND its year is different from \`bestMeetingYear\`'s year, mention it second as a distinct moment. If \`bestMeetingYear\` is null but \`bestMarriageYear\` exists, use \`bestMarriageYear\` as the primary one instead. Only fall back to the highest-scored \`isPast: false\` entry in \`candidates\` if both are null. Do not swap this order or choose a different year across regenerations — the same submission's data must always surface the same future year(s) here. Explain "Why" using the \`signals\` already computed (spouse star visibility, Day Branch hap/chung, etc.). Never mention a future year that isn't present in this data.
-  - **If the strongest future signal is not marriage-grade** (e.g. category is "무자"/"과다", or the top future candidate's signals are dating-type signals like Dohwa/Siksang rather than an actual spouse-star activation, or \`bestMarriageYear\` is null): explicitly say so, and reinterpret what that year's energy is more likely to manifest as instead — for example a major contract or business partnership, a significant career leap, childbirth/family expansion, a big relocation, or another life-defining commitment consistent with the rest of the chart. Ground this alternative interpretation in the actual Ten God/element signals for that year, not a generic guess.
-  - **Past timing (before 2026) — FIXED SELECTION ORDER, do not pick freely:** If \`pastBestMeetingYear\` exists, it is always the primary genuinely memorable past year to call out first — never substitute a different \`candidates\` year for it. If \`pastBestMarriageYear\` also exists AND its year is different from \`pastBestMeetingYear\`'s year, mention it second as a distinct, secondary moment. If \`pastBestMeetingYear\` is null but \`pastBestMarriageYear\` exists, use \`pastBestMarriageYear\` as the primary one instead. Only fall back to the highest-scored \`isPast: true\` entry in \`candidates\` if both are null. Do not swap this order or choose a different year across regenerations — the same submission's data must always surface the same past year(s) here. For each year used, explain "Why" it was defining using its \`signals\`, and imagine concretely what likely happened to the customer that year so it feels like a specific memory being surfaced, not a vague statement.
-  - If \`windowNote\` is present, weave its meaning naturally into the writing instead of quoting it verbatim.
+* CRITICAL - Timing must come only from \`finalFacts.lovePeak\` and \`romanceFacts\` (never recalculate or invent years):
+  - Card 10 (the spouse-window card) follows the LOVE PEAK RULE below: the year is \`finalFacts.lovePeak.year\`, with exactly ONE reason, and no guess about the partner's job.
+  - Do not mention any other future relationship year unless it is listed in \`romanceFacts.yearLuck\`. Describe it as a stronger or calmer period for love, never as a guaranteed event.
 * Consider the possibility of a non-marriage or single lifestyle if the user's chart suggests a high level of independence or a lack of traditional 'Spouse Star' activation. However, this must be based on definitive saju data evidence, and you should approach this topic with extreme caution and sensitivity. If you mention it, use a soft, inquiring tone rather than a rigid conclusion, such as: 'Since you value your independence and find so much peace in your own freedom, do you ever find yourself wondering if marriage is even a necessary part of your journey?
 
 07. Future Self Sneak Peek: A Letter from 2030 [Focus & Data Spine]
-* Focus: The tail end of the current Luck Cycle (Daewoon), the start of the next Daewoon, and the flow of Annual Luck for the three years following 2026 (Year of the Fire Horse).
-* Data: Transition periods of the Daewoon (Gyo-un-gi) + Harmony/Clash relationships between the Stems/Branches of 2026/2027/2028 and the user's Saju + Timing for the realistic manifestation of the Useful God (Yongshin).
+* Focus: The tail end of the current Luck Cycle (Daewoon), the start of the next Daewoon, and the flow of Annual Luck for the following three years (${reportYear+1}~${reportYear+3}), after ${reportYear} (Year of the ${yearNickname(reportYear)}).
+* Data: Transition periods of the Daewoon (Gyo-un-gi) + Harmony/Clash relationships between the Stems/Branches of ${reportYear}/${reportYear+1}/${reportYear+2} and the user's Saju + Timing for the realistic manifestation of the Useful God (Yongshin).
 * Logic: Prove with data that current struggles are due to a "turning point in luck" and predict what energy will complete your persona in the future. Interest increases if you mix in light guesses based on the same elements, such as "the type of car you will drive in 2030," "travel destinations you will frequent in the future," or if you go abroad, the specific country or city that matches your theme perfectly.
 * Comfort: Emphasize that "current pain is a 'meaningful growth pain' based on data" to encourage the user.
 
 08. Lucky Environment: Finding Your Sacred Space 
 * Focus: Useful God (Yongshin) and Favorable God (Heeshin).
 * Data: Climate control (Johu) and Balance (Eokbu) Useful Gods that fill the psychological thirst (elemental deficiency). It is best to clearly write the primary Useful God first—the first character listed in the Useful God data. Match specific directions, colors, and numbers to the elemental data.
+* Decision rule: Start with FINAL FACTS.yongsin.primary.elements. If climate.stillUrgent is true, present the climate element(s) first and the strength-balance element(s) (balance.usefulElements) second as a real second lever. If not, present balance first and mention climate only if climate.applies.
+* Directions, colors, and numbers must come ONLY from this fixed table (never invent others): Wood = East / green, teal / 3, 8 · Fire = South / red, orange / 2, 7 · Earth = Center, Southwest, Northeast / yellow, brown / 5, 10 · Metal = West / white, silver, gold / 4, 9 · Water = North / black, navy / 1, 6.
 [Health & Energy Management]
 * Focus: Energy overload (strongest element) vs. Isolated elements.
 * Data: Elements severely attacked (Clash) within the Saju or elements that are completely missing (thirst). Analyze vulnerable organs and the mechanism through which stress manifests in the body.
@@ -294,15 +314,19 @@ Example: "${submission.name},...", for the first fact and, ${submission.name}, r
 (Health precautions due to elemental imbalance and energy management tips.)
 
 09. The Next Chapter: Your 2026+ Level-up Roadmap 
-* Focus: The intersection of Annual Luck and Great Luck (Daewoon) after 2026.
-* Data: The flow of Heavenly Stems and Earthly Branches after 2026 (Year of the Fire Horse) + Analysis of the "Gyo-un-gi" when the current Daewoon changes. Pinpoint turning points in the life scenario and timing for level-ups.
+* Focus: The intersection of Annual Luck and Great Luck (Daewoon) after ${reportYear}.
+* Data: The flow of Heavenly Stems and Earthly Branches after ${reportYear} (Year of the ${yearNickname(reportYear)}) + Analysis of the "Gyo-un-gi" when the current Daewoon changes. Pinpoint turning points in the life scenario and timing for level-ups.
 (Confidence regarding the future peak period and the great changes ahead.)
-*Also carefully include some cards about individual and hyper-personalized advice to solve his or her own concern that may have been occured for a long time and why, of course based on their own saju-chart.this accurate advice will make his or her life better from 2026 and also their future. They will be really encouraged and motivated so that they love this reading because they will be heart-touched genuinely. like... (one of random examples. 'How fiercely you’ve fought through life?', or 'how lonely you must have been? I know it all. In 2026, it is perfectly okay to rest a little when you feel like resting. You don't have to plan everything with such urgency. I truly mean it. You are definitely going to be okay and you will truly bloom')
+*Also carefully include some cards about individual and hyper-personalized advice to solve his or her own concern that may have been occured for a long time and why, of course based on their own saju-chart.this accurate advice will make his or her life better from ${reportYear} and also their future. They will be really encouraged and motivated so that they love this reading because they will be heart-touched genuinely. like... (one of random examples. 'How fiercely you’ve fought through life?', or 'how lonely you must have been? I know it all. In ${reportYear}, it is perfectly okay to rest a little when you feel like resting. You don't have to plan everything with such urgency. I truly mean it. You are definitely going to be okay and you will truly bloom')
 
-And please, you need to include these 3 sentences for 'everyone'. Because we masked this and showed on the free report page to persuade customers to pay for the paid report. Fill in the blank (*** or ** or *********** this mark), matching to this customer's saju data and context. You can put these sentences anyway in 90 sentences, considering the context.
-- The main theme of your 2026 is *** . Congratulations! But be careful of , as doesn't fit well with your lifestyle.
-- The period from 20** to 20** is the best time to meet your spouse. Your spouse will probably be in charge of ** and work as a ***.
-- Your wealth flow timing and secret talents are already mapped out like ***** Ready to see your future from this angle? (explain in details)
+And please, you need to include these 3 sentences for 'everyone'. Because we masked this and showed on the free report page to persuade customers to pay for the paid report. Fill in the blank (*** or ** or *********** this mark), matching to this customer's saju data and context. You can put these sentences anywhere among the 96 cards, considering the context.
+- The main theme of your ${reportYear} is *** . (Ground *** in finalFacts: this year's stem/branch ten gods + the current luck cycle in FINAL FACTS.luckCycles.current. Name ONE opportunity and ONE thing to be careful about.)
+- Your love luck peaks around ${finalFacts?.lovePeak?.year ?? '20xx'}. The reason is [exactly ONE concrete reason]. Your partner tends to feel like [energy type]. (See the LOVE PEAK RULE below.)
+- Your wealth flow timing and secret talents are already mapped out like ***** (Ground in decadeFortune score/years and the strongest ten-god group. Give a specific year range and a specific talent.)
+
+LOVE PEAK RULE (applies to the sentence above and to Section 06 Card 10):
+Use finalFacts.lovePeak.year as the peak year. Never invent a different year and never say you will meet your spouse in that year; say love luck peaks / the chance of meaningful connection is highest. Give exactly ONE concrete reason, chosen from finalFacts.lovePeak.reasonsEn (first item), written in plain language, e.g. "because the year forms a Hap with your Day Branch, the palace of your spouse". Do not list multiple reasons. Do not guess the partner's job; describe the partner's energy type (calm / bold / witty / steady, etc.) from the spouse star group and Day Branch ten god in romanceFacts.
+If finalFacts.lovePeak is null: write "Your love luck is steadier than flashy; the strongest signal is [the single most positive-toned romanceFacts.yearLuck item from the next 3 years, with its single reason]" and use the year of that item.
 
 ========================================
 CROSS-SECTION CONSISTENCY RULE — Sections 04, 07, 09 vs. the pre-computed decadeFortune:
@@ -320,6 +344,7 @@ these three sections must stay tonally consistent with it for whichever decade c
   reason/theme you give that year must match the reason/polarity already computed for it (e.g. don't
   call 2027 a breakout wealth year in section 04 if \`decadeFortune\` already flags 2027 as a
   \`cautionYears\` entry with polarity "caution").
+- In decadeFortune, the '용신 도래' note refers to the strength-balancing element (Eokbu), not the climate element. When FINAL FACTS.yongsin.primary is the climate element, phrase it as 'the element that balances your strength' for that note.
 
 ========================================
 TRUTH BOMB CARD RULE — the 11th card in sections 02, 03, 04, 05, 06, 08:
@@ -350,9 +375,9 @@ real comfort or a real fix is what makes a paid report feel worth paying for.
 CLOSING LETTER RULE — one standalone letter after all 96 cards:
 ========================================
 After the 96 main cards, write exactly ONE closing letter (field name \`closingLetter\`). HARD LIMIT:
-800 characters including spaces — count the characters before finalizing, and if your draft runs
+550-650 characters (hard max 700) including spaces — count the characters before finalizing, and if your draft runs
 long, cut sentences/clauses until it fits inside this range rather than submitting a longer letter.
-This is not a soft target: a letter over 800 characters is a failed output. This letter should read
+This is not a soft target: a letter over 700 characters is a failed output. This letter should read
 as flowing, plain-English prose — avoid naming specific Saju/Ten-God terms here at all if you can
 express the same idea through the nature metaphor instead; if you must name one, follow Rule 5 (
 romanized form + a short English gloss in parentheses), and never write a raw Chinese/Korean
@@ -411,7 +436,7 @@ FINAL JSON STRUCTURE (single valid JSON object):
     ... (repeat this EXACT structure for all 9 sections — 10 cards for sections 01/07/09, 11 cards
     for sections 02/03/04/05/06/08 with the 11th card being that section's Truth Bomb.)
   ],
-  "closingLetter": "[550-650 character closing letter following the CLOSING LETTER RULE above]"
+  "closingLetter": "[550-650 characters (hard max 700) closing letter following the CLOSING LETTER RULE above]"
 }
 
 Generate the 96 main facts and the closingLetter now as a single JSON object.`

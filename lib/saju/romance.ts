@@ -1,6 +1,7 @@
 // 연애/결혼 결정론 팩트 (유료 리포트 전용). LLM은 이 값을 문장으로 풀기만 한다.
 // 사용처: generate-paid-report 에서 saju_data 와 현재 연도로 호출. (무료 리포트/Stage 1 에는 넣지 않는다)
 import { tenGod, group } from './expert-core'
+import { STEM_PRONUNCIATION, BRANCH_PRONUNCIATION, TEN_GODS_ENGLISH, ELEMENT_ENGLISH, STEM_TO_ELEMENT, ELEMENTS } from './constants'
 
 const STEMS = ['갑', '을', '병', '정', '무', '기', '경', '신', '임', '계']
 const BRANCHES = ['자', '축', '인', '묘', '진', '사', '오', '미', '신', '유', '술', '해']
@@ -8,6 +9,10 @@ const MAIN: Record<string, string> = { 자: '계', 축: '기', 인: '갑', 묘: 
 const SIXTY = (i: number) => STEMS[((i % 10) + 10) % 10] + BRANCHES[((i % 12) + 12) % 12]
 // 연도 → 간지 (1984 = 갑자)
 export const yearGanzi = (y: number) => SIXTY(y - 1984)
+const ANIMAL: Record<string, string> = { 자: 'Rat', 축: 'Ox', 인: 'Tiger', 묘: 'Rabbit', 진: 'Dragon', 사: 'Snake', 오: 'Horse', 미: 'Goat', 신: 'Monkey', 유: 'Rooster', 술: 'Dog', 해: 'Pig' }
+const STEM_EL_EN: Record<string, string> = { 갑: 'Wood', 을: 'Wood', 병: 'Fire', 정: 'Fire', 무: 'Earth', 기: 'Earth', 경: 'Metal', 신: 'Metal', 임: 'Water', 계: 'Water' }
+/** 예: 2026 -> "Fire Horse" */
+export const yearNickname = (y: number) => { const g = yearGanzi(y); return `${STEM_EL_EN[g[0]]} ${ANIMAL[g[1]]}` }
 
 const STEM_HAP: [string, string][] = [['갑', '기'], ['을', '경'], ['병', '신'], ['정', '임'], ['무', '계']]
 const STEM_CHUNG: [string, string][] = [['갑', '경'], ['을', '신'], ['병', '임'], ['정', '계']]
@@ -22,7 +27,19 @@ const SAMHAP: [string[], string, string][] = [[['신', '자', '진'], '수', '�
 
 const inPair = (t: [string, string][], a: string, b: string) => t.some(([x, y]) => (x === a && y === b) || (x === b && y === a))
 
-export type Rel = { type: string; with: string; label: string; polarity: 'good' | 'bad' | 'neutral' }
+export type Rel = { type: string; with: string; label: string; polarity: 'good' | 'bad' | 'neutral'; en?: string }
+
+// 라벨(한글) → 영문 로마자 라벨. 유료 리포트는 한글/한자 출력 금지라서 LLM 이 그대로 쓸 수 있게 미리 만들어 둔다.
+const ROMAN = (c: string): string => (STEM_PRONUNCIATION as any)[c]?.split('-')[0] ?? (BRANCH_PRONUNCIATION as any)[c] ?? c
+const TYPE_EN: Record<string, string> = {
+  천간합: 'Hap (Heavenly Stem Combination)', 천간충: 'Chung (Heavenly Stem Clash)', 육합: 'Hap (Branch Combination)', 지충: 'Chung (Branch Clash)',
+  원진: 'Wonjin (Resentment)', 해: 'Hae (Harm)', 파: 'Pa (Break)', 형: 'Hyeong (Penalty)', 자형: 'Ja-Hyeong (Self-Penalty)', 삼합: 'Samhap (Triple Harmony)', 반합: 'Banhap (Half Harmony)',
+}
+function enLabel(r: Rel): string {
+  const chars = [...r.label.split(/합|충|원진|해|파|형|삼합|반합|지세지형|무은지형|무례지형|자형/)[0]]
+  const names = chars.map(ROMAN).join('-')
+  return `${names} ${TYPE_EN[r.type] ?? r.type}`
+}
 
 /** 세운(또는 대운) 한 글자쌍(천간, 지지)이 원국 일간/각 지지와 맺는 관계 */
 export function relationsOf(stem: string, branch: string, natal: { stems: Record<string, string>; branches: Record<string, string> }) {
@@ -57,6 +74,7 @@ export function relationsOf(stem: string, branch: string, natal: { stems: Record
     const hit = merged.find((m) => m.label === r.label && m.type === r.type)
     if (hit) { if (!hit.with.split('·').includes(r.with)) hit.with += '·' + r.with } else merged.push({ ...r })
   }
+  merged.forEach((r) => { r.en = enLabel(r) })
   return merged
 }
 
@@ -75,9 +93,10 @@ export function buildRomanceFacts(saju: any, gender: 'male' | 'female', nowYear:
 
   // 배우자궁
   const palaceStar = (saju.twelveStars || []).find((t: any) => t.position === '일지')?.star ?? null
-  const palaceNatal = (['연지', '월지', '시지'] as const)
-    .map((pos) => ({ pos, rels: relationsOf('', db, { stems: {}, branches: { [pos]: natal.branches[pos] } }).map((r) => r.label) }))
+  const palaceNatalOut = (['연지', '월지', '시지'] as const)
+    .map((pos) => ({ pos, rels: relationsOf('', db, { stems: {}, branches: { [pos]: natal.branches[pos] } }).map((r) => ({ label: r.label, en: r.en, polarity: r.polarity })) }))
     .filter((x) => x.rels.length)
+  const spouseEl = (ELEMENTS as readonly string[])[((ELEMENTS as readonly string[]).indexOf((STEM_TO_ELEMENT as any)[dm]) + (gender === 'female' ? 3 : 2)) % 5]
 
   // 연애 관련 신살 (정답지 표기 기준)
   const ROMANCE_SINSAL = ['도화살', '홍염살', '의처의부살', '백호살', '음욕살', '고신살', '과숙살', '나체도화', '여연살', '남연살', '음양살', '귀문관살', '원진살']
@@ -113,21 +132,22 @@ export function buildRomanceFacts(saju: any, gender: 'male' | 'female', nowYear:
     const palaceBad = touchPalace.filter((r) => r.polarity === 'bad').length
     const tone = palaceBad && palaceGood ? 'mixed' : palaceBad ? 'caution' : palaceGood || spouseStar ? 'opportunity' : bad > good ? 'caution' : 'neutral'
     return {
-      year: y, ganzi: g, stemTenGod: stemGod, branchTenGod: branchGod,
+      year: y, ganzi: g, ganziEn: ROMAN(g[0]) + '-' + ROMAN(g[1]), stemTenGod: stemGod, branchTenGod: branchGod, stemTenGodEn: TEN_GODS_ENGLISH[stemGod], branchTenGodEn: TEN_GODS_ENGLISH[branchGod],
       spouseStarShown: spouseStar, expressionShown: expression,
-      relations: rels.map((r) => ({ type: r.type, with: r.with, label: r.label, polarity: r.polarity })),
-      touchesSpousePalace: touchPalace.map((r) => r.label), tone,
+      relations: rels.map((r) => ({ type: r.type, with: r.with, label: r.label, en: r.en, polarity: r.polarity })),
+      touchesSpousePalace: touchPalace.map((r) => r.label), touchesSpousePalaceEn: touchPalace.map((r) => r.en), tone,
     }
   })
 
   return {
     spouseStarGroup: spouseGroup,
+    spouseStarElement: (ELEMENT_ENGLISH as any)[spouseEl] ?? spouseEl,
     spouseStarPositions: saju.marriageTiming?.spouseStarPositions ?? null,
     spouseStarCount: saju.marriageTiming?.spouseStarCount ?? null,
-    palace: { branch: db, tenGod: tenGod(dm, MAIN[db]), twelveStar: palaceStar, natalRelations: palaceNatal },
+    palace: { branch: db, branchEn: ROMAN(db), tenGod: tenGod(dm, MAIN[db]), tenGodEn: TEN_GODS_ENGLISH[tenGod(dm, MAIN[db])], twelveStar: palaceStar, natalRelations: palaceNatalOut },
     dayMasterGrade: saju.expert?.grade ?? null,
     sinsal,
-    currentDaewoon: curDaewoon ? { ganzi: curDaewoon.ganziKorean ?? curDaewoon.fullName, relations: dwRel.map((r) => r.label), touchesSpousePalace: dwRel.filter((r) => /일지|일간/.test(r.with)).map((r) => r.label) } : null,
+    currentDaewoon: curDaewoon ? { ganzi: curDaewoon.ganziKorean ?? curDaewoon.fullName, relations: dwRel.map((r) => r.en), touchesSpousePalace: dwRel.filter((r) => /일지|일간/.test(r.with)).map((r) => r.en), startAge: curDaewoon.startAge, endAge: curDaewoon.endAge } : null,
     yearLuck: years,
   }
 }
