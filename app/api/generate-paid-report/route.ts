@@ -3,6 +3,7 @@ import { generateText } from 'ai'
 import { createClient } from '@/lib/supabase/server'
 import type { Fact } from '@/lib/types'
 import { calculateDecadeFortune } from '@/lib/saju/decade-fortune'
+import { buildRomanceFacts } from '@/lib/saju/romance'
 
 // Vercel Hobby 플랜 최대 60초
 export const maxDuration = 300
@@ -165,6 +166,17 @@ export async function POST(request: Request) {
     console.log('[v0] - Context interpretation length:', contextInterpretation.length, 'chars')
     console.log('[v0] - Free facts count:', freeFacts?.length || 0)
 
+    let romanceFacts: any = null
+    try {
+      if (submission.saju_data?.expert) {
+        const nowYear = Math.max(new Date().getFullYear(), 2026)
+        const birthYear = Number(String(submission.birth_date).slice(0, 4)) || undefined
+        romanceFacts = buildRomanceFacts(submission.saju_data, submission.gender === 'female' ? 'female' : 'male', nowYear, birthYear)
+      }
+    } catch (e) {
+      console.error('[v0] romanceFacts build failed (continuing without):', e)
+    }
+
     // 5. Gemini에 전체 context 주입
     const userPrompt = `
 === CUSTOMER SAJU DATA ===
@@ -183,6 +195,10 @@ recalculate them and you do NOT output any card or section based on this object 
 purpose is to keep sections 04, 07, and 09 tonally consistent (see the CROSS-SECTION CONSISTENCY RULE
 below) with whichever decade covers "now" and "the next 10 years" for this customer.
 ${JSON.stringify(submission.saju_data?.decadeFortune, null, 2)}
+
+=== PRE-COMPUTED ROMANCE FACTS (romanceFacts) — GROUNDING FOR SECTION 06 ONLY ===
+These are final, code-computed facts (spouse palace, current luck cycle and the next 3 years' annual-luck interactions with the spouse palace / Day Master). Do not recalculate them and never invent a relationship or year that is not listed here.
+${JSON.stringify(romanceFacts, null, 2)}
 
 === 1500-CHARACTER INTERPRETATION (from Stage 1) ===
 ${contextInterpretation}

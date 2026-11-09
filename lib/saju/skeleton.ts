@@ -158,9 +158,23 @@ export function buildSkeleton(saju: any, gender: 'male' | 'female') {
   ] as string[])
   const shinsalModifiers = Object.keys(SHINSAL_CAREER).filter((n) => sinsalNames.has(n)).map((n) => `${n} → ${SHINSAL_CAREER[n]}`)
 
+  // 9) 확정값: 가장 센 십성 그룹(전문가 가중 점수 기준), 신강/신약 필터, 직업 유형 — LLM이 직접 판단하지 않도록 코드에서 확정
+  const totals: Record<string, number> | undefined = saju.expert?.totals
+  const ranked = totals ? Object.entries(totals).sort((x, y) => y[1] - x[1]) : []
+  const dominantTenGod = ranked.length ? { group: ranked[0][0], score: ranked[0][1], ranking: ranked.map(([g, v]) => `${g} ${v}`) } : null
+  const strengthFilter: 'Strong' | 'Weak' = saju.expert ? (saju.expert.strong ? 'Strong' : 'Weak') : 'Weak'
+  const careerType = {
+    primary: workFormat,                       // Independent | Hybrid | Organizational
+    strength: strengthFilter,                  // Strong | Weak  (전문가 점수 60 이상이면 Strong)
+    label: `${workFormat} + ${strengthFilter} Day Master`,
+  }
+
   return {
     dayMaster: dm,
     elementToGroup: elToGroup,
+    dominantTenGod,
+    strengthFilter,
+    careerType,
     dominant: { element: dominantElement, group: dominantGroup, tiedAtCount: tied, rule: '8글자 개수 최다 → 동률은 지장간 가중' },
     missingElements,
     officerStatus,
