@@ -530,6 +530,8 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
     const MAX_RETRIES = 3
     let strengthRegenerated = false
     let strengthFallback = ''
+    let firstAttemptNumber = 0
+    let firstAttemptScore = 0
     
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
@@ -564,10 +566,15 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
         const strengthBad = hasStrengthMismatch(result.text, finalFacts?.strength?.grade)
         const genericBombs = findGenericTruthBombSections(result.text)
         for (const n of genericBombs) console.warn(`[v0] check truth-bomb generic section ${n}`)
+        // 검사 점수: 신강/신약 모순 3점, 연도 불일치 2점, 밋밋한 Truth Bomb 카드당 1점 (낮을수록 좋음)
+        const yearBad = findCycleYearMismatches(result.text, finalFacts?.luckCycles?.all).length > 0
+        const attemptScore = (strengthBad ? 3 : 0) + (yearBad ? 2 : 0) + genericBombs.length
         if (strengthBad || genericBombs.length > 0) {
           if (!strengthRegenerated && attempt < MAX_RETRIES) {
             strengthRegenerated = true
             strengthFallback = result.text
+            firstAttemptNumber = attempt
+            firstAttemptScore = attemptScore
             if (strengthBad) {
               console.warn('[v0] check strength mismatch, regenerating once')
               logTiming('check:strength-mismatch', { attempt })
@@ -577,6 +584,14 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
           if (strengthBad) console.warn('[v0] check strength mismatch persisted')
         }
         rawResponse = result.text
+        // 재생성한 경우 두 결과 중 점수가 낮은 쪽을 저장한다. 같으면 두 번째를 저장한다.
+        if (strengthFallback) {
+          const keepFirst = firstAttemptScore < attemptScore
+          if (keepFirst) rawResponse = strengthFallback
+          console.log(
+            `[v0] check chosen attempt ${keepFirst ? firstAttemptNumber : attempt} (scores ${firstAttemptScore}/${attemptScore})`,
+          )
+        }
         console.log(`[v0] Gemini API succeeded on attempt ${attempt}`)
         break // 성공하면 루프 종료
       } catch (error) {
