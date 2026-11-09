@@ -2,9 +2,9 @@ import { NextResponse } from 'next/server'
 import { generateText } from 'ai'
 import { createClient } from '@/lib/supabase/server'
 import type { Fact } from '@/lib/types'
-import { calculateDecadeFortune } from '@/lib/saju/decade-fortune'
 import { buildRomanceFacts, yearNickname } from '@/lib/saju/romance'
-import { buildPaidContext } from '@/lib/saju/paid-context'
+import { buildPaidContext, refreshDecadeFortune } from '@/lib/saju/paid-context'
+import { romanizeName, hasCJK } from '@/lib/romanize-name'
 
 // Vercel Hobby 플랜 최대 60초
 export const maxDuration = 300
@@ -122,44 +122,12 @@ export async function POST(request: Request) {
 
     console.log(`[v0] Found ${freeReports.length} free report sections, total ${freeFacts.length} free facts`)
 
-    // 레거시 submission 호환: saju_data에 decadeFortune이 없으면(구버전 계산 결과) 즉석으로 계산해 채워 넣는다.
-    // 새 submission은 calculateSaju()가 이미 decadeFortune을 포함해 저장하므로 이 분기를 타지 않는다.
-    if (submission.saju_data && !submission.saju_data.decadeFortune) {
-      try {
-        const sd = submission.saju_data
-        // pillar.stem/branch는 한자로 저장되어 있으므로, decade-fortune.ts가 요구하는 한글 간지는
-        // fullNameKorean(예: "갑자")에서 분리해 사용한다.
-        const dayKorean = sd.dayPillar?.fullNameKorean || ''
-        const monthKorean = sd.monthPillar?.fullNameKorean || ''
-        const yearKorean = sd.yearPillar?.fullNameKorean || ''
-        const hourKorean = sd.hourPillar?.fullNameKorean || ''
-        const dayStem = dayKorean.charAt(0)
-        const dayBranch = dayKorean.charAt(1)
-        const monthBranch = monthKorean.charAt(1)
-        const yearBranch = yearKorean.charAt(1)
-        const hourBranch = hourKorean.charAt(1) || null
-        const birthYear = new Date(submission.birth_date).getFullYear()
-        if (dayStem && dayBranch && monthBranch && yearBranch && Array.isArray(sd.daewoon) && sd.sinGangSinYak) {
-          submission.saju_data = {
-            ...sd,
-            decadeFortune: calculateDecadeFortune({
-              gender: submission.gender === 'female' ? 'female' : 'male',
-              dayStem,
-              dayBranch,
-              monthBranch,
-              yearBranch,
-              hourBranch,
-              birthYear,
-              isDayMasterStrong: (sd as any).expert ? !!(sd as any).expert.strong : sd.sinGangSinYak.ratio >= 50, // 새 계산(expert)이 있으면 그 기준, 옛 저장본은 기존 기준
-              daewoon: sd.daewoon
-            })
-          }
-          console.log('[v0] Computed decadeFortune on the fly for legacy submission')
-        }
-      } catch (fallbackError) {
-        console.error('[v0] Failed to compute fallback decadeFortune:', fallbackError)
-      }
-    }
+    // 저장된 decadeFortune 은 옛 계산(시작 연도 1년 오차)일 수 있으므로 신뢰하지 않고 항상 다시 계산한다.
+    const birthYear0 = Number(String(submission.birth_date).slice(0, 4)) || undefined
+    submission.saju_data = refreshDecadeFortune(submission.saju_data, submission.gender === 'female' ? 'female' : 'male', birthYear0)
+
+    // 한글 이름은 CJK 정리 단계에서 지워지므로 프롬프트에는 로마자 표기를 사용한다.
+    const displayName = hasCJK(submission.name || '') ? romanizeName(submission.name) : (submission.name || 'friend')
 
     console.log('[v0] Generating 96 paid facts')
     console.log('[v0] Context injection summary:')
@@ -200,7 +168,7 @@ export async function POST(request: Request) {
     // 5. Gemini에 전체 context 주입
     const userPrompt = `
 === CUSTOMER SAJU DATA ===
-Name: ${submission.name}
+Name: ${displayName}
 Gender: ${submission.gender}
 Birth Date: ${submission.birth_date}
 Birth Country: ${submission.birth_country}
@@ -244,24 +212,21 @@ Based on all the context above, generate 96 NEW facts that:
    characters on the page. If you want to emphasize a year or phrase, just write it in plain text with
    no wrapping characters at all. Never write an actual Chinese hanja or Korean Hangul character anywhere in
    any of the 96 cards or the closing letter (no 土/火/水/金/木, no 己/甲/etc., no Hangul) — the output
-   must be 100% Latin script. This does NOT mean dropping the Saju terminology itself: every Day
-   Master, element, Ten God, and Sinsal/relational term (Wonjinsal, Hyeong, Chung, Hap, etc.) should
-   still be named using its ROMANIZED form, exactly like the style already modeled in section 01 below
-   ("Gi-to", "Mi-to", "Zi-mi Wonjin-Sal"). Whenever you introduce one of these romanized terms, follow
-   it with a short plain-English gloss in parentheses the first time it's used in that card, e.g.
-   "Gi-to (Earth)", "Wonjinsal (Clash)", "'甲' -> "Gap (direct wealth)"" — never the bare hanja/Hangul
-   character alone, and never the romanized term with zero gloss on first use either. The romanized
-   term ALWAYS sits outside the parentheses, and the gloss ALWAYS sits inside them — never collapse
-   both into the parentheses. WRONG: "a missing (Sik-Sin - Eating God)" or "your (Hyeon-Chim-Sal -
-   Sharp Needle)" (term name is missing entirely, gloss uses "-" inside the parens). RIGHT: "a missing
-   Sik-Sin (Eating God)" or "your Hyeon-Chim-Sal (Sharp Needle)". This rule applies to ALL 96 cards,
-   not just the Truth Bomb cards.
+   must be 100% Latin script.
+
+STYLE OF TERMS (strict, applies to all 96 cards and the closing letter):
+- All data you receive about stars, patterns, luck cycles, grades and ganzi is already in English / romanized form. Never copy Hangul or Hanja.
+- Write Saju terms as plain words: Hurting Officer energy, the Direct Seal pattern, your Wonjin. Do NOT wrap ten gods, patterns, grades or ganzi in parentheses.
+- Put a stem-branch name in single quotes: the year 2026 'Byeong-O', your 'Gyeong-In' luck cycle, the 'Mi-Ja Wonjin' between your Year and Day branches.
+- Use parentheses ONLY to explain a term that a non-Korean reader would not understand, once per term in the whole report, in the form Term (short plain-English explanation), e.g. Daewoon (10-year luck cycle), Gyo-un-gi (transition period), Gongmang (void), Yongsin (Useful God). Never put only a term inside parentheses, and never use " - " inside them.
+- Never write the strength as a percentage.
+- When naming a luck cycle or Gyo-un-gi, cite the years from finalFacts.luckCycles (yearsActive, changesInYear). If you give ages, use internationalAges only.
 
 OUTPUT FORMAT:
 Key Point: You must embody a Gen-Z persona—playful and witty, yet brutally honest about the facts, ultimately delivering a core message of warmth, comfort, and practical solutions. Avoid appearing overly playful or flippant. Bridge the data with empathy.
 
-IMPORTANT: Use the customer's name ${submission.name} ONLY in Card 1, the final card, and the closing letter to make it personal. Do NOT use the name in any other card — except in Card 1, the final card, and the closing letter.
-Example: "${submission.name},...", for the first fact and, ${submission.name}, remember that..." for the last fact.
+IMPORTANT: Use the customer's name ${displayName} ONLY in Card 1, the final card, and the closing letter to make it personal. Do NOT use the name in any other card — except in Card 1, the final card, and the closing letter.
+Example: the first card starts with "Hey ${displayName}," and the last card starts with "${displayName}, remember that..."
 
 01. The Core Aura: Your 4 Pillars Unlocked 
 * Focus: The essence of the Day Master and the Independence Index (Strength/Weakness).
@@ -290,7 +255,7 @@ Example: "${submission.name},...", for the first fact and, ${submission.name}, r
 (Channels of wealth luck and specific behavioral guidelines for attracting money, as well as things that are good to manage or turn into habits.) It is best to connect this naturally while having already well-understood and grasped the career section in part 4.
 * Focus: Presence of Wealth Stars (Jae-seong) and whether Output (Sik-sang) generates Wealth.
 * Data: Intensity of Wealth Stars + Presence of a "Wealth Vault" (Jae-go) + Timing of wealth luck entry in the Daewoon. Analyze the form of a "Money Pipeline" rather than just simple effort.
-* FINAL FACTS rules: Mention a star (Sinsal) only if it appears in \`finalFacts.sinsalByPillar\`. Mention the Wealth Vault (Jae-go) only if "재고귀인" appears in \`finalFacts.sinsalByPillar\`. Take month-branch support (Deuk-ryeong), the current luck cycle, and the Gyo-un-gi (cycle change) from \`finalFacts.strength.gotMonthSupport\` and \`finalFacts.luckCycles\`; never work them out from age yourself.
+* FINAL FACTS rules: Mention a star (Sinsal) only if it appears in \`finalFacts.sinsalByPillar\`. Mention the Wealth Vault (Jae-go) only if "Jaegogwiin" (Wealth Vault) appears in \`finalFacts.sinsalByPillar\`. Take month-branch support (Deuk-ryeong), the current luck cycle, and the Gyo-un-gi (cycle change) from \`finalFacts.strength.gotMonthSupport\` and \`finalFacts.luckCycles\`; never work them out from age yourself.
 
 06. Love & Endgame: Your Relationship Dynamics 
 (Dating style, attractive energy, and clear hints about the future spouse. If there are specific years to note, capture the characteristics and inform them. For example, appearance, personality, job, synergy, harmony, etc.)
@@ -307,7 +272,7 @@ Example: "${submission.name},...", for the first fact and, ${submission.name}, r
 07. Future Self Sneak Peek: A Letter from 2030 [Focus & Data Spine]
 * Focus: The tail end of the current Luck Cycle (Daewoon), the start of the next Daewoon, and the flow of Annual Luck for the following three years (${reportYear+1}~${reportYear+3}), after ${reportYear} (Year of the ${yearNickname(reportYear)}).
 * Data: Transition periods of the Daewoon (Gyo-un-gi) + Harmony/Clash relationships between the Stems/Branches of ${reportYear}/${reportYear+1}/${reportYear+2} and the user's Saju + Timing for the realistic manifestation of the Useful God (Yongshin).
-* Logic: Prove with data that current struggles are due to a "turning point in luck" and predict what energy will complete your persona in the future. Interest increases if you mix in light guesses based on the same elements, such as "the type of car you will drive in 2030," "travel destinations you will frequent in the future," or if you go abroad, the specific country or city that matches your theme perfectly.
+* Logic: Prove with data that current struggles are due to a "turning point in luck" and predict what energy will complete your persona in the future. Do NOT invent concrete possessions, vehicles, homes or job titles that the chart cannot support; describe the mood and behavior explained by that year's Ten Gods and relationship data instead. Light, chart-grounded hints about travel themes are fine.
 * Comfort: Emphasize that "current pain is a 'meaningful growth pain' based on data" to encourage the user.
 
 08. Lucky Environment: Finding Your Sacred Space 
@@ -315,6 +280,7 @@ Example: "${submission.name},...", for the first fact and, ${submission.name}, r
 * Data: Climate control (Johu) and Balance (Eokbu) Useful Gods that fill the psychological thirst (elemental deficiency). It is best to clearly write the primary Useful God first—the first character listed in the Useful God data. Match specific directions, colors, and numbers to the elemental data.
 * Decision rule: Start with FINAL FACTS.yongsin.primary.elements. If climate.stillUrgent is true, present the climate element(s) first and the strength-balance element(s) (balance.usefulElements) second as a real second lever. If not, present balance first and mention climate only if climate.applies.
 * Directions, colors, and numbers must come ONLY from this fixed table (never invent others): Wood = East / green, teal / 3, 8 · Fire = South / red, orange / 2, 7 · Earth = Center, Southwest, Northeast / yellow, brown / 5, 10 · Metal = West / white, silver, gold / 4, 9 · Water = North / black, navy / 1, 6.
+* Direction, color and number lines must use the SAME set of elements: every climate (Johu) element and every strength-balance (Eokbu) element you name gets its own direction, its own color and its own number from the table. Never give the direction for one element set and the color/number for a different one.
 [Health & Energy Management]
 * Focus: Energy overload (strongest element) vs. Isolated elements.
 * Data: Elements severely attacked (Clash) within the Saju or elements that are completely missing (thirst). Analyze vulnerable organs and the mechanism through which stress manifests in the body.
@@ -331,6 +297,7 @@ And please, you need to include these 3 sentences for 'everyone'. Because we mas
 - The main theme of your ${reportYear} is *** . (Ground *** in finalFacts: this year's stem/branch ten gods + the current luck cycle in FINAL FACTS.luckCycles.current. Name ONE opportunity and ONE thing to be careful about.)
 - Your love luck peaks around ${lovePeakTeaserYear}. The reason is [exactly ONE concrete reason]. Your partner tends to feel like [energy type]. (The free page blurs only ${lovePeakTeaserYear}; in the paid report follow the LOVE PEAK RULE below, including the two-year wording when peak.status is "past".)
 - Your wealth flow timing and secret talents are already mapped out like ***** (Ground in decadeFortune score/years and the strongest ten-god group. Give a specific year range and a specific talent.)
+- Wealth-timing sentence: place the strongest money window inside a luck cycle whose score in finalFacts.luckCycles is Medium or High (current or previous). If the next cycle is Low, say that cycle is for consolidating what was built, not for expansion. Never call a Low cycle a period of big opportunities.
 
 LOVE PEAK RULE (applies to the teaser sentence above and to Section 06 Card 10):
 finalFacts.lovePeak = { window, peak, upcomingPeak }.
@@ -378,10 +345,8 @@ real comfort or a real fix is what makes a paid report feel worth paying for.
   never leave the reader on the harsh part. The comfort must feel earned and specific to the chart,
   not a generic "but it's okay!" tack-on.
 - Same format as every other card: ONE paragraph, HARD MAX 220 characters including spaces (count
-  before finalizing — if it runs long, cut words, don't add more). Follow Rule 5 above for any
-  Saju/Ten-God/Sinsal term: use its romanized form with a short English gloss in parentheses on first
-  use (e.g. "a tendency toward Jae-Da-Sin-Yak (Overwhelming Wealth, Weak Self)"), never the bare
-  hanja/Hangul character. Same warm Gen-Z wise-friend voice as the rest of the report — the difference
+  before finalizing — if it runs long, cut words, don't add more). Follow the STYLE OF TERMS rules above for any
+  Saju term (plain words, no parentheses around ten gods or patterns), never a raw hanja/Hangul character. Same warm Gen-Z wise-friend voice as the rest of the report — the difference
   from other cards is the precision of the observation, not the tone, and NEVER the presence of a raw
   Chinese/Korean character.
 - Do not contradict anything already stated elsewhere in that section or in the free 3 facts.
@@ -394,16 +359,15 @@ After the 96 main cards, write exactly ONE closing letter (field name \`closingL
 long, cut sentences/clauses until it fits inside this range rather than submitting a longer letter.
 This is not a soft target: a letter over 700 characters is a failed output. This letter should read
 as flowing, plain-English prose — avoid naming specific Saju/Ten-God terms here at all if you can
-express the same idea through the nature metaphor instead; if you must name one, follow Rule 5 (
-romanized form + a short English gloss in parentheses), and never write a raw Chinese/Korean
-character. This is the single most
+express the same idea through the nature metaphor instead; if you must name one, follow the STYLE OF TERMS
+rules above, and never write a raw Chinese/Korean character. This is the single most
 emotionally resonant piece of the entire report — it should read like a warm, perceptive friend who
 truly sees this person, not a summary of facts already stated. Follow this arc, in flowing prose (not
 labeled sections):
 1. Open by naming ONE real struggle this customer likely carries, drawn from the chart's actual core
    tension (e.g. an overwhelming element with no outlet, a Day Master fighting to hold its ground, a
    clash between two pillars) — acknowledge how exhausting or lonely that struggle has likely been,
-   using the customer's name (${submission.name}) once here. Example tone: naming a specific
+   using the customer's name (${displayName}) once here. Example tone: naming a specific
    quiet suffering ("the lonely nights spent trying to prove you're enough") rather than a generic
    compliment.
 2. Explain WHY, using one vivid nature/metaphor tied to the actual chart structure already
@@ -581,6 +545,8 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
       const CJK_TEST = new RegExp(CJK_CHAR)
       function sanitizeCJKArtifacts(text: string): string {
         let result = text
+        // "한글/한자 + 공백 + (English gloss)" -> keep only the English gloss, so "(Gyeong-In) Daewoon"-style empty wrappers never remain.
+        result = result.replace(new RegExp(`${CJK_CHAR}+\\s*\\(([^()]*[A-Za-z][^()]*)\\)`, 'g'), '$1')
         // Drop a whole "(...)" group if any CJK character appears inside it, including one trailing
         // comma/space (so "Earth (), is grounded" -> "Earth is grounded", not "Earth , is grounded").
         result = result.replace(new RegExp(`\\s*\\([^()]*${CJK_CHAR}[^()]*\\)\\s*,?`, 'g'), ' ')

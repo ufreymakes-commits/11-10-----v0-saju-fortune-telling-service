@@ -1,7 +1,38 @@
 // 유료 리포트 프롬프트용 "정리된 사주 데이터". 옛 필드(조후 문자열, 옛 신살, 옛 강도 %, 과거 중심 결혼 타이밍)를 제거하고
 // 전문가 기준 확정값만 남겨 LLM 에게 모순 없는 단일 근거를 준다.
-import { STEM_PRONUNCIATION, TEN_GODS_ENGLISH, STEM_TO_ELEMENT, ELEMENTS, ELEMENT_ENGLISH } from './constants'
+import { BRANCH_PRONUNCIATION, STEM_PRONUNCIATION, TEN_GODS_ENGLISH, STEM_TO_ELEMENT, ELEMENTS, ELEMENT_ENGLISH } from './constants'
 import { yearGanzi, yearNickname, buildLovePeak } from './romance'
+import { calculateDecadeFortune } from './decade-fortune'
+import { romanizeName } from '../romanize-name'
+
+// LLM 에 한글이 들어가면 한글을 그대로 따라 쓰고 뒤에 영어 괄호를 붙인다(그 뒤 한글만 지워져 "(Hurting Officer)" 같은 빈 괄호 문장이 됨).
+// 그래서 프롬프트에 들어가는 신살 이름 / 12운성 / 등급은 미리 영어로 바꿔 둔다.
+const SINSAL_GLOSS: Record<string, string> = { 도화살: 'Peach Blossom', 홍염살: 'Red Flame', 백호살: 'White Tiger', 현침살: 'Sharp Needle', 공망: 'Void', 원진살: 'Resentment', 재고귀인: 'Wealth Vault', 천을귀인: 'Noble Helper', 태극귀인: 'Grand Ultimate Noble', 천록귀인: 'Heavenly Salary', 양인살: 'Blade', 고신살: 'Lonely Star', 과숙살: 'Widow Star', 음양살: 'Yin-Yang Imbalance', 음욕살: 'Passion', 여연살: 'Romance Star', 남연살: 'Romance Star', 효신살: 'Owl Spirit', 학당귀인: 'Scholar Noble', 문창귀인: 'Literary Noble', 역마살: 'Traveling Horse', 화개살: 'Canopy', 괴강: 'Kwegang', 간여지동: 'Same Stem and Branch', 금여: 'Golden Carriage', 암록: 'Hidden Salary', 정록: 'Salary Seat', 복성귀인: 'Fortune Star' }
+const STAR_EN: Record<string, string> = { 장생: 'Birth', 목욕: 'Bath', 관대: 'Crown', 건록: 'Prosperity', 제왕: 'Peak', 쇠: 'Decline', 병: 'Illness', 사: 'Death', 묘: 'Tomb', 절: 'Extinction', 태: 'Conception', 양: 'Nurture' }
+const GRADE_EN: Record<string, string> = { 상: 'High', 중: 'Medium', 하: 'Low' }
+const GRADE_STR_EN: Record<string, string> = { 신약: 'Weak', 중화신약: 'Balanced-leaning Weak', 중화신강: 'Balanced-leaning Strong', 신강: 'Strong' }
+const GROUP_EN: Record<string, string> = { 비겁: 'Peers (Shoulder to Shoulder / Rob Wealth)', 식상: 'Output (Eating God / Hurting Officer)', 재성: 'Wealth', 관성: 'Officer', 인성: 'Seal (Resource)' }
+const PATTERN_EN: Record<string, string> = { 군비쟁재격: 'Rob Wealth Fighting Wealth', 인중용재격: 'Seal-heavy, Wealth as medicine', 관살태과격: 'Excess Officers', 재중용비격: 'Wealth-heavy, Peers as medicine' }
+const GYEOK_EN: Record<string, string> = { 정관격: 'Direct Officer pattern', 편관격: 'Indirect Officer pattern', 정재격: 'Direct Wealth pattern', 편재격: 'Indirect Wealth pattern', 식신격: 'Eating God pattern', 상관격: 'Hurting Officer pattern', 정인격: 'Direct Seal pattern', 편인격: 'Indirect Seal pattern', 비견격: 'Shoulder to Shoulder pattern', 겁재격: 'Rob Wealth pattern' }
+const ganziEn = (g?: string) => g && g.length >= 2 ? `${((STEM_PRONUNCIATION as any)[g[0]] ?? g[0]).split('-')[0]}-${(BRANCH_PRONUNCIATION as any)[g[1]] ?? g[1]}` : g
+export const sinsalEn = (ko: string) => { const r = romanizeName(ko).replace(/\s+/g, ''); return SINSAL_GLOSS[ko] ? `${r} (${SINSAL_GLOSS[ko]})` : r }
+
+/** 저장된 saju_data 의 decadeFortune 은 옛 연도 계산(시작 연도 +1 오류)을 담고 있을 수 있다. 저장된 값을 믿지 않고 항상 다시 계산해 채운다. */
+export function refreshDecadeFortune(saju: any, gender: 'male' | 'female', birthYear?: number) {
+  try {
+    if (!saju || !birthYear || !Array.isArray(saju.daewoon)) return saju
+    const k = (p: any) => p?.fullNameKorean || ''
+    const dayK = k(saju.dayPillar), monthK = k(saju.monthPillar), yearK = k(saju.yearPillar), hourK = k(saju.hourPillar)
+    if (!dayK || !monthK || !yearK) return saju
+    return {
+      ...saju,
+      decadeFortune: calculateDecadeFortune({
+        gender, dayStem: dayK.charAt(0), dayBranch: dayK.charAt(1), monthBranch: monthK.charAt(1), yearBranch: yearK.charAt(1), hourBranch: hourK.charAt(1) || null,
+        birthYear, isDayMasterStrong: saju.expert ? !!saju.expert.strong : (saju.sinGangSinYak?.ratio ?? 0) >= 50, daewoon: saju.daewoon,
+      }),
+    }
+  } catch (e) { console.error('[v0] refreshDecadeFortune failed (using stored decadeFortune):', e); return saju }
+}
 
 const GROUPS = ['비겁', '식상', '재성', '관성', '인성'] as const
 const SELF_GODS = ['비견', '겁재', '정인', '편인']   // 월지가 이 십성이면 득령(月令을 얻음)
@@ -34,16 +65,16 @@ export function buildPaidContext(saju: any, gender: 'male' | 'female', reportYea
   const monthGod = saju?.tenGods?.byPosition?.monthBranch
   const finalFacts: any = {
     note: 'FINAL code-computed facts. They override anything you would infer yourself and any older field. Do not recalculate.',
-    reportYear: { year: reportYear, ganziEn: yearGanzi(reportYear), nickname: yearNickname(reportYear) },
+    reportYear: { year: reportYear, ganziEn: ganziEn(yearGanzi(reportYear)), nickname: yearNickname(reportYear) },
     dayMaster: dm ? { stem: (STEM_PRONUNCIATION as any)[dm], element: dmEl ? (ELEMENT_ENGLISH as any)[dmEl] : null } : null,
   }
   if (expert) {
-    finalFacts.strength = { grade: expert.grade, score: expert.support, outOf: 120, note: 'This is a 0-120 score, NOT a percentage. Never write it as "%".', gotMonthSupport: monthGod ? SELF_GODS.includes(monthGod) : null }
-    finalFacts.gyeokguk = { name: expert.gyeok, monthStemRevealed: expert.gyeokTuchul }
+    finalFacts.strength = { grade: GRADE_STR_EN[expert.grade] ?? expert.grade, score: expert.support, outOf: 120, note: 'This is a 0-120 score, NOT a percentage. Never write it as "%".', gotMonthSupport: monthGod ? SELF_GODS.includes(monthGod) : null }
+    finalFacts.gyeokguk = { name: GYEOK_EN[expert.gyeok] ?? expert.gyeok, monthStemRevealed: expert.gyeokTuchul }
     finalFacts.yongsin = {
       primary: { source: expert.headline?.source === '조후' ? 'Climate balance (Johu) comes first because the season is extreme and not yet balanced in the chart' : 'Strength balance (Eokbu)', elements: toEn(expert.headline?.elements) },
       climate: { applies: !!expert.johu?.applicable, kind: expert.johu?.kind === '조열' ? 'hot and dry' : expert.johu?.kind === '한습' ? 'cold and damp' : null, stillUrgent: !!expert.johu?.urgent, neededElements: toEn(expert.johu?.elements) },
-      balance: { patternName: expert.eokName, usefulGroups: expert.eokYong, usefulElements: (expert.eokYong || []).map(groupEl), supportingElements: (expert.eokHee || []).map(groupEl) },
+      balance: { patternName: PATTERN_EN[expert.eokName] ?? expert.eokName, usefulGroups: (expert.eokYong || []).map((g: string) => GROUP_EN[g] ?? g), usefulElements: (expert.eokYong || []).map(groupEl), supportingElements: (expert.eokHee || []).map(groupEl) },
       note: 'When the climate element is the primary one, the strength-balance element is still a real second lever. Present both; never call either the only Useful God.',
     }
   }
@@ -51,11 +82,11 @@ export function buildPaidContext(saju: any, gender: 'male' | 'female', reportYea
   const decs: any[] | undefined = saju?.decadeFortune?.decades
   if (decs) {
     const i = decs.findIndex((x) => x.startYear <= reportYear && reportYear < x.endYear)
-    const fmt = (x: any) => x && ({ ganzi: x.ganziKorean ?? x.ganzi, ages: `${x.startAge}-${x.endAge}`, years: `${x.startYear}-${x.endYear}`, stemTenGodEn: TEN_GODS_ENGLISH[x.stemTenGod] ?? x.stemTenGod, twelveStar: x.twelveStar, score: x.score })
-    finalFacts.luckCycles = { previous: i > 0 ? fmt(decs[i - 1]) : null, current: i >= 0 ? fmt(decs[i]) : null, next: i >= 0 && decs[i + 1] ? fmt(decs[i + 1]) : null, changesInYear: i >= 0 ? decs[i].endYear : null, note: 'Use these for "current / previous / next" cycle statements. Do not work out the current cycle from age yourself.' }
+    const fmt = (x: any) => x && ({ ganzi: ganziEn(x.ganziKorean ?? x.ganzi), yearsActive: `${x.startYear}-${x.endYear - 1}`, internationalAges: `${x.startAge - 1}-${x.endAge - 2}`, stemTenGodEn: TEN_GODS_ENGLISH[x.stemTenGod] ?? x.stemTenGod, twelveStar: STAR_EN[x.twelveStar] ?? x.twelveStar, score: GRADE_EN[x.score] ?? x.score })
+    finalFacts.luckCycles = { previous: i > 0 ? fmt(decs[i - 1]) : null, current: i >= 0 ? fmt(decs[i]) : null, next: i >= 0 && decs[i + 1] ? fmt(decs[i + 1]) : null, changesInYear: i >= 0 ? decs[i].endYear : null, note: 'Use these for "current / previous / next" cycle statements. Cite the YEARS (yearsActive), and if you give ages use internationalAges only (never Korean-age numbers). Do not work out the current cycle from age yourself.' }
   }
   // 신살: 전문가 기준 슬롯별 + 12신살 (옛 spirits 오탐 제거)
-  finalFacts.sinsalByPillar = saju?.expertSinsal ?? null
+  finalFacts.sinsalByPillar = saju?.expertSinsal ? Object.fromEntries(Object.entries(saju.expertSinsal).map(([slot, names]) => [({ 시: 'hour', 일: 'day', 월: 'month', 연: 'year' } as any)[slot] ?? slot, (names as string[]).map(sinsalEn)])) : null
   // 연애운 정점: 만 19~39세 구간에서 점수가 가장 높은 해 (romance.ts buildLovePeak). 옛 marriageTiming 은 사용하지 않는다.
   finalFacts.lovePeak = buildLovePeak(saju, gender, reportYear, birthYear)
   return { sajuForPrompt: sd, finalFacts }

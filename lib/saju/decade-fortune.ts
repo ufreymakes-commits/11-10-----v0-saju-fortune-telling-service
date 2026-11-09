@@ -242,9 +242,11 @@ export function calculateDecadeFortune(params: {
     const score = scoreFromGroupAndStar(stemGroup, d.twelveStar, favorableTenGodGroups, unfavorableTenGodGroups)
     const isYouthDecade = (d.startAge + d.endAge) / 2 < 20
 
-    const startYear = birthYear + d.startAge
-    const endYear = birthYear + d.endAge
-    const yearCount = Math.max(1, endYear - startYear + 1)
+    // startAge/endAge 는 세는나이(만 아님). 정답지: 26살 대운 = 1996년생 2021~2030년 → 시작 연도 = 출생연도 + 시작나이 - 1.
+    // endYear 는 "다음 대운 시작 연도"(exclusive), 한 대운은 정확히 10개 연도.
+    const startYear = birthYear + d.startAge - 1
+    const endYear = birthYear + d.endAge - 1
+    const yearCount = Math.max(1, endYear - startYear)
     const yearsInDecade = calculateYeonWoon(startYear, yearCount)
 
     // ==========================================================

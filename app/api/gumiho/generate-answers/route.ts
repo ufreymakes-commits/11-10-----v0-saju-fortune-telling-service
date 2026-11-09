@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { generateText } from 'ai'
-import { buildPaidContext } from '@/lib/saju/paid-context'
+import { buildPaidContext, refreshDecadeFortune } from '@/lib/saju/paid-context'
 import { buildRomanceFacts } from '@/lib/saju/romance'
+import { romanizeName, hasCJK } from '@/lib/romanize-name'
 
 // ================================================================
 // SYSTEM PROMPT - 직접 수정 가능
@@ -123,6 +124,9 @@ export async function POST(request: Request) {
     const reportYear = Math.max(new Date().getFullYear(), 2026)
     const birthYear = Number(String(submission.birth_date).slice(0, 4)) || undefined
     const gender = submission.gender === 'female' ? 'female' : 'male'
+    const birthYear0 = Number(String(submission.birth_date).slice(0, 4)) || undefined
+    submission.saju_data = refreshDecadeFortune(submission.saju_data, gender, birthYear0)
+    const displayName = hasCJK(submission.name || '') ? romanizeName(submission.name) : (submission.name || 'friend')
     let sajuForPrompt: any = submission.saju_data
     let finalFacts: any = null
     let romanceFacts: any = null
@@ -144,7 +148,7 @@ export async function POST(request: Request) {
     // 5. Build the context prompt
     const userPrompt = `
 === PERSON'S INFORMATION ===
-Name: ${submission.name}
+Name: ${displayName}
 Birth Date: ${submission.birth_date}
 Birth Time: ${submission.birth_time || 'Unknown'}
 Gender: ${submission.gender}
