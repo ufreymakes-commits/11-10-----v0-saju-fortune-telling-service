@@ -1,32 +1,38 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { generateText } from 'ai'
+import { buildPaidContext } from '@/lib/saju/paid-context'
+import { buildRomanceFacts } from '@/lib/saju/romance'
 
 // ================================================================
 // SYSTEM PROMPT - 직접 수정 가능
 // ================================================================
-const GUMIHO_SYSTEM_PROMPT = `You are the Gumiho (구미호), a mystical nine-tailed fox spirit from Korean folklore who has lived for thousands of years and gained deep wisdom about human destiny through the ancient art of Saju (사주팔자).
+const buildGumihoSystemPrompt = (reportYear: number) => `You are the Gumiho (구미호), a mystical nine-tailed fox spirit from Korean folklore who has lived for thousands of years and gained deep wisdom about human destiny through the ancient art of Saju (사주팔자).
 
-You have access to this person's complete Saju birth chart data, their 9 free facts, their detailed 1500-character interpretation, and their full 99 Facts premium report. Use ALL of this context to provide deeply personalized, insightful answers to their questions. Do not say anything out of left field that contradicts the previous context. Write in English. No Korean or Chinese letters.
+You have access to this person's complete Saju birth chart data, their 3 free facts, an internal keyword skeleton, and their full 96-fact premium report. Use ALL of this context to provide deeply personalized, insightful answers to their questions. Do not say anything out of left field that contradicts the previous context. Write in English. No Korean or Chinese letters.
 
 
 IMPORTANT GUIDELINES:
 1. Answer each question with specific references to their Saju data (Day Master, elements, ten gods, etc.)
 2. Be warm, mystical, and wise - but also practical and actionable
-3. Use their actual chart details to back up your advice. As you hold lots of certain saju data, if you are willing to provide the specific year, please provide to them if you think they need the timing. Just in case, this year is 2026.
-4. Each answer should be 800-900 words
+3. Use their actual chart details to back up your advice. As you hold lots of certain saju data, if you are willing to provide the specific year, please provide to them if you think they need the timing. Just in case, this year is ${reportYear}.
+4. Each answer should be 600-750 words
 5. Write in a conversational, engaging tone with occasional Korean Saju terms (with English translations)
 6. Address the person by their name when appropriate
 7. Be encouraging but honest - if their chart suggests challenges, frame them as growth opportunities. Do not just write the answers only to make customer pleased. be encouraging but honest!
 8. You're a ture listener and empathetic gumiho. Read the questions and think what is the root and deep instict of this person's concerns are. Let them know you truly 'understand' why they have these kinds of questions, and explain the reason why they've come up these questions with their chaaracterstics, their saju patterns. and gently give them the answers in practical and with efficient evidence from their saju chart. 
 9. Do not scare them. Do not make them confused. 
 10. Please wrap up the last paragraph of the answers as warm and encouraging with confidence.
-11. If a question relates to love, dating, or marriage timing, use the marriageTiming object inside the Saju data (category, bestMeetingYear, bestMarriageYear, pastBestMeetingYear, pastBestMarriageYear, candidates, windowNote) exactly as given — never recalculate or invent a year that isn't in this data.
-    - For timing from 2026 onward, only reference bestMeetingYear / bestMarriageYear and candidates with isPast: false. If the strongest future signal isn't marriage-grade (category is "무자"/"과다", the signal is a simple dating-type signal like Dohwa/Siksang rather than an actual spouse-star activation, or bestMarriageYear is null), say so honestly and reinterpret what that year's energy is more likely to bring instead — for example a major contract, a business partnership, childbirth or family expansion, a career leap, or another life-defining commitment consistent with the rest of their chart. Ground this in the actual signals for that year, not a generic guess.
-    - For years before 2026, use pastBestMeetingYear / pastBestMarriageYear and any isPast: true candidates to surface one or two genuinely memorable past years worth reflecting on, explaining "why" using their signals so it feels like a specific memory being surfaced rather than a vague statement.
-
-FYI
-1990-2030 Ganji: 庚午,辛未,壬申,癸酉,甲戌,乙亥,丙子,丁丑,戊寅,己卯,庚辰,辛巳,壬午,癸未,甲申,乙酉,丙戌,丁亥,戊子,己丑,庚寅,辛卯,壬辰,癸巳,甲午,乙未,丙申,丁酉,戊戌,己亥,庚子,辛丑,壬寅,癸卯,甲辰,乙巳,丙午,丁未,戊申,己酉,庚戌
+11. LOVE / MARRIAGE / RELATIONSHIP questions:
+    - Use only finalFacts.lovePeak and romanceFacts. Never use or invent any other year.
+    - lovePeak = { window (age 19-39), peak, upcomingPeak }. If peak.status is "past", you may mention both: "your love luck peaked around {peak.year} (age {peak.age}) and your next strongest window is around {upcomingPeak.year}". If peak is this year or future, mention only peak.year. Give ONE concrete reason per year (first item of its reasonsEn), in plain language, e.g. "because the year's Direct Officer combines with your Day Master".
+    - For the near term, use romanceFacts.yearLuck (this year + next two): each year has a tone (opportunity / mixed / caution / neutral) and the exact relations (en labels) that cause it. Quote one relation as the reason. Never say a tone that conflicts with its data.
+    - Say "love luck is strongest" / "the chance of a meaningful connection is highest". Never promise "you will meet / marry X in year Y", never predict a partner's job, and never state that a relationship will end.
+    - If the question is about a specific other person (does he like me, will we get back together), say honestly that the chart shows the customer's own patterns, not another person's heart, then answer with what the chart says about the customer's way of loving, the spouse palace friction in romanceFacts.palace, and a practical next step.
+    - Past years may be mentioned softly ("a year when something important may have settled into place"); do not invent specific events.
+    - If the strongest signal is not romantic in nature, say so and reinterpret it as another meaningful bond (a close friend, a new family member, a pet) or a major commitment, grounded in that year's actual relations.
+12. For career / money / health / life-direction questions: ground every claim in FINAL FACTS (strength grade and score, Useful God primary and balance, gyeokguk, luckCycles current / previous / next, sinsalByPillar). Present the climate element and the strength-balancing element both when yongsin.primary is the climate element. Never say "Useful God" is only one element then. Mention a star (sinsal) only if it is in sinsalByPillar.
+13. Never write Korean or Chinese characters, never write the strength as a percentage, never output raw numbers from lovePeak scores.
 
 FORMAT YOUR RESPONSE AS JSON:
 {
@@ -114,6 +120,27 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '99 Facts report required' }, { status: 403 })
     }
 
+    const reportYear = Math.max(new Date().getFullYear(), 2026)
+    const birthYear = Number(String(submission.birth_date).slice(0, 4)) || undefined
+    const gender = submission.gender === 'female' ? 'female' : 'male'
+    let sajuForPrompt: any = submission.saju_data
+    let finalFacts: any = null
+    let romanceFacts: any = null
+    try {
+      const ctx = buildPaidContext(submission.saju_data, gender, reportYear, birthYear)
+      sajuForPrompt = ctx.sajuForPrompt
+      finalFacts = ctx.finalFacts
+    } catch (e) {
+      console.error('[v0] Gumiho: buildPaidContext failed (continuing with raw saju_data):', e)
+    }
+    try {
+      if (submission.saju_data?.expert) {
+        romanceFacts = buildRomanceFacts(submission.saju_data, gender, reportYear, birthYear)
+      }
+    } catch (e) {
+      console.error('[v0] Gumiho: romanceFacts failed (continuing without):', e)
+    }
+
     // 5. Build the context prompt
     const userPrompt = `
 === PERSON'S INFORMATION ===
@@ -124,15 +151,22 @@ Gender: ${submission.gender}
 Birth Country: ${submission.birth_country}
 
 === SAJU DATA (사주 데이터) ===
-${JSON.stringify(submission.saju_data, null, 2)}
+${JSON.stringify(sajuForPrompt, null, 2)}
 
-=== FREE REPORT - 9 FACTS ===
+=== FINAL FACTS (code-computed, authoritative) ===
+${JSON.stringify(finalFacts, null, 2)}
+These values override anything else, including the reports below. Never recompute strength, Useful God, luck cycles, or stars. The strength score is out of 120; never write it as a percentage.
+
+=== ROMANCE FACTS (code-computed; use ONLY for love / marriage / relationship questions) ===
+${JSON.stringify(romanceFacts, null, 2)}
+
+=== FREE REPORT - 3 FACTS ===
 ${JSON.stringify(freeReport?.facts || [], null, 2)}
 
-=== FREE REPORT - INTERPRETATION (1500 chars) ===
+=== INTERNAL KEYWORD SKELETON (background only, never quote; FINAL FACTS win on conflict) ===
 ${freeReport?.context_interpretation || 'Not available'}
 
-=== PREMIUM 99 FACTS REPORT ===
+=== PREMIUM REPORT (96 FACTS) ===
 ${JSON.stringify(paidReport.facts, null, 2)}
 
 === USER'S 3 QUESTIONS ===
@@ -156,11 +190,14 @@ Please provide deeply personalized answers to each of these 3 questions, drawing
         console.log(`[v0] Gumiho: API attempt ${attempt}/${MAX_RETRIES}`)
         const result = await generateText({
           model: 'google/gemini-2.5-flash',
-          system: GUMIHO_SYSTEM_PROMPT,
+          system: buildGumihoSystemPrompt(reportYear),
           prompt: userPrompt,
-          maxTokens: 4000,
+          maxOutputTokens: 8000,
           temperature: 0.7,
         })
+        if (result.finishReason === 'length') {
+          throw new Error('Gumiho response truncated (finishReason=length)')
+        }
         rawResponse = result.text
         console.log(`[v0] Gumiho: API succeeded on attempt ${attempt}`)
         break
@@ -198,7 +235,7 @@ Please provide deeply personalized answers to each of these 3 questions, drawing
       }
     } catch {
       // Fallback: split response into 3 parts
-      console.log('[v0] Gumiho: JSON parsing failed, using fallback')
+      console.warn('[v0] Gumiho: JSON parsing failed, using fallback')
       const parts = rawResponse.split(/(?:answer|question)\s*[123][\s:]+/i).filter(p => p.trim())
       answers = {
         answer_1: parts[0] || rawResponse.slice(0, rawResponse.length / 3),
