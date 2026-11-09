@@ -203,6 +203,209 @@ function findUnknownYears(text: string, allowed: Set<number>): number[] {
   return [...unknown]
 }
 
+// ---- 수리 패스(repair pass) ----
+const CLOSING_LETTER_MAX = 700
+const CLOSING_LETTER_TARGET = 600
+const REGULAR_CARD_MAX = 260
+const SPECIAL_CARD_MAX = 300
+const REPAIR_MAX_CARDS = 12
+
+type ProblemKind = 'long' | 'repeated' | 'truth-bomb' | 'duplicate'
+interface ProblemCard {
+  index: number
+  sectionIdx: number
+  cardIdx: number
+  section: string
+  text: string
+  isTruthBomb: boolean
+  problems: Array<{ kind: ProblemKind; detail: string }>
+}
+
+function quotedTerms(text: string): string[] {
+  const terms: string[] = []
+  for (const m of text.matchAll(/(?<![A-Za-z])'([^'\n]{2,40}?)'(?![A-Za-z])/g)) {
+    const term = m[1].trim()
+    if (term) terms.push(term)
+  }
+  return terms
+}
+
+function wordSet(text: string): Set<string> {
+  return new Set((text.toLowerCase().match(/[a-z]{4,}/g) ?? []))
+}
+
+function yearRanges(text: string): Set<string> {
+  const ranges = new Set<string>()
+  for (const m of text.matchAll(/\b((?:19|20)\d\d)\s*[-\u2013]\s*((?:19|20)\d\d)\b/g)) ranges.add(`${m[1]}-${m[2]}`)
+  return ranges
+}
+
+function jaccard(a: Set<string>, b: Set<string>): number {
+  if (a.size === 0 || b.size === 0) return 0
+  let shared = 0
+  for (const w of a) if (b.has(w)) shared++
+  return shared / (a.size + b.size - shared)
+}
+
+// 문제 카드 수집: (a) 길이 초과 (b) 한 용어가 4장 넘는 카드에 반복 (c) Truth Bomb 주제 중복 (d) 같은 섹션 내 같은 말
+function findProblemCards(sections: any[], lovePeakYears: Array<number | string>): ProblemCard[] {
+  const flagged = new Map<number, ProblemCard>()
+  const termCardCount = new Map<string, number>()
+  const seenBombItems = new Set<string>()
+  let index = 0
+
+  sections.forEach((section, sectionIdx) => {
+    const number = String(section?.sectionNumber ?? '')
+    const cards: any[] = Array.isArray(section?.cards) ? section.cards : []
+    const seenInSection: Array<{ words: Set<string>; ranges: Set<string> }> = []
+
+    cards.forEach((card, cardIdx) => {
+      const text = String(card?.content ?? '')
+      const currentIndex = index++
+      const isTruthBomb = TRUTH_BOMB_SECTIONS.has(number) && cardIdx === cards.length - 1
+      const addProblem = (kind: ProblemKind, detail: string) => {
+        let entry = flagged.get(currentIndex)
+        if (!entry) {
+          entry = { index: currentIndex, sectionIdx, cardIdx, section: number, text, isTruthBomb, problems: [] }
+          flagged.set(currentIndex, entry)
+        }
+        entry.problems.push({ kind, detail })
+      }
+
+      // a) 길이: 일반 카드 260자, 08 장소 카드와 06 연애 피크 카드는 300자까지
+      const isPlaceCard = number === '08' && /\b(places?|regions?|cities|city|coast|coastline|elsewhere|country)\b/i.test(text)
+      const isLovePeakCard =
+        number === '06' && (/\bpets?\b/i.test(text) || lovePeakYears.some((y) => text.includes(String(y))))
+      const limit = isPlaceCard || isLovePeakCard ? SPECIAL_CARD_MAX : REGULAR_CARD_MAX
+      if (text.length > limit) addProblem('long', `${text.length} characters`)
+
+      // b) 반복 용어: 앞의 4장은 두고 5번째 카드부터 문제 카드
+      const terms = [...new Set(quotedTerms(text).map((t) => t.toLowerCase()))]
+      for (const term of terms) {
+        const count = (termCardCount.get(term) ?? 0) + 1
+        termCardCount.set(term, count)
+        if (count > 4) addProblem('repeated', term)
+      }
+
+      // c) Truth Bomb: 앞선 Truth Bomb과 같은 핵심 차트 항목이면 뒤의 카드가 문제 카드
+      if (isTruthBomb) {
+        const item = (quotedTerms(text)[0] ?? text.match(TEN_GOD_PATTERN)?.[0] ?? '').toLowerCase()
+        if (item) {
+          if (seenBombItems.has(item)) addProblem('truth-bomb', item)
+          seenBombItems.add(item)
+        }
+      }
+
+      // d) 같은 섹션 안에서 같은 말을 하는 카드: 뒤의 카드가 문제 카드
+      const words = wordSet(text)
+      const ranges = yearRanges(text)
+      const duplicate = seenInSection.some((prev) => {
+        const similarity = jaccard(words, prev.words)
+        const sharedRange = [...ranges].some((r) => prev.ranges.has(r))
+        return similarity >= 0.55 || (sharedRange && similarity >= 0.3)
+      })
+      if (duplicate) addProblem('duplicate', 'same message as an earlier card in this section')
+      seenInSection.push({ words, ranges })
+    })
+  })
+
+  return [...flagged.values()]
+}
+
+const REPAIR_SYSTEM_PROMPT = `You are an editor fixing specific cards of a Saju (Four Pillars) report written in English.
+Rules for every rewrite:
+- Keep the Gen-Z, warm, practical tone; hedge with "may", "tends to", "can". No guarantees, no fear-based language.
+- 100% Latin script: never write Hangul or Hanja, never use ** markdown markers.
+- Quote stem-branch names in single quotes (e.g. 'Gyeong-In'); do not put ten gods or patterns in parentheses; never write strength as a percentage.
+- Use only facts, chart items, years and ages that appear in FINAL FACTS. Never invent a year, star, or relationship.
+- Do not use the customer's name unless the original text already uses it.
+- Return ONLY a valid JSON array [{"index": ..., "text": "..."}] with exactly one entry for each card you were given. No markdown, no commentary.`
+
+async function repairProblemCards(
+  cards: ProblemCard[],
+  closingLetter: string | null,
+  finalFacts: any,
+): Promise<Map<string, string>> {
+  const describe = (c: ProblemCard) =>
+    c.problems
+      .map((p) => {
+        if (p.kind === 'long')
+          return 'Too long. Rewrite it shorter than 220 characters, keeping the same facts and years.'
+        if (p.kind === 'repeated')
+          return `The term '${p.detail}' is already used in 4 other cards. Rewrite it shorter than 220 characters and talk about a DIFFERENT chart item from FINAL FACTS (not '${p.detail}'), keeping the same years if it has any.`
+        if (p.kind === 'truth-bomb')
+          return `Another Truth Bomb card already uses the same main chart item ('${p.detail}'). Pick a DIFFERENT chart item from FINAL FACTS, keep the "Truth Bomb: " prefix, and stay shorter than 220 characters.`
+        return 'Another card in the same section already says the same thing. Say something NEW for this section from FINAL FACTS, shorter than 220 characters.'
+      })
+      .join(' ')
+
+  const items: Array<{ index: number | string; section: string; text: string; problem: string }> = cards.map((c) => ({
+    index: c.index,
+    section: c.section,
+    text: c.text,
+    problem: describe(c),
+  }))
+  if (closingLetter) {
+    items.push({
+      index: 'closing',
+      section: 'closing letter',
+      text: closingLetter,
+      problem: `This closing letter is too long. Shorten it to under ${CLOSING_LETTER_TARGET} characters, keep its warm flowing tone and the same facts, add nothing new, and make it end on a warm, complete final sentence.`,
+    })
+  }
+
+  const result = await generateText({
+    model: 'google/gemini-2.5-flash',
+    system: REPAIR_SYSTEM_PROMPT,
+    prompt: `=== FINAL FACTS ===\n${JSON.stringify(finalFacts, null, 2)}\n\n=== CARDS TO REWRITE (JSON) ===\n${JSON.stringify(items, null, 2)}\n\nRewrite ONLY these cards and return the JSON array [{"index", "text"}].`,
+    maxOutputTokens: 6000,
+    temperature: 0.3,
+    providerOptions: { google: { thinkingConfig: { thinkingBudget: 0 } } },
+    abortSignal: AbortSignal.timeout(60000),
+  })
+
+  const rewrites = new Map<string, string>()
+  const start = result.text.indexOf('[')
+  const end = result.text.lastIndexOf(']')
+  if (start === -1 || end <= start) return rewrites
+  let parsed: any
+  try {
+    parsed = JSON.parse(result.text.slice(start, end + 1))
+  } catch {
+    return rewrites
+  }
+  if (!Array.isArray(parsed)) return rewrites
+  for (const entry of parsed) {
+    const text = typeof entry?.text === 'string' ? entry.text.trim() : ''
+    if (entry?.index === undefined || !text) continue
+    rewrites.set(String(entry.index), text)
+  }
+  return rewrites
+}
+
+// 편지 마무리: 700자 이하로 두고, 잘라야 하면 700자 미만의 마지막 완결 문장에서 자른다. 콜론이나 "But here's the truth"로 끝나지 않게 한다.
+function finalizeClosingLetter(text: string): string {
+  let letter = text.trim()
+  if (letter.length > CLOSING_LETTER_MAX) {
+    let cut = -1
+    for (const m of letter.matchAll(/[.!?]["'\u2019\u201D)]?(?=\s|$)/g)) {
+      const end = (m.index ?? 0) + m[0].length
+      if (end < CLOSING_LETTER_MAX) cut = end
+      else break
+    }
+    letter = cut > 0 ? letter.slice(0, cut).trim() : letter.slice(0, CLOSING_LETTER_MAX - 1).trim()
+  }
+  const sentences = letter.match(/[^.!?]+[.!?]+["'\u2019\u201D)]*\s*|[^.!?]+$/g)?.map((s) => s.trim()) ?? [letter]
+  while (sentences.length > 1) {
+    const last = sentences[sentences.length - 1]
+    const incomplete =
+      !/[.!?]["'\u2019\u201D)]*$/.test(last) || /:$/.test(last) || /but here['\u2019]?s the truth\W*$/i.test(last)
+    if (!incomplete) break
+    sentences.pop()
+  }
+  return sentences.join(' ').trim()
+}
+
 // 같은 서버 인스턴스 안에서의 중복 생성 방지용 (submissionId → 시작 시각). 인스턴스가 다르면 막지 못하는 약한 안전장치.
 const IN_FLIGHT_WINDOW_MS = 6 * 60 * 1000
 const inFlightGenerations = new Map<string, number>()
@@ -533,8 +736,9 @@ real comfort or a real fix is what makes a paid report feel worth paying for.
 CLOSING LETTER RULE — one standalone letter after all 96 cards:
 ========================================
 After the 96 main cards, write exactly ONE closing letter (field name \`closingLetter\`). HARD LIMIT:
-550-650 characters (hard max 700) including spaces — count the characters before finalizing, and if your draft runs
-long, cut sentences/clauses until it fits inside this range rather than submitting a longer letter.
+600 characters including spaces — count the characters before finalizing, and if your draft runs
+long, cut sentences/clauses until it fits rather than submitting a longer letter. The letter MUST end on a
+warm, complete final sentence (never on a colon, a lead-in like "But here's the truth", or a half-finished thought).
 This is not a soft target: a letter over 700 characters is a failed output. This letter should read
 as flowing, plain-English prose — avoid naming specific Saju/Ten-God terms here at all if you can
 express the same idea through the nature metaphor instead; if you must name one, follow the STYLE OF TERMS
@@ -593,7 +797,7 @@ FINAL JSON STRUCTURE (single valid JSON object):
     ... (repeat this EXACT structure for all 9 sections — 10 cards for sections 01/07/09, 11 cards
     for sections 02/03/04/05/06/08 with the 11th card being that section's Truth Bomb.)
   ],
-  "closingLetter": "[550-650 characters (hard max 700) closing letter following the CLOSING LETTER RULE above]"
+  "closingLetter": "[up to 600 characters, ending on a warm, complete final sentence, following the CLOSING LETTER RULE above]"
 }
 
 Generate the 96 main facts and the closingLetter now as a single JSON object.`
@@ -624,7 +828,7 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
           // routinely exceeds 16k output tokens and gets silently truncated mid-JSON. Raised with headroom.
           maxOutputTokens: 32000,
           temperature: 0,
-          providerOptions: { google: { thinkingConfig: { thinkingBudget: 4096 } } },
+          providerOptions: { google: { thinkingConfig: { thinkingBudget: 1024 } } },
         })
         const usage: any = result.usage
         logTiming('gemini:attempt-end', {
@@ -835,13 +1039,6 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
         console.warn(`[v0] Sanitized stray CJK characters/wrappers from ${cjkStripped} field(s) despite English-only prompt rule`)
       }
 
-      const CLOSING_LETTER_MAX = 700
-      if (closingLetter.length > CLOSING_LETTER_MAX) {
-        const sentenceEnd = closingLetter.lastIndexOf('.', CLOSING_LETTER_MAX)
-        closingLetter = sentenceEnd > 400 ? closingLetter.slice(0, sentenceEnd + 1) : closingLetter.slice(0, CLOSING_LETTER_MAX)
-        console.warn(`[v0] Closing letter exceeded ${CLOSING_LETTER_MAX} chars, trimmed to ${closingLetter.length}`)
-      }
-
       // Safety net: two more formatting slips the model can make despite explicit prompt rules.
       function fixFormattingArtifacts(text: string): string {
         let result = text
@@ -874,6 +1071,53 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
       }
       if (formattingFixed > 0) {
         console.warn(`[v0] Fixed markdown-asterisk or misplaced-term-gloss formatting in ${formattingFixed} field(s)`)
+      }
+
+      // 수리 패스: 문제 카드(길이 초과, 반복 용어, Truth Bomb 중복, 같은 말)와 700자 넘는 편지만 AI 호출 한 번으로 다시 쓴다.
+      const flaggedCards = findProblemCards(paidFacts as any[], [
+        finalFacts?.lovePeak?.peak?.year,
+        finalFacts?.lovePeak?.upcomingPeak?.year,
+      ].filter((y) => y !== undefined && y !== null)).slice(0, REPAIR_MAX_CARDS)
+      const closingTooLong = closingLetter.length > CLOSING_LETTER_MAX
+      if (flaggedCards.length > 0 || closingTooLong) {
+        const countKind = (kind: ProblemKind) => flaggedCards.filter((c) => c.problems.some((p) => p.kind === kind)).length
+        console.log(
+          `[v0] repair pass: flagged ${flaggedCards.length} cards (long ${countKind('long')}, repeated ${countKind('repeated')}, truth-bomb ${countKind('truth-bomb')}, duplicate ${countKind('duplicate')})` +
+            (closingTooLong ? ` + closing letter (${closingLetter.length} chars)` : ''),
+        )
+        const repairStart = Date.now()
+        try {
+          const rewrites = await repairProblemCards(flaggedCards, closingTooLong ? closingLetter : null, finalFacts)
+          const cleanRewrite = (raw: string) => {
+            let text = CJK_TEST.test(raw) ? sanitizeCJKArtifacts(raw) : raw
+            if (text.includes('**') || /\([A-Z][a-zA-Z]*(?:-[A-Za-z]+)+\s*-\s*[^()]+\)/.test(text)) text = fixFormattingArtifacts(text)
+            return text.trim()
+          }
+          for (const c of flaggedCards) {
+            const raw = rewrites.get(String(c.index))
+            if (!raw) continue
+            let text = cleanRewrite(raw)
+            if (!text) continue
+            if (c.isTruthBomb && /^Truth Bomb:/i.test(c.text) && !/^Truth Bomb:/i.test(text)) text = `Truth Bomb: ${text}`
+            const target = (paidFacts as any[])[c.sectionIdx]?.cards?.[c.cardIdx]
+            if (target) (paidFacts as any[])[c.sectionIdx].cards[c.cardIdx] = { ...target, content: text }
+          }
+          const rewrittenLetter = rewrites.get('closing')
+          if (closingTooLong && rewrittenLetter) {
+            const text = cleanRewrite(rewrittenLetter)
+            if (text && text.length <= CLOSING_LETTER_MAX) closingLetter = text
+          }
+        } catch (repairError) {
+          console.warn('[v0] repair pass failed, keeping original text:', repairError)
+        }
+        console.log(`[v0] repair pass done in ${Date.now() - repairStart} ms`)
+      }
+
+      // 편지가 여전히 700자를 넘거나 어색하게 끝나면 마지막 완결 문장에서 마무리한다(내용을 새로 붙이지 않는다).
+      if (closingLetter) {
+        const before = closingLetter.length
+        closingLetter = finalizeClosingLetter(closingLetter)
+        if (closingLetter.length !== before) console.warn(`[v0] Closing letter finalized: ${before} -> ${closingLetter.length} chars`)
       }
 
     } catch (parseError) {
