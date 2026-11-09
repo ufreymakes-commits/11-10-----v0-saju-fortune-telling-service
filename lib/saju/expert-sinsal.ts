@@ -31,10 +31,10 @@ const PILLAR_RULES: Record<string, (s: string, b: string) => boolean> = {
   간여지동: lst('을묘 병오 정사 경신 신유 계해'), 고란과숙: lst('갑인 을사 무신 신해'),
   곡각살: lst('기사 신축 을미 정사'), 단장관: lst('계축 을미 정사'), 철사관: lst('경술 계축 무인 정미'), 퇴신: lst('임술 정미'),
   음인: lst('계해 기사 정사'), 신병살: lst('기사 을미'), 평두살: lst('병술 병인'), 일인: lst('무오 임자'), 나체도화: lst('경오'),
-  뇌공타뇌관: lst('무술'), 음양살: lst('무오'), 유하살: lst('경진'), 일귀: lst('계사'), 금신: lst('기사'), 천록귀인: lst('신사'),
-  록마동향: lst('임오'), 비인살: lst('임오'), 육수: lst('기미 무오 정미'), 구추방해: lst('무오 임오 임자'), 복신: lst('계사 계해 무인'),
-  음욕살: lst('경신 계축 기미 무술 정미'), 장군전: lst('계축 기미 무오 임자 정미'), 재고귀인: lst('무술 병술 임술'),
-  여연살: lst('기미 임신'), 남연살: lst('갑인'), 의처의부살: lst('경진 계해 무진 병술 신사 임술'), 정록: lst('경신'),
+  뇌공타뇌관: lst('무술 병자'), 음양살: lst('무오 병자'), 유하살: lst('경진'), 일귀: lst('계사'), 금신: lst('기사'), 천록귀인: lst('신사 병자'),
+  록마동향: lst('임오'), 비인살: lst('임오 병자'), 육수: lst('기미 무오 정미'), 구추방해: lst('무오 임오 임자'), 복신: lst('계사 계해 무인'),
+  음욕살: lst('경신 계축 기미 무술 정미'), 장군전: lst('계축 기미 무오 임자 정미'), 재고귀인: lst('무술 병술 임술 신미'),
+  여연살: lst('기미 임신 신미'), 남연살: lst('갑인 신미'), 의처의부살: lst('경진 계해 무진 병술 신사 임술'), 정록: lst('경신'),
 }
 const GO: Record<string, string> = { 해: '인', 자: '인', 축: '인', 인: '사', 묘: '사', 진: '사', 사: '신', 오: '신', 미: '신', 신: '해', 유: '해', 술: '해' }
 const GW: Record<string, string> = { 해: '술', 자: '술', 축: '술', 인: '축', 묘: '축', 진: '축', 사: '진', 오: '진', 미: '진', 신: '미', 유: '미', 술: '미' }
@@ -52,7 +52,7 @@ export function calcExpertSinsal(p: P): Record<SlotName, string[]> {
     for (const [name, f] of Object.entries(PILLAR_RULES)) if (f(s, b)) out[k].push(name)
     if (b === GO[p.연.branch]) out[k].push('고신살')               // 연지 기준 [검증됨]
     if (b === GW[p.연.branch]) out[k].push('과숙살')               // 연지 기준 [검증됨]
-    if (b === DO[p.연.branch]) out[k].push('도화살')               // 연지 기준 (표본 1건)
+    if (b === DO[p.연.branch] || b === DO[p.일.branch]) out[k].push('도화살')   // 연지·일지 기준 (표본 2건)
     if (YI[p.일.stem] === b) out[k].push('양인살')                 // 일간 기준 [검증됨]
     if (CE[p.일.stem].includes(b)) out[k].push('천을귀인')         // 일간 기준 [검증됨]
     if (k !== '일' && gong.includes(b)) out[k].push('공망')        // 일주 기준 [검증됨]

@@ -901,8 +901,7 @@ function getMunChangSalPositions(dayStem: string, yearBranch: string, monthBranc
 function checkBaekhoSal(dayStem: string, dayBranch: string): boolean {
   const baekhoList = [
     ["갑","진"],["을","미"],["병","술"],["정","축"],
-    ["무","진"],["경","진"],["신","미"],["임","술"],
-    ["계","축"],["무","술"]
+    ["무","진"],["임","술"],["계","축"]   // 전문가 기준 7개 (경진·신미·무술은 정답지에서 백호살이 아님)
   ]
   return baekhoList.some(([s, b]) => s === dayStem && b === dayBranch)
 }

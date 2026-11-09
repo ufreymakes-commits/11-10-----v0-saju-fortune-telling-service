@@ -90,18 +90,41 @@ export async function POST(request: Request) {
 
     // ===== 전문가 기준 확정값 (lib/saju/expert-core.ts · expert-sinsal.ts · skeleton.ts) =====
     // 새로 계산된 submission 에만 있음. 옛 저장본은 expert 가 없어서 null 로 두고 기존 방식 유지.
+    const KO2EN: Record<string, string> = { 목: 'Wood', 화: 'Fire', 토: 'Earth', 금: 'Metal', 수: 'Water' }
     let expertFacts: any = null
     try {
-      if ((saju_data as any).expert) {
+      const expert = (saju_data as any).expert
+      if (expert) {
+        const headlineEn: string[] = (expert.headline?.elements ?? []).map((k: string) => KO2EN[k]).filter(Boolean)
         expertFacts = {
           note: 'Pre-calculated FINAL facts. Do not recompute strength, yongsin, gyeokguk, shinsal or relations.',
           skeleton: buildSkeleton(saju_data, gender === 'female' ? 'female' : 'male'),
-          shinsalByPillar: (saju_data as any).expertSinsal || {}
+          shinsalByPillar: (saju_data as any).expertSinsal || {},
+          ...(headlineEn.length
+            ? {
+                yongsinHeadline: {
+                  elements: headlineEn,
+                  source: expert.headline.source === '조후' ? 'Johu-first (seasonal climate balance takes priority)' : 'Eokbu (strength balance)'
+                }
+              }
+            : {})
         }
       }
     } catch (e) {
       console.error('[v0] Gemini: expertFacts build failed (continuing without):', e)
     }
+
+    // 옛 spirits 에는 백호살·천덕귀인 오탐이 있어, 전문가 기준 신살(슬롯별 합집합) + 12신살로 대체. 옛 저장본은 기존 spirits 사용.
+    const expertSinsalMap = (saju_data as any).expertSinsal as Record<string, string[]> | undefined
+    const spiritsForLLM: string[] = expertSinsalMap
+      ? Array.from(
+          new Set([
+            ...Object.values(expertSinsalMap).flat(),
+            ...(Object.values(saju_data.hybridTwelveSinsal?.byDayBranch ?? {}) as string[]),
+            ...(Object.values(saju_data.hybridTwelveSinsal?.byYearBranch ?? {}) as string[])
+          ].filter(Boolean))
+        )
+      : (saju_data.spirits || []).filter((s: string) => s !== '천덕귀인' && s !== '월덕귀인')
 
     const allSajuData = {
       // 기본 정보
@@ -175,7 +198,7 @@ export async function POST(request: Request) {
       gongmang: saju_data.gongmang || [],
 
       // 신살 (모두 포함 - 상세)
-      spirits: (saju_data.spirits || []).filter((s: string) => s !== '천덕귀인' && s !== '월덕귀인'),
+      spirits: spiritsForLLM,
       expertFacts: expertFacts,
       sinsalDetails: saju_data.sinsalDetails || [],
       sinsalSummary: saju_data.sinsalSummary || '',
@@ -947,13 +970,19 @@ Language: English only.
 
     console.log(`[v0] Gemini: Final yongsinElement: ${yongsinElement} (balanced season: ${isBalancedSeason})`)
     // 전문가 기준 억부용신이 있으면 그것을 우선 사용 (기존 문자열 파싱은 항상 '가장 약한 오행'으로 빠지는 문제가 있었음)
-    if (expertFacts && (saju_data as any).expert?.eokYong?.length) {
-      const KO2EN: Record<string, string> = { 목: 'Wood', 화: 'Fire', 토: 'Earth', 금: 'Metal', 수: 'Water' }
-      const toGroup: Record<string, string> = expertFacts.skeleton.elementToGroup
-      const el = Object.keys(toGroup).find((k) => toGroup[k] === (saju_data as any).expert.eokYong[0])
-      if (el && KO2EN[el]) {
-        yongsinElement = KO2EN[el]
-        console.log(`[v0] Gemini: yongsin from expert eokbu = ${yongsinElement}`)
+    if (expertFacts) {
+      const expert = (saju_data as any).expert
+      const headlineEl: string | undefined = expert?.headline?.elements?.[0]
+      if (headlineEl && KO2EN[headlineEl]) {
+        yongsinElement = KO2EN[headlineEl]
+        console.log(`[v0] Gemini: yongsin from expert headline (${expert.headline.source}) = ${yongsinElement}`)
+      } else if (expert?.eokYong?.length) {
+        const toGroup: Record<string, string> = expertFacts.skeleton.elementToGroup
+        const el = Object.keys(toGroup).find((k) => toGroup[k] === expert.eokYong[0])
+        if (el && KO2EN[el]) {
+          yongsinElement = KO2EN[el]
+          console.log(`[v0] Gemini: yongsin from expert eokbu = ${yongsinElement}`)
+        }
       }
     }
     // resolvedYongsin will be set after Fact 8 is generated; initialize with computed value
