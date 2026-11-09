@@ -37,7 +37,7 @@ function luckyItems(saju: any, groupEl: (g: string) => string | null) {
     direction: [LUCKY_TABLE[primary].dir, secondary ? LUCKY_TABLE[secondary].dir : null].filter(Boolean),
     colors: [...LUCKY_TABLE[primary].colors.slice(0, 2), ...(secondary ? LUCKY_TABLE[secondary].colors.slice(0, 1) : [])],
     luckyNumbers: LUCKY_TABLE[primary].numbers,
-    note: 'Use ONLY these directions, colors and numbers (3 colors max, one pair of numbers, 2 directions max). Explain in one line why this element: it is a Useful God element that your chart is missing.',
+    note: 'Use ONLY these directions, colors and numbers (3 colors max, one pair of numbers, 2 directions max). Explain in one line why this element: it is a Useful God element that your chart is missing. NAMING RULE: never call this element the "primary lucky element" or the "primary Useful God" (the headline Useful God is in yongsin.primary and may be a different element). Call it "the element behind your lucky directions, colors and numbers".',
   }
 }
 const ganziEn = (g?: string) => g && g.length >= 2 ? `${((STEM_PRONUNCIATION as any)[g[0]] ?? g[0]).split('-')[0]}-${(BRANCH_PRONUNCIATION as any)[g[1]] ?? g[1]}` : g
@@ -110,6 +110,10 @@ export function buildPaidContext(saju: any, gender: 'male' | 'female', reportYea
       const bp = saju?.tenGods?.byPosition
       if (bp) {
         const t = (k: string) => (bp[k] && bp[k] !== '일간' ? ((TEN_GODS_ENGLISH as any)[bp[k]] ?? bp[k]) : null)
+        const POS: Record<string, string> = { yearStem: 'Year Stem', yearBranch: 'Year Branch', monthStem: 'Month Stem', monthBranch: 'Month Branch', dayBranch: 'Day Branch', hourStem: 'Hour Stem', hourBranch: 'Hour Branch' }
+        const byGod: Record<string, string[]> = {}
+        for (const k of Object.keys(POS)) { const g = t(k); if (g) (byGod[g] ||= []).push(POS[k]) }
+        finalFacts.tenGodsByGod = { ...byGod, note: 'Same data grouped by ten god. When you say where a ten god sits, copy these positions exactly. Stems and branches are different positions: never merge "Year Stem and Month Stem" with "Year Branch and Month Branch".' }
         finalFacts.tenGodsByPosition = { yearStem: t('yearStem'), yearBranch: t('yearBranch'), monthStem: t('monthStem'), monthBranch: t('monthBranch'), dayBranch: t('dayBranch'), hourStem: t('hourStem'), hourBranch: t('hourBranch'), note: 'Use these exact positions. A ten god is attached to the position listed here only (a stem is not a branch).' }
       }
     }

@@ -57,6 +57,8 @@ CONSISTENCY RULES (critical):
 - The strength rule in FINAL FACTS (finalFacts.strength.rule) is binding. Never contradict it anywhere in the 96 cards or the closing letter. If it says STRONG, never write weak, "Weak Self" or "Jae-Da-Sin-Yak"; if it says WEAK, never write strong or self-reliant by strength.
 - Cycle years and ages: for ANY 10-year luck cycle you mention (past, current, next, childhood), copy its years and international ages exactly from finalFacts.luckCycles.all. Never compute your own ages or years, never write an end year one higher than listed, and never mention a cycle that is not in the list. Use one age system only (the international ages given).
 - Ten gods and positions: attach a ten god only to the position listed in finalFacts.tenGodsByPosition (for example, a god on the Month STEM is not on the Month BRANCH). Never say "from your Year and Month stems" unless both stems really have that god.
+- Where a ten god sits: copy the positions from FINAL FACTS tenGodsByGod exactly. A stem and a branch are different positions. Never write "Year and Month stems" or "Year and Month branches" unless both really have that god in tenGodsByGod.
+- Lucky-item element: call it "the element behind your lucky directions, colors and numbers". Never call it the "primary lucky element" or "primary Useful God" (the headline Useful God is yongsin.primary). Do not say two different elements are "primary".
 - Dates must be consistent between cards: the same cycle always has the same years and ages everywhere.
 
 Return ONLY a valid JSON object with "mainFacts" and "closingLetter". No markdown, no explanations outside the JSON.`
@@ -87,6 +89,40 @@ function findCycleYearMismatches(text: string, cycles: any[] | undefined): strin
     if (overlaps && !exact) mismatches.add(`${a}-${b}`)
   }
   return [...mismatches]
+}
+
+// 생성 후 코드 검사: 섹션 02/03/04/05/06/08의 마지막 카드(Truth Bomb)가 일반적인 문장인지 확인한다.
+// "Truth Bomb:" 접두어가 없거나, 작은따옴표 용어/오행/십성/연도 중 어느 것도 없으면 generic으로 본다.
+const TRUTH_BOMB_SECTIONS = new Set(['02', '03', '04', '05', '06', '08'])
+const TEN_GOD_PATTERN =
+  /(Friend|Rob(?:bing)? Wealth|Eating God|Hurting Officer|Direct Wealth|Indirect Wealth|Direct Officer|Seven Killings|Direct Resource|Indirect Resource|Bi-?gyeon|Geob-?jae|Sik-?sin|Sang-?gwan|Pyeon-?jae|Jeong-?jae|Pyeon-?gwan|Jeong-?gwan|Pyeon-?in|Jeong-?in)/i
+
+function findGenericTruthBombSections(text: string): string[] {
+  const start = text.indexOf('{')
+  const end = text.lastIndexOf('}')
+  if (start === -1 || end <= start) return []
+  let parsed: any
+  try {
+    parsed = JSON.parse(text.slice(start, end + 1))
+  } catch {
+    return []
+  }
+  const sections: any[] = Array.isArray(parsed?.mainFacts) ? parsed.mainFacts : []
+  const generic: string[] = []
+  for (const section of sections) {
+    const number = String(section?.sectionNumber ?? '')
+    if (!TRUTH_BOMB_SECTIONS.has(number)) continue
+    const cards: any[] = Array.isArray(section?.cards) ? section.cards : []
+    const content = String(cards[cards.length - 1]?.content ?? '')
+    const hasPrefix = content.includes('Truth Bomb:')
+    const isSpecific =
+      /'[^']+'/.test(content) ||
+      /\b(Wood|Fire|Earth|Metal|Water)\b/.test(content) ||
+      TEN_GOD_PATTERN.test(content) ||
+      /\b(19|20)\d\d\b/.test(content)
+    if (!hasPrefix || !isSpecific) generic.push(number)
+  }
+  return generic
 }
 
 // 같은 서버 인스턴스 안에서의 중복 생성 방지용 (submissionId → 시작 시각). 인스턴스가 다르면 막지 못하는 약한 안전장치.
@@ -293,6 +329,8 @@ Example: the first card starts with "Hey ${displayName}," and the last card star
 * Data: Elemental traits of the Day Master + Relationship with the Month Branch (Seasonality/Deuk-ryeong) + Overall energy balance stats.
 * Analysis of the fundamental temperament of the Saju and the "Base Camp" of life. It is best to identify which characters surround the customer's Day Master and represent them through metaphors in nature. Then, weave a story by capturing important characteristics of what those characters mean and how they manifest in life. For example, the following type of interpretation is preferred flow ; : "{{name}}, your chart is actually so fascinating. You are basically the soil of a field in a hot, dry summer, but you're literally surrounded by a massive ocean of water (even 3 letters) Since you have to handle and control all this water solo, the difficulty level of your life is definitely not 'Easy Mode,' but it’s a high-risk, high-reward structure where the payoff for winning is absolutely massive. In Saju terms, your Day Master, Gi-to, is rooted in the Mi-to of your same earthly branch, giving you insane self-reliance. However, because the 'Wealth' element (Water) is so overwhelming, there’s a strong 'Jae-Da-Sin-Yak' (Overwhelming Wealth, Weak Self) vibe going on. On top of that, you've got the 'Zi-Mi Wonjin-Sal' (Resentment/Clash) sitting between your Year and Day pillars, which means your sensitivity and intuition are both cranked up to 100. I was low-key worried your soil might get washed away by all that water, but thankfully, the Mi-to Earth in your Day Branch acts like a sturdy levee, giving you a top-tier ability to flip any crisis into an opportunity. If I were to give you a real-talk tip for 'unlocking your luck,' the key is to not get swept away by emotional waves. Instead of overreacting to your surroundings or what others say, just push through with your own 'My Way' energy. For Gi-to day master, having a lot of water means you have both flexibility and wealth. But to actually bottle up all this water, you must build a solid dam—meaning you need to level up your specs through self-development or getting certified. That’s the only way you’ll truly own all the money and opportunities flowing your way.")
 
+* Cards 1-3 of this section must open with something specific to THIS chart (for example the season of the Month Branch, the Day Master in that season, or the most visible element or relation in the chart), never with a generic Day Master description.
+
 02. Inner Child Era: Your Early Vibes & Scars 
 * Focus: Clashes in the Year Pillar and Month Pillar + Ten Gods.
 * Data: Pillar interactions (Hyung, Chung, Pa, Hae/Core Scars) + Initial Luck Cycles (1st & 2nd Daewoon). Analysis of unconscious voids originating from relationships with parents or siblings. Many people grow up happy, so do not force a "void" if none exists.
@@ -397,10 +435,10 @@ Endgame), and 08 (Lucky Environment/Health) each get one extra 11th card called 
 This is the one card per section allowed to lead with an unflinching, specific truth before pivoting
 to comfort — it exists because generic praise gets old, and a sharp, accurate observation followed by
 real comfort or a real fix is what makes a paid report feel worth paying for.
-- Name ONE specific, real behavioral pattern or blind spot that is actually visible in this
-  customer's chart data for that section's theme (a real Ten God imbalance, a real clash/combo, a
-  real missing element — not a vague, could-apply-to-anyone statement like "you can be moody").
-- State it plainly in the first part of the paragraph, without hedging or softening language up
+- Begin the card with exactly "Truth Bomb: " (this prefix counts toward the character limit) so the reader can spot it.
+- The Truth Bomb MUST name ONE concrete item from FINAL FACTS or the chart for that section (a specific ten god in a position, a specific branch relation such as Mi-Ja Wonjin, a missing element, a luck cycle, or a sinsal) and say bluntly, in the first sentence, what behavior it causes. Not a vague, could-apply-to-anyone statement like "you can be moody".
+- Then give one concrete fix or earned comfort in the same paragraph. No "you might sometimes", no advice that fits anyone.
+- State the truth plainly in the first part of the paragraph, without hedging or softening language up
   front (this is the one card in the whole report allowed to open bluntly).
 - In the same paragraph, pivot immediately to genuine comfort and/or one concrete, actionable fix —
   never leave the reader on the harsh part. The comfort must feel earned and specific to the chart,
@@ -522,15 +560,21 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
           throw new Error(`Response truncated by maxOutputTokens (finishReason: length, ${result.text.length} chars)`)
         }
         // 신강/신약 모순 검사: 한 번만 재생성(시도 횟수에 포함). 재생성 후에도 남으면 그대로 저장한다.
-        if (hasStrengthMismatch(result.text, finalFacts?.strength?.grade)) {
+        // Truth Bomb 카드가 generic인 경우도 같은 단일 재생성에 포함한다(MAX_RETRIES에 포함).
+        const strengthBad = hasStrengthMismatch(result.text, finalFacts?.strength?.grade)
+        const genericBombs = findGenericTruthBombSections(result.text)
+        for (const n of genericBombs) console.warn(`[v0] check truth-bomb generic section ${n}`)
+        if (strengthBad || genericBombs.length > 0) {
           if (!strengthRegenerated && attempt < MAX_RETRIES) {
             strengthRegenerated = true
             strengthFallback = result.text
-            console.warn('[v0] check strength mismatch, regenerating once')
-            logTiming('check:strength-mismatch', { attempt })
+            if (strengthBad) {
+              console.warn('[v0] check strength mismatch, regenerating once')
+              logTiming('check:strength-mismatch', { attempt })
+            }
             continue
           }
-          console.warn('[v0] check strength mismatch persisted')
+          if (strengthBad) console.warn('[v0] check strength mismatch persisted')
         }
         rawResponse = result.text
         console.log(`[v0] Gemini API succeeded on attempt ${attempt}`)
