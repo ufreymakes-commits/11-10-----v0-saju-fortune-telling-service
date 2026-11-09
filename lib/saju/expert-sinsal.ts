@@ -41,6 +41,7 @@ const GW: Record<string, string> = { 해: '술', 자: '술', 축: '술', 인: '�
 const DO: Record<string, string> = { 사: '오', 유: '오', 축: '오', 인: '묘', 오: '묘', 술: '묘', 신: '유', 자: '유', 진: '유', 해: '자', 묘: '자', 미: '자' }
 const YI: Record<string, string> = { 갑: '묘', 병: '오', 무: '오', 경: '유', 임: '자' }
 const CE: Record<string, string> = { 갑: '축미', 무: '축미', 경: '축미', 을: '자신', 기: '자신', 병: '해유', 정: '해유', 신: '인오', 임: '사묘', 계: '사묘' }
+const GUIMUN: Record<string, string> = { 자: '유', 유: '자', 축: '오', 오: '축', 인: '미', 미: '인', 묘: '신', 신: '묘', 진: '해', 해: '진', 사: '술', 술: '사' }
 export function calcExpertSinsal(p: P): Record<SlotName, string[]> {
   const out: Record<SlotName, string[]> = { 시: [], 일: [], 월: [], 연: [] }
   const slots: SlotName[] = ['시', '일', '월', '연']
@@ -56,6 +57,8 @@ export function calcExpertSinsal(p: P): Record<SlotName, string[]> {
     if (YI[p.일.stem] === b) out[k].push('양인살')                 // 일간 기준 [검증됨]
     if (CE[p.일.stem].includes(b)) out[k].push('천을귀인')         // 일간 기준 [검증됨]
     if (k !== '일' && gong.includes(b)) out[k].push('공망')        // 일주 기준 [검증됨]
+    // 귀문관살: 자유 / 축오 / 인미 / 묘신 / 진해 / 사술 — 사주 안에서 두 지지가 이 쌍을 이루면 두 기둥 모두에 표시 [검증됨: 정답지 12건 전부 일치]
+    if (slots.some((o) => o !== k && GUIMUN[b] === p[o].branch)) out[k].push('귀문관살')
   }
   return out
 }

@@ -14,6 +14,32 @@ const GRADE_STR_EN: Record<string, string> = { 신약: 'Weak', 중화신약: 'Ba
 const GROUP_EN: Record<string, string> = { 비겁: 'Peers (Shoulder to Shoulder / Rob Wealth)', 식상: 'Output (Eating God / Hurting Officer)', 재성: 'Wealth', 관성: 'Officer', 인성: 'Seal (Resource)' }
 const PATTERN_EN: Record<string, string> = { 군비쟁재격: 'Rob Wealth Fighting Wealth', 인중용재격: 'Seal-heavy, Wealth as medicine', 관살태과격: 'Excess Officers', 재중용비격: 'Wealth-heavy, Peers as medicine' }
 const GYEOK_EN: Record<string, string> = { 정관격: 'Direct Officer pattern', 편관격: 'Indirect Officer pattern', 정재격: 'Direct Wealth pattern', 편재격: 'Indirect Wealth pattern', 식신격: 'Eating God pattern', 상관격: 'Hurting Officer pattern', 정인격: 'Direct Seal pattern', 편인격: 'Indirect Seal pattern', 비견격: 'Shoulder to Shoulder pattern', 겁재격: 'Rob Wealth pattern' }
+// 정답지 10개 대조: 개운 항목(방위·색·숫자)의 오행 = "쓸 수 있는 오행(조후/억부 용신·희신·격국용신) 중 원국 8글자에 하나도 없는 오행" (8/8 포함).
+// 후보가 여러 개면 헤드라인 용신 순서를 우선(7/8; 1건은 정답지가 다른 후보를 고름).
+const LUCKY_TABLE: Record<string, { dir: string; colors: string[]; numbers: string }> = {
+  Wood: { dir: 'East', colors: ['green', 'teal'], numbers: '3 and 8' }, Fire: { dir: 'South', colors: ['red', 'orange'], numbers: '2 and 7' },
+  Earth: { dir: 'Center, Southwest or Northeast', colors: ['yellow', 'brown'], numbers: '5 and 10' }, Metal: { dir: 'West', colors: ['white', 'silver', 'gold'], numbers: '4 and 9' },
+  Water: { dir: 'North', colors: ['black', 'navy'], numbers: '1 and 6' },
+}
+function luckyItems(saju: any, groupEl: (g: string) => string | null) {
+  const e = saju?.expert; if (!e) return null
+  const EN_TO_KO: Record<string, string> = { Wood: '목', Fire: '화', Earth: '토', Metal: '금', Water: '수' }
+  const head: string[] = (e.headline?.elements ?? []).map((k: string) => (ELEMENT_ENGLISH as any)[k]).filter(Boolean)
+  const cand: string[] = []
+  for (const x of [...head, ...(e.eokYong ?? []).map(groupEl), ...(e.eokHee ?? []).map(groupEl), ...(e.gyeokYong ?? []).map(groupEl)]) if (x && !cand.includes(x)) cand.push(x)
+  const cnt = saju.elementCountBasicKorean ?? {}
+  const missing = cand.filter((x) => (cnt[EN_TO_KO[x]] ?? 0) === 0)
+  const primary = missing[0] ?? head[0] ?? cand[0]
+  if (!primary) return null
+  const secondary = head[0] && head[0] !== primary ? head[0] : null
+  return {
+    primaryElement: primary, basis: missing.length ? 'a useful element that is completely missing from the chart' : 'the first Useful God element',
+    direction: [LUCKY_TABLE[primary].dir, secondary ? LUCKY_TABLE[secondary].dir : null].filter(Boolean),
+    colors: [...LUCKY_TABLE[primary].colors.slice(0, 2), ...(secondary ? LUCKY_TABLE[secondary].colors.slice(0, 1) : [])],
+    luckyNumbers: LUCKY_TABLE[primary].numbers,
+    note: 'Use ONLY these directions, colors and numbers (3 colors max, one pair of numbers, 2 directions max). Explain in one line why this element: it is a Useful God element that your chart is missing.',
+  }
+}
 const ganziEn = (g?: string) => g && g.length >= 2 ? `${((STEM_PRONUNCIATION as any)[g[0]] ?? g[0]).split('-')[0]}-${(BRANCH_PRONUNCIATION as any)[g[1]] ?? g[1]}` : g
 export const sinsalEn = (ko: string) => { const r = romanizeName(ko).replace(/\s+/g, ''); return SINSAL_GLOSS[ko] ? `${r} (${SINSAL_GLOSS[ko]})` : r }
 
@@ -85,6 +111,7 @@ export function buildPaidContext(saju: any, gender: 'male' | 'female', reportYea
     const fmt = (x: any) => x && ({ ganzi: ganziEn(x.ganziKorean ?? x.ganzi), yearsActive: `${x.startYear}-${x.endYear - 1}`, internationalAges: `${x.startAge - 1}-${x.endAge - 2}`, stemTenGodEn: TEN_GODS_ENGLISH[x.stemTenGod] ?? x.stemTenGod, twelveStar: STAR_EN[x.twelveStar] ?? x.twelveStar, score: GRADE_EN[x.score] ?? x.score })
     finalFacts.luckCycles = { previous: i > 0 ? fmt(decs[i - 1]) : null, current: i >= 0 ? fmt(decs[i]) : null, next: i >= 0 && decs[i + 1] ? fmt(decs[i + 1]) : null, changesInYear: i >= 0 ? decs[i].endYear : null, note: 'Use these for "current / previous / next" cycle statements. Cite the YEARS (yearsActive), and if you give ages use internationalAges only (never Korean-age numbers). Do not work out the current cycle from age yourself.' }
   }
+  finalFacts.luckyItems = luckyItems(saju, groupEl)
   // 신살: 전문가 기준 슬롯별 + 12신살 (옛 spirits 오탐 제거)
   finalFacts.sinsalByPillar = saju?.expertSinsal ? Object.fromEntries(Object.entries(saju.expertSinsal).map(([slot, names]) => [({ 시: 'hour', 일: 'day', 월: 'month', 연: 'year' } as any)[slot] ?? slot, (names as string[]).map(sinsalEn)])) : null
   // 연애운 정점: 만 19~39세 구간에서 점수가 가장 높은 해 (romance.ts buildLovePeak). 옛 marriageTiming 은 사용하지 않는다.

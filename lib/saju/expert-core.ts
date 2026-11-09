@@ -21,7 +21,7 @@ const EOK_TABLE: Record<string, { yong: Group[]; hee: Group[]; why: string }> = 
   재중용비격: { yong: ['비겁'], hee: ['인성'], why: '재물이 무거워 약해진 판 → 비겁' },
   진상관용인격: { yong: ['인성'], hee: [], why: '(미검증: 표본 없음)' },
 }
-const GYEOK_YONG: Record<string, Group[]> = { 정인격: ['관성', '비겁'], 정관격: ['인성'], 정재격: ['식상', '관성'], 상관격: ['인성', '재성', '관성'], 비견격: ['관성', '식상'], 편인격: ['재성'], 편관격: ['식상'] }
+const GYEOK_YONG: Record<string, Group[]> = { 정인격: ['관성', '비겁'], 정관격: ['인성'], 정재격: ['식상', '관성'], 상관격: ['인성', '재성', '관성'], 비견격: ['관성', '식상'], 편인격: ['재성'], 편관격: ['식상'], 편재격: ['식상', '관성'] }
 export interface ExpertResult {
   support: number; against: number; grade: '신약' | '중화신약' | '중화신강' | '신강'; strong: boolean
   totals: Record<Group, number>; gyeok: string; gyeokTuchul: boolean; gyeokYong: Group[] | null
@@ -54,7 +54,7 @@ export function analyzeExpert(p: { yearStem: string; yearBranch: string; monthSt
   // 억부: 신강 쪽이면 비겁 vs 인성, 신약 쪽이면 관성·재성·식상 중 상위 2개를 비교. 격차 ≤3이면 월지 그룹(없으면 힘의 우열)으로 결정
   const cand: Group[] = strong ? ['비겁', '인성'] : (['관성', '재성', '식상'] as Group[]).sort((a, b) => totals[b] - totals[a]).slice(0, 2)
   const gap = Math.abs(totals[cand[0]] - totals[cand[1]])
-  const border = gap <= 3
+  const border = gap <= 4   // 정답지: 격차 3(3건) 경계, 격차 4(박우철) 경계, 격차 16 이상 비경계 → 상한은 4 이상 15 이하 사이(미확정, 4로 둠)
   let heavy: Group, borderBy = ''
   if (border) {
     const mg = gs['월지']
