@@ -65,7 +65,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing saju_data' }, { status: 400 })
     }
 
-    console.log(`[v0] Gemini: Generating 9 facts for ${name}`)
+    console.log('[v0] Gemini: Generating facts')
 
     // ===== 십신 포맷팅: "비견 (3개), 식신 (2개)" 형식 =====
     // 십신별 개수 계산 (byPosition 기준 - 8개 위치에서 실제 개수 세기)
@@ -257,10 +257,6 @@ export async function POST(request: Request) {
       // 합충 조정 상세 내역 (오행 점��� 변��)
       hapChungAdjustmentDetails: saju_data.hapChungAdjustmentDetails || saju_data.elementAdjustmentHistory || []
     }
-
-    console.log('[v0] Gemini: ===== COMPLETE CUSTOMER DATA FOR GEMINI 1.5 PRO =====')
-    console.log('[v0] Gemini:', JSON.stringify(allSajuData, null, 2))
-    console.log('[v0] Gemini: ==================================================')
 
     const userPrompt = `Now, generate a total of 9 chillingly insightful sentences for him or her — the kind of sentences someone would want to share with a friend because they're just that on point. Sentences that make them truly feel like, 'Wow, this is tailored to my personal Saju chart, rather than being a generic one for everyone. This captures every detail of my Saju all at once.'
 
@@ -615,7 +611,7 @@ Respond ONLY in JSON format.`
 [STAGE 1: 11가지 체크포인트 심화 분석]
 ===========================================
 
-[��� 절대 주의사항: 속���와 압축이 생명이다! 🚨]
+[🚨 절대 주의사항: 속도와 압축이 생명이다! 🚨]
 이것은 유저에게 보여줄 텍스트가 아니라 Stage 2를 위한 '내부 뼈대(Skeleton) 데이터'다. 
 절대 줄글이나 서술형 문장으로 설명하지 마라. 전체 텍스트 분량은 반드시 300자 이내로 압축하라. 
 모든 항목의 분석 결과는 **최대 3개의 단어(핵심 키워드) 또는 10자 이내의 짧은 구문**으로만 도출하라.
@@ -695,51 +691,56 @@ ${JSON.stringify(allSajuData, null, 2)}
 `
 
     console.log('[v0] Gemini: ===== STAGE 1: Deep Analysis =====')
-    console.log('[v0] Gemini: allSajuData.gyeokguk =', allSajuData.gyeokguk)
-    console.log('[v0] Gemini: allSajuData.strength_analysis =', JSON.stringify(allSajuData.strength_analysis))
-    console.log('[v0] Gemini: allSajuData.ten_gods_summary =', JSON.stringify(allSajuData.ten_gods_summary))
     console.log('[v0] Gemini: stage1SystemPrompt length =', stage1SystemPrompt.length, 'chars')
     console.log('[v0] Gemini: stage1UserPrompt length =', stage1UserPrompt.length, 'chars')
 
-    const stage1Result = await generateText({
-      model: 'google/gemini-2.5-flash',
-      system: stage1SystemPrompt,
-      prompt: stage1UserPrompt,
-      temperature: 0,
-      maxOutputTokens: 4000,
-      providerOptions: { google: { thinkingConfig: { thinkingBudget: 0 } } }
-    })
+    const STAGE1_MAX_ATTEMPTS = 2
+    let deepAnalysis: any
 
-    console.log('[v0] Gemini: Stage 1 response received, parsing...')
-    console.log('[v0] Gemini: Raw response length:', stage1Result.text.length)
+    for (let attempt = 1; attempt <= STAGE1_MAX_ATTEMPTS; attempt++) {
+      try {
+        const stage1Result = await generateText({
+          model: 'google/gemini-2.5-flash',
+          system: stage1SystemPrompt,
+          prompt: stage1UserPrompt,
+          temperature: 0,
+          maxOutputTokens: 4000,
+          providerOptions: { google: { thinkingConfig: { thinkingBudget: 0 } } }
+        })
 
-    // Stage 1 JSON 파싱 (더 유연한 형식 지원)
-    let stage1JsonMatch = stage1Result.text.match(/```json\n([\s\S]*?)\n```/)
+        console.log(`[v0] Gemini: Stage 1 response received (attempt ${attempt}), length:`, stage1Result.text.length)
 
-    // 첫 번째 시도 실패시 다른 형식 시도
-    if (!stage1JsonMatch) {
-      // 형식2: ```json ... ``` (줄바꿈 없음)
-      stage1JsonMatch = stage1Result.text.match(/```json([\s\S]*?)```/)
-    }
+        // Stage 1 JSON 파싱 (더 유연한 형식 지원)
+        let stage1JsonMatch = stage1Result.text.match(/```json\n([\s\S]*?)\n```/)
 
-    if (!stage1JsonMatch) {
-      // 형식3: { ... } 직접 매칭
-      const directJsonMatch = stage1Result.text.match(/(\{[\s\S]*\})/)
-      if (directJsonMatch) {
-        stage1JsonMatch = [null, directJsonMatch[1]]
+        // 첫 번째 시도 실패시 다른 형식 시도
+        if (!stage1JsonMatch) {
+          // 형식2: ```json ... ``` (줄바꿈 없음)
+          stage1JsonMatch = stage1Result.text.match(/```json([\s\S]*?)```/)
+        }
+
+        if (!stage1JsonMatch) {
+          // 형식3: { ... } 직접 매칭
+          const directJsonMatch = stage1Result.text.match(/(\{[\s\S]*\})/)
+          if (directJsonMatch) {
+            stage1JsonMatch = [null, directJsonMatch[1]]
+          }
+        }
+
+        if (!stage1JsonMatch) {
+          throw new Error('Stage 1 JSON format not found')
+        }
+
+        deepAnalysis = JSON.parse(stage1JsonMatch[1])
+        break
+      } catch (stage1Error) {
+        console.error(
+          `[v0] Gemini: Stage 1 attempt ${attempt}/${STAGE1_MAX_ATTEMPTS} failed:`,
+          stage1Error instanceof Error ? stage1Error.message : stage1Error
+        )
+        if (attempt === STAGE1_MAX_ATTEMPTS) throw stage1Error
       }
     }
-
-    if (!stage1JsonMatch) {
-      console.error('[v0] Gemini: Stage 1 raw response:', stage1Result.text)
-      throw new Error('Stage 1 JSON format not found')
-    }
-
-    const deepAnalysis = JSON.parse(stage1JsonMatch[1])
-    console.log('[v0] Gemini: ===== STAGE 1 OUTPUT =====')
-    console.log('[v0] Gemini: social_genes.career_fit =', deepAnalysis.social_genes?.career_fit)
-    console.log('[v0] Gemini: independence_index =', JSON.stringify(deepAnalysis.independence_index))
-    console.log('[v0] Gemini: Full Stage 1 Output:', JSON.stringify(deepAnalysis, null, 2))
 
     // ===== STAGE 2: 9문장 생성 (Final Facts) =====
     // 사용자가 이 프롬프트를 직접 수정할 수 있습니다
@@ -848,7 +849,7 @@ Example: "Hey ${name}, ..." for the first fact, and "${name}, remember that..." 
 
 [🚫 절대 주의사항 (결제 전환율을 위한 필수 제약)]
 - 현재의 구체적 상황(예: 너 지금 솔로지?)이나 미래에 대한 구체적 예언을 절대 하지 말 것. 틀리면 고객이 즉각 이탈함. 철저히 '행동 패턴'과 '심리 기질'에만 집중할 것.
-- 2번(Career Path): 직업명(예: Project Manager, Doctor 등)은 아직 언급하지 말되, 잘 어울리는 산업 분야에 대해��는 언급 해도 됨!(예시: Education, Medical, Food, UX, Tech, Contents, Consulting 등등..) 고객이 어떤 '업무 환경(구조적 적합성)'에서 스트레스를 받고, 어떤 '일하는 방식과 분야(재능적 두각)'에서 가장 빛나는지 그 패턴을 이 사람의 사주 해설지를 확인한 후 구체적이고 사실적으로 묘사할 것.
+- 2번(Career Path): 직업명(예: Project Manager, Doctor 등)은 아직 언급하지 말되, 잘 어울리는 산업 분야에 대해서는 언급 해도 됨!(예시: Education, Medical, Food, UX, Tech, Contents, Consulting 등등..) 고객이 어떤 '업무 환경(구조적 적합성)'에서 스트레스를 받고, 어떤 '일하는 방식과 분야(재능적 두각)'에서 가장 빛나는지 그 패턴을 이 사람의 사주 해설지를 확인한 후 구체적이고 사실적으로 묘사할 것.
 - 3번(Life Turning소 Points): 어떤 종류의 터닝포인트인지는 구체적으로 얘기해주되, 구체적인 연도나 나이를 절대로 스포일러 하지 말 것! (예: 2026년에 조심해라, 38살에 만난다 등 금지).대신 예를 들어 "몇년 안에 ~ 이런 터닝포인트가 다가오고 있고, ~이런 문제를 해결하게 된다."등의 강력한 호기심(Curiosity Gap)만 유발하여 유료 결제를 유도할 것.
 
 === 심화 분석 보고서 ===
@@ -919,24 +920,32 @@ OUTPUT FORMAT (JSON ONLY):
 
       // 각 섹션을 DB에 저장 또는 업데이트
       for (const [sectionKey, sectionFacts] of Object.entries(factsBySection)) {
-        const { data: existingReport } = await supabase
+        const { data: existingReport, error: lookupError } = await supabase
           .from('reports')
           .select('id')
           .eq('submission_id', body.submissionId)
           .eq('section_key', sectionKey)
           .eq('is_free', true)
-          .single()
+          .maybeSingle()
+
+        if (lookupError) {
+          throw new Error(`Free report lookup failed (${sectionKey}): ${lookupError.message}`)
+        }
 
         if (existingReport) {
-          await supabase
+          const { error: updateError } = await supabase
             .from('reports')
             .update({
               facts: sectionFacts,
               context_interpretation: contextInterpretation,
             })
             .eq('id', existingReport.id)
+
+          if (updateError) {
+            throw new Error(`Free report update failed (${sectionKey}): ${updateError.message}`)
+          }
         } else {
-          await supabase
+          const { error: insertError } = await supabase
             .from('reports')
             .insert({
               submission_id: body.submissionId,
@@ -945,6 +954,10 @@ OUTPUT FORMAT (JSON ONLY):
               context_interpretation: contextInterpretation,
               is_free: true,
             })
+
+          if (insertError) {
+            throw new Error(`Free report insert failed (${sectionKey}): ${insertError.message}`)
+          }
         }
       }
 
@@ -953,7 +966,7 @@ OUTPUT FORMAT (JSON ONLY):
       resolvedYongsin = yongsinElement
 
       // yongsinElement를 submission의 saju_data에 저장 (캐시 로드 시 사용)
-      await supabase
+      const { error: submissionUpdateError } = await supabase
         .from('submissions')
         .update({
           saju_data: {
@@ -962,6 +975,10 @@ OUTPUT FORMAT (JSON ONLY):
           }
         })
         .eq('id', body.submissionId)
+
+      if (submissionUpdateError) {
+        throw new Error(`Submission yongsin update failed: ${submissionUpdateError.message}`)
+      }
     }
 
     return NextResponse.json({

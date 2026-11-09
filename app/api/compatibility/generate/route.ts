@@ -275,10 +275,6 @@ export async function POST(request: Request) {
       submission.person_b_saju_data || {}
     )
 
-    console.log('[v0] Compatibility: ===== COMPLETE SAJU DATA FOR STAGE 1 & 2 =====')
-    console.log('[v0] Compatibility:', JSON.stringify(allSajuData, null, 2))
-    console.log('[v0] Compatibility: ====================================================')
-
     const stage1SystemPrompt = `👑 [최종 Prompt Instruction: 궁합 실전 해석 - 심화 업데이트본]
 1. 데이터 전처리 (오행 궁합 및 십성 치환)
 오행 구족 확인: Person A와 B의 elementBalanceWithHiddenStems를 합산하여 5가지 오행(목, 화, 토, 금, 수)이 모두 갖춰지는지(최소 4개 이상) 확인한다.

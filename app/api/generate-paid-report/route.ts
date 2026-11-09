@@ -160,7 +160,7 @@ export async function POST(request: Request) {
       }
     }
 
-    console.log(`[v0] Generating 96 paid facts for ${submission.name}`)
+    console.log('[v0] Generating 96 paid facts')
     console.log('[v0] Context injection summary:')
     console.log('[v0] - Saju data fields:', Object.keys(submission.saju_data || {}).length)
     console.log('[v0] - Context interpretation length:', contextInterpretation.length, 'chars')
@@ -680,7 +680,7 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
       console.error('[v0] Failed to save paid_report_url:', urlUpdateError)
     }
 
-    console.log(`[v0] Successfully generated ${paidFacts.length} paid facts for ${submission.name}`)
+    console.log(`[v0] Successfully generated ${paidFacts.length} paid facts`)
 
     return NextResponse.json({
       facts: paidFacts,
