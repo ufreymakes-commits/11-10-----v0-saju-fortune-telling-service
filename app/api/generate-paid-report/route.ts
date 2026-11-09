@@ -55,7 +55,16 @@ MANDATORY REQUIREMENTS:
 
 Return ONLY a valid JSON object with "mainFacts" and "closingLetter". No markdown, no explanations outside the JSON.`
 
+// 같은 서버 인스턴스 안에서의 중복 생성 방지용 (submissionId → 시작 시각). 인스턴스가 다르면 막지 못하는 약한 안전장치.
+const IN_FLIGHT_WINDOW_MS = 6 * 60 * 1000
+const inFlightGenerations = new Map<string, number>()
+
 export async function POST(request: Request) {
+  const t0 = Date.now()
+  const logTiming = (step: string, extra?: Record<string, unknown>) =>
+    console.log('[v0] timing', { step, ms: Date.now() - t0, ...extra })
+  let lockedSubmissionId: string | null = null
+
   try {
     const { submissionId } = await request.json()
 
@@ -73,6 +82,8 @@ export async function POST(request: Request) {
       .eq('status', 'completed')
       .single()
 
+    logTiming('db:payment')
+
     if (paymentError || !payment) {
       return NextResponse.json({ error: 'Payment required' }, { status: 403 })
     }
@@ -85,6 +96,8 @@ export async function POST(request: Request) {
       .eq('section_key', 'paid_full')
       .single()
 
+    logTiming('db:cache')
+
     if (existingPaidReport?.facts && Array.isArray(existingPaidReport.facts) && existingPaidReport.facts.length > 5) {
       console.log('[v0] Paid report already exists (paid_full), returning cached version')
       return NextResponse.json({
@@ -94,12 +107,23 @@ export async function POST(request: Request) {
       })
     }
 
+    // 2-1. 같은 인스턴스에서 최근 6분 안에 시작된 생성이 있으면 새로 시작하지 않는다.
+    const startedAt = inFlightGenerations.get(submissionId)
+    if (startedAt && Date.now() - startedAt < IN_FLIGHT_WINDOW_MS) {
+      console.log('[v0] Generation already in progress for this submission, returning 202')
+      return NextResponse.json({ status: 'generating' }, { status: 202 })
+    }
+    inFlightGenerations.set(submissionId, Date.now())
+    lockedSubmissionId = submissionId
+
     // 3. submission 데이터 조회 (사주 데이터)
     const { data: submission, error: submissionError } = await supabase
       .from('submissions')
       .select('*')
       .eq('id', submissionId)
       .single()
+
+    logTiming('db:submission')
 
     if (submissionError || !submission) {
       return NextResponse.json({ error: 'Submission not found' }, { status: 404 })
@@ -111,6 +135,8 @@ export async function POST(request: Request) {
       .select('facts, context_interpretation')
       .eq('submission_id', submissionId)
       .eq('is_free', true)
+
+    logTiming('db:freeReports')
 
     if (freeReportError || !freeReports || freeReports.length === 0) {
       return NextResponse.json({ error: 'Free report not found. Please generate free report first.' }, { status: 404 })
@@ -421,6 +447,8 @@ FINAL JSON STRUCTURE (single valid JSON object):
 
 Generate the 96 main facts and the closingLetter now as a single JSON object.`
 
+    logTiming('prompt:assembled', { userPromptLength: userPrompt.length, systemPromptLength: PAID_REPORT_SYSTEM_PROMPT.length })
+
     // 6. Gemini API 호출 with retry logic (최대 3번 시도)
     console.log('[v0] Calling Gemini API...')
     const startTime = Date.now()
@@ -432,6 +460,7 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
         console.log(`[v0] Gemini API attempt ${attempt}/${MAX_RETRIES}`)
+        logTiming('gemini:attempt-start', { attempt })
         const result = await generateText({
           model: 'google/gemini-2.5-flash',
           system: PAID_REPORT_SYSTEM_PROMPT,
@@ -440,6 +469,17 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
           // routinely exceeds 16k output tokens and gets silently truncated mid-JSON. Raised with headroom.
           maxOutputTokens: 32000,
           temperature: 0,
+          // 이미 계산된 데이터를 문장으로 옮기는 작업이라 긴 추론이 필요 없다. 로그의 reasoningTokens 가 0 인지로 적용 여부를 확인한다.
+          providerOptions: { google: { thinkingConfig: { thinkingBudget: 0 } } },
+        })
+        const usage: any = result.usage
+        logTiming('gemini:attempt-end', {
+          attempt,
+          finishReason: result.finishReason,
+          inputTokens: usage?.inputTokens,
+          outputTokens: usage?.outputTokens,
+          reasoningTokens: usage?.outputTokenDetails?.reasoningTokens ?? usage?.reasoningTokens,
+          googleThoughtsTokenCount: (result.providerMetadata as any)?.google?.usageMetadata?.thoughtsTokenCount,
         })
         // finishReason === 'length' means the model hit maxOutputTokens and was cut off mid-JSON —
         // treat this the same as a failure so we retry instead of handing truncated JSON to the parser.
@@ -452,6 +492,7 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
       } catch (error) {
         lastError = error as Error
         console.error(`[v0] Gemini API attempt ${attempt} failed:`, error)
+        logTiming('gemini:attempt-failed', { attempt })
         
         if (attempt < MAX_RETRIES) {
           // 재시도 전 잠시 대기 (exponential backoff: 2초, 4초)
@@ -633,7 +674,9 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
       console.error('[v0] Raw response end:', rawResponse.substring(rawResponse.length - 500))
       return NextResponse.json({ error: 'Failed to parse AI response' }, { status: 500 })
     }
-      
+
+    logTiming('postprocess:done', { cards: paidFacts.reduce((n: number, s: any) => n + (Array.isArray(s?.cards) ? s.cards.length : 0), 0) })
+
     // 8. DB에 저장 (중복 방지: 기존 paid_full 있으면 upsert)
     const { data: existing } = await supabase
       .from('reports')
@@ -665,6 +708,8 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
         })
       insertError = error
     }
+
+    logTiming('db:upsert', { saveFailed: Boolean(insertError) })
 
     if (insertError) {
       console.error('[v0] Failed to save paid report:', insertError)
@@ -702,5 +747,7 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
       { error: 'Internal server error' },
       { status: 500 }
     )
+  } finally {
+    if (lockedSubmissionId) inFlightGenerations.delete(lockedSubmissionId)
   }
 }

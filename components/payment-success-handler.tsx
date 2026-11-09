@@ -1,11 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Spinner } from '@/components/ui/spinner'
 import { Button } from '@/components/ui/button'
+import { ReportProgress, useReportGeneration } from '@/components/report-progress'
 import { CheckCircleIcon } from 'lucide-react'
 
 interface PaymentSuccessHandlerProps {
@@ -14,7 +14,6 @@ interface PaymentSuccessHandlerProps {
 }
 
 export function PaymentSuccessHandler({ submissionId, orderId }: PaymentSuccessHandlerProps) {
-  const router = useRouter()
   const [status, setStatus] = useState<'processing' | 'generating' | 'success' | 'error'>('processing')
   const [error, setError] = useState<string | null>(null)
 
@@ -40,24 +39,8 @@ export function PaymentSuccessHandler({ submissionId, orderId }: PaymentSuccessH
           throw new Error(captureData.error || 'Payment capture failed')
         }
 
-        // Step 2: Show generating UI
+        // Step 2: Show generating UI; useReportGeneration starts generation and polls from here
         setStatus('generating')
-
-        // Step 3: Fire generate API - if it times out (500) that's OK, we poll DB below
-        fetch('/api/generate-paid-report', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ submissionId })
-        }).then(async (res) => {
-          if (res.ok) {
-            // Generation completed within timeout - redirect immediately
-            setStatus('success')
-            setTimeout(() => router.push(`/report/${submissionId}/paid`), 1000)
-          }
-          // If not ok (e.g. 500 timeout), polling below will catch the DB write
-        }).catch(() => {
-          // Network error - polling below will handle it
-        })
 
       } catch (err) {
         // Only payment capture errors reach here
@@ -67,31 +50,9 @@ export function PaymentSuccessHandler({ submissionId, orderId }: PaymentSuccessH
     }
 
     captureAndGenerate()
-  }, [orderId, submissionId, router])
+  }, [orderId, submissionId])
 
-  // Poll DB every 5 seconds while generating - catches cases where Gemini
-  // completes but the API timed out before returning the response
-  useEffect(() => {
-    if (status !== 'generating') return
-
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/check-paid-report?submissionId=${submissionId}`)
-        if (res.ok) {
-          const data = await res.json()
-          if (data.facts && Array.isArray(data.facts) && data.facts.length > 0) {
-            clearInterval(interval)
-            setStatus('success')
-            setTimeout(() => router.push(`/report/${submissionId}/paid`), 1000)
-          }
-        }
-      } catch {
-        // keep polling
-      }
-    }, 5000)
-
-    return () => clearInterval(interval)
-  }, [status, submissionId, router])
+  const generation = useReportGeneration(submissionId, status === 'generating')
 
   if (status === 'processing') {
     return (
@@ -111,28 +72,23 @@ export function PaymentSuccessHandler({ submissionId, orderId }: PaymentSuccessH
     )
   }
 
-  if (status === 'generating') {
+  if (status === 'generating' && generation.status !== 'success') {
     return (
-      <div className="text-center max-w-md">
-        <CheckCircleIcon className="w-12 h-12 mx-auto mb-6 text-secondary" />
+      <div className="flex flex-col items-center text-center max-w-md w-full">
+        <CheckCircleIcon className="w-12 h-12 mx-auto mb-4 text-secondary" />
         <h2 className="text-2xl font-bold text-gradient mb-2">Payment Successful!</h2>
-        <p className="text-muted-foreground mb-8">Now generating your personalized 99 facts...</p>
-        <div className="relative w-32 h-32 mx-auto mb-8 animate-float">
-          <Image
-            src="/images/mascot-main.png"
-            alt="Sajume mascot"
-            fill
-            className="object-contain"
-          />
-        </div>
-        <Spinner className="w-8 h-8 mx-auto mb-6" />
-        <p className="text-muted-foreground text-sm mb-2">It usually takes less than 2-3 minutes.</p>
-        <p className="text-muted-foreground/60 text-xs">Please don&apos;t close this page. You&apos;ll be redirected automatically when ready.</p>
+        <p className="text-muted-foreground mb-8">Now generating your personalized report...</p>
+        <ReportProgress
+          key={generation.attempt}
+          error={generation.error}
+          onRetry={generation.retry}
+          onCheckAgain={generation.checkNow}
+        />
       </div>
     )
   }
 
-  if (status === 'success') {
+  if (status === 'success' || generation.status === 'success') {
     return (
       <div className="text-center">
         <CheckCircleIcon className="w-16 h-16 mx-auto mb-4 text-secondary" />

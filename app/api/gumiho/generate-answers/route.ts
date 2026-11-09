@@ -198,6 +198,7 @@ Please provide deeply personalized answers to each of these 3 questions, drawing
           prompt: userPrompt,
           maxOutputTokens: 8000,
           temperature: 0.7,
+          providerOptions: { google: { thinkingConfig: { thinkingBudget: 0 } } },
         })
         if (result.finishReason === 'length') {
           throw new Error('Gumiho response truncated (finishReason=length)')
