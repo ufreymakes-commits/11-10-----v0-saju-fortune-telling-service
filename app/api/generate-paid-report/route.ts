@@ -60,6 +60,10 @@ CONSISTENCY RULES (critical):
 - Where a ten god sits: copy the positions from FINAL FACTS tenGodsByGod exactly. A stem and a branch are different positions. Never write "Year and Month stems" or "Year and Month branches" unless both really have that god in tenGodsByGod.
 - Lucky-item element: call it "the element behind your lucky directions, colors and numbers". Never call it the "primary lucky element" or "primary Useful God" (the headline Useful God is yongsin.primary). Do not say two different elements are "primary".
 - Dates must be consistent between cards: the same cycle always has the same years and ages everywhere.
+- Money window: when you write about "your strongest money window / wealth flow timing", use exactly FINAL FACTS wealthWindow (years and ages). Never call a Low-scored cycle the strongest money window, and never contradict another card about the same cycle (e.g. one card says a cycle is the strongest money window while another card calls it Low and says protect assets).
+- Years: any specific past or future year you mention must come from FINAL FACTS (reportYear, luckCycles, lovePeak, the yearly list in the saju data). Do not invent favorable/unfavorable years and do not copy years from the free report. Never call a year before the report year "is favorable" in present tense.
+- Repetition: one named chart item (for example Mi-Ja Wonjin, Rob Wealth Fighting Wealth, a cycle name, a twelve star) may appear in at most 3 cards of the whole report. Each of the 6 Truth Bomb cards must use a DIFFERENT chart item from the others.
+- Final card (96): warm, personal, ties to the report year and to one concrete thing from this chart (not a generic "you have inner resources").
 
 Return ONLY a valid JSON object with "mainFacts" and "closingLetter". No markdown, no explanations outside the JSON.`
 
@@ -123,6 +127,80 @@ function findGenericTruthBombSections(text: string): string[] {
     if (!hasPrefix || !isSpecific) generic.push(number)
   }
   return generic
+}
+
+function parseMainFacts(text: string): any[] {
+  const start = text.indexOf('{')
+  const end = text.lastIndexOf('}')
+  if (start === -1 || end <= start) return []
+  try {
+    const parsed = JSON.parse(text.slice(start, end + 1))
+    return Array.isArray(parsed?.mainFacts) ? parsed.mainFacts : []
+  } catch {
+    return []
+  }
+}
+
+// 생성 후 코드 검사: 섹션 06(연애) 카드 중 "family"와 "pet"이 함께 들어간 카드가 하나도 없는지 확인한다.
+// JSON을 읽을 수 없으면 false(재생성하지 않음).
+function isLovePetSentenceMissing(text: string): boolean {
+  const love = parseMainFacts(text).find((s) => String(s?.sectionNumber ?? '') === '06')
+  if (!love) return false
+  const cards: any[] = Array.isArray(love.cards) ? love.cards : []
+  return !cards.some((c) => {
+    const content = String(c?.content ?? '')
+    return /\bfamily\b/i.test(content) && /\bpets?\b/i.test(content)
+  })
+}
+
+// 생성 후 코드 검사(로그 전용): 작은따옴표로 묶인 용어가 4장 넘는 카드에 나오는지 센다.
+function findRepeatedTerms(text: string): Array<[string, number]> {
+  const cardsByTerm = new Map<string, Set<string>>()
+  parseMainFacts(text).forEach((section, si) => {
+    const cards: any[] = Array.isArray(section?.cards) ? section.cards : []
+    cards.forEach((card, ci) => {
+      const content = String(card?.content ?? '')
+      for (const m of content.matchAll(/(?<![A-Za-z])'([^'\n]{2,40}?)'(?![A-Za-z])/g)) {
+        const term = m[1].trim()
+        if (!term) continue
+        const key = term.toLowerCase()
+        if (!cardsByTerm.has(key)) cardsByTerm.set(key, new Set())
+        cardsByTerm.get(key)!.add(`${si}-${ci}`)
+      }
+    })
+  })
+  return [...cardsByTerm.entries()].filter(([, set]) => set.size > 4).map(([term, set]) => [term, set.size])
+}
+
+// 생성 후 코드 검사(로그 전용): 허용된 연도 집합(보고서 연도, 대운 구간, 연애 피크, 사주 데이터의 연도 목록, 생년)에 없는 20NN 연도
+function collectAllowedYears(sources: unknown[], reportYear: number, cycles: any[] | undefined): Set<number> {
+  const allowed = new Set<number>([reportYear])
+  for (const source of sources) {
+    let serialized = ''
+    try {
+      serialized = typeof source === 'string' ? source : JSON.stringify(source) ?? ''
+    } catch {
+      serialized = ''
+    }
+    for (const m of serialized.matchAll(/\b(?:19|20)\d\d\b/g)) allowed.add(Number(m[0]))
+  }
+  if (Array.isArray(cycles)) {
+    for (const c of cycles) {
+      const range = String(c?.yearsActive ?? '').match(/^(\d{4})-(\d{4})$/)
+      if (!range) continue
+      for (let y = Number(range[1]); y <= Number(range[2]); y++) allowed.add(y)
+    }
+  }
+  return allowed
+}
+
+function findUnknownYears(text: string, allowed: Set<number>): number[] {
+  const unknown = new Set<number>()
+  for (const m of text.matchAll(/\b20\d\d\b/g)) {
+    const year = Number(m[0])
+    if (!allowed.has(year)) unknown.add(year)
+  }
+  return [...unknown]
 }
 
 // 같은 서버 인스턴스 안에서의 중복 생성 방지용 (submissionId → 시작 시각). 인스턴스가 다르면 막지 못하는 약한 안전장치.
@@ -363,6 +441,7 @@ Example: the first card starts with "Hey ${displayName}," and the last card star
 * - Do not give generic marriage advice to a student, and do not treat a 40-year-old's relationship as a "first crush." Always consider the customer's age and Daewoon all together.
 * CRITICAL - Timing must come only from \`finalFacts.lovePeak\` and \`romanceFacts\` (never recalculate or invent years):
   - Card 10 (the spouse-window card) follows the LOVE PEAK RULE below (same rule as the teaser sentence), with exactly ONE reason and no guess about the partner's job.
+  - In exactly ONE love-timing card (the one about the love peak), add this sentence word for word: "If it isn't a romantic partner, this can also arrive as a new family member, a precious friend, or even a pet that changes your days." Do not add it to any other card.
   - This year, next year and the year after: keep using \`romanceFacts.yearLuck\`. Use \`finalFacts.lovePeak\` only for the teaser sentence and Card 10.
   - Do not mention any other future relationship year unless it is listed in \`romanceFacts.yearLuck\` or is the lovePeak year. Describe it as a stronger or calmer period for love, never as a guaranteed event.
 * Consider the possibility of a non-marriage or single lifestyle if the user's chart suggests a high level of independence or a lack of traditional 'Spouse Star' activation. However, this must be based on definitive saju data evidence, and you should approach this topic with extreme caution and sensitivity. If you mention it, use a soft, inquiring tone rather than a rigid conclusion, such as: 'Since you value your independence and find so much peace in your own freedom, do you ever find yourself wondering if marriage is even a necessary part of your journey?
@@ -545,7 +624,7 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
           // routinely exceeds 16k output tokens and gets silently truncated mid-JSON. Raised with headroom.
           maxOutputTokens: 32000,
           temperature: 0,
-          providerOptions: { google: { thinkingConfig: { thinkingBudget: 1024 } } },
+          providerOptions: { google: { thinkingConfig: { thinkingBudget: 4096 } } },
         })
         const usage: any = result.usage
         logTiming('gemini:attempt-end', {
@@ -568,8 +647,11 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
         for (const n of genericBombs) console.warn(`[v0] check truth-bomb generic section ${n}`)
         // 검사 점수: 신강/신약 모순 3점, 연도 불일치 2점, 밋밋한 Truth Bomb 카드당 1점 (낮을수록 좋음)
         const yearBad = findCycleYearMismatches(result.text, finalFacts?.luckCycles?.all).length > 0
-        const attemptScore = (strengthBad ? 3 : 0) + (yearBad ? 2 : 0) + genericBombs.length
-        if (strengthBad || genericBombs.length > 0) {
+        // 연애 섹션에 "family"+"pet" 문장이 없으면 1점이고, 같은 단일 재생성에 포함한다.
+        const petMissing = isLovePetSentenceMissing(result.text)
+        if (petMissing) console.warn('[v0] check love pet sentence missing')
+        const attemptScore = (strengthBad ? 3 : 0) + (yearBad ? 2 : 0) + genericBombs.length + (petMissing ? 1 : 0)
+        if (strengthBad || genericBombs.length > 0 || petMissing) {
           if (!strengthRegenerated && attempt < MAX_RETRIES) {
             strengthRegenerated = true
             strengthFallback = result.text
@@ -612,6 +694,21 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
     if (!rawResponse && strengthFallback) {
       rawResponse = strengthFallback
       console.warn('[v0] check strength mismatch persisted')
+    }
+
+    // 최종 저장본에 대한 로그 전용 검사 (재생성을 일으키지 않는다)
+    if (rawResponse) {
+      for (const [term, count] of findRepeatedTerms(rawResponse)) {
+        console.warn(`[v0] check repeated term "${term}" x${count}`)
+      }
+      const allowedYears = collectAllowedYears(
+        [finalFacts, romanceFacts, sajuForPrompt, submission.saju_data, submission.birth_date],
+        reportYear,
+        finalFacts?.luckCycles?.all,
+      )
+      for (const year of findUnknownYears(rawResponse, allowedYears)) {
+        console.warn(`[v0] check unknown year ${year}`)
+      }
     }
 
     // 모든 시도 실패

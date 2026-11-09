@@ -129,7 +129,16 @@ export function buildPaidContext(saju: any, gender: 'male' | 'female', reportYea
   const decs: any[] | undefined = saju?.decadeFortune?.decades
   if (decs) {
     const i = decs.findIndex((x) => x.startYear <= reportYear && reportYear < x.endYear)
+    const fmtW = (x: any) => fmt(x)
     const fmt = (x: any) => x && ({ ganzi: ganziEn(x.ganziKorean ?? x.ganzi), yearsActive: `${x.startYear}-${x.endYear - 1}`, internationalAges: `${x.startAge - 1}-${x.endAge - 2}`, stemTenGodEn: TEN_GODS_ENGLISH[x.stemTenGod] ?? x.stemTenGod, twelveStar: STAR_EN[x.twelveStar] ?? x.twelveStar, score: GRADE_EN[x.score] ?? x.score })
+    {
+      // 재물 구간: 이전·현재·다음 대운 중 점수가 가장 높은 것(동점이면 현재 > 이전 > 다음). '하' 등급 대운이 "가장 강한 재물 시기"로 나오는 모순을 막는다.
+      const rank: Record<string, number> = { 상: 3, 중: 2, 하: 1 }
+      const cand = [decs[i], decs[i - 1], decs[i + 1]].filter(Boolean)
+      let best: any = null
+      for (const c of cand) if (!best || (rank[c.score] ?? 0) > (rank[best.score] ?? 0)) best = c
+      if (best) finalFacts.wealthWindow = { ...fmtW(best), note: 'When you name "your strongest money window", use exactly this cycle (years and ages). Never name a Low-scored cycle as the strongest money window.' }
+    }
     finalFacts.luckCycles = { previous: i > 0 ? fmt(decs[i - 1]) : null, current: i >= 0 ? fmt(decs[i]) : null, next: i >= 0 && decs[i + 1] ? fmt(decs[i + 1]) : null, all: decs.map(fmt), changesInYear: i >= 0 ? decs[i].endYear : null, note: 'Use these for "current / previous / next" cycle statements. Cite the YEARS (yearsActive), and if you give ages use internationalAges only (never Korean-age numbers). Do not work out the current cycle from age yourself. "all" lists EVERY 10-year cycle with its exact years and ages: when you mention any cycle (including childhood ones) use its years and ages from "all" exactly, never your own numbers, and never mention a cycle that is not in the list.' }
   }
   finalFacts.luckyItems = luckyItems(saju, groupEl)
