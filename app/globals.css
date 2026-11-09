@@ -162,6 +162,48 @@
   .animate-float {
     animation: float 4s ease-in-out infinite;
   }
+
+  .tarot-card-float {
+    position: relative;
+    border-color: oklch(0.62 0.18 295 / 0.36);
+    box-shadow: 0 10px 24px oklch(0.42 0.16 295 / 0.12), 0 0 0 1px oklch(0.74 0.16 320 / 0.12) inset;
+    animation: tarot-float 6s ease-in-out infinite;
+  }
+
+  .tarot-card-float::before {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border: 1px solid oklch(0.7 0.15 320 / 0.2);
+    border-radius: 0.7rem;
+    pointer-events: none;
+  }
+
+  .cta-shimmer {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  .cta-shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(110deg, transparent 20%, oklch(1 0 0 / 0.5) 45%, transparent 70%);
+    transform: translateX(-120%);
+    animation: cta-shimmer 2.4s linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes tarot-float {
+    0%, 100% { transform: translateY(0) rotate(-0.25deg); }
+    50% { transform: translateY(-4px) rotate(0.25deg); }
+  }
+
+  @keyframes cta-shimmer {
+    to { transform: translateX(120%); }
+  }
   
   @keyframes marquee {
     from { transform: translateX(0); }

@@ -308,7 +308,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
   return (
     <div className="px-4 py-8 max-w-2xl mx-auto">
       {/* Four Pillars Card */}
-      <div className="bg-card border border-border rounded-xl p-4 mb-6 shadow-lg shadow-primary/5">
+      <div className="bg-card border border-border rounded-xl p-4 mb-6 shadow-lg shadow-primary/5 tarot-card-float">
         <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-3 text-center">
           <span className="text-gradient font-semibold">{submission.name}&apos;s</span> Four Pillars
         </h2>
@@ -344,7 +344,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
       {/* Free Facts */}
       <div className="mb-6">
         <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
-          <span className="text-gradient">3 Free Insights First!</span>
+          <span className="text-gradient text-lg">3 Free Insights First!</span>
           <span className="text-[10px] font-bold bg-accent/20 text-accent px-2 py-0.5 rounded border border-accent/50">FREE</span>
         </h2>
         
@@ -400,7 +400,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           From your ideal career path to when your love luck peaks!
         </p>
         <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
-          <span className="bg-gradient-to-r from-purple-500 to-fuchsia-500 bg-clip-text text-transparent">Hidden VIP Insights</span>
+          <span className="bg-gradient-to-r from-purple-500 to-fuchsia-500 bg-clip-text text-transparent text-xl">Hidden VIP Insights</span>
           <LockIcon className="w-3 h-3 text-purple-400" />
         </h2>
         
@@ -460,10 +460,10 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           />
         </div>
         
-        <h3 className="text-lg font-semibold text-gradient mb-0">
+        <h3 className="text-2xl font-bold text-gradient mb-0">
           Unlock 99 Secret Facts!
         </h3>
-        <p className="text-sm font-medium text-foreground/80 mb-2">
+        <p className="text-sm font-bold text-foreground/80 mb-2">
           Full Report
         </p>
 
@@ -478,7 +478,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
         </div>
         
         <Link href={`/checkout/${submissionId}`}>
-          <Button className="w-full max-w-xs bg-[#0070ba] text-white hover:bg-[#005ea6] h-11 text-sm font-semibold rounded-md shadow-lg">
+          <Button className="w-full max-w-xs bg-[#0070ba] text-white hover:bg-[#005ea6] h-11 text-sm font-semibold rounded-md shadow-lg cta-shimmer">
             <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
               <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 3.72a.773.773 0 0 1 .763-.642h6.153c2.042 0 3.474.405 4.256 1.208.784.8 1.035 1.934.748 3.37l-.022.112h.02a3.606 3.606 0 0 1-.004.133l-.015.12-.025.127c-.002.01-.003.02-.006.03l-.012.05-.01.043-.014.054c-.34 1.47-1.162 2.472-2.386 2.98-.006.002-.012.005-.018.008l-.014.006c-.07.03-.143.058-.217.085l-.086.03c-.068.023-.138.044-.209.064l-.078.022c-.082.022-.166.042-.252.06l-.056.012c-.109.023-.222.044-.337.063l-.038.006a6.933 6.933 0 0 1-.467.057l-.052.004c-.103.009-.209.016-.316.021l-.073.003a7.93 7.93 0 0 1-.288.008h-.08l-.152.001h-2.06l-.048.32-1.026 6.499-.035.215H7.076v.001z"/>
             </svg>
