@@ -53,7 +53,41 @@ MANDATORY REQUIREMENTS:
 - Maintain Gen-Z tone, warmth, and practical advice
 - After the 96 cards, also write one standalone "closingLetter" per the CLOSING LETTER rules below
 
+CONSISTENCY RULES (critical):
+- The strength rule in FINAL FACTS (finalFacts.strength.rule) is binding. Never contradict it anywhere in the 96 cards or the closing letter. If it says STRONG, never write weak, "Weak Self" or "Jae-Da-Sin-Yak"; if it says WEAK, never write strong or self-reliant by strength.
+- Cycle years and ages: for ANY 10-year luck cycle you mention (past, current, next, childhood), copy its years and international ages exactly from finalFacts.luckCycles.all. Never compute your own ages or years, never write an end year one higher than listed, and never mention a cycle that is not in the list. Use one age system only (the international ages given).
+- Ten gods and positions: attach a ten god only to the position listed in finalFacts.tenGodsByPosition (for example, a god on the Month STEM is not on the Month BRANCH). Never say "from your Year and Month stems" unless both stems really have that god.
+- Dates must be consistent between cards: the same cycle always has the same years and ages everywhere.
+
 Return ONLY a valid JSON object with "mainFacts" and "closingLetter". No markdown, no explanations outside the JSON.`
+
+// 생성 후 코드 검사 (추가 AI 호출 없음): 신강/신약 모순
+function hasStrengthMismatch(text: string, grade: unknown): boolean {
+  const g = String(grade ?? '')
+  if (/weak/i.test(g)) return /day master is strong|strong day master/i.test(text)
+  if (/strong/i.test(g)) return /weak self|jae-da-sin-yak|day master is weak/i.test(text)
+  return false
+}
+
+// 생성 후 코드 검사: 대운 연도 범위가 목록과 다르게 쓰인 경우 (경고 로그만 남김)
+function findCycleYearMismatches(text: string, cycles: any[] | undefined): string[] {
+  if (!Array.isArray(cycles) || cycles.length === 0) return []
+  const listed = cycles
+    .map((c) => String(c?.yearsActive ?? '').match(/^(\d{4})-(\d{4})$/))
+    .filter((m): m is RegExpMatchArray => !!m)
+    .map((m) => [Number(m[1]), Number(m[2])] as const)
+  const mismatches = new Set<string>()
+  for (const m of text.matchAll(/\b(20\d\d)\s*[-\u2013]\s*(20\d\d)\b/g)) {
+    const a = Number(m[1])
+    const b = Number(m[2])
+    // 대운은 10년 단위이므로 8~11년 폭의 범위만 대운 후보로 본다 (연애 시기 등 짧은 구간은 제외)
+    if (b - a < 8 || b - a > 11) continue
+    const overlaps = listed.some(([s, e]) => a <= e && b >= s)
+    const exact = listed.some(([s, e]) => a === s && b === e)
+    if (overlaps && !exact) mismatches.add(`${a}-${b}`)
+  }
+  return [...mismatches]
+}
 
 // 같은 서버 인스턴스 안에서의 중복 생성 방지용 (submissionId → 시작 시각). 인스턴스가 다르면 막지 못하는 약한 안전장치.
 const IN_FLIGHT_WINDOW_MS = 6 * 60 * 1000
@@ -456,6 +490,8 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
     let rawResponse = ''
     let lastError: Error | null = null
     const MAX_RETRIES = 3
+    let strengthRegenerated = false
+    let strengthFallback = ''
     
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
@@ -469,8 +505,7 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
           // routinely exceeds 16k output tokens and gets silently truncated mid-JSON. Raised with headroom.
           maxOutputTokens: 32000,
           temperature: 0,
-          // 이미 계산된 데이터를 문장으로 옮기는 작업이라 긴 추론이 필요 없다. 로그의 reasoningTokens 가 0 인지로 적용 여부를 확인한다.
-          providerOptions: { google: { thinkingConfig: { thinkingBudget: 0 } } },
+          providerOptions: { google: { thinkingConfig: { thinkingBudget: 1024 } } },
         })
         const usage: any = result.usage
         logTiming('gemini:attempt-end', {
@@ -485,6 +520,17 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
         // treat this the same as a failure so we retry instead of handing truncated JSON to the parser.
         if (result.finishReason === 'length') {
           throw new Error(`Response truncated by maxOutputTokens (finishReason: length, ${result.text.length} chars)`)
+        }
+        // 신강/신약 모순 검사: 한 번만 재생성(시도 횟수에 포함). 재생성 후에도 남으면 그대로 저장한다.
+        if (hasStrengthMismatch(result.text, finalFacts?.strength?.grade)) {
+          if (!strengthRegenerated && attempt < MAX_RETRIES) {
+            strengthRegenerated = true
+            strengthFallback = result.text
+            console.warn('[v0] check strength mismatch, regenerating once')
+            logTiming('check:strength-mismatch', { attempt })
+            continue
+          }
+          console.warn('[v0] check strength mismatch persisted')
         }
         rawResponse = result.text
         console.log(`[v0] Gemini API succeeded on attempt ${attempt}`)
@@ -503,6 +549,12 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
       }
     }
     
+    // 재생성이 실패했다면 모순이 있던 첫 결과라도 사용한다
+    if (!rawResponse && strengthFallback) {
+      rawResponse = strengthFallback
+      console.warn('[v0] check strength mismatch persisted')
+    }
+
     // 모든 시도 실패
     if (!rawResponse && lastError) {
       console.error('[v0] All Gemini API attempts failed')
@@ -673,6 +725,17 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
       console.error('[v0] Raw response preview:', rawResponse.substring(0, 500))
       console.error('[v0] Raw response end:', rawResponse.substring(rawResponse.length - 500))
       return NextResponse.json({ error: 'Failed to parse AI response' }, { status: 500 })
+    }
+
+    {
+      const allText = paidFacts
+        .flatMap((s: any) => (Array.isArray(s?.cards) ? s.cards.map((c: any) => String(c?.content ?? '')) : []))
+        .concat(closingLetter)
+        .join('\n')
+      const yearMismatches = findCycleYearMismatches(allText, finalFacts?.luckCycles?.all)
+      if (yearMismatches.length > 0) {
+        console.warn('[v0] check cycle-year mismatch', { found: yearMismatches, listed: finalFacts?.luckCycles?.all?.map((c: any) => c?.yearsActive) })
+      }
     }
 
     logTiming('postprocess:done', { cards: paidFacts.reduce((n: number, s: any) => n + (Array.isArray(s?.cards) ? s.cards.length : 0), 0) })

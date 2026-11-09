@@ -96,6 +96,23 @@ export function buildPaidContext(saju: any, gender: 'male' | 'female', reportYea
   }
   if (expert) {
     finalFacts.strength = { grade: GRADE_STR_EN[expert.grade] ?? expert.grade, score: expert.support, outOf: 120, note: 'This is a 0-120 score, NOT a percentage. Never write it as "%".', gotMonthSupport: monthGod ? SELF_GODS.includes(monthGod) : null }
+    {
+      const g = String(finalFacts.strength.grade)
+      const weak = /weak/i.test(g)
+      const mid = /balanced/i.test(g)
+      finalFacts.strength.rule = weak
+        ? 'The Day Master is WEAK. Never call it strong or self-reliant by strength.'
+        : mid
+          ? 'The Day Master is near balance (' + g + '). Describe it as balanced; do not call it clearly strong or clearly weak.'
+          : 'The Day Master is STRONG. Never call it weak. Never use "Weak Self", "Overwhelming Wealth, Weak Self" or "Jae-Da-Sin-Yak". A pattern of Rob Wealth fighting for wealth is fine; it does not make the chart weak.'
+    }
+    {
+      const bp = saju?.tenGods?.byPosition
+      if (bp) {
+        const t = (k: string) => (bp[k] && bp[k] !== '일간' ? ((TEN_GODS_ENGLISH as any)[bp[k]] ?? bp[k]) : null)
+        finalFacts.tenGodsByPosition = { yearStem: t('yearStem'), yearBranch: t('yearBranch'), monthStem: t('monthStem'), monthBranch: t('monthBranch'), dayBranch: t('dayBranch'), hourStem: t('hourStem'), hourBranch: t('hourBranch'), note: 'Use these exact positions. A ten god is attached to the position listed here only (a stem is not a branch).' }
+      }
+    }
     finalFacts.gyeokguk = { name: GYEOK_EN[expert.gyeok] ?? expert.gyeok, monthStemRevealed: expert.gyeokTuchul }
     finalFacts.yongsin = {
       primary: { source: expert.headline?.source === '조후' ? 'Climate balance (Johu) comes first because the season is extreme and not yet balanced in the chart' : 'Strength balance (Eokbu)', elements: toEn(expert.headline?.elements) },
@@ -109,7 +126,7 @@ export function buildPaidContext(saju: any, gender: 'male' | 'female', reportYea
   if (decs) {
     const i = decs.findIndex((x) => x.startYear <= reportYear && reportYear < x.endYear)
     const fmt = (x: any) => x && ({ ganzi: ganziEn(x.ganziKorean ?? x.ganzi), yearsActive: `${x.startYear}-${x.endYear - 1}`, internationalAges: `${x.startAge - 1}-${x.endAge - 2}`, stemTenGodEn: TEN_GODS_ENGLISH[x.stemTenGod] ?? x.stemTenGod, twelveStar: STAR_EN[x.twelveStar] ?? x.twelveStar, score: GRADE_EN[x.score] ?? x.score })
-    finalFacts.luckCycles = { previous: i > 0 ? fmt(decs[i - 1]) : null, current: i >= 0 ? fmt(decs[i]) : null, next: i >= 0 && decs[i + 1] ? fmt(decs[i + 1]) : null, changesInYear: i >= 0 ? decs[i].endYear : null, note: 'Use these for "current / previous / next" cycle statements. Cite the YEARS (yearsActive), and if you give ages use internationalAges only (never Korean-age numbers). Do not work out the current cycle from age yourself.' }
+    finalFacts.luckCycles = { previous: i > 0 ? fmt(decs[i - 1]) : null, current: i >= 0 ? fmt(decs[i]) : null, next: i >= 0 && decs[i + 1] ? fmt(decs[i + 1]) : null, all: decs.map(fmt), changesInYear: i >= 0 ? decs[i].endYear : null, note: 'Use these for "current / previous / next" cycle statements. Cite the YEARS (yearsActive), and if you give ages use internationalAges only (never Korean-age numbers). Do not work out the current cycle from age yourself. "all" lists EVERY 10-year cycle with its exact years and ages: when you mention any cycle (including childhood ones) use its years and ages from "all" exactly, never your own numbers, and never mention a cycle that is not in the list.' }
   }
   finalFacts.luckyItems = luckyItems(saju, groupEl)
   // 신살: 전문가 기준 슬롯별 + 12신살 (옛 spirits 오탐 제거)

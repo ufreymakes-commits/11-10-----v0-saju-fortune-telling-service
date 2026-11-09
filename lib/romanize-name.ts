@@ -5,7 +5,13 @@ const MEDIAL = ['a', 'ae', 'ya', 'yae', 'eo', 'e', 'yeo', 'ye', 'o', 'wa', 'wae'
 const FINAL = ['', 'k', 'kk', 'ks', 'n', 'nj', 'nh', 't', 'l', 'lk', 'lm', 'lb', 'ls', 'lt', 'lp', 'lh', 'm', 'p', 'ps', 't', 't', 'ng', 't', 't', 'k', 't', 'p', 't']
 
 export function romanizeName(name: string): string {
-  const out = [...String(name ?? '')].map((ch) => {
+  const raw = String(name ?? '')
+  // 이미 영문 이름이 있으면(예: "Yuri 유리") 한글 부분은 버리고 영문만 쓴다. 한글을 또 로마자로 바꾸면 "Yuri Yuri"가 된다.
+  if (/[A-Za-z]/.test(raw)) {
+    const latin = raw.replace(/[ㄱ-ㆎ가-힣一-鿿\u3400-\u4dbf()（）\[\]]/g, ' ').replace(/\s+/g, ' ').trim()
+    if (/[A-Za-z]/.test(latin)) return latin
+  }
+  const out = [...raw].map((ch) => {
     const c = ch.charCodeAt(0) - 0xac00
     if (c < 0 || c > 11171) return ch
     return INITIAL[Math.floor(c / 588)] + MEDIAL[Math.floor((c % 588) / 28)] + FINAL[c % 28]
