@@ -7,14 +7,14 @@ import { LinkIcon, CheckIcon, ChevronDownIcon, DownloadIcon, SparklesIcon } from
 import type { Submission, SajuData } from '@/lib/types'
 import type { OrbInfo } from '@/lib/saju/orb'
 import { TAILS } from '@/lib/saju/tails'
-import { OrbCard, ORB_CARD_ID } from '@/components/orb-card'
+import { OrbCard, ORB_CARD_ID, ORB_IMAGES } from '@/components/orb-card'
 import { DayMasterTarotCard, DAY_MASTER_CARD_ID } from '@/components/day-master-tarot-card'
 import { ElementsTarotCard, ELEMENTS_CARD_ID } from '@/components/elements-tarot-card'
 import { CardCarousel, type CarouselItem } from '@/components/card-carousel'
-import { CardActions } from '@/components/tarot-frame'
 import { DAY_MASTER_QUOTE } from '@/lib/day-master-quotes'
 import { romanizeName } from '@/lib/romanize-name'
-import { TailIcon } from '@/components/tail-icon'
+import { TailIcon, TAIL_IMAGES } from '@/components/tail-icon'
+import { cdnImage } from '@/lib/cdn-image'
 import { ClosingLetter } from '@/components/closing-letter'
 import { getDayMasterCharacter } from '@/lib/day-master-characters'
 import { track } from '@/hooks/use-track'
@@ -92,6 +92,26 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
   const displayName = romanizeName(submission.name || '') || 'Friend'
   const firstName = displayName.split(' ')[0]
 
+  const orbImageUrl = orb ? ORB_IMAGES[orb.imageKey] : undefined
+  const characterImageUrl = character?.imagePath ? cdnImage(character.imagePath, 480) : undefined
+
+  // 꼬리 아이콘 9장과 캐릭터 이미지는 섹션을 열기 전에 미리 받아 둔다.
+  useEffect(() => {
+    const urls = [...Object.values(TAIL_IMAGES), ...(characterImageUrl ? [characterImageUrl] : [])]
+    urls.forEach((url) => {
+      const img = new window.Image()
+      img.src = url
+    })
+  }, [characterImageUrl])
+
+  // 오브 이미지는 <img crossOrigin="anonymous">로 쓰이므로 같은 방식으로 미리 받아야 캐시를 재사용한다.
+  useEffect(() => {
+    if (!orbImageUrl) return
+    const img = new window.Image()
+    img.crossOrigin = 'anonymous'
+    img.src = orbImageUrl
+  }, [orbImageUrl])
+
   const carouselItems: CarouselItem[] = [
     ...(!isGenerating && orb
       ? [{
@@ -99,7 +119,7 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
           slug: 'orb',
           label: 'Your Orb',
           shareText: `My Sajume Orb: ${orb.name}`,
-          node: <OrbCard orb={orb} displayName={displayName} quote={quote} />,
+          node: <OrbCard orb={orb} displayName={displayName} />,
         }]
       : []),
     {
@@ -168,6 +188,8 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
 
   return (
     <div className="px-4 py-8 max-w-3xl mx-auto pdf-content">
+      <link rel="preload" as="image" href={TAIL_IMAGES[1]} />
+      {orbImageUrl && <link rel="preload" as="image" href={orbImageUrl} crossOrigin="anonymous" />}
 
       {/* Header */}
       <div className="text-center mb-6">
@@ -261,7 +283,7 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
                       className="mt-4 rounded-lg border border-dashed bg-background/30 p-3"
                       style={{ borderColor: `${tail.hex}88` }}
                     >
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Journal prompt</p>
+                      <p className="text-[11px] font-medium tracking-wide text-muted-foreground mb-1">Journal Question</p>
                       <p className="font-serif italic text-xs text-foreground/90 leading-relaxed text-pretty">{tail.journal}</p>
                     </div>
                   )}
@@ -294,27 +316,12 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
           </div>
           <ul className="space-y-3">
             {permissions.map((text, i) => (
-              <li key={i} className="space-y-1">
-                <div
-                  id={`permission-slip-${i + 1}`}
-                  className="rounded-xl border border-[#b8934a]/50 bg-[#f6ecd6] p-4 shadow-sm"
-                >
-                  <div className="flex items-start gap-3">
-                    <SparklesIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#a8332a]" aria-hidden="true" />
-                    <p className="font-serif text-[13px] leading-relaxed text-[#3d2a1e] text-pretty">{text}</p>
-                  </div>
-                  <p className="mt-2 text-right text-[8px] uppercase tracking-[0.2em] text-[#3d2a1e]/60">
-                    Sajume &middot; Permission Slip
-                  </p>
-                </div>
-                <CardActions
-                  targetId={`permission-slip-${i + 1}`}
-                  slug={`permission-${i + 1}`}
-                  firstName={firstName}
-                  shareText="My Sajume permission slip"
-                  showShare={false}
-                  backgroundColor="#f6ecd6"
-                />
+              <li
+                key={i}
+                className="flex items-start gap-3 rounded-2xl border border-[#d9ccff] bg-[#f4efff] p-4"
+              >
+                <SparklesIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#7c5cd6]" aria-hidden="true" />
+                <p className="text-[13px] leading-relaxed text-[#2a2250] text-pretty">{text}</p>
               </li>
             ))}
           </ul>

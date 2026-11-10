@@ -1,6 +1,7 @@
 'use client'
 
 import { useId, useState } from 'react'
+import { cdnImage } from '@/lib/cdn-image'
 
 interface TailIconProps {
   n: number
@@ -8,7 +9,7 @@ interface TailIconProps {
   className?: string
 }
 
-export const TAIL_IMAGES: Record<number, string> = {
+const TAIL_SOURCES: Record<number, string> = {
   1: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/red.png?v=1794297606',
   2: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/orange.png?v=1794297606',
   3: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/yellow.png?v=1794297607',
@@ -19,6 +20,11 @@ export const TAIL_IMAGES: Record<number, string> = {
   8: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/white.png?v=1794297607',
   9: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/black.png?v=1794297606',
 }
+
+// 32px로 보여주므로 3배(96px)만 요청한다.
+export const TAIL_IMAGES: Record<number, string> = Object.fromEntries(
+  Object.entries(TAIL_SOURCES).map(([n, url]) => [Number(n), cdnImage(url, 96)]),
+)
 
 const WHITE_TAIL = 8
 const BLACK_TAIL = 9
@@ -143,10 +149,10 @@ export function TailIcon({ n, hex, className }: TailIconProps) {
         aria-hidden="true"
         width={32}
         height={32}
-        loading="lazy"
+        loading="eager"
         decoding="async"
         onError={() => setFailedSrc(src)}
-        className="h-full w-full object-contain"
+        className="h-8 w-8 object-contain"
         style={{ filter: getImageShadow(n, hex) }}
       />
       <SparkleOverlay color={sparkleColor} />

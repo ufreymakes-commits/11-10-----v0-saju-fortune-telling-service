@@ -3,8 +3,9 @@
 import { useState } from 'react'
 import type { OrbInfo } from '@/lib/saju/orb'
 import { CardHeading, TarotFrame } from '@/components/tarot-frame'
+import { cdnImage } from '@/lib/cdn-image'
 
-const ORB_IMAGES: Record<string, string> = {
+const ORB_SOURCES: Record<string, string> = {
   gap: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/gap.png?v=1794291992',
   eul: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/eul.png?v=1794291991',
   byeong: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/byeong.png?v=1794291992',
@@ -16,6 +17,10 @@ const ORB_IMAGES: Record<string, string> = {
   im: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/im.png?v=1794291992',
   gye: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/gye.png?v=1794291992',
 }
+
+export const ORB_IMAGES: Record<string, string> = Object.fromEntries(
+  Object.entries(ORB_SOURCES).map(([key, url]) => [key, cdnImage(url, 480)]),
+)
 
 const ORB_NUMERALS: Record<string, string> = {
   gap: 'I', eul: 'II', byeong: 'III', jeong: 'IV', mu: 'V',
@@ -70,10 +75,9 @@ function buildBadges(rarity: OrbInfo['rarity']): string[] {
 interface OrbCardProps {
   orb: OrbInfo
   displayName: string
-  quote: string
 }
 
-export function OrbCard({ orb, displayName, quote }: OrbCardProps) {
+export function OrbCard({ orb, displayName }: OrbCardProps) {
   const [imageFailed, setImageFailed] = useState(false)
 
   const accent = ELEMENT_ACCENTS[orb.element] ?? '#e9c872'
@@ -136,11 +140,6 @@ export function OrbCard({ orb, displayName, quote }: OrbCardProps) {
           {orb.name}
         </h3>
         <p className="mt-1 text-[11px] tracking-wider text-[#e9dff7]/85">{orb.subtitle}</p>
-        {quote && (
-          <p className="mx-auto mt-2 max-w-[92%] font-serif text-[11px] italic leading-snug text-[#f1d98a]/90 text-pretty">
-            &ldquo;{quote}&rdquo;
-          </p>
-        )}
         <div className="mx-auto my-2 flex items-center justify-center gap-2" aria-hidden="true">
           <span className="h-px w-10 bg-[#e9c872]/50" />
           <span className="h-1.5 w-1.5 rotate-45 bg-[#e9c872]" />

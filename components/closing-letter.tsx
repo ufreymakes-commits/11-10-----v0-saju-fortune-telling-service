@@ -4,6 +4,8 @@ import { useId, useState } from 'react'
 import Image from 'next/image'
 import { Fraunces } from 'next/font/google'
 import { getDayMasterCharacter } from '@/lib/day-master-characters'
+import { cdnImage } from '@/lib/cdn-image'
+import { stripGumihoSignature } from '@/lib/letter-signature'
 
 const letterFont = Fraunces({ subsets: ['latin'], style: ['italic'], display: 'swap' })
 
@@ -17,7 +19,8 @@ interface ClosingLetterProps {
 export function ClosingLetter({ text, dayMasterKorean }: ClosingLetterProps) {
   const uid = useId().replace(/:/g, '')
   const character = getDayMasterCharacter(dayMasterKorean)
-  const [imageSrc, setImageSrc] = useState(character?.imagePath || FALLBACK_IMAGE)
+  const [imageSrc, setImageSrc] = useState(character?.imagePath ? cdnImage(character.imagePath, 480) : FALLBACK_IMAGE)
+  const body = stripGumihoSignature(text)
 
   return (
     <div id="closing-letter" className="relative mx-auto w-full max-w-md pt-6">
@@ -56,7 +59,7 @@ export function ClosingLetter({ text, dayMasterKorean }: ClosingLetterProps) {
           <p
             className={`${letterFont.className} whitespace-pre-line text-pretty text-center text-[17px] leading-[1.8] text-[#3d2a1e]`}
           >
-            {text}
+            {body}
           </p>
 
           <div className="mt-8 flex items-end justify-between gap-4">

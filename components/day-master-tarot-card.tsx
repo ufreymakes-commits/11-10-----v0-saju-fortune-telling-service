@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { getDayMasterCharacter } from '@/lib/day-master-characters'
 import { ELEMENT_EN } from '@/lib/day-master-quotes'
+import { cdnImage } from '@/lib/cdn-image'
 import { CardHeading, TarotFrame } from '@/components/tarot-frame'
 
 export const DAY_MASTER_CARD_ID = 'day-master-card'
@@ -16,7 +17,7 @@ interface DayMasterTarotCardProps {
 
 export function DayMasterTarotCard({ dayMasterKorean, displayName, quote }: DayMasterTarotCardProps) {
   const character = getDayMasterCharacter(dayMasterKorean)
-  const [imageSrc, setImageSrc] = useState(character?.imagePath || FALLBACK_IMAGE)
+  const [imageSrc, setImageSrc] = useState(character?.imagePath ? cdnImage(character.imagePath, 480) : FALLBACK_IMAGE)
   const accent = '#f08aa8'
   const element = character ? ELEMENT_EN[character.element] || character.element : ''
 

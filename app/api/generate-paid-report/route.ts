@@ -6,6 +6,7 @@ import { buildRomanceFacts, yearNickname } from '@/lib/saju/romance'
 import { buildPaidContext, refreshDecadeFortune } from '@/lib/saju/paid-context'
 import { romanizeName, hasCJK } from '@/lib/romanize-name'
 import { TAILS } from '@/lib/saju/tails'
+import { stripGumihoSignature } from '@/lib/letter-signature'
 
 // Vercel Hobby 플랜 최대 60초
 export const maxDuration = 300
@@ -101,12 +102,7 @@ function findCycleYearMismatches(text: string, cycles: any[] | undefined): strin
 const TRUTH_BOMB_SECTIONS = new Set(['02', '03', '04', '05', '06', '08'])
 const TRUTH_BOMB_CARD_INDEX = 7
 
-const GUMIHO_SIGNATURE = '- Your Gumiho'
 const PERMISSION_MAX_CHARS = 90
-
-function stripGumihoSignature(text: string): string {
-  return text.replace(/\s*(?:[-\u2013\u2014]\s*)?Your Gumiho\.?\s*$/i, '').trim()
-}
 
 function normalizePermissions(raw: unknown): string[] {
   if (!Array.isArray(raw)) return []
@@ -223,8 +219,8 @@ function findUnknownYears(text: string, allowed: Set<number>): number[] {
 }
 
 // ---- 수리 패스(repair pass) ----
-const CLOSING_LETTER_MAX = 700
-const CLOSING_LETTER_TARGET = 600
+const CLOSING_LETTER_MAX = 900
+const CLOSING_LETTER_TARGET = 850
 const REGULAR_CARD_MAX = 260
 const SPECIAL_CARD_MAX = 300
 const REPAIR_MAX_CARDS = 12
@@ -412,7 +408,7 @@ async function repairProblemCards(
   return rewrites
 }
 
-// 편지 마무리: 700자 이하로 두고, 잘라야 하면 700자 미만의 마지막 완결 문장에서 자른다. 콜론이나 "But here's the truth"로 끝나지 않게 한다.
+// 편지 마무리: 900자 이하로 두고, 잘라야 하면 900자 미만의 마지막 완결 문장에서 자른다. 콜론이나 "But here's the truth"로 끝나지 않게 한다.
 function finalizeClosingLetter(text: string): string {
   let letter = text.trim()
   if (letter.length > CLOSING_LETTER_MAX) {
@@ -780,39 +776,18 @@ Cards 1-7 of these sections stay accurate chart analysis. Cards 8-11 follow this
 ========================================
 CLOSING LETTER RULE — one standalone letter after all 96 cards:
 ========================================
-After the 96 main cards, write exactly ONE closing letter (field name \`closingLetter\`), written as the Gumiho (a warm, perceptive nine-tailed fox spirit) speaking directly to the reader in the first person, and signed at the very end with "- Your Gumiho". HARD LIMIT:
-600 characters including spaces, not counting the signature — count the characters before finalizing, and if your draft runs
-long, cut sentences/clauses until it fits rather than submitting a longer letter. The letter MUST end on a
-warm, complete final sentence (never on a colon, a lead-in like "But here's the truth", or a half-finished thought).
-This is not a soft target: a letter over 700 characters is a failed output. This letter should read
-as flowing, plain-English prose — avoid naming specific Saju/Ten-God terms here at all if you can
-express the same idea through the nature metaphor instead; if you must name one, follow the STYLE OF TERMS
-rules above, and never write a raw Chinese/Korean character. This is the single most
-emotionally resonant piece of the entire report — it should read like a warm, perceptive friend who
-truly sees this person, not a summary of facts already stated. Follow this arc, in flowing prose (not
-labeled sections):
-1. The letter MUST begin with the customer's English first name, exactly "${displayName.split(' ')[0]}," followed by one short, warm
-   empathic sentence (for example "${displayName.split(' ')[0]}, you've been carrying more than anyone has seen."). Use the first name only, never the full name, and never write a Korean or Chinese name. Then name ONE real struggle
-   this customer likely carries, drawn from the chart's actual core tension (e.g. an overwhelming
-   element with no outlet, a Day Master fighting to hold its ground, a clash between two pillars) —
-   acknowledge how exhausting or lonely that struggle has likely been. Example tone: naming a specific
-   quiet suffering ("the lonely nights spent trying to prove you're enough") rather than a generic
-   compliment.
-2. Explain WHY, using one vivid nature/metaphor tied to the actual chart structure already
-   established elsewhere in the report (Day Master strength, dominant/missing element, or a key
-   clash/combo) — e.g. fertile soil with no dam to hold an overwhelming flood of water. This metaphor
-   must be internally consistent with what sections 01 and 08 already said about their elements.
-3. Name 2-3 concrete strengths in plain, specific language grounded in the chart (e.g. "you draw
-   people to you effortlessly," "money finds its way to you more than most," "you can turn a crisis
-   into an opening no one else sees") — not vague praise.
-4. Name 1-2 concrete growth points or blind spots in plain, kind language (e.g. "your moods can swing
-   harder than you'd like," "you start strong but can lose the thread before the finish," "you give
-   too much before you've learned who deserves it") — grounded in the same chart signals used
-   elsewhere in the report, not invented from nothing.
-5. Close with warmth: a short, genuine note of encouragement that leaves the reader feeling truly
-   understood, not just informed.
-Do NOT contradict anything already stated in the 96 cards or the free 3 facts — this letter is the
-emotional summary of everything already established, not a new analysis.
+After the 96 main cards, write exactly ONE closing letter (field name \`closingLetter\`), written as the Gumiho (a warm, perceptive nine-tailed fox spirit) speaking directly to the reader in the first person. Do NOT sign the letter: no "Your Gumiho", no dash signature, no sign-off line of any kind (the app prints the signature itself).
+LENGTH: 700 to 900 characters including spaces. Count the characters before finalizing; under 700 or over 900 is a failed output.
+The letter MUST end on a warm, complete final sentence (never on a colon, a lead-in like "But here's the truth", or a half-finished thought).
+Write flowing, plain-English prose in one or two short paragraphs, no labeled sections. Avoid naming specific Saju/Ten-God terms if you can express the same idea
+through a nature metaphor; if you must name one, follow the STYLE OF TERMS rules above, and never write a raw Chinese/Korean character. This is the single most
+emotionally resonant piece of the entire report: it should read like a warm, perceptive friend who truly sees this person, not a summary of facts already stated.
+Follow this arc, in this order:
+1. Start with the customer's English first name, exactly "${displayName.split(' ')[0]},", followed by ONE empathic sentence about how hard it has been. It can be a gentle question or a plain acknowledgement, and it must be grounded in THIS chart's main struggle (for example an overwhelming element with no outlet, a Day Master fighting to hold its ground, or a clash between two pillars). Write it fresh for this chart; never reuse a stock line. Use the first name only, never the full name, and never write a Korean or Chinese name.
+2. Then explain why this chart is bound to do well, using 2-3 concrete facts from the chart in plain, specific language (for example a strength, a supportive element or a favorable cycle already established in the report). A single nature metaphor is welcome if it matches what sections 01 and 08 already said about the elements.
+3. Then give the direction for effort: where this person should put their energy, plus one kind reminder about a real blind spot from the same chart, said gently.
+4. Close with a confident, bright-future final sentence that leaves the reader feeling truly understood.
+Do NOT contradict anything already stated in the 96 cards or the free 3 facts; this letter is the emotional summary of everything already established, not a new analysis.
 
 PERMISSIONS RULE — a separate field \`permissions\` after the closing letter:
 Write EXACTLY 3 sentences. Each one starts with "You're allowed to", is specific to this chart (use three DIFFERENT chart items), and is at most 90 characters including spaces. Plain English, Latin script only, no markdown, no guarantees.
@@ -849,7 +824,7 @@ FINAL JSON STRUCTURE (single valid JSON object):
     ... (repeat this EXACT structure for all 9 sections — 10 cards for sections 01/07/09, 11 cards
     for sections 02/03/04/05/06/08 with the 8th card being that section's Truth Bomb.)
   ],
-  "closingLetter": "[up to 600 characters, a letter from the Gumiho ending on a warm, complete final sentence, then the signature - Your Gumiho, following the CLOSING LETTER RULE above]",
+  "closingLetter": "[700-900 characters, a letter from the Gumiho ending on a confident, complete final sentence, with NO signature, following the CLOSING LETTER RULE above]",
   "permissions": ["You're allowed to ...", "You're allowed to ...", "You're allowed to ..."]
 }
 
@@ -1135,7 +1110,7 @@ Generate the 96 main facts, the closingLetter and the 3 permissions now as a sin
         console.warn(`[v0] Fixed markdown-asterisk or misplaced-term-gloss formatting in ${formattingFixed} field(s)`)
       }
 
-      // 서명은 길이 계산에서 빼고, 저장 직전에 코드가 한 번만 붙인다.
+      // 편지에는 서명을 저장하지 않는다. 화면 하단에서 한 번만 그린다.
       closingLetter = stripGumihoSignature(closingLetter)
       permissions = normalizePermissions(rawPermissions).map((p) => {
         let text = CJK_TEST.test(p) ? sanitizeCJKArtifacts(p) : p
@@ -1198,12 +1173,11 @@ Generate the 96 main facts, the closingLetter and the 3 permissions now as a sin
         console.log(`[v0] repair pass done in ${Date.now() - repairStart} ms`)
       }
 
-      // 편지가 여전히 700자를 넘거나 어색하게 끝나면 마지막 완결 문장에서 마무리한다(내용을 새로 붙이지 않는다).
+      // 편지가 여전히 900자를 넘거나 어색하게 끝나면 마지막 완결 문장에서 마무리한다(내용을 새로 붙이지 않는다).
       if (closingLetter) {
         const before = closingLetter.length
         closingLetter = finalizeClosingLetter(closingLetter)
         if (closingLetter.length !== before) console.warn(`[v0] Closing letter finalized: ${before} -> ${closingLetter.length} chars`)
-        closingLetter = `${closingLetter}\n\n${GUMIHO_SIGNATURE}`
       }
 
     } catch (parseError) {
