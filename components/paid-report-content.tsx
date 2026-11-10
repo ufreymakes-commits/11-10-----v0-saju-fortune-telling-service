@@ -222,7 +222,7 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
               {/* Section Header */}
               <div className="bg-muted border-b border-border px-4 py-3 flex items-center gap-2">
                 <div className="p-1 rounded-lg bg-background/60 text-foreground">
-                  {tail ? <TailIcon hex={tail.hex} className="w-8 h-8" /> : null}
+                  {tail ? <TailIcon n={tail.n} hex={tail.hex} className="w-8 h-8" /> : null}
                 </div>
                 <div className="flex-1">
                   <h3 className="text-sm font-semibold">{section.sectionTitle}</h3>

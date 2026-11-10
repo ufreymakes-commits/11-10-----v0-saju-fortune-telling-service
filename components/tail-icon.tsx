@@ -1,9 +1,27 @@
-import { useId } from 'react'
+'use client'
+
+import { useId, useState } from 'react'
 
 interface TailIconProps {
+  n: number
   hex: string
   className?: string
 }
+
+export const TAIL_IMAGES: Record<number, string> = {
+  1: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/red.png?v=1794297606',
+  2: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/orange.png?v=1794297606',
+  3: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/yellow.png?v=1794297607',
+  4: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/green.png?v=1794297606',
+  5: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/blue.png?v=1794297606',
+  6: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/indigo.png?v=1794297606',
+  7: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/violet.png?v=1794297606',
+  8: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/white.png?v=1794297607',
+  9: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/black.png?v=1794297606',
+}
+
+const WHITE_TAIL = 8
+const BLACK_TAIL = 9
 
 // 좁은 뿌리(왼쪽 아래)에서 풍성한 끝(오른쪽 위)으로 휘어 올라가는 여우 꼬리 윤곽.
 // 끝에는 작은 털 갈래 세 개를 두었다.
@@ -29,7 +47,35 @@ const SPECIAL_COLORS: Record<string, { stroke: string; sparkle: string }> = {
   '#1f2937': { stroke: '#cbd5e1', sparkle: '#e2e8f0' },
 }
 
-export function TailIcon({ hex, className }: TailIconProps) {
+function getImageShadow(n: number, hex: string) {
+  if (n === WHITE_TAIL) {
+    return 'drop-shadow(0 0 3px rgba(168, 139, 250, 0.65)) drop-shadow(0 1px 2px rgba(139, 92, 246, 0.35))'
+  }
+  if (n === BLACK_TAIL) {
+    return 'drop-shadow(0 0 0.6px rgba(203, 213, 225, 0.95)) drop-shadow(0 0 0.6px rgba(203, 213, 225, 0.8)) drop-shadow(0 0 2px rgba(226, 232, 240, 0.55))'
+  }
+  return `drop-shadow(0 0 3px ${hex})`
+}
+
+function SparkleOverlay({ color }: { color: string }) {
+  return (
+    <svg
+      viewBox="0 0 48 48"
+      className="pointer-events-none absolute inset-0 h-full w-full"
+      aria-hidden="true"
+      fill="none"
+      style={{ overflow: 'visible' }}
+    >
+      {SPARKLES.map((s) => (
+        <g key={`${s.x}-${s.y}`} transform={`translate(${s.x} ${s.y}) scale(${s.scale})`}>
+          <path d={SPARKLE_PATH} fill={color} className="tail-sparkle" style={{ animationDelay: `${s.delay}s` }} />
+        </g>
+      ))}
+    </svg>
+  )
+}
+
+function TailSvg({ hex, className }: { hex: string; className?: string }) {
   const uid = useId().replace(/:/g, '')
   const special = SPECIAL_COLORS[hex.toLowerCase()]
   const tint = `color-mix(in srgb, ${hex} 55%, white)`
@@ -75,5 +121,35 @@ export function TailIcon({ hex, className }: TailIconProps) {
         </g>
       ))}
     </svg>
+  )
+}
+
+export function TailIcon({ n, hex, className }: TailIconProps) {
+  const src = TAIL_IMAGES[n]
+  const [failedSrc, setFailedSrc] = useState<string | null>(null)
+
+  if (!src || failedSrc === src) {
+    return <TailSvg hex={hex} className={className} />
+  }
+
+  const sparkleColor = SPECIAL_COLORS[hex.toLowerCase()]?.sparkle ?? `color-mix(in srgb, ${hex} 45%, white)`
+
+  return (
+    <span className={`relative inline-block shrink-0 ${className ?? ''}`}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt=""
+        aria-hidden="true"
+        width={32}
+        height={32}
+        loading="lazy"
+        decoding="async"
+        onError={() => setFailedSrc(src)}
+        className="h-full w-full object-contain"
+        style={{ filter: getImageShadow(n, hex) }}
+      />
+      <SparkleOverlay color={sparkleColor} />
+    </span>
   )
 }
