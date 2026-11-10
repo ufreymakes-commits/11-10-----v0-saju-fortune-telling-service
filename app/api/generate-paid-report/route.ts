@@ -87,7 +87,7 @@ CONSISTENCY RULES (critical):
 
 Return ONLY a valid JSON object with "mainFacts" and "closingLetter". No markdown, no explanations outside the JSON.`
 
-// 생성 후 코드 검사 (추가 AI 호출 없음): 신강/신�� 모순
+// 생성 후 코드 검사 (추가 AI 호출 없음): 신강/신�� 모��
 function hasStrengthMismatch(text: string, grade: unknown): boolean {
   const g = String(grade ?? '')
   if (/weak/i.test(g)) return /day master is strong|strong day master/i.test(text)
@@ -1102,6 +1102,7 @@ ${structureBlock}`
     let cardPrompts = legacyPrompts
     let pipelineUsed: 'single' | 'two_stage' = 'single'
     let pipelineFallback = ''
+    let paidNotes: string | null = null
     if (PIPELINE === 'single') {
       pipelineFallback = 'PAID_PIPELINE=single'
     } else if (!finalFacts) {
@@ -1123,6 +1124,7 @@ ${structureBlock}`
       })
       logTiming('notes:done', stage.ok ? { chars: stage.notes.length, attempts: stage.attempts, issues: stage.issues } : { failed: stage.reason })
       if (stage.ok) {
+        paidNotes = stage.notes
         cardPrompts = {
           system: withRequiredSentences(finalFacts, reportYear),
           user: buildCardUserPrompt({
@@ -1580,7 +1582,12 @@ ${structureBlock}`
       // 이미 존재하면 update
       const { error } = await supabase
         .from('reports')
-        .update({ facts: paidFacts, payment_id: payment.id, hidden_cards: hiddenCards })
+        .update({
+          facts: paidFacts,
+          payment_id: payment.id,
+          hidden_cards: hiddenCards,
+          ...(paidNotes ? { paid_notes: paidNotes } : {}),
+        })
         .eq('id', existing.id)
       insertError = error
     } else {
@@ -1593,6 +1600,7 @@ ${structureBlock}`
           section_key: 'paid_full',
           facts: paidFacts,
           ...(hiddenCards ? { hidden_cards: hiddenCards } : {}),
+          ...(paidNotes ? { paid_notes: paidNotes } : {}),
           is_free: false,
         })
       insertError = error
