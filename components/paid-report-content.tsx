@@ -9,6 +9,7 @@ import type { OrbInfo } from '@/lib/saju/orb'
 import { TAILS } from '@/lib/saju/tails'
 import { OrbCard } from '@/components/orb-card'
 import { TailIcon } from '@/components/tail-icon'
+import { ClosingLetter } from '@/components/closing-letter'
 import { getDayMasterCharacter } from '@/lib/day-master-characters'
 import { track } from '@/hooks/use-track'
 import { useScreenshotDetect } from '@/hooks/use-screenshot-detect'
@@ -348,11 +349,7 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground">From Your Sajume Reader</p>
             <h3 className="text-sm font-semibold text-foreground mt-1">Your Closing Letter</h3>
           </div>
-          <div className="bg-card border border-primary/20 rounded-xl p-6 shadow-lg shadow-primary/5">
-            <p className="font-serif italic text-[13px] text-foreground/90 leading-relaxed text-pretty whitespace-pre-line">
-              {closingLetter}
-            </p>
-          </div>
+          <ClosingLetter text={closingLetter} dayMasterKorean={dayMasterKorean} />
         </div>
       )}
 
