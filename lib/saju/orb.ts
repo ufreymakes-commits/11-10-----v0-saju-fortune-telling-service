@@ -49,7 +49,7 @@ export function buildOrb(saju: any, finalFacts: any): OrbInfo | null {
       for (const [s, v] of Object.entries(counts as Record<string, number>)) if (zeros.every((i: number) => s[i] === '0')) m += v
       const pct = Math.round((m / n) * 100)
       const label = zeros.map((i: number) => names[i]).join(' and ')
-      missingElement = { element: label, text: `only about ${pct}% of birth charts have no visible ${label} at all` }
+      missingElement = { element: label, text: pct > 20 ? `about ${pct}% of birth charts have no visible ${label}` : `only about ${pct}% of birth charts have no visible ${label} at all` }
     }
   }
   return { imageKey: key, name: `${adj} ${BASE[key]} Orb`, element: EL_OF_KEY[key], subtitle: `${strength} · ${season}`, rarity: { dayPillarOneIn: 60, elementPattern, missingElement } }

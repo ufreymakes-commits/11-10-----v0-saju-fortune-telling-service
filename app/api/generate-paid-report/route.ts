@@ -68,7 +68,7 @@ CONSISTENCY RULES (critical):
 
 Return ONLY a valid JSON object with "mainFacts" and "closingLetter". No markdown, no explanations outside the JSON.`
 
-// 생성 후 코드 검사 (추가 AI 호출 없음): 신강/신약 모순
+// 생성 후 코드 검사 (추가 AI 호출 없음): 신강/신�� 모순
 function hasStrengthMismatch(text: string, grade: unknown): boolean {
   const g = String(grade ?? '')
   if (/weak/i.test(g)) return /day master is strong|strong day master/i.test(text)
@@ -87,7 +87,7 @@ function findCycleYearMismatches(text: string, cycles: any[] | undefined): strin
   for (const m of text.matchAll(/\b(20\d\d)\s*[-\u2013]\s*(20\d\d)\b/g)) {
     const a = Number(m[1])
     const b = Number(m[2])
-    // 대운은 10년 단위이므로 8~11년 폭의 범위만 대운 후보로 본다 (연애 시기 등 짧은 구간은 제외)
+    // 대운은 10년 단위이므로 8~11�� 폭의 범위만 대운 후보로 본다 (연애 시기 등 짧은 구간은 제외)
     if (b - a < 8 || b - a > 11) continue
     const overlaps = listed.some(([s, e]) => a <= e && b >= s)
     const exact = listed.some(([s, e]) => a === s && b === e)
@@ -645,7 +645,7 @@ Example: the first card starts with "Hey ${displayName}," and the last card star
   - Card 1 "Your chart in one line": one memorable identity sentence for THIS chart (a nickname plus why), built from the Day Master, the season and the strongest signal in the chart.
   - Card 2 "Outside vs inside": what other people see versus what is really going on inside, tied to ONE concrete chart relation.
   - Card 3 "Your Orb": say the orb's name EXACTLY as finalFacts.orb.name (copy it word for word, never rename it) and explain why this chart has that orb, using finalFacts.orb.subtitle. If finalFacts.orb is null, write this card about the Day Master image in nature instead.
-  - Card 4 "How rare you are": use ONLY the numbers in finalFacts.orb.rarity: "1 in 60" for the Day Pillar (dayPillarOneIn), plus elementPattern.text and missingElement.text when they exist. Copy the numbers exactly. Never invent any other statistic. If finalFacts.orb is null, write a normal analysis card instead.
+  - Card 4 "How rare you are": use ONLY the numbers in finalFacts.orb.rarity: "1 in 60" for the Day Pillar (dayPillarOneIn), plus elementPattern.text and missingElement.text when they exist. Copy the numbers exactly. Never invent any other statistic. Only describe a number as "rare" when it truly is rare: the Day Pillar (1 in 60), an element mix of 1 in 50 or rarer, or a missing element shared by 20% of charts or fewer. If a number is common (an element mix more common than 1 in 50, or a missing element in more than 20% of charts), state it neutrally and do NOT call it rare, special or unusual. If finalFacts.orb is null, write a normal analysis card instead.
   - Cards 5-10: normal accurate analysis of the chart.
 
 02. Inner Child Era: Your Early Vibes & Scars 
@@ -773,9 +773,9 @@ CLOSING FLOW RULE — the LAST FOUR cards (Cards 8-11) of sections 02, 03, 04, 0
 ========================================
 Cards 1-7 of these sections stay accurate chart analysis. Cards 8-11 follow this flow, and every card keeps the 220 character limit:
 - Card 8 MIRROR + REASON: the Truth Bomb above (keep the "Truth Bomb: " prefix). One specific felt experience and the chart reason for it, using ONE concrete chart item that no other section's Truth Bomb uses.
-- Card 9 REFRAME: show how the same trait is a real strength or design ("what you call X is actually Y"), grounded in the same chart item or a closely related one.
-- Card 10: for sections 02, 03 and 08 write a PERMISSION card that starts with "You're allowed to ..." and is specific to this chart. For sections 04 (career), 05 (money) and 06 (love) write a STRATEGY card instead: the realistic strengths and constraints of this chart and the single best strategic move (which kind of work structure or role fits, how to use the current luck cycle and the wealthWindow or lovePeak, what to avoid). Keep it concrete and practical, with no guarantees and no financial or legal advice wording.
-- Card 11 SMALL ACTION: one doable thing for this week. It must start with "This week:" and tie to the reframe or to the Useful God element.
+- Card 9 REFRAME: it must start with "Reframe: " (the prefix counts toward the 220 characters). Show how the same trait is a real strength or design ("what you call X is actually Y"), grounded in the same chart item or a closely related one.
+- Card 10: for sections 02, 03 and 08 write a PERMISSION card that starts with "You're allowed to ..." and is specific to this chart. For sections 04 (career), 05 (money) and 06 (love) write a STRATEGY card instead that starts with "Strategy: " (the prefix counts toward the 220 characters): the realistic strengths and constraints of this chart and the single best strategic move (which kind of work structure or role fits, how to use the current luck cycle and the wealthWindow or lovePeak, what to avoid). Keep it concrete and practical, with no guarantees and no financial or legal advice wording.
+- Card 11 SMALL ACTION: one doable thing for this week. It must start with "This week:" and tie to the reframe or to the Useful God element. It must be a concrete outside-world action (a message to send, a boundary to set, a small purchase or routine, a place to go, a task to finish). NEVER make it a journaling, writing-down, note-taking, or "reflect on" task.
 
 ========================================
 CLOSING LETTER RULE — one standalone letter after all 96 cards:
@@ -791,10 +791,11 @@ rules above, and never write a raw Chinese/Korean character. This is the single 
 emotionally resonant piece of the entire report — it should read like a warm, perceptive friend who
 truly sees this person, not a summary of facts already stated. Follow this arc, in flowing prose (not
 labeled sections):
-1. Open by naming ONE real struggle this customer likely carries, drawn from the chart's actual core
-   tension (e.g. an overwhelming element with no outlet, a Day Master fighting to hold its ground, a
-   clash between two pillars) — acknowledge how exhausting or lonely that struggle has likely been,
-   using the customer's name (${displayName}) once here. Example tone: naming a specific
+1. The letter MUST begin with the customer's English first name, exactly "${displayName.split(' ')[0]}," followed by one short, warm
+   empathic sentence (for example "${displayName.split(' ')[0]}, you've been carrying more than anyone has seen."). Use the first name only, never the full name, and never write a Korean or Chinese name. Then name ONE real struggle
+   this customer likely carries, drawn from the chart's actual core tension (e.g. an overwhelming
+   element with no outlet, a Day Master fighting to hold its ground, a clash between two pillars) —
+   acknowledge how exhausting or lonely that struggle has likely been. Example tone: naming a specific
    quiet suffering ("the lonely nights spent trying to prove you're enough") rather than a generic
    compliment.
 2. Explain WHY, using one vivid nature/metaphor tied to the actual chart structure already

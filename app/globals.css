@@ -333,13 +333,29 @@
   50% { opacity: 1; transform: scale(1.04); }
 }
 
+.tail-sparkle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: tail-twinkle 2.6s ease-in-out infinite;
+}
+
+@keyframes tail-twinkle {
+  0%, 100% { opacity: 0.25; transform: scale(0.6); }
+  50% { opacity: 1; transform: scale(1.25); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .tarot-card-float,
   .cta-shimmer::after,
   .orb-star,
   .orb-ring-spin,
-  .orb-halo {
+  .orb-halo,
+  .tail-sparkle {
     animation: none;
+  }
+
+  .tail-sparkle {
+    opacity: 0.8;
   }
 
   .orb-star {

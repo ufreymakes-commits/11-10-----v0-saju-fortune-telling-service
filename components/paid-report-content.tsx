@@ -7,7 +7,13 @@ import { LinkIcon, CheckIcon, ChevronDownIcon, DownloadIcon, SparklesIcon } from
 import type { Submission, SajuData } from '@/lib/types'
 import type { OrbInfo } from '@/lib/saju/orb'
 import { TAILS } from '@/lib/saju/tails'
-import { OrbCard } from '@/components/orb-card'
+import { OrbCard, ORB_CARD_ID } from '@/components/orb-card'
+import { DayMasterTarotCard, DAY_MASTER_CARD_ID } from '@/components/day-master-tarot-card'
+import { ElementsTarotCard, ELEMENTS_CARD_ID } from '@/components/elements-tarot-card'
+import { CardCarousel, type CarouselItem } from '@/components/card-carousel'
+import { CardActions } from '@/components/tarot-frame'
+import { DAY_MASTER_QUOTE } from '@/lib/day-master-quotes'
+import { romanizeName } from '@/lib/romanize-name'
 import { TailIcon } from '@/components/tail-icon'
 import { ClosingLetter } from '@/components/closing-letter'
 import { getDayMasterCharacter } from '@/lib/day-master-characters'
@@ -26,33 +32,6 @@ const HANJA_TO_KOREAN_STEM: Record<string, string> = {
 const KOREAN_TO_HANJA_STEM: Record<string, string> = {
   '갑': '甲', '을': '乙', '병': '丙', '정': '丁', '무': '戊',
   '기': '己', '경': '庚', '신': '辛', '임': '壬', '계': '癸',
-}
-const DAY_MASTER_QUOTE: Record<string, string> = {
-  '갑': "Just goes for it. The path? I'll make one.",
-  '을': 'Plant me anywhere. I\'ll bloom.',
-  '병': 'The vibe shifts the moment I walk in.',
-  '정': "You'll open up before you even realize it.",
-  '무': "Lean on me. I'm not going anywhere.",
-  '기': 'Somehow everything just gets taken care of.',
-  '경': "Blunt? Sure. But also always right.",
-  '신': "It's not overthinking. It's called having standards.",
-  '임': "Goes wherever life takes them. And it's always interesting.",
-  '계': 'Already knew how you felt before you said a word.',
-}
-
-const elementColors: Record<string, string> = {
-  wood: 'bg-green-500',
-  fire: 'bg-red-500',
-  earth: 'bg-yellow-600',
-  metal: 'bg-gray-400',
-  water: 'bg-blue-500',
-}
-const elementLabels: Record<string, string> = {
-  wood: 'Wood',
-  fire: 'Fire',
-  earth: 'Earth',
-  metal: 'Metal',
-  water: 'Water',
 }
 
 export function PaidReportContent({ submission, paidReport: initialPaidReport }: PaidReportContentProps) {
@@ -110,6 +89,40 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
   const dayMasterHanja = KOREAN_TO_HANJA_STEM[dayMasterKorean] || rawStem
   const character = getDayMasterCharacter(dayMasterKorean)
   const quote = DAY_MASTER_QUOTE[dayMasterKorean] || ''
+  const displayName = romanizeName(submission.name || '') || 'Friend'
+  const firstName = displayName.split(' ')[0]
+
+  const carouselItems: CarouselItem[] = [
+    ...(!isGenerating && orb
+      ? [{
+          id: ORB_CARD_ID,
+          slug: 'orb',
+          label: 'Your Orb',
+          shareText: `My Sajume Orb: ${orb.name}`,
+          node: <OrbCard orb={orb} displayName={displayName} quote={quote} />,
+        }]
+      : []),
+    {
+      id: DAY_MASTER_CARD_ID,
+      slug: 'day-master',
+      label: 'Your Day Master',
+      shareText: `My Sajume Day Master: ${character?.themeTitle ?? dayMasterHanja}`,
+      node: <DayMasterTarotCard dayMasterKorean={dayMasterKorean} displayName={displayName} quote={quote} />,
+    },
+    {
+      id: ELEMENTS_CARD_ID,
+      slug: 'five-elements',
+      label: 'Your Five Elements',
+      shareText: 'My Sajume Five Elements',
+      node: (
+        <ElementsTarotCard
+          counts={(sajuData.elementCountBasic || {}) as Record<string, number>}
+          luckyElement={String((sajuData as any)?.yongsin || (sajuData as any)?.luckyElement || 'Water')}
+          displayName={displayName}
+        />
+      ),
+    },
+  ]
 
   useEffect(() => {
     track('view_paid_report', '/paid-report')
@@ -159,92 +172,12 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
       {/* Header */}
       <div className="text-center mb-6">
         <p className="text-xs text-muted-foreground">
-          {submission.name}&apos;s Sajume Full 99 Facts Report
+          {displayName}&apos;s Sajume Full 99 Facts Report
         </p>
       </div>
 
-      {/* Five Elements Balance */}
-      <div className="bg-card border border-border rounded-xl p-4 mb-6 shadow-lg shadow-primary/5">
-        <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-2 text-center">Your Five Elements Distribution</h2>
-        <p className="text-[10px] text-muted-foreground/60 text-center mb-3">Based on 8 characters (4 pillars x 2). Simple count of visible elements, excludes hidden stems.</p>
-        <div className="space-y-2">
-          {(() => {
-            const counts: Record<string, number> = sajuData.elementCountBasic || {}
-            const total = Object.values(counts).reduce((sum: number, v) => sum + (Number(v) || 0), 0) || 1
-            return Object.entries(counts).map(([element, score]) => {
-              const scoreNumber = Number(score) || 0
-              const percentage = (scoreNumber / total) * 100
-              return (
-                <div key={element} className="flex items-center gap-3">
-                  <span className="text-xs text-foreground w-12 flex-shrink-0">{elementLabels[element] || element}</span>
-                  <div className="flex-1 h-4 bg-background/50 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full ${elementColors[element] || 'bg-primary'} transition-all duration-500`}
-                      style={{ width: `${percentage}%` }}
-                    />
-                  </div>
-                  <span className="text-xs text-muted-foreground w-8 text-right">{scoreNumber}</span>
-                </div>
-              )
-            })
-          })()}
-        </div>
-        <div className="mt-4 pt-3 border-t border-border/30 text-center">
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Your Lucky Element (Yongsin)</p>
-          <p className="text-lg font-bold text-gradient">
-            {(sajuData as any)?.yongsin || (sajuData as any)?.luckyElement || 'Water'}
-          </p>
-        </div>
-      </div>
-
-      {/* Day Master Card — horizontal layout */}
-      <div className="bg-card border border-border rounded-xl p-4 mb-6 shadow-lg shadow-primary/5">
-        <p className="text-[10px] text-muted-foreground mb-3 text-center uppercase tracking-wider">Your Day Master</p>
-        <div className="flex gap-4 items-center">
-          {/* Left: image + name */}
-          <div className="flex flex-col items-center flex-shrink-0 w-24">
-            <div className="relative w-20 h-20 mb-2">
-              <Image
-                src={character?.imagePath || '/images/characters-collection.png'}
-                alt={`${character?.themeTitle || dayMasterHanja} character`}
-                fill
-                className="object-contain drop-shadow-lg"
-                priority
-                onError={(e) => { (e.target as HTMLImageElement).src = '/images/characters-collection.png' }}
-              />
-            </div>
-            <p className={`text-sm font-bold text-center leading-tight ${character?.color || 'text-foreground'}`}>
-              {dayMasterHanja}
-            </p>
-            <p className="text-[10px] text-muted-foreground text-center">{character?.element || ''}</p>
-          </div>
-
-          {/* Right: keywords, description, quote */}
-          <div className="flex-1 min-w-0">
-            {/* Keywords */}
-            {character?.keywords && character.keywords.length > 0 && (
-              <div className="flex flex-wrap gap-1 mb-2">
-                {character.keywords.map((kw: string, i: number) => (
-                  <span key={i} className="text-[10px] px-2 py-0.5 bg-primary/15 rounded-full text-primary font-medium">
-                    #{kw}
-                  </span>
-                ))}
-              </div>
-            )}
-            {/* Theme title + description */}
-            <p className="text-xs font-semibold text-foreground/90 mb-1">{character?.themeTitle || 'Day Master'}</p>
-            <p className="text-[11px] text-muted-foreground/80 leading-relaxed mb-2">{character?.themeDescription || ''}</p>
-            {/* Quote */}
-            {quote && (
-              <p className="text-[10px] text-muted-foreground italic">
-                &ldquo;{quote}&rdquo;
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {!isGenerating && orb && <OrbCard orb={orb} />}
+      {/* Tarot card carousel: Orb (default), Day Master, Five Elements */}
+      <CardCarousel key={orb && !isGenerating ? 'with-orb' : 'no-orb'} items={carouselItems} firstName={firstName} />
 
       {/* Arrow hint */}
       <p className="text-center text-[11px] text-muted-foreground/60 mb-2">Tap the arrow below to open each section of your report</p>
@@ -289,7 +222,7 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
               {/* Section Header */}
               <div className="bg-muted border-b border-border px-4 py-3 flex items-center gap-2">
                 <div className="p-1 rounded-lg bg-background/60 text-foreground">
-                  {tail ? <TailIcon hex={tail.hex} className="w-6 h-6" /> : null}
+                  {tail ? <TailIcon hex={tail.hex} className="w-8 h-8" /> : null}
                 </div>
                 <div className="flex-1">
                   <h3 className="text-sm font-semibold">{section.sectionTitle}</h3>
@@ -361,12 +294,27 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
           </div>
           <ul className="space-y-3">
             {permissions.map((text, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-3 bg-card border border-primary/20 rounded-xl p-4 shadow-sm"
-              >
-                <SparklesIcon className="w-4 h-4 mt-0.5 flex-shrink-0 text-primary" aria-hidden="true" />
-                <p className="font-serif text-[13px] text-foreground/90 leading-relaxed text-pretty">{text}</p>
+              <li key={i} className="space-y-1">
+                <div
+                  id={`permission-slip-${i + 1}`}
+                  className="rounded-xl border border-[#b8934a]/50 bg-[#f6ecd6] p-4 shadow-sm"
+                >
+                  <div className="flex items-start gap-3">
+                    <SparklesIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#a8332a]" aria-hidden="true" />
+                    <p className="font-serif text-[13px] leading-relaxed text-[#3d2a1e] text-pretty">{text}</p>
+                  </div>
+                  <p className="mt-2 text-right text-[8px] uppercase tracking-[0.2em] text-[#3d2a1e]/60">
+                    Sajume &middot; Permission Slip
+                  </p>
+                </div>
+                <CardActions
+                  targetId={`permission-slip-${i + 1}`}
+                  slug={`permission-${i + 1}`}
+                  firstName={firstName}
+                  shareText="My Sajume permission slip"
+                  showShare={false}
+                  backgroundColor="#f6ecd6"
+                />
               </li>
             ))}
           </ul>
