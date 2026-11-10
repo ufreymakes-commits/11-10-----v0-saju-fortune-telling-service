@@ -147,6 +147,12 @@ export function buildPaidContext(saju: any, gender: 'male' | 'female', reportYea
   // 신살: 전문가 기준 슬롯별 + 12신살 (옛 spirits 오탐 제거)
   finalFacts.sinsalByPillar = saju?.expertSinsal ? Object.fromEntries(Object.entries(saju.expertSinsal).map(([slot, names]) => [({ 시: 'hour', 일: 'day', 월: 'month', 연: 'year' } as any)[slot] ?? slot, (names as string[]).map(sinsalEn)])) : null
   // 연애운 정점: 만 19~39세 구간에서 점수가 가장 높은 해 (romance.ts buildLovePeak). 옛 marriageTiming 은 사용하지 않는다.
-  finalFacts.lovePeak = buildLovePeak(saju, gender, reportYear, birthYear)
+  // 출생 시간을 모르면 시주가 없어 buildLovePeak 가 던질 수 있다. 그 경우 lovePeak 만 null 로 두고 나머지 finalFacts 는 살린다.
+  try {
+    finalFacts.lovePeak = buildLovePeak(saju, gender, reportYear, birthYear)
+  } catch (e) {
+    console.error('[v0] buildLovePeak failed (lovePeak = null, e.g. unknown birth time):', e)
+    finalFacts.lovePeak = null
+  }
   return { sajuForPrompt: sd, finalFacts }
 }

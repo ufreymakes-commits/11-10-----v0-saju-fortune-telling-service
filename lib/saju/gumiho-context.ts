@@ -106,7 +106,9 @@ export function buildGumihoInputs(args: { sajuForPrompt: any; finalFacts: any; r
   const collect = (o: any) => { for (const m of JSON.stringify(o ?? {}).matchAll(/\b(19|20)\d{2}\b/g)) allowedYears.add(Number(m[0])) }
   collect(finalFacts?.wealthWindow); collect(finalFacts?.luckCycles); collect(finalFacts?.lovePeak); collect(rf.yearLuck); collect(childFacts.yearsWhereChildStarOrHourPillarIsActivated)
   return {
-    sajuForPrompt: stripCjkDeep(sajuForPrompt),
+    // stripCjkDeep on the raw object empties pillars/relations/sinsal (they are Hangul/hanja only), so send a compact English chart instead.
+    // Relations, sinsal, ten gods, cycles and strength are already in finalFacts / romanceFacts.
+    sajuForPrompt: buildEnglishChart(saju, sajuForPrompt),
     finalFacts: stripCjkDeep(finalFacts),
     romanceFacts: stripCjkDeep(rf),
     childFacts: stripCjkDeep(childFacts),
@@ -210,4 +212,36 @@ export function buildCareerLean(saju: any, finalFacts: any) {
     quietestTheme: { theme: EN[sorted[4][0]], fits: GROUP_TAGS[sorted[4][0]], meaning: 'an area that takes more conscious effort, not a weakness' },
     usefulElementFits: els.map((e) => ({ element: e, fits: EL_TAGS[e] })),
   }
+}
+
+const PILLAR_EN = (p: any) => (p?.fullNameKorean ? `${EN_STEM(p.fullNameKorean[0])}-${EN_BR(p.fullNameKorean[1])}` : null)
+/** Relations inside the natal chart (pairs among the four pillars), English labels only. */
+export function buildNatalRelations(saju: any) {
+  const P = (p: any) => (p?.fullNameKorean ? [p.fullNameKorean[0], p.fullNameKorean[1]] : [null, null])
+  const defs: [string, any][] = [['연', saju.yearPillar], ['월', saju.monthPillar], ['일', saju.dayPillar], ['시', saju.hourPillar]]
+  const EN_POS: Record<string, string> = { 연: 'year', 월: 'month', 일: 'day', 시: 'hour' }
+  const seen = new Map<string, any>()
+  for (const [k, pil] of defs) {
+    const [st, br] = P(pil)
+    if (!st || !br) continue
+    const stems: Record<string, string> = {}, branches: Record<string, string> = {}
+    for (const [k2, pil2] of defs) { if (k2 === k) continue; const [s2, b2] = P(pil2); if (s2) stems[k2 + '간'] = s2; if (b2) branches[k2 + '지'] = b2 }
+    for (const r of relationsOf(st, br, { stems, branches }) as any[]) {
+      const key = r.label.split('').sort().join('') + r.type
+      const where = r.with.split('·').map((w: string) => EN_POS[w[0]] ? `${EN_POS[w[0]]} ${w[1] === '간' ? 'stem' : w[1] === '지' ? 'branch' : 'chart'}` : 'natal chart').join(' + ')
+      if (!seen.has(key)) seen.set(key, { relation: r.en, between: `${EN_POS[k]} ${r.type.startsWith('천간') ? 'stem' : 'branch'} and ${where}`, polarity: r.polarity })
+    }
+  }
+  return [...seen.values()]
+}
+
+export function buildEnglishChart(saju: any, sajuForPrompt: any) {
+  return stripCjkDeep({
+    natalRelations: buildNatalRelations(saju),
+    natalPillars: { year: PILLAR_EN(saju.yearPillar), month: PILLAR_EN(saju.monthPillar), day: PILLAR_EN(saju.dayPillar), hour: PILLAR_EN(saju.hourPillar) },
+    note: 'Pillars are written as Stem-Branch. All relations, stars, ten gods, cycles and strength are in FINAL FACTS and ROMANCE FACTS.',
+    elementCountBasic: sajuForPrompt?.elementCountBasic,
+    elementBalanceWithHiddenStems: sajuForPrompt?.elementBalanceWithHiddenStems,
+    dominantElement: sajuForPrompt?.dominantElement,
+  })
 }
