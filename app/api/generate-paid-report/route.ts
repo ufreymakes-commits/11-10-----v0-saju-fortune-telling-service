@@ -7,6 +7,7 @@ import { buildPaidContext, refreshDecadeFortune } from '@/lib/saju/paid-context'
 import { romanizeName, hasCJK } from '@/lib/romanize-name'
 import { TAILS } from '@/lib/saju/tails'
 import { stripGumihoSignature } from '@/lib/letter-signature'
+import { buildGuardBlock, checkGuards } from '@/lib/saju/ten-god-guards'
 
 // Vercel Hobby 플랜 최대 60초
 export const maxDuration = 300
@@ -98,7 +99,7 @@ function findCycleYearMismatches(text: string, cycles: any[] | undefined): strin
 }
 
 // 생성 후 코드 검사: 섹션 02/03/04/05/06/08의 8번째 카드(Truth Bomb)가 일반적인 문장인지 확인한다.
-// "Truth Bomb:" 접두어가 없거나, 작은따옴표 용어/오행/���성/연도 중 어느 것도 없으면 generic으로 본다.
+// "Truth Bomb:" 접두어가 없거나, 작은따옴표 용어/오행/�����성/연도 중 어느 것도 없으면 generic으로 본다.
 const TRUTH_BOMB_SECTIONS = new Set(['02', '03', '04', '05', '06', '08'])
 const TRUTH_BOMB_CARD_INDEX = 7
 
@@ -225,7 +226,7 @@ const REGULAR_CARD_MAX = 260
 const SPECIAL_CARD_MAX = 300
 const REPAIR_MAX_CARDS = 12
 
-type ProblemKind = 'long' | 'repeated' | 'truth-bomb' | 'duplicate'
+type ProblemKind = 'long' | 'repeated' | 'truth-bomb' | 'duplicate' | 'guard'
 interface ProblemCard {
   index: number
   sectionIdx: number
@@ -321,6 +322,9 @@ function findProblemCards(sections: any[], lovePeakYears: Array<number | string>
       })
       if (duplicate) addProblem('duplicate', 'same message as an earlier card in this section')
       seenInSection.push({ words, ranges })
+
+      // e) 십성 의미 뒤집힘(guard): ten-god-guards.ts의 규칙에 걸리면 문제 카드
+      for (const reason of checkGuards(text)) addProblem('guard', reason)
     })
   })
 
@@ -349,6 +353,8 @@ async function repairProblemCards(
           return 'Too long. Rewrite it shorter than 220 characters, keeping the same facts and years.'
         if (p.kind === 'repeated')
           return `The term '${p.detail}' is already used in 4 other cards. Rewrite it shorter than 220 characters and talk about a DIFFERENT chart item from FINAL FACTS (not '${p.detail}'), keeping the same years if it has any.`
+        if (p.kind === 'guard')
+          return `Wrong reading: ${p.detail}. Rewrite it so the star or pattern keeps its true meaning (see the guardrails in FINAL FACTS context: Rob Wealth Fighting Wealth means competition over resources and money that tends to leak, so advise protecting money; Direct Seal means learning, credentials and support, not pioneering). Keep the same facts and years and stay shorter than 220 characters.`
         if (p.kind === 'truth-bomb')
           return `Another Truth Bomb card already uses the same main chart item ('${p.detail}'). Pick a DIFFERENT chart item from FINAL FACTS, keep the "Truth Bomb: " prefix, and stay shorter than 220 characters.`
         return 'Another card in the same section already says the same thing. Say something NEW for this section from FINAL FACTS, shorter than 220 characters.'
@@ -382,7 +388,7 @@ async function repairProblemCards(
   const result = await generateText({
     model: 'google/gemini-2.5-flash',
     system: REPAIR_SYSTEM_PROMPT,
-    prompt: `=== FINAL FACTS ===\n${JSON.stringify(finalFacts, null, 2)}\n\n=== CARDS TO REWRITE (JSON) ===\n${JSON.stringify(items, null, 2)}\n\nRewrite ONLY these cards and return the JSON array [{"index", "text"}].`,
+    prompt: `=== FINAL FACTS ===\n${JSON.stringify(finalFacts, null, 2)}\n${buildGuardBlock(finalFacts)}\n\n=== CARDS TO REWRITE (JSON) ===\n${JSON.stringify(items, null, 2)}\n\nRewrite ONLY these cards and return the JSON array [{"index", "text"}].`,
     maxOutputTokens: 6000,
     temperature: 0.3,
     providerOptions: { google: { thinkingConfig: { thinkingBudget: 0 } } },
@@ -660,6 +666,7 @@ ${JSON.stringify(sajuForPrompt, null, 2)}
 === FINAL FACTS (code-computed, authoritative) ===
 ${JSON.stringify(finalFacts, null, 2)}
 These values override anything else in this prompt and any older field. Never recompute strength, Useful God, luck cycles, or stars yourself. The strength score is out of 120, never write it as a percentage.
+${buildGuardBlock(finalFacts)}
 
 === PRE-COMPUTED DECADE FORTUNE (decadeFortune) — SILENT GROUNDING CONTEXT ONLY, DO NOT OUTPUT ===
 This is the saju_data.decadeFortune object, left out of the Four Pillars JSON above so it is not duplicated.
@@ -1208,7 +1215,7 @@ Generate the 96 main facts, the closingLetter and the 3 permissions now as a sin
       if (flaggedCards.length > 0 || closingTooLong || longPermissions.length > 0) {
         const countKind = (kind: ProblemKind) => flaggedCards.filter((c) => c.problems.some((p) => p.kind === kind)).length
         console.log(
-          `[v0] repair pass: flagged ${flaggedCards.length} cards (long ${countKind('long')}, repeated ${countKind('repeated')}, truth-bomb ${countKind('truth-bomb')}, duplicate ${countKind('duplicate')})` +
+          `[v0] repair pass: flagged ${flaggedCards.length} cards (long ${countKind('long')}, repeated ${countKind('repeated')}, truth-bomb ${countKind('truth-bomb')}, duplicate ${countKind('duplicate')}, guard ${countKind('guard')})` +
             (closingTooLong ? ` + closing letter (${closingLetter.length} chars)` : ''),
         )
         const repairStart = Date.now()

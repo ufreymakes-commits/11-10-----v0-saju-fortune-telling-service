@@ -1,12 +1,32 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+const MAX_QUESTION_LENGTH = 300
+
+const stripControlChars = (s: string) => s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').trim()
+
 export async function POST(request: Request) {
   try {
     const { submissionId, question1, question2, question3 } = await request.json()
 
-    if (!submissionId || !question1 || !question2 || !question3) {
+    if (!submissionId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+
+    const rawQuestions = [question1, question2, question3]
+    const questions: string[] = []
+    for (let i = 0; i < rawQuestions.length; i++) {
+      const q = typeof rawQuestions[i] === 'string' ? stripControlChars(rawQuestions[i]) : ''
+      if (!q) {
+        return NextResponse.json({ error: `Question ${i + 1} cannot be empty.` }, { status: 400 })
+      }
+      if (q.length > MAX_QUESTION_LENGTH) {
+        return NextResponse.json(
+          { error: `Question ${i + 1} is too long (${q.length} characters). Please keep each question under ${MAX_QUESTION_LENGTH} characters.` },
+          { status: 400 },
+        )
+      }
+      questions.push(q)
     }
 
     const supabase = await createClient()
@@ -39,9 +59,9 @@ export async function POST(request: Request) {
       .from('gumiho_questions')
       .insert({
         submission_id: submissionId,
-        question_1: question1,
-        question_2: question2,
-        question_3: question3
+        question_1: questions[0],
+        question_2: questions[1],
+        question_3: questions[2],
       })
       .select('id')
       .single()
@@ -51,9 +71,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Failed to save questions' }, { status: 500 })
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      gumihoQuestionId: gumihoQuestion.id 
+    return NextResponse.json({
+      success: true,
+      gumihoQuestionId: gumihoQuestion.id,
     })
   } catch (error) {
     console.error('[v0] Gumiho submit questions error:', error)
