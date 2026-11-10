@@ -62,7 +62,7 @@ export default function StartPage() {
         
         {/* Subtitle */}
         <p className="text-white text-center mb-6 text-sm md:text-base font-medium">
-          No Sign-up, First 3 Facts
+          No Sign-up, First 3 Facts Free
         </p>
 
         {/* Form Card */}
