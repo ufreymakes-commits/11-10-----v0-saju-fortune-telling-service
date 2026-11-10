@@ -85,6 +85,7 @@ export function BirthForm() {
     referralSource: '',
     yajasi: 'apply'
   })
+  const [referralOther, setReferralOther] = useState('')
   
   // New: City selection for precise timezone/longitude
   const [selectedCity, setSelectedCity] = useState<City | null>(null)
@@ -125,6 +126,8 @@ export function BirthForm() {
     
     if (!formData.referralSource) {
       newErrors.referralSource = 'Please tell us how you found us'
+    } else if (formData.referralSource === 'other' && !referralOther.trim()) {
+      newErrors.referralSource = 'Please tell us where you found us'
     }
     
     setErrors(newErrors)
@@ -148,6 +151,10 @@ export function BirthForm() {
 
       const submitData = {
         ...formData,
+        referralSource:
+          formData.referralSource === 'other'
+            ? `other: ${referralOther.trim()}`
+            : formData.referralSource,
         birthCountry: selectedCity?.country || formData.birthCountry,
         birthCity: selectedCity?.name || null,
         timezone: resolvedTimezone,
@@ -415,6 +422,18 @@ export function BirthForm() {
               ))}
             </SelectContent>
           </Select>
+          {formData.referralSource === 'other' && (
+            <Input
+              id="referral-other"
+              aria-label="Where did you find us?"
+              placeholder="Please tell us where you found us"
+              maxLength={100}
+              value={referralOther}
+              onChange={(e) => setReferralOther(e.target.value)}
+              className="bg-white border-gray-300 focus:border-primary text-gray-900 placeholder:text-purple-300"
+              aria-invalid={!!errors.referralSource}
+            />
+          )}
           {errors.referralSource && <FieldError>{errors.referralSource}</FieldError>}
         </Field>
 

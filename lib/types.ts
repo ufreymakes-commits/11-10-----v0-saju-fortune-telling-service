@@ -416,11 +416,11 @@ export const REPORT_SECTIONS: ReportSection[] = [
 
 export const REFERRAL_SOURCES = [
   { value: 'tiktok', label: 'TikTok' },
+  { value: 'friend', label: 'Friend Recommendation' },
   { value: 'instagram', label: 'Instagram' },
   { value: 'youtube', label: 'YouTube' },
   { value: 'google', label: 'Google Search' },
   { value: 'gpt', label: 'ChatGPT / AI' },
-  { value: 'friend', label: 'Friend Recommendation' },
   { value: 'other', label: 'Other' }
 ]
 
