@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { generateText } from 'ai'
+import { generateText, generateObject } from 'ai'
+import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import type { Fact } from '@/lib/types'
 import { buildRomanceFacts, yearNickname } from '@/lib/saju/romance'
@@ -25,8 +26,8 @@ export const maxDuration = 300
 const PIPELINE: 'single' | 'two_stage' = process.env.PAID_PIPELINE === 'single' ? 'single' : 'two_stage'
 const STAGE_MODEL = 'google/gemini-3.8-flash'
 const NOTES_TIMEOUT_MS = 90_000
-// 한 용어(작은따옴표로 묶인 간지/패턴 이름)가 나올 수 있는 최대 카드 수
-const TERM_BUDGET = 6
+// 한 용어(작은따옴표로 묶인 간지/패턴 이름)가 카드/편지/허락 문장 전체에서 나올 수 있는 최대 횟수
+const TERM_BUDGET = 4
 const PROMISE_PATTERN = /\b(guarantee[sd]?|destined to|you will definitely|certain to)\b/i
 
 /**
@@ -252,11 +253,11 @@ const CLOSING_LETTER_MAX = 900
 const CLOSING_LETTER_TARGET = 850
 const REGULAR_CARD_MAX = 260
 const SPECIAL_CARD_MAX = 300
-const REPAIR_MAX_CARDS = 16
+const REPAIR_MAX_CARDS = 12
 
-type ProblemKind = 'long' | 'repeated' | 'truth-bomb' | 'duplicate' | 'guard' | 'promise'
+type ProblemKind = 'long' | 'repeated' | 'truth-bomb' | 'duplicate' | 'guard' | 'promise' | 'relation'
 // 수리 대상이 상한을 넘으면 앞쪽 종류부터 고친다.
-const PROBLEM_PRIORITY: ProblemKind[] = ['guard', 'promise', 'truth-bomb', 'long', 'repeated', 'duplicate']
+const PROBLEM_PRIORITY: ProblemKind[] = ['relation', 'guard', 'promise', 'truth-bomb', 'long', 'repeated', 'duplicate']
 const problemRank = (card: { problems: Array<{ kind: ProblemKind }> }) =>
   Math.min(...card.problems.map((p) => PROBLEM_PRIORITY.indexOf(p.kind)))
 interface ProblemCard {
@@ -269,13 +270,60 @@ interface ProblemCard {
   problems: Array<{ kind: ProblemKind; detail: string }>
 }
 
+// 작은따옴표로 묶인 간지/관계/신살 이름만 용어로 센다 ('Ja-Mi Wonjin'). 'I need a minute' 같은 인용 문장이나 일반 단어는 센다.
+const CHART_TERM_SHAPE = /^[A-Z][A-Za-z]*(?:[- ][A-Z][A-Za-z]*){0,3}$/
 function quotedTerms(text: string): string[] {
   const terms: string[] = []
   for (const m of text.matchAll(/(?<![A-Za-z])'([^'\n]{2,40}?)'(?![A-Za-z])/g)) {
     const term = m[1].trim()
-    if (term) terms.push(term)
+    if (term && CHART_TERM_SHAPE.test(term)) terms.push(term)
   }
   return terms
+}
+
+// ---- 관계(충/형/해/원진/합...) 사실 확인 ----
+const RELATION_TYPES = 'Ja-Hyeong|Banhap|Samhap|Wonjin|Hyeong|Chung|Hae|Hap|Pa'
+const RELATION_NAME_RE = new RegExp(`\\b([A-Z][a-z]+(?:-[A-Z][a-z]+){1,2}) (${RELATION_TYPES})\\b`, 'g')
+const RELATION_VERBS: Array<[RegExp, string]> = [
+  [/clash/i, 'chung'],
+  [/harm/i, 'hae'],
+  [/combin|harmon|bond|pair/i, 'hap'],
+  [/break|broke/i, 'pa'],
+  [/penal|punish/i, 'hyeong'],
+]
+const relationKey = (names: string[], type: string) =>
+  `${names.map((n) => n.toLowerCase()).sort().join('|')}|${type.toLowerCase()}`
+
+// FINAL FACTS / 원국 관계 / 월별 창에 실제로 있는 관계 이름 집합 (예: "Ja-Mi Wonjin" -> "ja|mi|wonjin")
+function collectAllowedRelations(sources: unknown[]): Set<string> {
+  const allowed = new Set<string>()
+  for (const source of sources) {
+    let serialized = ''
+    try {
+      serialized = JSON.stringify(source) ?? ''
+    } catch {
+      serialized = ''
+    }
+    for (const m of serialized.matchAll(RELATION_NAME_RE)) allowed.add(relationKey(m[1].split('-'), m[2]))
+  }
+  return allowed
+}
+
+// 카드에 적힌 관계 중 사실에 없는 것을 찾는다. 예: "Year Branch Ja clashed with Month Branch Sa", "Ja-Sa Chung"
+function findUnknownRelations(text: string, allowed: Set<string>): string[] {
+  const bad = new Set<string>()
+  for (const m of text.matchAll(RELATION_NAME_RE)) {
+    const names = m[1].split('-')
+    if (!allowed.has(relationKey(names, m[2]))) bad.add(`${m[1]} ${m[2]}`)
+  }
+  for (const m of text.matchAll(
+    /\b(?:Year|Month|Day|Hour) (?:Branch|Stem) ([A-Z][a-z]+)\s+(\w+)\s+(?:with\s+|against\s+|and\s+)?(?:your\s+)?(?:Year|Month|Day|Hour) (?:Branch|Stem) ([A-Z][a-z]+)/g,
+  )) {
+    const verb = RELATION_VERBS.find(([re]) => re.test(m[2]))
+    if (!verb) continue
+    if (!allowed.has(relationKey([m[1], m[3]], verb[1]))) bad.add(`${m[1]}-${m[3]} ${verb[1]}`)
+  }
+  return [...bad]
 }
 
 function wordSet(text: string): Set<string> {
@@ -296,11 +344,22 @@ function jaccard(a: Set<string>, b: Set<string>): number {
 }
 
 // 문제 카드 수집: (a) 길이 초과 (b) 한 용어가 4장 넘는 카드에 반복 (c) Truth Bomb 주제 중복 (d) 같은 섹션 내 같은 말
-function findProblemCards(sections: any[], lovePeakYears: Array<number | string>): ProblemCard[] {
+function findProblemCards(
+  sections: any[],
+  lovePeakYears: Array<number | string>,
+  extra: { outsideTexts?: string[]; allowedRelations?: Set<string> | null } = {},
+): ProblemCard[] {
   const flagged = new Map<number, ProblemCard>()
   const termCardCount = new Map<string, number>()
   const seenBombItems = new Set<string>()
   let index = 0
+
+  // 편지와 허락 문장에 쓰인 용어도 전체 횟수(TERM_BUDGET)에 포함한다. 이 글들은 카드처럼 고치지 않으니 카드 쪽이 줄인다.
+  for (const outside of extra.outsideTexts ?? []) {
+    for (const term of new Set(quotedTerms(outside).map((t) => t.toLowerCase()))) {
+      termCardCount.set(term, (termCardCount.get(term) ?? 0) + 1)
+    }
+  }
 
   sections.forEach((section, sectionIdx) => {
     const number = String(section?.sectionNumber ?? '')
@@ -361,6 +420,12 @@ function findProblemCards(sections: any[], lovePeakYears: Array<number | string>
       // f) 약속/단정 표현(promise): 사주는 경향만 말한다
       const promise = text.match(PROMISE_PATTERN)
       if (promise) addProblem('promise', promise[0])
+
+      // g) 사실에 없는 관계 이름 (예: 없는 충/해/원진)
+      if (extra.allowedRelations && extra.allowedRelations.size > 0) {
+        const unknown = findUnknownRelations(text, extra.allowedRelations)
+        if (unknown.length > 0) addProblem('relation', unknown.join(', '))
+      }
     })
   })
 
@@ -391,6 +456,8 @@ async function repairProblemCards(
           return `The term '${p.detail}' is already used in ${TERM_BUDGET} other cards. Rewrite it shorter than 220 characters and talk about a DIFFERENT chart item from FINAL FACTS (not '${p.detail}'), keeping the same years if it has any.`
         if (p.kind === 'guard')
           return `Wrong reading: ${p.detail}. Rewrite it so the star or pattern keeps its true meaning (see the guardrails in FINAL FACTS context: Rob Wealth Fighting Wealth means competition over resources and money that tends to leak, so advise protecting money; Direct Seal means learning, credentials and support, not pioneering). Keep the same facts and years and stay shorter than 220 characters.`
+        if (p.kind === 'relation')
+          return `It names a relation that does not exist in FINAL FACTS (${p.detail}). Rewrite it using ONLY relations listed in FINAL FACTS (natal relations, year or cycle relations, monthlyWindows), or drop the relation and describe the same feeling with a different real chart item. Keep the same years and stay shorter than 220 characters.`
         if (p.kind === 'promise')
           return `It makes a promise ("${p.detail}"). Rewrite it as a tendency ("tends to", "may", "the chart leans toward"), with no guarantee and no certainty, keeping the same facts and years and staying shorter than 220 characters.`
         if (p.kind === 'truth-bomb')
@@ -497,13 +564,15 @@ function splitSentences(text: string): string[] {
   )
 }
 
-function findClosingLetterIssue(letter: string, firstName: string): string | null {
+// skipEmpathy: 이름을 코드로 붙여 고친 편지는 문장 순서가 달라질 수 있으니 "둘째 문장 공감" 검사로 거절하지 않는다.
+function findClosingLetterIssue(letter: string, firstName: string, skipEmpathy = false): string | null {
   const text = letter.trim()
   if (!text) return 'letter is empty'
   if (!text.startsWith(`${firstName},`)) return `does not start with "${firstName},"`
   if (text.length < CLOSING_LETTER_MIN_CHECK || text.length > CLOSING_LETTER_MAX_CHECK) {
     return `length ${text.length} is outside ${CLOSING_LETTER_MIN_CHECK}-${CLOSING_LETTER_MAX_CHECK}`
   }
+  if (skipEmpathy) return null
   const second = splitSentences(text)[1]
   if (!second || !EMPATHY_PATTERN.test(second)) return 'second sentence has no feeling or acknowledgement'
   return null
@@ -526,7 +595,7 @@ function formatLetterParagraphs(letter: string): string {
 const LETTER_REPAIR_SYSTEM_PROMPT = `You rewrite ONE closing letter of a Saju (Four Pillars) report, spoken by the Gumiho (a warm, perceptive nine-tailed fox spirit) to the reader. Plain English, Latin script only, no markdown, no quotes around the letter.
 Rules:
 - Start exactly with "<FirstName>," (the first name you are given, followed by a comma).
-- Use five parts, in this order: (1) the name plus ONE vivid image of their chart; (2) ONE empathic sentence about how hard it has been, written fresh for this chart (never a stock line; it may be a gentle question); (3) 2-3 concrete chart facts from FINAL FACTS or the Truth Bomb themes showing why they are bound to do well; (4) where to put their effort plus one kind reminder about a real blind spot; (5) a confident, bright-future final sentence.
+- Use five parts, in this order: (1) the name plus ONE vivid image of their chart; (2) ONE empathic sentence about how hard it has been, written fresh for this chart (never a stock line; it may be a gentle question); (3) 2-3 concrete chart facts from FINAL FACTS or the Truth Bomb themes showing why they are bound to do well; (4) where to put their effort plus one gentle mention of a real blind spot, once and early, never in the last sentence; (5) the final sentence is a warm, bright closing line, never a warning, instruction or blind spot.
 - The SECOND sentence of the letter must be the empathic one.
 - Never contradict FINAL FACTS (especially the strength rule and the cycle years/ages) or the Truth Bomb themes. Do not invent facts.
 - 650 to 850 characters including spaces. Exactly 3 short paragraphs separated by one blank line: paragraph 1 = name + image + empathy; paragraph 2 = why they will do well + direction + reminder; paragraph 3 = the bright closing.
@@ -596,8 +665,109 @@ async function generateStage(args: {
   throw lastError
 }
 
+// v26b: 2단계 카드를 3개의 병렬 generateObject 호출로 나눈다 (섹션 1-3 = 카드 1-32, 4-6 = 33-65, 7-9 = 66-96 + 편지 + 허락 문장).
+const SECTION_CARD_COUNTS = [10, 11, 11, 11, 11, 11, 10, 11, 10]
+const CARD_PARTS = [
+  { from: 0, to: 3, label: 'cards 1-32' },
+  { from: 3, to: 6, label: 'cards 33-65' },
+  { from: 6, to: 9, label: 'cards 66-96 + closing letter + permissions' },
+]
+
+const cardSectionSchema = z.object({
+  sectionNumber: z.string(),
+  sectionTitle: z.string(),
+  cards: z.array(z.object({ content: z.string() })),
+})
+const cardPartSchema = z.object({
+  mainFacts: z.array(cardSectionSchema),
+  closingLetter: z.string().optional(),
+  permissions: z.array(z.string()).optional(),
+})
+
+function buildPartInstruction(partIdx: number): string {
+  const { from, to } = CARD_PARTS[partIdx]
+  const isLast = partIdx === CARD_PARTS.length - 1
+  const sections = SECTION_CARD_COUNTS.slice(from, to)
+  const total = sections.reduce((a, b) => a + b, 0)
+  const nums = Array.from({ length: to - from }, (_, i) => String(from + i + 1).padStart(2, '0'))
+  return `\n\n=== PARALLEL PART ${partIdx + 1} OF ${CARD_PARTS.length} (overrides the "generate all 96" line above) ===
+Write ONLY sections ${nums.join(', ')}: "mainFacts" must contain exactly ${to - from} section objects with ${sections.join(', ')} cards in that order (${total} cards). ${
+    isLast
+      ? 'ALSO write "closingLetter" and "permissions" (exactly 3).'
+      : 'Do NOT write "closingLetter" or "permissions"; another writer does it.'
+  } The other sections are written at the same time by other writers from the same notes, so never refer to them.
+${
+  partIdx === 1
+    ? 'You own the three REQUIRED sentences of the free page, the love-peak sentence and the pet sentence: write all of them in your sections.'
+    : 'Do NOT write the REQUIRED free-page sentences, the love-peak sentence or the pet sentence; another writer places them.'
+}`
+}
+
+async function generateCardPart(args: { system: string; user: string; partIdx: number; timings: Record<string, number> }) {
+  const { from, to, label } = CARD_PARTS[args.partIdx]
+  const isLast = args.partIdx === CARD_PARTS.length - 1
+  const expected = SECTION_CARD_COUNTS.slice(from, to)
+  const start = Date.now()
+  const configs: Array<Record<string, unknown>> = [{ thinkingLevel: 'low' }, { thinkingLevel: 'medium' }, { thinkingBudget: 2048 }]
+  let lastError: unknown
+  for (const thinkingConfig of configs) {
+    try {
+      const result = await generateObject({
+        model: STAGE_MODEL,
+        schema: cardPartSchema,
+        system: args.system,
+        prompt: args.user + buildPartInstruction(args.partIdx),
+        maxOutputTokens: 16000,
+        temperature: 0,
+        providerOptions: { google: { thinkingConfig: thinkingConfig as any } },
+        abortSignal: AbortSignal.timeout(150_000),
+      })
+      const obj = result.object
+      const counts = obj.mainFacts.map((s) => s.cards.length)
+      if (counts.length !== expected.length || counts.some((c, i) => c !== expected[i])) {
+        throw new Error(`part ${args.partIdx + 1} card counts ${counts.join(',')} != ${expected.join(',')}`)
+      }
+      if (isLast && (!obj.closingLetter || !obj.closingLetter.trim())) throw new Error('part 3 missing closingLetter')
+      args.timings[label] = Date.now() - start
+      return { object: obj, usage: result.usage, finishReason: result.finishReason }
+    } catch (error) {
+      lastError = error
+      const message = error instanceof Error ? `${error.name} ${error.message}` : String(error)
+      if (/timeout|abort/i.test(message)) throw error
+      console.warn(`[v0] card part ${args.partIdx + 1} failed with config`, JSON.stringify(thinkingConfig), message.slice(0, 200))
+    }
+  }
+  throw lastError
+}
+
+async function generateCardsParallel(system: string, user: string, timings: Record<string, number>) {
+  const parts = await Promise.all(CARD_PARTS.map((_, partIdx) => generateCardPart({ system, user, partIdx, timings })))
+  const last = parts[parts.length - 1].object
+  const text = JSON.stringify({
+    mainFacts: parts.flatMap((p) => p.object.mainFacts),
+    closingLetter: last.closingLetter ?? '',
+    permissions: last.permissions ?? [],
+  })
+  const sum = (key: 'inputTokens' | 'outputTokens') => parts.reduce((n, p) => n + (((p.usage as any)?.[key] as number) ?? 0), 0)
+  return {
+    text,
+    finishReason: 'stop' as const,
+    usage: { inputTokens: sum('inputTokens'), outputTokens: sum('outputTokens') },
+    providerMetadata: undefined as any,
+  }
+}
+
+// 편지는 "<FirstName>,"으로 시작해야 한다. 아니면 이름을 앞에 붙이고 다음 단어의 첫 글자를 소문자로 바꾼다("I"는 그대로).
+function ensureLetterFirstName(letter: string, firstName: string): { text: string; repaired: boolean } {
+  const text = letter.trim()
+  if (!text || !firstName || text.startsWith(`${firstName},`)) return { text, repaired: false }
+  const body = text.replace(/^[A-Za-z\u00C0-\u024F'-]{1,30},\s*/, (m) => (m.trim().slice(0, -1).toLowerCase() === firstName.toLowerCase() ? '' : m))
+  const lowered = body.replace(/^([A-Z])([a-z']*)/, (m, first: string, rest: string) => (m === 'I' || /^I['\u2019]/.test(m + rest) ? m : first.toLowerCase() + rest))
+  return { text: `${firstName}, ${lowered}`, repaired: true }
+}
+
 type NotesStageResult =
-  | { ok: true; notes: string; englishChart: unknown; finalFactsForPrompt: unknown; romanceFactsForPrompt: unknown; decadeSummary: unknown; freeFactsForPrompt: unknown; attempts: number; issues: string[] }
+  | { ok: true; notes: string; monthlyWindows: unknown; englishChart: unknown; finalFactsForPrompt: unknown; romanceFactsForPrompt: unknown; decadeSummary: unknown; freeFactsForPrompt: unknown; attempts: number; issues: string[] }
   | { ok: false; reason: string }
 
 async function runNotesStage(a: {
@@ -682,6 +852,7 @@ async function runNotesStage(a: {
   return {
     ok: true,
     notes: best.text,
+    monthlyWindows: inputs.monthlyWindows,
     englishChart: inputs.sajuForPrompt,
     finalFactsForPrompt: inputs.finalFacts,
     romanceFactsForPrompt: inputs.romanceFacts,
@@ -937,7 +1108,7 @@ Example: the first card starts with "Hey ${displayName}," and the last card star
   - Card 1 "Your chart in one line": one memorable identity sentence for THIS chart (a nickname plus why), built from the Day Master, the season and the strongest signal in the chart.
   - Card 2 "Outside vs inside": what other people see versus what is really going on inside, tied to ONE concrete chart relation.
   - Card 3 "Your Orb": say the orb's name EXACTLY as finalFacts.orb.name (copy it word for word, never rename it) and explain why this chart has that orb, using finalFacts.orb.subtitle. If finalFacts.orb is null, write this card about the Day Master image in nature instead.
-  - Card 4 "How rare you are": use ONLY the numbers in finalFacts.orb.rarity: "1 in 60" for the Day Pillar (dayPillarOneIn), plus elementPattern.text and missingElement.text when they exist. Copy the numbers exactly. Never invent any other statistic. Only describe a number as "rare" when it truly is rare: the Day Pillar (1 in 60), an element mix of 1 in 50 or rarer, or a missing element shared by 20% of charts or fewer. If a number is common (an element mix more common than 1 in 50, or a missing element in more than 20% of charts), state it neutrally and do NOT call it rare, special or unusual. If finalFacts.orb is null, write a normal analysis card instead.
+  - Card 4 "How rare you are": use ONLY the numbers in finalFacts.orb.rarity: elementPattern.text and missingElement.text when they exist. Never say the Day Pillar is "1 in 60" (that is true for everyone). Copy the numbers exactly. Never invent any other statistic. Only describe a number as "rare" when it truly is rare: an element mix of 1 in 50 or rarer, or a missing element shared by 20% of charts or fewer. If a number is common (an element mix more common than 1 in 50, or a missing element in more than 20% of charts), state it neutrally and do NOT call it rare, special or unusual. If finalFacts.orb is null, write a normal analysis card instead.
   - Cards 5-10: normal accurate analysis of the chart.
 
 02. Inner Child Era: Your Early Vibes & Scars 
@@ -1005,7 +1176,7 @@ Example: the first card starts with "Hey ${displayName}," and the last card star
 And please, you need to include these 3 sentences for 'everyone'. Because we masked this and showed on the free report page to persuade customers to pay for the paid report. Fill in the blank (*** or ** or *********** this mark), matching to this customer's saju data and context. You can put these sentences anywhere among the 96 cards, considering the context.
 - The main theme of your ${reportYear} is *** . (Ground *** in finalFacts: this year's stem/branch ten gods + the current luck cycle in FINAL FACTS.luckCycles.current. Name ONE opportunity and ONE thing to be careful about.)
 - Your love luck peaks around ${lovePeakTeaserYear}. The reason is [exactly ONE concrete reason]. Your partner tends to feel like [energy type]. (The free page blurs only ${lovePeakTeaserYear}; in the paid report follow the LOVE PEAK RULE below, including the two-year wording when peak.status is "past".)
-- Your wealth flow timing and secret talents are already mapped out like ***** (Ground in decadeFortune score/years and the strongest ten-god group. Give a specific year range and a specific talent.)
+- Your strongest money stretch is [finalFacts.wealthWindow years and its score label], and it works best through [how wealth enters per FINAL FACTS]. (Phrase it naturally in your own words, not as a fixed template; the money window and its score label must appear. Give a specific year range and a specific talent.)
 - Wealth-timing sentence: place the strongest money window inside a luck cycle whose score in finalFacts.luckCycles is Medium or High (current or previous). If the next cycle is Low, say that cycle is for consolidating what was built, not for expansion. Never call a Low cycle a period of big opportunities.
 
 LOVE PEAK RULE (applies to the teaser sentence above and to Section 06 Card 7):
@@ -1103,11 +1274,16 @@ ${structureBlock}`
     let pipelineUsed: 'single' | 'two_stage' = 'single'
     let pipelineFallback = ''
     let paidNotes: string | null = null
+    let notesMonthlyWindows: unknown = null
+    let notesMs = 0
+    let notesSavePromise: Promise<void> = Promise.resolve()
+    const cardTimings: Record<string, number> = {}
     if (PIPELINE === 'single') {
       pipelineFallback = 'PAID_PIPELINE=single'
     } else if (!finalFacts) {
       pipelineFallback = 'no finalFacts'
     } else {
+      const notesStart = Date.now()
       const stage = await runNotesStage({
         displayName,
         gender: reportGender,
@@ -1123,8 +1299,42 @@ ${structureBlock}`
         freeInterpretation: contextInterpretation,
       })
       logTiming('notes:done', stage.ok ? { chars: stage.notes.length, attempts: stage.attempts, issues: stage.issues } : { failed: stage.reason })
+      notesMs = Date.now() - notesStart
       if (stage.ok) {
         paidNotes = stage.notes
+        notesMonthlyWindows = stage.monthlyWindows
+        // 노트 저장은 카드 생성과 동시에 진행한다. 저장이 실패해도 리포트는 계속 만든다.
+        const notesText = stage.notes
+        notesSavePromise = (async () => {
+          try {
+            const { error: notesRowError } = await supabase
+              .from('reports')
+              .upsert(
+                {
+                  submission_id: submissionId,
+                  payment_id: payment.id,
+                  section_key: 'paid_notes',
+                  paid_notes: notesText,
+                  is_free: false,
+                },
+                { onConflict: 'submission_id,section_key' },
+              )
+            if (notesRowError) {
+              // upsert 제약이 없으면 지우고 다시 넣는다.
+              await supabase.from('reports').delete().eq('submission_id', submissionId).eq('section_key', 'paid_notes')
+              const { error: insertNotesError } = await supabase.from('reports').insert({
+                submission_id: submissionId,
+                payment_id: payment.id,
+                section_key: 'paid_notes',
+                paid_notes: notesText,
+                is_free: false,
+              })
+              if (insertNotesError) console.warn('[v0] notes row save failed:', insertNotesError.message)
+            }
+          } catch (notesSaveError) {
+            console.warn('[v0] notes row save threw:', notesSaveError)
+          }
+        })()
         cardPrompts = {
           system: withRequiredSentences(finalFacts, reportYear),
           user: buildCardUserPrompt({
@@ -1170,13 +1380,7 @@ ${structureBlock}`
         // routinely exceeds 16k output tokens and gets silently truncated mid-JSON. Raised with headroom.
         const result =
           pipelineUsed === 'two_stage'
-            ? await generateStage({
-                system: cardPrompts.system,
-                prompt: cardPrompts.user,
-                maxOutputTokens: 32000,
-                levels: ['low', 'medium'],
-                timeoutMs: 150_000,
-              })
+            ? await generateCardsParallel(cardPrompts.system, cardPrompts.user, cardTimings)
             : await generateText({
                 model: 'google/gemini-2.5-flash',
                 system: cardPrompts.system,
@@ -1213,7 +1417,9 @@ ${structureBlock}`
         const peakMissing = isLovePeakSentenceMissing(result.text, finalFacts?.lovePeak)
         if (peakMissing) console.warn('[v0] check love peak sentence missing')
         const attemptScore = (strengthBad ? 3 : 0) + (yearBad ? 2 : 0) + genericBombs.length + (petMissing ? 1 : 0) + (peakMissing ? 1 : 0)
-        if (strengthBad || genericBombs.length > 0 || petMissing || peakMissing) {
+        // 2단계에서는 밋밋한 Truth Bomb 때문에 96장을 다시 만들지 않는다 (수리 패스가 해당 카드만 고친다). 전체 재생성은 하드 실패에만 쓴다.
+        const genericTriggersRegen = pipelineUsed !== 'two_stage' && genericBombs.length > 0
+        if (strengthBad || genericTriggersRegen || petMissing || peakMissing) {
           if (!strengthRegenerated && attempt < MAX_RETRIES) {
             strengthRegenerated = true
             strengthFallback = result.text
@@ -1296,6 +1502,8 @@ ${structureBlock}`
     // 7. JSON 파싱 (더 유연한 형식 지원)
     let paidFacts: Fact[] = []
     let closingLetter = ''
+    let letterNameRepairedByCode = false
+    let repairMsTotal = 0
     let permissions: string[] = []
     let rawPermissions: unknown = null
     try {
@@ -1457,10 +1665,27 @@ ${structureBlock}`
       if (permissions.length !== 3) console.warn(`[v0] check permissions count ${permissions.length}`)
 
       // 수리 패스: 문제 카드(길이 초과, 반복 용어, Truth Bomb 중복, 같은 말)와 700자 넘는 편지만 AI 호출 한 번으로 다시 쓴다.
-      const flaggedCards = findProblemCards(paidFacts as any[], [
-        finalFacts?.lovePeak?.peak?.year,
-        finalFacts?.lovePeak?.upcomingPeak?.year,
-      ].filter((y) => y !== undefined && y !== null)).slice(0, REPAIR_MAX_CARDS)
+      const allowedRelations = collectAllowedRelations([
+        finalFacts,
+        romanceFacts,
+        sajuForPrompt,
+        submission.saju_data,
+        notesMonthlyWindows,
+        paidNotes,
+      ])
+      // 편지는 이름을 코드로 먼저 맞춘다. 이름이 이미 맞으면 그대로 둔다.
+      const letterFirstNameEarly = displayName.split(' ')[0]
+      const nameFix = ensureLetterFirstName(closingLetter, letterFirstNameEarly)
+      if (nameFix.repaired) {
+        console.warn('[v0] check letter name prepended by code')
+        closingLetter = nameFix.text
+      }
+      letterNameRepairedByCode = nameFix.repaired
+      const flaggedCards = findProblemCards(
+        paidFacts as any[],
+        [finalFacts?.lovePeak?.peak?.year, finalFacts?.lovePeak?.upcomingPeak?.year].filter((y) => y !== undefined && y !== null),
+        { outsideTexts: [closingLetter, ...permissions], allowedRelations },
+      ).slice(0, REPAIR_MAX_CARDS)
       const closingTooLong = closingLetter.length > CLOSING_LETTER_MAX
       const closingPromise = closingLetter.match(PROMISE_PATTERN)?.[0] ?? null
       const longPermissions = permissions
@@ -1508,6 +1733,7 @@ ${structureBlock}`
         } catch (repairError) {
           console.warn('[v0] repair pass failed, keeping original text:', repairError)
         }
+        repairMsTotal += Date.now() - repairStart
         console.log(`[v0] repair pass done in ${Date.now() - repairStart} ms`)
       }
 
@@ -1521,7 +1747,7 @@ ${structureBlock}`
       // 편지 규칙을 코드로 확인한다. 하나라도 어기면 작은 수리 호출을 딱 한 번만 하고, 실패하면 원본을 유지한다.
       {
         const letterFirstName = displayName.split(' ')[0]
-        const issue = findClosingLetterIssue(closingLetter, letterFirstName)
+        const issue = findClosingLetterIssue(closingLetter, letterFirstName, letterNameRepairedByCode)
         if (issue) {
           console.log(`[v0] repair letter: ${issue}`)
           try {
@@ -1586,7 +1812,6 @@ ${structureBlock}`
           facts: paidFacts,
           payment_id: payment.id,
           hidden_cards: hiddenCards,
-          ...(paidNotes ? { paid_notes: paidNotes } : {}),
         })
         .eq('id', existing.id)
       insertError = error
@@ -1600,13 +1825,21 @@ ${structureBlock}`
           section_key: 'paid_full',
           facts: paidFacts,
           ...(hiddenCards ? { hidden_cards: hiddenCards } : {}),
-          ...(paidNotes ? { paid_notes: paidNotes } : {}),
           is_free: false,
         })
       insertError = error
     }
 
+    await notesSavePromise
     logTiming('db:upsert', { saveFailed: Boolean(insertError) })
+    console.log('[v0] run summary', {
+      notes_ms: notesMs,
+      cards_ms: cardTimings,
+      repair_ms: repairMsTotal,
+      total_ms: Date.now() - t0,
+      birth_country: String(submission.birth_country ?? ''),
+      pipeline: pipelineUsed,
+    })
 
     if (insertError) {
       console.error('[v0] Failed to save paid report:', insertError)
