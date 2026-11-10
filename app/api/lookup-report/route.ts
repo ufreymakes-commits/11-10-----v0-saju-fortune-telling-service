@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { getCountryFullName } from '@/lib/country-name'
 
 export async function POST(request: Request) {
   try {
@@ -48,7 +49,7 @@ export async function POST(request: Request) {
         .select('id, name, birth_date, paid_report_url, created_at')
         .ilike('name', `%${firstName}%`)
         .eq('birth_date', birthDate)
-        .eq('birth_country', country)
+        .in('birth_country', [country, getCountryFullName(country)])
         .not('paid_report_url', 'is', null)
         .order('created_at', { ascending: false })
         .limit(5)

@@ -4,6 +4,7 @@ import { calculateSaju } from '@/lib/saju-calculator'
 import { runSajuTests } from '@/lib/saju-test'
 import type { BirthInfo } from '@/lib/types'
 import { isValidEmail } from '@/lib/validation'
+import { getCountryFullName } from '@/lib/country-name'
 
 export async function POST(request: Request) {
   try {
@@ -71,7 +72,7 @@ export async function POST(request: Request) {
         name,
         email,
         birth_date: birthDate,
-        birth_country: birthCountry,
+        birth_country: getCountryFullName(birthCountry),
         birth_time: birthTime || null,
         gender,
         referral_source: referralSource,
