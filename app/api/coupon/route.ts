@@ -36,6 +36,11 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Same canonical base URL logic as generate-paid-report, so payments.report_url matches submissions.paid_report_url
+  const baseUrl = process.env.NEXT_PUBLIC_CANONICAL_URL ||
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+
   // No paid report yet — create payment record for coupon (same structure as PayPal)
   const { error: paymentError } = await supabase
     .from('payments')
@@ -45,6 +50,7 @@ export async function POST(req: NextRequest) {
       amount: 0,
       currency: 'USD',
       status: 'completed',
+      report_url: `${baseUrl}/report/${submissionId}/paid`,
     })
 
   if (paymentError) {
