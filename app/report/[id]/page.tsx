@@ -57,7 +57,7 @@ export default async function ReportPage({ params }: PageProps) {
   const cachedSections: Record<string, Fact[]> = {}
   if (reportsResult.data) {
     for (const row of reportsResult.data) {
-      if (row.section_key && Array.isArray(row.facts)) {
+      if (row.section_key && row.section_key !== 'paid_notes' && Array.isArray(row.facts)) {
         // For free reports: load free sections (is_free = true)
         // For paid reports: load paid sections (is_free = false)
         if (hasPaidAccess && !row.is_free) {
