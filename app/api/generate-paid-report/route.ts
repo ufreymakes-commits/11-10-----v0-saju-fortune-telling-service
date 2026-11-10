@@ -88,7 +88,7 @@ CONSISTENCY RULES (critical):
 
 Return ONLY a valid JSON object with "mainFacts" and "closingLetter". No markdown, no explanations outside the JSON.`
 
-// 생성 후 코드 검사 (추가 AI 호출 없음): 신강/신�� 모��
+// 생성 후 코드 검사 (추�� AI 호출 없음): 신강/신�� 모��
 function hasStrengthMismatch(text: string, grade: unknown): boolean {
   const g = String(grade ?? '')
   if (/weak/i.test(g)) return /day master is strong|strong day master/i.test(text)
@@ -1314,6 +1314,7 @@ ${structureBlock}`
                   submission_id: submissionId,
                   payment_id: payment.id,
                   section_key: 'paid_notes',
+                  facts: [],
                   paid_notes: notesText,
                   is_free: false,
                 },
@@ -1326,6 +1327,7 @@ ${structureBlock}`
                 submission_id: submissionId,
                 payment_id: payment.id,
                 section_key: 'paid_notes',
+                facts: [],
                 paid_notes: notesText,
                 is_free: false,
               })
@@ -1563,7 +1565,7 @@ ${structureBlock}`
         rawPermissions = parsedData.permissions
       }
 
-      // 섹션 제목은 모델이 아니라 코드의 Nine Tails 목록으로 고정한다.
+      // 섹션 제목은 모델이 아니라 코드의 Nine Tails 목록으��� 고정한다.
       paidFacts = paidFacts.map((section: any) => {
         const tail = TAILS.find((t) => t.n === Number(section?.sectionNumber))
         return tail ? { ...section, sectionTitle: tail.title } : section
