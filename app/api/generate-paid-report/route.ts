@@ -8,9 +8,26 @@ import { romanizeName, hasCJK } from '@/lib/romanize-name'
 import { TAILS } from '@/lib/saju/tails'
 import { stripGumihoSignature } from '@/lib/letter-signature'
 import { buildGuardBlock, checkGuards } from '@/lib/saju/ten-god-guards'
+import { buildGumihoInputs, stripCjkDeep } from '@/lib/saju/gumiho-context'
+import {
+  NOTES_SYSTEM_PROMPT,
+  buildNotesUserPrompt,
+  buildDecadeSummary,
+  checkNotes,
+  buildCardUserPrompt,
+  withRequiredSentences,
+} from '@/lib/saju/paid-notes'
 
 // Vercel Hobby 플랜 최대 60초
 export const maxDuration = 300
+
+// v26a: 2단계 생성(읽기 노트 -> 카드). PAID_PIPELINE=single 이면 예전 한 번 호출 방식으로 되돌린다.
+const PIPELINE: 'single' | 'two_stage' = process.env.PAID_PIPELINE === 'single' ? 'single' : 'two_stage'
+const STAGE_MODEL = 'google/gemini-3.8-flash'
+const NOTES_TIMEOUT_MS = 90_000
+// 한 용어(작은따옴표로 묶인 간지/패턴 이름)가 나올 수 있는 최대 카드 수
+const TERM_BUDGET = 6
+const PROMISE_PATTERN = /\b(guarantee[sd]?|destined to|you will definitely|certain to)\b/i
 
 /**
  * 유료 레포트 생성 API (96개 사실 + 총평 편지)
@@ -23,7 +40,7 @@ export const maxDuration = 300
  */
 
 // ===== 유료 레포트 프롬프트 (사용자가 이 부분을 수정) =====
-const PAID_REPORT_SYSTEM_PROMPT = `You are an expert Korean Saju analyst creating a premium paid report called 99 facts from your birth chart - korean ancient saju based.
+const LEGACY_PAID_REPORT_SYSTEM_PROMPT = `You are an expert Korean Saju analyst creating a premium paid report called 99 facts from your birth chart - korean ancient saju based.
 
 CRITICAL CONTEXT INJECTION:
 The user has already received 3 FREE facts. You must now generate 96 ADDITIONAL facts.
@@ -98,7 +115,7 @@ function findCycleYearMismatches(text: string, cycles: any[] | undefined): strin
   return [...mismatches]
 }
 
-// 생성 후 코드 검사: 섹션 02/03/04/05/06/08의 8번째 카드(Truth Bomb)가 일반적인 문장인지 확인한다.
+// 생성 후 코드 검사: 섹션 02/03/04/05/06/08의 8번째 카드(Truth Bomb)가 일반적인 문장인지 확인��다.
 // "Truth Bomb:" 접두어가 없거나, 작은따옴표 용어/오행/�����성/연도 중 어느 것도 없으면 generic으로 본다.
 const TRUTH_BOMB_SECTIONS = new Set(['02', '03', '04', '05', '06', '08'])
 const TRUTH_BOMB_CARD_INDEX = 7
@@ -169,7 +186,18 @@ function isLovePetSentenceMissing(text: string): boolean {
   })
 }
 
-// 생성 후 코드 검사(로그 전용): 작은따옴표로 묶인 용어가 4장 넘는 카드에 나오는지 센다.
+// 생성 후 코드 검사: 유료 리포트 어딘가에 "Your love luck peak(s/ed)" 문장과 lovePeak 연도가 함께 있어야 한다.
+// lovePeak 가 없으면(출생 시간 모름 등) 코드가 쓴 대체 문장을 쓰므로 검사하지 않는다. JSON 을 읽을 수 없으면 false.
+function isLovePeakSentenceMissing(text: string, lovePeak: any): boolean {
+  const year = lovePeak?.peak?.year
+  if (!year) return false
+  const sections = parseMainFacts(text)
+  if (sections.length === 0) return false
+  const cards: string[] = sections.flatMap((s) => (Array.isArray(s?.cards) ? s.cards.map((c: any) => String(c?.content ?? '')) : []))
+  return !cards.some((c) => /\bYour love luck peak(?:s|ed)?\b/i.test(c) && c.includes(String(year)))
+}
+
+// 생성 후 코드 검사(로그 전용): 작은따옴표로 묶인 용어가 TERM_BUDGET장 넘는 카드에 나오는지 센다.
 function findRepeatedTerms(text: string): Array<[string, number]> {
   const cardsByTerm = new Map<string, Set<string>>()
   parseMainFacts(text).forEach((section, si) => {
@@ -185,7 +213,7 @@ function findRepeatedTerms(text: string): Array<[string, number]> {
       }
     })
   })
-  return [...cardsByTerm.entries()].filter(([, set]) => set.size > 4).map(([term, set]) => [term, set.size])
+  return [...cardsByTerm.entries()].filter(([, set]) => set.size > TERM_BUDGET).map(([term, set]) => [term, set.size])
 }
 
 // 생성 후 코드 검사(로그 전용): 허용된 연도 집합(보고서 연도, 대운 구간, 연애 피크, 사주 데이터의 연도 목록, 생년)에 없는 20NN 연도
@@ -224,9 +252,13 @@ const CLOSING_LETTER_MAX = 900
 const CLOSING_LETTER_TARGET = 850
 const REGULAR_CARD_MAX = 260
 const SPECIAL_CARD_MAX = 300
-const REPAIR_MAX_CARDS = 12
+const REPAIR_MAX_CARDS = 16
 
-type ProblemKind = 'long' | 'repeated' | 'truth-bomb' | 'duplicate' | 'guard'
+type ProblemKind = 'long' | 'repeated' | 'truth-bomb' | 'duplicate' | 'guard' | 'promise'
+// 수리 대상이 상한을 넘으면 앞쪽 종류부터 고친다.
+const PROBLEM_PRIORITY: ProblemKind[] = ['guard', 'promise', 'truth-bomb', 'long', 'repeated', 'duplicate']
+const problemRank = (card: { problems: Array<{ kind: ProblemKind }> }) =>
+  Math.min(...card.problems.map((p) => PROBLEM_PRIORITY.indexOf(p.kind)))
 interface ProblemCard {
   index: number
   sectionIdx: number
@@ -300,7 +332,7 @@ function findProblemCards(sections: any[], lovePeakYears: Array<number | string>
       for (const term of terms) {
         const count = (termCardCount.get(term) ?? 0) + 1
         termCardCount.set(term, count)
-        if (count > 4) addProblem('repeated', term)
+        if (count > TERM_BUDGET) addProblem('repeated', term)
       }
 
       // c) Truth Bomb: 앞선 Truth Bomb과 같은 핵심 차트 항목이면 뒤의 카드가 문제 카드
@@ -325,10 +357,14 @@ function findProblemCards(sections: any[], lovePeakYears: Array<number | string>
 
       // e) 십성 의미 뒤집힘(guard): ten-god-guards.ts의 규칙에 걸리면 문제 카드
       for (const reason of checkGuards(text)) addProblem('guard', reason)
+
+      // f) 약속/단정 표현(promise): 사주는 경향만 말한다
+      const promise = text.match(PROMISE_PATTERN)
+      if (promise) addProblem('promise', promise[0])
     })
   })
 
-  return [...flagged.values()]
+  return [...flagged.values()].sort((a, b) => problemRank(a) - problemRank(b) || a.index - b.index)
 }
 
 const REPAIR_SYSTEM_PROMPT = `You are an editor fixing specific cards of a Saju (Four Pillars) report written in English.
@@ -342,7 +378,7 @@ Rules for every rewrite:
 
 async function repairProblemCards(
   cards: ProblemCard[],
-  closingLetter: string | null,
+  closingLetter: { text: string; tooLong: boolean; promise: string | null } | null,
   finalFacts: any,
   longPermissions: Array<{ text: string; i: number }> = [],
 ): Promise<Map<string, string>> {
@@ -352,9 +388,11 @@ async function repairProblemCards(
         if (p.kind === 'long')
           return 'Too long. Rewrite it shorter than 220 characters, keeping the same facts and years.'
         if (p.kind === 'repeated')
-          return `The term '${p.detail}' is already used in 4 other cards. Rewrite it shorter than 220 characters and talk about a DIFFERENT chart item from FINAL FACTS (not '${p.detail}'), keeping the same years if it has any.`
+          return `The term '${p.detail}' is already used in ${TERM_BUDGET} other cards. Rewrite it shorter than 220 characters and talk about a DIFFERENT chart item from FINAL FACTS (not '${p.detail}'), keeping the same years if it has any.`
         if (p.kind === 'guard')
           return `Wrong reading: ${p.detail}. Rewrite it so the star or pattern keeps its true meaning (see the guardrails in FINAL FACTS context: Rob Wealth Fighting Wealth means competition over resources and money that tends to leak, so advise protecting money; Direct Seal means learning, credentials and support, not pioneering). Keep the same facts and years and stay shorter than 220 characters.`
+        if (p.kind === 'promise')
+          return `It makes a promise ("${p.detail}"). Rewrite it as a tendency ("tends to", "may", "the chart leans toward"), with no guarantee and no certainty, keeping the same facts and years and staying shorter than 220 characters.`
         if (p.kind === 'truth-bomb')
           return `Another Truth Bomb card already uses the same main chart item ('${p.detail}'). Pick a DIFFERENT chart item from FINAL FACTS, keep the "Truth Bomb: " prefix, and stay shorter than 220 characters.`
         return 'Another card in the same section already says the same thing. Say something NEW for this section from FINAL FACTS, shorter than 220 characters.'
@@ -368,11 +406,16 @@ async function repairProblemCards(
     problem: describe(c),
   }))
   if (closingLetter) {
+    const reasons: string[] = []
+    if (closingLetter.tooLong)
+      reasons.push(`This closing letter is too long. Shorten it to under ${CLOSING_LETTER_TARGET} characters, keep its warm flowing tone and the same facts, add nothing new, and make it end on a warm, complete final sentence.`)
+    if (closingLetter.promise)
+      reasons.push(`It makes a promise ("${closingLetter.promise}"). Rewrite that part as a tendency or a warm hope, with no guarantee, and keep the rest, the first-name opening, the three short paragraphs separated by a blank line, and a length between 700 and ${CLOSING_LETTER_TARGET} characters.`)
     items.push({
       index: 'closing',
       section: 'closing letter',
-      text: closingLetter,
-      problem: `This closing letter is too long. Shorten it to under ${CLOSING_LETTER_TARGET} characters, keep its warm flowing tone and the same facts, add nothing new, and make it end on a warm, complete final sentence.`,
+      text: closingLetter.text,
+      problem: reasons.join(' '),
     })
   }
 
@@ -514,6 +557,141 @@ async function repairClosingLetter(
     .trim()
 }
 
+// ---------------------------------------------------------------------------------------------
+// v26a: 2단계 생성. 1단계는 읽기 노트(고객에게 보이지 않음), 2단계는 노트만 보고 카드 JSON을 쓴다.
+// ---------------------------------------------------------------------------------------------
+type ThinkingLevel = 'low' | 'medium' | 'high'
+
+// 모델이 thinkingLevel 설정을 받지 않으면 thinkingBudget 으로 한 번 더 시도한다. 시간 초과/중단은 그대로 던진다.
+async function generateStage(args: {
+  system: string
+  prompt: string
+  maxOutputTokens: number
+  levels: ThinkingLevel[]
+  timeoutMs: number
+}) {
+  const configs: Array<Record<string, unknown>> = [
+    ...args.levels.map((thinkingLevel) => ({ thinkingLevel })),
+    { thinkingBudget: 2048 },
+  ]
+  let lastError: unknown
+  for (const thinkingConfig of configs) {
+    try {
+      return await generateText({
+        model: STAGE_MODEL,
+        system: args.system,
+        prompt: args.prompt,
+        maxOutputTokens: args.maxOutputTokens,
+        temperature: 0,
+        providerOptions: { google: { thinkingConfig: thinkingConfig as any } },
+        abortSignal: AbortSignal.timeout(args.timeoutMs),
+      })
+    } catch (error) {
+      lastError = error
+      const message = error instanceof Error ? `${error.name} ${error.message}` : String(error)
+      if (/timeout|abort/i.test(message)) throw error
+      console.warn('[v0] stage call failed with config', JSON.stringify(thinkingConfig), message.slice(0, 200))
+    }
+  }
+  throw lastError
+}
+
+type NotesStageResult =
+  | { ok: true; notes: string; englishChart: unknown; finalFactsForPrompt: unknown; romanceFactsForPrompt: unknown; decadeSummary: unknown; freeFactsForPrompt: unknown; attempts: number; issues: string[] }
+  | { ok: false; reason: string }
+
+async function runNotesStage(a: {
+  displayName: string
+  gender: 'male' | 'female'
+  birthDate: string
+  birthCountry: string
+  reportYear: number
+  birthYear?: number
+  sajuData: any
+  sajuForPrompt: any
+  finalFacts: any
+  romanceFacts: any
+  freeFacts: unknown
+  freeInterpretation: string
+}): Promise<NotesStageResult> {
+  let inputs: ReturnType<typeof buildGumihoInputs>
+  let decadeSummary: unknown
+  try {
+    inputs = buildGumihoInputs({
+      sajuForPrompt: a.sajuForPrompt,
+      finalFacts: a.finalFacts,
+      romanceFacts: a.romanceFacts,
+      saju: a.sajuData,
+      gender: a.gender,
+      nowYear: a.reportYear,
+      birthYear: a.birthYear,
+    })
+    decadeSummary = stripCjkDeep(buildDecadeSummary(a.sajuData?.decadeFortune, a.finalFacts?.luckCycles, a.reportYear))
+  } catch (e) {
+    return { ok: false, reason: `inputs failed: ${e instanceof Error ? e.message : String(e)}` }
+  }
+
+  const freeFactsForPrompt = stripCjkDeep(a.freeFacts)
+  const prompt = buildNotesUserPrompt({
+    displayName: a.displayName,
+    gender: a.gender,
+    birthDate: a.birthDate,
+    birthCountry: a.birthCountry,
+    reportYear: a.reportYear,
+    todayISO: new Date().toISOString().slice(0, 10),
+    englishChart: inputs.sajuForPrompt,
+    finalFacts: inputs.finalFacts,
+    romanceFacts: inputs.romanceFacts,
+    decadeSummary,
+    monthlyWindows: inputs.monthlyWindows,
+    freeFacts: freeFactsForPrompt,
+    freeInterpretation: stripCjkDeep(a.freeInterpretation),
+  })
+
+  const checkCtx = {
+    allowedYears: new Set<number>(inputs.allowedYears),
+    strengthGrade: a.finalFacts?.strength?.grade,
+    birthYear: a.birthYear,
+  }
+
+  // 한 번 만들고, 검사에 걸리면 한 번만 더 만든다(두 번째는 high). 둘 중 문제가 적은 쪽을 쓴다.
+  let best: { text: string; issues: string[] } | null = null
+  const plan: ThinkingLevel[][] = [['medium', 'low'], ['high', 'medium']]
+  for (let i = 0; i < plan.length; i++) {
+    try {
+      const result = await generateStage({
+        system: NOTES_SYSTEM_PROMPT,
+        prompt,
+        maxOutputTokens: 12000,
+        levels: plan[i],
+        timeoutMs: NOTES_TIMEOUT_MS,
+      })
+      if (result.finishReason === 'length') throw new Error('notes truncated (finishReason: length)')
+      const text = stripCjkDeep(result.text.trim())
+      const issues = checkNotes(text, checkCtx)
+      console.log(`[v0] notes attempt ${i + 1}: ${text.length} chars, issues: ${issues.join(' | ') || 'none'}`)
+      if (!best || issues.length < best.issues.length) best = { text, issues }
+      if (issues.length === 0) break
+    } catch (e) {
+      console.warn(`[v0] notes attempt ${i + 1} failed:`, e instanceof Error ? e.message : e)
+    }
+  }
+  if (!best) return { ok: false, reason: 'notes generation failed' }
+  if (best.issues.includes('too short')) return { ok: false, reason: 'notes too short' }
+
+  return {
+    ok: true,
+    notes: best.text,
+    englishChart: inputs.sajuForPrompt,
+    finalFactsForPrompt: inputs.finalFacts,
+    romanceFactsForPrompt: inputs.romanceFacts,
+    decadeSummary,
+    freeFactsForPrompt,
+    attempts: plan.length,
+    issues: best.issues,
+  }
+}
+
 // 같은 서버 인스턴스 안에서의 중복 생성 방지용 (submissionId → 시작 시각). 인스턴스가 다르면 막지 못하는 약한 안전장치.
 const IN_FLIGHT_WINDOW_MS = 6 * 60 * 1000
 const inFlightGenerations = new Map<string, number>()
@@ -651,6 +829,40 @@ export async function POST(request: Request) {
       lovePeakData?.peak && (lovePeakData.peak.status === 'future' || lovePeakData.peak.status === 'this year')
         ? lovePeakData.peak.year
         : lovePeakData?.upcomingPeak?.year ?? lovePeakData?.peak?.year ?? '20xx'
+
+    // v26a: 카드 프롬프트(2단계)와 레거시 프롬프트가 같은 구조 블록을 공유한다. 내용은 기존 그대로.
+    const structureBlock = `SECTION TITLES (the Nine Tails). Use exactly these titles as "sectionTitle", in this order:
+${TAILS.map((t) => `${String(t.n).padStart(2, '0')}. ${t.title}`).join('\n')}
+
+Then, APPEND the closing letter as a single string field named "closingLetter", and the 3 permission sentences as an array of strings named "permissions".
+
+FINAL JSON STRUCTURE (single valid JSON object):
+{
+  "mainFacts": [
+    {
+      "sectionNumber": "01",
+      "sectionTitle": "${TAILS[0].title}",
+      "cards": [
+        { "content": "First insight about their core energy..." },
+        { "content": "" },
+        { "content": "" },
+        { "content": "" },
+        { "content": "" },
+        { "content": "" },
+        { "content": "" },
+        { "content": "" },
+        { "content": "" },
+        { "content": "" }
+      ]
+    },
+    ... (repeat this EXACT structure for all 9 sections — 10 cards for sections 01/07/09, 11 cards
+    for sections 02/03/04/05/06/08 with the 8th card being that section's Truth Bomb.)
+  ],
+  "closingLetter": "[700-900 characters, a letter from the Gumiho ending on a confident, complete final sentence, with NO signature, following the CLOSING LETTER RULE above]",
+  "permissions": ["You're allowed to ...", "You're allowed to ...", "You're allowed to ..."]
+}
+
+Generate the 96 main facts, the closingLetter and the 3 permissions now as a single JSON object.`
 
     // 5. Gemini에 전체 context 주입
     const userPrompt = `
@@ -881,40 +1093,60 @@ You MUST return EXACTLY 9 sections. Sections 01, 07, 09 have EXACTLY 10 cards. S
 05, 06, 08 have EXACTLY 11 cards (Cards 1-7 analysis, Card 8 Truth Bomb, Card 9 Reframe, Card 10 Permission or Strategy, Card 11 Small Action).
 TOTAL = 96 cards. DO NOT return fewer cards. The user PAID for 96 facts. Returning less is unacceptable.
 
-SECTION TITLES (the Nine Tails). Use exactly these titles as "sectionTitle", in this order:
-${TAILS.map((t) => `${String(t.n).padStart(2, '0')}. ${t.title}`).join('\n')}
+${structureBlock}`
 
-Then, APPEND the closing letter as a single string field named "closingLetter", and the 3 permission sentences as an array of strings named "permissions".
+    logTiming('prompt:assembled', { userPromptLength: userPrompt.length, systemPromptLength: LEGACY_PAID_REPORT_SYSTEM_PROMPT.length })
 
-FINAL JSON STRUCTURE (single valid JSON object):
-{
-  "mainFacts": [
-    {
-      "sectionNumber": "01",
-      "sectionTitle": "${TAILS[0].title}",
-      "cards": [
-        { "content": "First insight about their core energy..." },
-        { "content": "" },
-        { "content": "" },
-        { "content": "" },
-        { "content": "" },
-        { "content": "" },
-        { "content": "" },
-        { "content": "" },
-        { "content": "" },
-        { "content": "" }
-      ]
-    },
-    ... (repeat this EXACT structure for all 9 sections — 10 cards for sections 01/07/09, 11 cards
-    for sections 02/03/04/05/06/08 with the 8th card being that section's Truth Bomb.)
-  ],
-  "closingLetter": "[700-900 characters, a letter from the Gumiho ending on a confident, complete final sentence, with NO signature, following the CLOSING LETTER RULE above]",
-  "permissions": ["You're allowed to ...", "You're allowed to ...", "You're allowed to ..."]
-}
-
-Generate the 96 main facts, the closingLetter and the 3 permissions now as a single JSON object.`
-
-    logTiming('prompt:assembled', { userPromptLength: userPrompt.length, systemPromptLength: PAID_REPORT_SYSTEM_PROMPT.length })
+    // 5-1. v26a: 1단계 읽기 노트를 먼저 만든다. 실패하면 예전 한 번 호출 방식으로 그대로 이어간다.
+    const legacyPrompts = { system: LEGACY_PAID_REPORT_SYSTEM_PROMPT, user: userPrompt }
+    let cardPrompts = legacyPrompts
+    let pipelineUsed: 'single' | 'two_stage' = 'single'
+    let pipelineFallback = ''
+    if (PIPELINE === 'single') {
+      pipelineFallback = 'PAID_PIPELINE=single'
+    } else if (!finalFacts) {
+      pipelineFallback = 'no finalFacts'
+    } else {
+      const stage = await runNotesStage({
+        displayName,
+        gender: reportGender,
+        birthDate: String(submission.birth_date),
+        birthCountry: String(submission.birth_country ?? ''),
+        reportYear,
+        birthYear,
+        sajuData: submission.saju_data,
+        sajuForPrompt,
+        finalFacts,
+        romanceFacts,
+        freeFacts,
+        freeInterpretation: contextInterpretation,
+      })
+      logTiming('notes:done', stage.ok ? { chars: stage.notes.length, attempts: stage.attempts, issues: stage.issues } : { failed: stage.reason })
+      if (stage.ok) {
+        cardPrompts = {
+          system: withRequiredSentences(finalFacts, reportYear),
+          user: buildCardUserPrompt({
+            displayName,
+            gender: String(submission.gender),
+            birthDate: String(submission.birth_date),
+            birthCountry: String(submission.birth_country ?? ''),
+            reportYear,
+            notes: stage.notes,
+            englishChart: stage.englishChart,
+            finalFacts: stage.finalFactsForPrompt,
+            romanceFacts: stage.romanceFactsForPrompt,
+            decadeSummary: stage.decadeSummary,
+            freeFacts: stage.freeFactsForPrompt,
+            structureBlock,
+            guardBlock: buildGuardBlock(finalFacts),
+          }),
+        }
+        pipelineUsed = 'two_stage'
+      } else {
+        pipelineFallback = stage.reason
+      }
+    }
+    console.log(`[v0] pipeline: ${pipelineUsed}${pipelineFallback ? ` (fallback: ${pipelineFallback})` : ''}`)
 
     // 6. Gemini API 호출 with retry logic (최대 3번 시도)
     console.log('[v0] Calling Gemini API...')
@@ -932,16 +1164,25 @@ Generate the 96 main facts, the closingLetter and the 3 permissions now as a sin
       try {
         console.log(`[v0] Gemini API attempt ${attempt}/${MAX_RETRIES}`)
         logTiming('gemini:attempt-start', { attempt })
-        const result = await generateText({
-          model: 'google/gemini-2.5-flash',
-          system: PAID_REPORT_SYSTEM_PROMPT,
-          prompt: userPrompt,
-          // 90 main-fact cards + up to 9 decade cards (8 text fields each incl. seasonTitle/seasonEmoji)
-          // routinely exceeds 16k output tokens and gets silently truncated mid-JSON. Raised with headroom.
-          maxOutputTokens: 32000,
-          temperature: 0,
-          providerOptions: { google: { thinkingConfig: { thinkingBudget: 1024 } } },
-        })
+        // 90 main-fact cards + up to 9 decade cards (8 text fields each incl. seasonTitle/seasonEmoji)
+        // routinely exceeds 16k output tokens and gets silently truncated mid-JSON. Raised with headroom.
+        const result =
+          pipelineUsed === 'two_stage'
+            ? await generateStage({
+                system: cardPrompts.system,
+                prompt: cardPrompts.user,
+                maxOutputTokens: 32000,
+                levels: ['low', 'medium'],
+                timeoutMs: 150_000,
+              })
+            : await generateText({
+                model: 'google/gemini-2.5-flash',
+                system: cardPrompts.system,
+                prompt: cardPrompts.user,
+                maxOutputTokens: 32000,
+                temperature: 0,
+                providerOptions: { google: { thinkingConfig: { thinkingBudget: 1024 } } },
+              })
         const usage: any = result.usage
         logTiming('gemini:attempt-end', {
           attempt,
@@ -966,8 +1207,11 @@ Generate the 96 main facts, the closingLetter and the 3 permissions now as a sin
         // 연애 섹션에 "family"+"pet" 문장이 없으면 1점이고, 같은 단일 재생성에 포함한다.
         const petMissing = isLovePetSentenceMissing(result.text)
         if (petMissing) console.warn('[v0] check love pet sentence missing')
-        const attemptScore = (strengthBad ? 3 : 0) + (yearBad ? 2 : 0) + genericBombs.length + (petMissing ? 1 : 0)
-        if (strengthBad || genericBombs.length > 0 || petMissing) {
+        // "Your love luck peak" 문장과 lovePeak 연도가 어디에도 없으면 1점이고, 같은 단일 재생성에 포함한다.
+        const peakMissing = isLovePeakSentenceMissing(result.text, finalFacts?.lovePeak)
+        if (peakMissing) console.warn('[v0] check love peak sentence missing')
+        const attemptScore = (strengthBad ? 3 : 0) + (yearBad ? 2 : 0) + genericBombs.length + (petMissing ? 1 : 0) + (peakMissing ? 1 : 0)
+        if (strengthBad || genericBombs.length > 0 || petMissing || peakMissing) {
           if (!strengthRegenerated && attempt < MAX_RETRIES) {
             strengthRegenerated = true
             strengthFallback = result.text
@@ -996,6 +1240,13 @@ Generate the 96 main facts, the closingLetter and the 3 permissions now as a sin
         lastError = error as Error
         console.error(`[v0] Gemini API attempt ${attempt} failed:`, error)
         logTiming('gemini:attempt-failed', { attempt })
+        // 2단계 카드 호출이 실패하면 다음 시도부터는 예전 한 번 호출 방식으로 되돌린다.
+        if (pipelineUsed === 'two_stage') {
+          pipelineUsed = 'single'
+          pipelineFallback = 'card stage failed'
+          cardPrompts = legacyPrompts
+          console.warn('[v0] pipeline: falling back to single call after card stage failure')
+        }
         
         if (attempt < MAX_RETRIES) {
           // 재시도 전 잠시 대기 (exponential backoff: 2초, 4초)
@@ -1209,20 +1460,21 @@ Generate the 96 main facts, the closingLetter and the 3 permissions now as a sin
         finalFacts?.lovePeak?.upcomingPeak?.year,
       ].filter((y) => y !== undefined && y !== null)).slice(0, REPAIR_MAX_CARDS)
       const closingTooLong = closingLetter.length > CLOSING_LETTER_MAX
+      const closingPromise = closingLetter.match(PROMISE_PATTERN)?.[0] ?? null
       const longPermissions = permissions
         .map((text, i) => ({ text, i }))
         .filter((p) => p.text.length > PERMISSION_MAX_CHARS)
-      if (flaggedCards.length > 0 || closingTooLong || longPermissions.length > 0) {
+      if (flaggedCards.length > 0 || closingTooLong || closingPromise || longPermissions.length > 0) {
         const countKind = (kind: ProblemKind) => flaggedCards.filter((c) => c.problems.some((p) => p.kind === kind)).length
         console.log(
-          `[v0] repair pass: flagged ${flaggedCards.length} cards (long ${countKind('long')}, repeated ${countKind('repeated')}, truth-bomb ${countKind('truth-bomb')}, duplicate ${countKind('duplicate')}, guard ${countKind('guard')})` +
-            (closingTooLong ? ` + closing letter (${closingLetter.length} chars)` : ''),
+          `[v0] repair pass: flagged ${flaggedCards.length} cards (long ${countKind('long')}, repeated ${countKind('repeated')}, truth-bomb ${countKind('truth-bomb')}, duplicate ${countKind('duplicate')}, guard ${countKind('guard')}, promise ${countKind('promise')})` +
+            (closingTooLong || closingPromise ? ` + closing letter (${closingLetter.length} chars)` : ''),
         )
         const repairStart = Date.now()
         try {
           const rewrites = await repairProblemCards(
             flaggedCards,
-            closingTooLong ? closingLetter : null,
+            closingTooLong || closingPromise ? { text: closingLetter, tooLong: closingTooLong, promise: closingPromise } : null,
             finalFacts,
             longPermissions,
           )
@@ -1241,9 +1493,9 @@ Generate the 96 main facts, the closingLetter and the 3 permissions now as a sin
             if (target) (paidFacts as any[])[c.sectionIdx].cards[c.cardIdx] = { ...target, content: text }
           }
           const rewrittenLetter = rewrites.get('closing')
-          if (closingTooLong && rewrittenLetter) {
+          if ((closingTooLong || closingPromise) && rewrittenLetter) {
             const text = cleanRewrite(rewrittenLetter)
-            if (text && text.length <= CLOSING_LETTER_MAX) closingLetter = stripGumihoSignature(text)
+            if (text && text.length <= CLOSING_LETTER_MAX && !PROMISE_PATTERN.test(text)) closingLetter = stripGumihoSignature(text)
           }
           for (const p of longPermissions) {
             const raw = rewrites.get(`permission-${p.i}`)
