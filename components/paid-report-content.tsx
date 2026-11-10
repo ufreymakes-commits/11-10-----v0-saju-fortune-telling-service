@@ -193,7 +193,7 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
 
       {/* Header */}
       <div className="text-center mb-6">
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-white">
           {displayName}&apos;s Sajume Full 99 Facts Report
         </p>
       </div>
@@ -202,13 +202,13 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
       <CardCarousel key={orb && !isGenerating ? 'with-orb' : 'no-orb'} items={carouselItems} firstName={firstName} />
 
       {/* Arrow hint */}
-      <p className="text-center text-[11px] text-muted-foreground/60 mb-2">Tap the arrow below to open each section of your report</p>
+      <p className="text-center text-[11px] text-[#e6dfff]/70 mb-2">Tap the arrow below to open each section of your report</p>
 
       {/* Generating state */}
       {isGenerating && (
         <div className="flex flex-col items-center justify-center py-16 gap-4">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-muted-foreground text-center">Generating your 99 facts report...<br /><span className="text-xs text-muted-foreground/60">This may take up to 3 minutes. Please keep this page open.</span></p>
+          <p className="text-sm text-[#e6dfff] text-center">Generating your 99 facts report...<br /><span className="text-xs text-[#e6dfff]/70">This may take up to 3 minutes. Please keep this page open.</span></p>
         </div>
       )}
 
@@ -301,8 +301,8 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
       {!isGenerating && closingLetter && (
         <div className="mt-8">
           <div className="text-center mb-4">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">From Your Sajume Reader</p>
-            <h3 className="text-sm font-semibold text-foreground mt-1">Your Closing Letter</h3>
+            <p className="text-[10px] uppercase tracking-wider text-[#e6dfff]/80">From Your Sajume Reader</p>
+            <h3 className="text-sm font-semibold text-white mt-1">Your Closing Letter</h3>
           </div>
           <ClosingLetter text={closingLetter} dayMasterKorean={dayMasterKorean} />
         </div>
@@ -311,8 +311,8 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
       {!isGenerating && permissions.length > 0 && (
         <div className="mt-8">
           <div className="text-center mb-4">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Take what you need</p>
-            <h3 className="text-sm font-semibold text-foreground mt-1">Your Permission Slips</h3>
+            <p className="text-[10px] uppercase tracking-wider text-[#e6dfff]/80">Take what you need</p>
+            <h3 className="text-sm font-semibold text-white mt-1">Your Permission Slips</h3>
           </div>
           <ul className="space-y-3">
             {permissions.map((text, i) => (
@@ -330,7 +330,7 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
 
       {/* Store Products */}
       <div className="mt-8">
-        <h3 className="text-sm font-semibold text-foreground mb-4 text-center">More from Sajume</h3>
+        <h3 className="text-sm font-semibold text-white mb-4 text-center">More from Sajume</h3>
         <div className="space-y-4">
 
           {/* Ask the Gumiho 1:1 */}
@@ -458,14 +458,14 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
 
       {/* Footer */}
       <div className="mt-8 text-center">
-        <p className="text-[10px] text-muted-foreground">
+        <p className="text-[10px] text-[#e6dfff]">
           This report is generated based on Korean Saju (Four Pillars) astrology.
           <br />
           For entertainment purposes only.
         </p>
-        <p className="mt-4 text-[10px] text-muted-foreground/70">All rights reserved by Sajume.</p>
+        <p className="mt-4 text-[10px] text-[#e6dfff]/70">All rights reserved by Sajume.</p>
         <div className="mt-4 flex flex-col items-center gap-3">
-          <p className="text-[10px] text-muted-foreground/50">Business: hello@sajume.com</p>
+          <p className="text-[10px] text-[#e6dfff]/60">Business: hello@sajume.com</p>
         </div>
       </div>
 

@@ -61,8 +61,8 @@ export default async function PaidReportPage({ params }: PageProps) {
   const paidReport = paidReportResult.data
   
   return (
-    <main className="min-h-screen bg-mystical relative overflow-hidden">
-      <StarsBackground />
+    <main className="min-h-screen bg-[#0a0a14] relative overflow-hidden">
+      <StarsBackground lite />
       
       <div className="relative z-10">
         <PaidReportContent 

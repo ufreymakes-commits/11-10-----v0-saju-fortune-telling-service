@@ -149,6 +149,12 @@
     box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
   }
   
+  @media (prefers-reduced-motion: reduce) {
+    .stars-lite .star {
+      animation: none;
+    }
+  }
+
   @keyframes twinkle {
     0%, 100% { opacity: 0.3; }
     50% { opacity: 1; }

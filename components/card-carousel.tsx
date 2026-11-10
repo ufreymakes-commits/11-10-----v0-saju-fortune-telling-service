@@ -86,7 +86,7 @@ export function CardCarousel({ items, firstName }: CardCarouselProps) {
             onClick={() => goTo(active - 1)}
             disabled={active === 0}
             aria-label="Previous card"
-            className="absolute left-2 top-1/3 hidden h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-md transition-opacity disabled:opacity-30 md:flex"
+            className="absolute left-2 top-1/3 hidden h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-white/10 text-white shadow-md transition-opacity disabled:opacity-30 md:flex"
           >
             <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
           </button>
@@ -95,7 +95,7 @@ export function CardCarousel({ items, firstName }: CardCarouselProps) {
             onClick={() => goTo(active + 1)}
             disabled={active === items.length - 1}
             aria-label="Next card"
-            className="absolute right-2 top-1/3 hidden h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-md transition-opacity disabled:opacity-30 md:flex"
+            className="absolute right-2 top-1/3 hidden h-9 w-9 items-center justify-center rounded-full border border-white/40 bg-white/10 text-white shadow-md transition-opacity disabled:opacity-30 md:flex"
           >
             <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
           </button>
@@ -108,7 +108,7 @@ export function CardCarousel({ items, firstName }: CardCarouselProps) {
                 onClick={() => goTo(i)}
                 aria-label={`Show ${item.label}`}
                 aria-current={i === active}
-                className={`h-2 rounded-full transition-all ${i === active ? 'w-5 bg-primary' : 'w-2 bg-muted-foreground/40'}`}
+                className={`h-2 rounded-full transition-all ${i === active ? 'w-5 bg-[#cdbfff]' : 'w-2 bg-white/40'}`}
               />
             ))}
           </div>

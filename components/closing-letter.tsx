@@ -20,7 +20,10 @@ export function ClosingLetter({ text, dayMasterKorean }: ClosingLetterProps) {
   const uid = useId().replace(/:/g, '')
   const character = getDayMasterCharacter(dayMasterKorean)
   const [imageSrc, setImageSrc] = useState(character?.imagePath ? cdnImage(character.imagePath, 480) : FALLBACK_IMAGE)
-  const body = stripGumihoSignature(text)
+  const paragraphs = stripGumihoSignature(text)
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean)
 
   return (
     <div id="closing-letter" className="relative mx-auto w-full max-w-md pt-6">
@@ -56,11 +59,11 @@ export function ClosingLetter({ text, dayMasterKorean }: ClosingLetterProps) {
         </div>
 
         <div className="relative px-7 pb-8 pt-14 sm:px-9">
-          <p
-            className={`${letterFont.className} whitespace-pre-line text-pretty text-center text-[17px] leading-[1.8] text-[#3d2a1e]`}
-          >
-            {body}
-          </p>
+          <div className={`${letterFont.className} flex flex-col gap-4 text-pretty text-center text-[17px] leading-[1.8] text-[#3d2a1e]`}>
+            {paragraphs.map((paragraph, i) => (
+              <p key={i}>{paragraph}</p>
+            ))}
+          </div>
 
           <div className="mt-8 flex items-end justify-between gap-4">
             <p className={`${letterFont.className} text-base text-[#3d2a1e]/80`}>&mdash; Your Gumiho</p>

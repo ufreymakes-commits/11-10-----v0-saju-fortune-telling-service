@@ -2,14 +2,20 @@
 
 import { useEffect, useRef } from 'react'
 
-export function StarsBackground() {
+interface StarsBackgroundProps {
+  // Lighter variant: fewer stars (even fewer on mobile) and no twinkle for prefers-reduced-motion.
+  lite?: boolean
+}
+
+export function StarsBackground({ lite = false }: StarsBackgroundProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!containerRef.current) return
     
     const container = containerRef.current
-    const starCount = 100
+    const isMobile = window.matchMedia('(max-width: 767px)').matches
+    const starCount = lite ? (isMobile ? 35 : 60) : 100
     
     // Clear existing stars
     container.innerHTML = ''
@@ -30,12 +36,12 @@ export function StarsBackground() {
       
       container.appendChild(star)
     }
-  }, [])
+  }, [lite])
 
   return (
     <div 
       ref={containerRef} 
-      className="fixed inset-0 pointer-events-none overflow-hidden z-0"
+      className={`fixed inset-0 pointer-events-none overflow-hidden z-0${lite ? ' stars-lite' : ''}`}
       aria-hidden="true"
     />
   )

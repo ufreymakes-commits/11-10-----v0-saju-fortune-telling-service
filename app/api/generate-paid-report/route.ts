@@ -98,7 +98,7 @@ function findCycleYearMismatches(text: string, cycles: any[] | undefined): strin
 }
 
 // 생성 후 코드 검사: 섹션 02/03/04/05/06/08의 8번째 카드(Truth Bomb)가 일반적인 문장인지 확인한다.
-// "Truth Bomb:" 접두어가 없거나, 작은따옴표 용어/오행/십성/연도 중 어느 것도 없으면 generic으로 본다.
+// "Truth Bomb:" 접두어가 없거나, 작은따옴표 용어/오행/���성/연도 중 어느 것도 없으면 generic으로 본다.
 const TRUTH_BOMB_SECTIONS = new Set(['02', '03', '04', '05', '06', '08'])
 const TRUTH_BOMB_CARD_INDEX = 7
 
@@ -429,6 +429,83 @@ function finalizeClosingLetter(text: string): string {
     sentences.pop()
   }
   return sentences.join(' ').trim()
+}
+
+// 편지 규칙 코드 검사 (프롬프트만으로는 모델이 계속 무시했다): 이름으로 시작, 500~1000자, 둘째 문장에 공감 표현.
+const CLOSING_LETTER_MIN_CHECK = 500
+const CLOSING_LETTER_MAX_CHECK = 1000
+const EMPATHY_PATTERN =
+  /\b(hard|heavy|tired|alone|lonely|carried|carrying|carry|struggl\w*|exhaust\w*|weigh\w*|weight|drain\w*|overwhelm\w*|pain\w*|ache\w*|difficult|tough|worn|weary|pressure|burden\w*|unseen|misunderstood|how long|how much|how many)\b|\?/i
+
+function splitSentences(text: string): string[] {
+  return (
+    text
+      .replace(/\s+/g, ' ')
+      .trim()
+      .match(/[^.!?]+[.!?]+["'\u2019\u201D)]*|[^.!?]+$/g)
+      ?.map((s) => s.trim())
+      .filter(Boolean) ?? []
+  )
+}
+
+function findClosingLetterIssue(letter: string, firstName: string): string | null {
+  const text = letter.trim()
+  if (!text) return 'letter is empty'
+  if (!text.startsWith(`${firstName},`)) return `does not start with "${firstName},"`
+  if (text.length < CLOSING_LETTER_MIN_CHECK || text.length > CLOSING_LETTER_MAX_CHECK) {
+    return `length ${text.length} is outside ${CLOSING_LETTER_MIN_CHECK}-${CLOSING_LETTER_MAX_CHECK}`
+  }
+  const second = splitSentences(text)[1]
+  if (!second || !EMPATHY_PATTERN.test(second)) return 'second sentence has no feeling or acknowledgement'
+  return null
+}
+
+// 편지를 3개의 짧은 문단(빈 줄로 구분)으로 나눈다: 이름+본질+공감 / 잘될 이유+방향+당부 / 밝은 마무리.
+function formatLetterParagraphs(letter: string): string {
+  const sentences = splitSentences(letter)
+  const n = sentences.length
+  if (n < 3) return letter.trim()
+  const head = n >= 4 ? 2 : 1
+  const tail = n >= 7 ? 2 : 1
+  return [
+    sentences.slice(0, head).join(' '),
+    sentences.slice(head, n - tail).join(' '),
+    sentences.slice(n - tail).join(' '),
+  ].join('\n\n')
+}
+
+const LETTER_REPAIR_SYSTEM_PROMPT = `You rewrite ONE closing letter of a Saju (Four Pillars) report, spoken by the Gumiho (a warm, perceptive nine-tailed fox spirit) to the reader. Plain English, Latin script only, no markdown, no quotes around the letter.
+Rules:
+- Start exactly with "<FirstName>," (the first name you are given, followed by a comma).
+- Use five parts, in this order: (1) the name plus ONE vivid image of their chart; (2) ONE empathic sentence about how hard it has been, written fresh for this chart (never a stock line; it may be a gentle question); (3) 2-3 concrete chart facts from FINAL FACTS or the Truth Bomb themes showing why they are bound to do well; (4) where to put their effort plus one kind reminder about a real blind spot; (5) a confident, bright-future final sentence.
+- The SECOND sentence of the letter must be the empathic one.
+- Never contradict FINAL FACTS (especially the strength rule and the cycle years/ages) or the Truth Bomb themes. Do not invent facts.
+- 650 to 850 characters including spaces. Exactly 3 short paragraphs separated by one blank line: paragraph 1 = name + image + empathy; paragraph 2 = why they will do well + direction + reminder; paragraph 3 = the bright closing.
+- No signature, no "Your Gumiho", no sign-off. End on a complete sentence.
+Return ONLY the letter text.`
+
+async function repairClosingLetter(
+  letter: string,
+  firstName: string,
+  reason: string,
+  finalFacts: any,
+  truthBombs: string[],
+): Promise<string> {
+  const result = await generateText({
+    model: 'google/gemini-2.5-flash',
+    system: LETTER_REPAIR_SYSTEM_PROMPT,
+    prompt: `FirstName: ${firstName}\nStart with: "${firstName},"\nWhat was wrong with the current letter: ${reason}\n\n=== FINAL FACTS ===\n${JSON.stringify(finalFacts, null, 2)}\n\n=== TRUTH BOMB THEMES (already in the report, do not contradict) ===\n${truthBombs.join('\n')}\n\n=== CURRENT LETTER (may be empty or flawed; reuse its true facts, rewrite the rest) ===\n${letter}\n\nWrite the corrected letter now.`,
+    maxOutputTokens: 2000,
+    temperature: 0.4,
+    providerOptions: { google: { thinkingConfig: { thinkingBudget: 0 } } },
+    abortSignal: AbortSignal.timeout(45000),
+  })
+  return result.text
+    .trim()
+    .replace(/^```[a-z]*\s*/i, '')
+    .replace(/\s*```$/, '')
+    .replace(/^["\u201C]|["\u201D]$/g, '')
+    .trim()
 }
 
 // 같은 서버 인스턴스 안에서의 중복 생성 방지용 (submissionId → 시작 시각). 인스턴스가 다르면 막지 못하는 약한 안전장치.
@@ -779,7 +856,7 @@ CLOSING LETTER RULE — one standalone letter after all 96 cards:
 After the 96 main cards, write exactly ONE closing letter (field name \`closingLetter\`), written as the Gumiho (a warm, perceptive nine-tailed fox spirit) speaking directly to the reader in the first person. Do NOT sign the letter: no "Your Gumiho", no dash signature, no sign-off line of any kind (the app prints the signature itself).
 LENGTH: 700 to 900 characters including spaces. Count the characters before finalizing; under 700 or over 900 is a failed output.
 The letter MUST end on a warm, complete final sentence (never on a colon, a lead-in like "But here's the truth", or a half-finished thought).
-Write flowing, plain-English prose in one or two short paragraphs, no labeled sections. Avoid naming specific Saju/Ten-God terms if you can express the same idea
+Write flowing, plain-English prose in three short paragraphs separated by a blank line (paragraph 1: name + essence + empathy; paragraph 2: why they will do well + direction + reminder; paragraph 3: the bright closing), no labeled sections. Avoid naming specific Saju/Ten-God terms if you can express the same idea
 through a nature metaphor; if you must name one, follow the STYLE OF TERMS rules above, and never write a raw Chinese/Korean character. This is the single most
 emotionally resonant piece of the entire report: it should read like a warm, perceptive friend who truly sees this person, not a summary of facts already stated.
 Follow this arc, in this order:
@@ -1180,6 +1257,31 @@ Generate the 96 main facts, the closingLetter and the 3 permissions now as a sin
         if (closingLetter.length !== before) console.warn(`[v0] Closing letter finalized: ${before} -> ${closingLetter.length} chars`)
       }
 
+      // 편지 규칙을 코드로 확인한다. 하나라도 어기면 작은 수리 호출을 딱 한 번만 하고, 실패하면 원본을 유지한다.
+      {
+        const letterFirstName = displayName.split(' ')[0]
+        const issue = findClosingLetterIssue(closingLetter, letterFirstName)
+        if (issue) {
+          console.log(`[v0] repair letter: ${issue}`)
+          try {
+            const truthBombs = (paidFacts as any[])
+              .flatMap((s: any) => (Array.isArray(s?.cards) ? s.cards : []))
+              .map((c: any) => String(c?.content ?? ''))
+              .filter((t: string) => /^Truth Bomb:/i.test(t))
+            let repaired = await repairClosingLetter(closingLetter, letterFirstName, issue, finalFacts, truthBombs)
+            if (CJK_TEST.test(repaired)) repaired = sanitizeCJKArtifacts(repaired)
+            if (repaired.includes('**')) repaired = fixFormattingArtifacts(repaired)
+            repaired = finalizeClosingLetter(stripGumihoSignature(repaired))
+            const stillBad = findClosingLetterIssue(repaired, letterFirstName)
+            if (!stillBad) closingLetter = repaired
+            else console.warn(`[v0] repair letter rejected (${stillBad}), keeping original`)
+          } catch (letterRepairError) {
+            console.warn('[v0] repair letter failed, keeping original:', letterRepairError)
+          }
+        }
+        closingLetter = formatLetterParagraphs(closingLetter)
+      }
+
     } catch (parseError) {
       console.error('[v0] Failed to parse Gemini response:', parseError)
       console.error('[v0] Raw response preview:', rawResponse.substring(0, 500))
@@ -1200,7 +1302,7 @@ Generate the 96 main facts, the closingLetter and the 3 permissions now as a sin
 
     logTiming('postprocess:done', { cards: paidFacts.reduce((n: number, s: any) => n + (Array.isArray(s?.cards) ? s.cards.length : 0), 0) })
 
-    // hidden_cards 컬럼(레거시 이름)에 편지, 허락 문장, 구슬 데이터를 함께 저장한다.
+    // hidden_cards 컬럼(레거시 이름)에 편지, 허락 ��장, 구슬 데이터를 함께 저장한다.
     const orb = finalFacts?.orb ?? null
     const hiddenCards =
       closingLetter || permissions.length > 0 || orb ? { closingLetter, permissions, orb } : undefined
