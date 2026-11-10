@@ -3,8 +3,12 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { CheckCircleIcon, LinkIcon, CheckIcon, ChevronDownIcon, DownloadIcon } from 'lucide-react'
+import { LinkIcon, CheckIcon, ChevronDownIcon, DownloadIcon, SparklesIcon } from 'lucide-react'
 import type { Submission, SajuData } from '@/lib/types'
+import type { OrbInfo } from '@/lib/saju/orb'
+import { TAILS } from '@/lib/saju/tails'
+import { OrbCard } from '@/components/orb-card'
+import { TailIcon } from '@/components/tail-icon'
 import { getDayMasterCharacter } from '@/lib/day-master-characters'
 import { track } from '@/hooks/use-track'
 import { useScreenshotDetect } from '@/hooks/use-screenshot-detect'
@@ -55,6 +59,8 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
   const [openSections, setOpenSections] = useState<Record<number, boolean>>({})
   const [paidReport, setPaidReport] = useState<any>(initialPaidReport)
   const [closingLetter, setClosingLetter] = useState<string>(initialPaidReport?.hidden_cards?.closingLetter || '')
+  const [orb, setOrb] = useState<OrbInfo | null>(initialPaidReport?.hidden_cards?.orb || null)
+  const [permissions, setPermissions] = useState<string[]>(initialPaidReport?.hidden_cards?.permissions || [])
   const [isGenerating, setIsGenerating] = useState(!initialPaidReport)
   const [generateError, setGenerateError] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
@@ -81,8 +87,13 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
           throw new Error(err.error || `HTTP ${res.status}`)
         }
         const data = await res.json()
-        setPaidReport({ facts: data.facts, hidden_cards: { closingLetter: data.closingLetter } })
+        setPaidReport({
+          facts: data.facts,
+          hidden_cards: { closingLetter: data.closingLetter, permissions: data.permissions, orb: data.orb },
+        })
         setClosingLetter(data.closingLetter || '')
+        setPermissions(Array.isArray(data.permissions) ? data.permissions : [])
+        setOrb(data.orb || null)
       } catch (e: any) {
         setGenerateError(e.message || 'Failed to generate report')
       } finally {
@@ -232,6 +243,8 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
         </div>
       </div>
 
+      {!isGenerating && orb && <OrbCard orb={orb} />}
+
       {/* Arrow hint */}
       <p className="text-center text-[11px] text-muted-foreground/60 mb-2">Tap the arrow below to open each section of your report</p>
 
@@ -269,12 +282,13 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
           })
           return sections.map((section: any, sectionIndex: number) => {
           const isOpen = !!openSections[sectionIndex]
+          const tail = TAILS.find((t) => t.n === Number(section.sectionNumber)) ?? TAILS[sectionIndex]
           return (
             <div key={sectionIndex} className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
               {/* Section Header */}
               <div className="bg-muted border-b border-border px-4 py-3 flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-secondary/20 text-secondary">
-                  <CheckCircleIcon className="w-4 h-4" />
+                <div className="p-1 rounded-lg bg-background/60 text-foreground">
+                  {tail ? <TailIcon hex={tail.hex} className="w-6 h-6" /> : null}
                 </div>
                 <div className="flex-1">
                   <h3 className="text-sm font-semibold">{section.sectionTitle}</h3>
@@ -308,6 +322,15 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
                       )
                     })}
                   </div>
+                  {tail && (
+                    <div
+                      className="mt-4 rounded-lg border border-dashed bg-background/30 p-3"
+                      style={{ borderColor: `${tail.hex}88` }}
+                    >
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Journal prompt</p>
+                      <p className="font-serif italic text-xs text-foreground/90 leading-relaxed text-pretty">{tail.journal}</p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -330,6 +353,26 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
               {closingLetter}
             </p>
           </div>
+        </div>
+      )}
+
+      {!isGenerating && permissions.length > 0 && (
+        <div className="mt-8">
+          <div className="text-center mb-4">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Take what you need</p>
+            <h3 className="text-sm font-semibold text-foreground mt-1">Your Permission Slips</h3>
+          </div>
+          <ul className="space-y-3">
+            {permissions.map((text, i) => (
+              <li
+                key={i}
+                className="flex items-start gap-3 bg-card border border-primary/20 rounded-xl p-4 shadow-sm"
+              >
+                <SparklesIcon className="w-4 h-4 mt-0.5 flex-shrink-0 text-primary" aria-hidden="true" />
+                <p className="font-serif text-[13px] text-foreground/90 leading-relaxed text-pretty">{text}</p>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 

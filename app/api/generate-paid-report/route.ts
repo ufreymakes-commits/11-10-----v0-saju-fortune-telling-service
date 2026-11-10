@@ -5,6 +5,7 @@ import type { Fact } from '@/lib/types'
 import { buildRomanceFacts, yearNickname } from '@/lib/saju/romance'
 import { buildPaidContext, refreshDecadeFortune } from '@/lib/saju/paid-context'
 import { romanizeName, hasCJK } from '@/lib/romanize-name'
+import { TAILS } from '@/lib/saju/tails'
 
 // Vercel Hobby 플랜 최대 60초
 export const maxDuration = 300
@@ -45,7 +46,7 @@ TONE AND STYLE (mandatory):
 MANDATORY REQUIREMENTS:
 - EXACTLY 9 sections (numbered 01-09)
 - Sections 01, 07, 09 have EXACTLY 10 cards each
-- Sections 02, 03, 04, 05, 06, 08 have EXACTLY 11 cards each (the 11th is a "Truth Bomb" card, see rules below)
+- Sections 02, 03, 04, 05, 06, 08 have EXACTLY 11 cards each (Cards 1-7 are analysis, Card 8 is the "Truth Bomb" mirror card, Card 9 is a Reframe, Card 10 is a Permission or Strategy card, Card 11 is a Small Action, see the CLOSING FLOW rules below)
 - TOTAL = 96 cards (this is non-negotiable)
 - Each card's "content" field: Max 220 characters including spaces (the only exception is the Place card in section 08, which may use up to 300 characters)
 - Be compact but meaningful - core insight only
@@ -95,9 +96,27 @@ function findCycleYearMismatches(text: string, cycles: any[] | undefined): strin
   return [...mismatches]
 }
 
-// 생성 후 코드 검사: 섹션 02/03/04/05/06/08의 마지막 카드(Truth Bomb)가 일반적인 문장인지 확인한다.
+// 생성 후 코드 검사: 섹션 02/03/04/05/06/08의 8번째 카드(Truth Bomb)가 일반적인 문장인지 확인한다.
 // "Truth Bomb:" 접두어가 없거나, 작은따옴표 용어/오행/십성/연도 중 어느 것도 없으면 generic으로 본다.
 const TRUTH_BOMB_SECTIONS = new Set(['02', '03', '04', '05', '06', '08'])
+const TRUTH_BOMB_CARD_INDEX = 7
+
+const GUMIHO_SIGNATURE = '- Your Gumiho'
+const PERMISSION_MAX_CHARS = 90
+
+function stripGumihoSignature(text: string): string {
+  return text.replace(/\s*(?:[-\u2013\u2014]\s*)?Your Gumiho\.?\s*$/i, '').trim()
+}
+
+function normalizePermissions(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return []
+  return raw
+    .map((item) =>
+      typeof item === 'string' ? item.replace(/[\u2018\u2019]/g, "'").replace(/\*\*/g, '').trim() : '',
+    )
+    .filter((item) => /^You're allowed to\b/i.test(item))
+    .slice(0, 3)
+}
 const TEN_GOD_PATTERN =
   /(Friend|Rob(?:bing)? Wealth|Eating God|Hurting Officer|Direct Wealth|Indirect Wealth|Direct Officer|Seven Killings|Direct Resource|Indirect Resource|Bi-?gyeon|Geob-?jae|Sik-?sin|Sang-?gwan|Pyeon-?jae|Jeong-?jae|Pyeon-?gwan|Jeong-?gwan|Pyeon-?in|Jeong-?in)/i
 
@@ -117,7 +136,7 @@ function findGenericTruthBombSections(text: string): string[] {
     const number = String(section?.sectionNumber ?? '')
     if (!TRUTH_BOMB_SECTIONS.has(number)) continue
     const cards: any[] = Array.isArray(section?.cards) ? section.cards : []
-    const content = String(cards[cards.length - 1]?.content ?? '')
+    const content = String(cards[TRUTH_BOMB_CARD_INDEX]?.content ?? '')
     const hasPrefix = content.includes('Truth Bomb:')
     const isSpecific =
       /'[^']+'/.test(content) ||
@@ -262,7 +281,7 @@ function findProblemCards(sections: any[], lovePeakYears: Array<number | string>
     cards.forEach((card, cardIdx) => {
       const text = String(card?.content ?? '')
       const currentIndex = index++
-      const isTruthBomb = TRUTH_BOMB_SECTIONS.has(number) && cardIdx === cards.length - 1
+      const isTruthBomb = TRUTH_BOMB_SECTIONS.has(number) && cardIdx === TRUTH_BOMB_CARD_INDEX
       const addProblem = (kind: ProblemKind, detail: string) => {
         let entry = flagged.get(currentIndex)
         if (!entry) {
@@ -296,7 +315,7 @@ function findProblemCards(sections: any[], lovePeakYears: Array<number | string>
         }
       }
 
-      // d) 같은 섹션 안에서 같은 말을 하는 카드: 뒤의 카드가 문제 카드
+      // d) 같은 섹션 안에��� 같은 말을 하는 카드: 뒤의 카드가 문제 카드
       const words = wordSet(text)
       const ranges = yearRanges(text)
       const duplicate = seenInSection.some((prev) => {
@@ -325,6 +344,7 @@ async function repairProblemCards(
   cards: ProblemCard[],
   closingLetter: string | null,
   finalFacts: any,
+  longPermissions: Array<{ text: string; i: number }> = [],
 ): Promise<Map<string, string>> {
   const describe = (c: ProblemCard) =>
     c.problems
@@ -351,6 +371,15 @@ async function repairProblemCards(
       section: 'closing letter',
       text: closingLetter,
       problem: `This closing letter is too long. Shorten it to under ${CLOSING_LETTER_TARGET} characters, keep its warm flowing tone and the same facts, add nothing new, and make it end on a warm, complete final sentence.`,
+    })
+  }
+
+  for (const p of longPermissions) {
+    items.push({
+      index: `permission-${p.i}`,
+      section: 'permission sentence',
+      text: p.text,
+      problem: `Too long. Rewrite it in at most ${PERMISSION_MAX_CHARS} characters, keep it starting with "You're allowed to" and keep the same idea.`,
     })
   }
 
@@ -454,6 +483,8 @@ export async function POST(request: Request) {
       return NextResponse.json({
         facts: existingPaidReport.facts,
         closingLetter: existingPaidReport.hidden_cards?.closingLetter || '',
+        permissions: existingPaidReport.hidden_cards?.permissions || [],
+        orb: existingPaidReport.hidden_cards?.orb || null,
         cached: true
       })
     }
@@ -610,7 +641,12 @@ Example: the first card starts with "Hey ${displayName}," and the last card star
 * Data: Elemental traits of the Day Master + Relationship with the Month Branch (Seasonality/Deuk-ryeong) + Overall energy balance stats.
 * Analysis of the fundamental temperament of the Saju and the "Base Camp" of life. It is best to identify which characters surround the customer's Day Master and represent them through metaphors in nature. Then, weave a story by capturing important characteristics of what those characters mean and how they manifest in life. For example, the following type of interpretation is preferred flow ; : "{{name}}, your chart is actually so fascinating. You are basically the soil of a field in a hot, dry summer, but you're literally surrounded by a massive ocean of water (even 3 letters) Since you have to handle and control all this water solo, the difficulty level of your life is definitely not 'Easy Mode,' but it’s a high-risk, high-reward structure where the payoff for winning is absolutely massive. In Saju terms, your Day Master, Gi-to, is rooted in the Mi-to of your same earthly branch, giving you insane self-reliance. However, because the 'Wealth' element (Water) is so overwhelming, there’s a strong 'Jae-Da-Sin-Yak' (Overwhelming Wealth, Weak Self) vibe going on. On top of that, you've got the 'Zi-Mi Wonjin-Sal' (Resentment/Clash) sitting between your Year and Day pillars, which means your sensitivity and intuition are both cranked up to 100. I was low-key worried your soil might get washed away by all that water, but thankfully, the Mi-to Earth in your Day Branch acts like a sturdy levee, giving you a top-tier ability to flip any crisis into an opportunity. If I were to give you a real-talk tip for 'unlocking your luck,' the key is to not get swept away by emotional waves. Instead of overreacting to your surroundings or what others say, just push through with your own 'My Way' energy. For Gi-to day master, having a lot of water means you have both flexibility and wealth. But to actually bottle up all this water, you must build a solid dam—meaning you need to level up your specs through self-development or getting certified. That’s the only way you’ll truly own all the money and opportunities flowing your way.")
 
-* Cards 1-3 of this section must open with something specific to THIS chart (for example the season of the Month Branch, the Day Master in that season, or the most visible element or relation in the chart), never with a generic Day Master description.
+* The first four cards of this section are special, and each must open with something specific to THIS chart (never a generic Day Master description):
+  - Card 1 "Your chart in one line": one memorable identity sentence for THIS chart (a nickname plus why), built from the Day Master, the season and the strongest signal in the chart.
+  - Card 2 "Outside vs inside": what other people see versus what is really going on inside, tied to ONE concrete chart relation.
+  - Card 3 "Your Orb": say the orb's name EXACTLY as finalFacts.orb.name (copy it word for word, never rename it) and explain why this chart has that orb, using finalFacts.orb.subtitle. If finalFacts.orb is null, write this card about the Day Master image in nature instead.
+  - Card 4 "How rare you are": use ONLY the numbers in finalFacts.orb.rarity: "1 in 60" for the Day Pillar (dayPillarOneIn), plus elementPattern.text and missingElement.text when they exist. Copy the numbers exactly. Never invent any other statistic. If finalFacts.orb is null, write a normal analysis card instead.
+  - Cards 5-10: normal accurate analysis of the chart.
 
 02. Inner Child Era: Your Early Vibes & Scars 
 * Focus: Clashes in the Year Pillar and Month Pillar + Ten Gods.
@@ -643,11 +679,11 @@ Example: the first card starts with "Hey ${displayName}," and the last card star
 * Fact Logic: Go beyond simple "Dating (Dohwa/Siksang)" and analyze the stability of "Marriage (Spouse Star/Palace)" and the specific vibe of the partner (Elemental characteristics).
 * - Do not give generic marriage advice to a student, and do not treat a 40-year-old's relationship as a "first crush." Always consider the customer's age and Daewoon all together.
 * CRITICAL - Timing must come only from \`finalFacts.lovePeak\` and \`romanceFacts\` (never recalculate or invent years):
-  - Card 10 (the spouse-window card) follows the LOVE PEAK RULE below (same rule as the teaser sentence), with exactly ONE reason and no guess about the partner's job.
+  - Card 7 (the spouse-window card) follows the LOVE PEAK RULE below (same rule as the teaser sentence), with exactly ONE reason and no guess about the partner's job.
   - In exactly ONE love-timing card (the one about the love peak), add this sentence word for word: "If it isn't a romantic partner, this can also arrive as a new family member, a precious friend, or even a pet that changes your days." Do not add it to any other card.
-  - This year, next year and the year after: keep using \`romanceFacts.yearLuck\`. Use \`finalFacts.lovePeak\` only for the teaser sentence and Card 10.
+  - This year, next year and the year after: keep using \`romanceFacts.yearLuck\`. Use \`finalFacts.lovePeak\` only for the teaser sentence and Card 7.
   - Do not mention any other future relationship year unless it is listed in \`romanceFacts.yearLuck\` or is the lovePeak year. Describe it as a stronger or calmer period for love, never as a guaranteed event.
-* Consider the possibility of a non-marriage or single lifestyle if the user's chart suggests a high level of independence or a lack of traditional 'Spouse Star' activation. However, this must be based on definitive saju data evidence, and you should approach this topic with extreme caution and sensitivity. If you mention it, use a soft, inquiring tone rather than a rigid conclusion, such as: 'Since you value your independence and find so much peace in your own freedom, do you ever find yourself wondering if marriage is even a necessary part of your journey?
+* Never suggest to the reader that marriage may be unnecessary, unwanted or not part of their journey. If the spouse star is weak or hidden, say that the person values independence and does best with a partner who respects it.
 
 07. Future Self Sneak Peek: A Letter from 2030 [Focus & Data Spine]
 * Focus: The tail end of the current Luck Cycle (Daewoon), the start of the next Daewoon, and the flow of Annual Luck for the following three years (${reportYear+1}~${reportYear+3}), after ${reportYear} (Year of the ${yearNickname(reportYear)}).
@@ -660,7 +696,7 @@ Example: the first card starts with "Hey ${displayName}," and the last card star
 * Data: Climate control (Johu) and Balance (Eokbu) Useful Gods that fill the psychological thirst (elemental deficiency). It is best to clearly write the primary Useful God first—the first character listed in the Useful God data.
 * Decision rule for the Useful God explanation cards: Start with FINAL FACTS.yongsin.primary.elements. If climate.stillUrgent is true, present the climate element(s) first and the strength-balance element(s) (balance.usefulElements) second as a real second lever. If not, present balance first and mention climate only if climate.applies.
 * Directions, colors and numbers are now decided by code. Use ONLY the values in \`finalFacts.luckyItems\` (direction: at most 2 directions; colors: 3 or fewer; luckyNumbers: one pair). Never invent others and never use any other table or the "climate element first" rule for these three items. Explain why this element in ONE line from \`luckyItems.basis\`, in plain words, e.g. "this is a Useful God element your chart is completely missing".
-* Card layout inside section 08 (the card count stays at 11, with the Truth Bomb last): the Useful God explanation cards stay as they are; put the direction on its own card; put the colors AND the lucky numbers together on ONE card; use the card that is freed up for the Place card below.
+* Card layout inside section 08 (the card count stays at 11: Cards 1-7 are these analysis cards, then the CLOSING FLOW in Cards 8-11; keep the health and energy advice inside Cards 1-7): the Useful God explanation cards stay as they are; put the direction on its own card; put the colors AND the lucky numbers together on ONE card; use the card that is freed up for the Place card below.
 * Place card: Using the customer's birth country (submission.birth_country, see "Birth Country" above) as the default home base, point to the kind of place that matches \`finalFacts.luckyItems.primaryElement\`, and name one or two real regions or cities in that country as examples (Water: coastlines, lakes, big rivers, harbor cities; Metal: clean modern business districts, crisp dry highlands; Wood: forests, parks, green hills, leafy suburbs; Fire: warm sunny regions, lively bright cities; Earth: calm inland plains, solid grounded towns). Then add one sentence: "If you live somewhere else now, apply the same idea where you are: look toward the {direction} side and near {place type}." Then add ONE playful line with 2 or 3 examples from different countries around the world that have that same kind of landscape (e.g. for Water: Lisbon in Portugal, Vancouver in Canada, Busan in Korea, Sydney in Australia), framed as a vibe ("if you ever feel like a change, places like these would feed your Water"), never as advice to relocate and never as a prediction. Choose the examples from the customer's primary Useful God element type only, vary them between reports (do not always list the same ones), and mix continents. Do not claim any country is lucky or unlucky; talk about the type of place, not the people. Use only real places that clearly fit the element's type. EXCEPTION to the 220-character rule: this Place card ONLY may use up to 300 characters including spaces (HARD MAX 300), so the birth-country regions, the "if you live somewhere else" sentence and the 2 or 3 world examples all fit without being cut. Never drop the world examples or the "somewhere else" sentence to save space; trim wording instead. Every other card keeps the 220-character limit.
 [Health & Energy Management]
 * Focus: Energy overload (strongest element) vs. Isolated elements.
@@ -680,7 +716,7 @@ And please, you need to include these 3 sentences for 'everyone'. Because we mas
 - Your wealth flow timing and secret talents are already mapped out like ***** (Ground in decadeFortune score/years and the strongest ten-god group. Give a specific year range and a specific talent.)
 - Wealth-timing sentence: place the strongest money window inside a luck cycle whose score in finalFacts.luckCycles is Medium or High (current or previous). If the next cycle is Low, say that cycle is for consolidating what was built, not for expansion. Never call a Low cycle a period of big opportunities.
 
-LOVE PEAK RULE (applies to the teaser sentence above and to Section 06 Card 10):
+LOVE PEAK RULE (applies to the teaser sentence above and to Section 06 Card 7):
 finalFacts.lovePeak = { window, peak, upcomingPeak }.
 - peak = the strongest love-signal year between age 19 and 39. upcomingPeak = the strongest one still ahead.
 - If peak.status is "future" or "this year": write only peak.year, with ONE reason.
@@ -688,7 +724,7 @@ finalFacts.lovePeak = { window, peak, upcomingPeak }.
 - Years always come from finalFacts.lovePeak. The model must not choose or alter them. Never invent a year.
 - Each reason is the first item of that year's reasonsEn, in plain language (e.g. "because the year's Direct Officer combines with your Day Master"). Do not list several reasons per year, and do not output raw scores.
 - Say "love luck is strongest" / "the chance of a meaningful connection is highest". Never say "you will meet your spouse that year". Never guess the partner's job; describe the partner's energy (calm / bold / witty / steady) from romanceFacts.spouseStarElement and palace.tenGodEn.
-- Add ONE warm sentence, once only (teaser sentence or Card 10, not both): "If it isn't a romantic partner, this can also arrive as a new family member, a precious friend, or even a pet that changes your days."
+- Add ONE warm sentence, once only (teaser sentence or Card 7, not both): "If it isn't a romantic partner, this can also arrive as a new family member, a precious friend, or even a pet that changes your days."
 - If lovePeak is null, use the most positive-tone year in romanceFacts.yearLuck and one reason from it.
 
 ========================================
@@ -710,10 +746,10 @@ these three sections must stay tonally consistent with it for whichever decade c
 - In decadeFortune, the '용신 도래' note refers to the strength-balancing element (Eokbu), not the climate element. When FINAL FACTS.yongsin.primary is the climate element, phrase it as 'the element that balances your strength' for that note.
 
 ========================================
-TRUTH BOMB CARD RULE — the 11th card in sections 02, 03, 04, 05, 06, 08:
+TRUTH BOMB CARD RULE — Card 8 (the MIRROR + REASON card) in sections 02, 03, 04, 05, 06, 08:
 ========================================
 Sections 02 (Inner Child Era), 03 (Present Energy), 04 (Career Motion), 05 (Money Flow), 06 (Love &
-Endgame), and 08 (Lucky Environment/Health) each get one extra 11th card called the "Truth Bomb."
+Endgame), and 08 (Lucky Environment/Health) each have their Card 8 as the "Truth Bomb": it names one specific felt experience ("that's why you ...") and gives the chart reason for it.
 This is the one card per section allowed to lead with an unflinching, specific truth before pivoting
 to comfort — it exists because generic praise gets old, and a sharp, accurate observation followed by
 real comfort or a real fix is what makes a paid report feel worth paying for.
@@ -733,10 +769,19 @@ real comfort or a real fix is what makes a paid report feel worth paying for.
 - Do not contradict anything already stated elsewhere in that section or in the free 3 facts.
 
 ========================================
+CLOSING FLOW RULE — the LAST FOUR cards (Cards 8-11) of sections 02, 03, 04, 05, 06, 08:
+========================================
+Cards 1-7 of these sections stay accurate chart analysis. Cards 8-11 follow this flow, and every card keeps the 220 character limit:
+- Card 8 MIRROR + REASON: the Truth Bomb above (keep the "Truth Bomb: " prefix). One specific felt experience and the chart reason for it, using ONE concrete chart item that no other section's Truth Bomb uses.
+- Card 9 REFRAME: show how the same trait is a real strength or design ("what you call X is actually Y"), grounded in the same chart item or a closely related one.
+- Card 10: for sections 02, 03 and 08 write a PERMISSION card that starts with "You're allowed to ..." and is specific to this chart. For sections 04 (career), 05 (money) and 06 (love) write a STRATEGY card instead: the realistic strengths and constraints of this chart and the single best strategic move (which kind of work structure or role fits, how to use the current luck cycle and the wealthWindow or lovePeak, what to avoid). Keep it concrete and practical, with no guarantees and no financial or legal advice wording.
+- Card 11 SMALL ACTION: one doable thing for this week. It must start with "This week:" and tie to the reframe or to the Useful God element.
+
+========================================
 CLOSING LETTER RULE — one standalone letter after all 96 cards:
 ========================================
-After the 96 main cards, write exactly ONE closing letter (field name \`closingLetter\`). HARD LIMIT:
-600 characters including spaces — count the characters before finalizing, and if your draft runs
+After the 96 main cards, write exactly ONE closing letter (field name \`closingLetter\`), written as the Gumiho (a warm, perceptive nine-tailed fox spirit) speaking directly to the reader in the first person, and signed at the very end with "- Your Gumiho". HARD LIMIT:
+600 characters including spaces, not counting the signature — count the characters before finalizing, and if your draft runs
 long, cut sentences/clauses until it fits rather than submitting a longer letter. The letter MUST end on a
 warm, complete final sentence (never on a colon, a lead-in like "But here's the truth", or a half-finished thought).
 This is not a soft target: a letter over 700 characters is a failed output. This letter should read
@@ -768,19 +813,25 @@ labeled sections):
 Do NOT contradict anything already stated in the 96 cards or the free 3 facts — this letter is the
 emotional summary of everything already established, not a new analysis.
 
+PERMISSIONS RULE — a separate field \`permissions\` after the closing letter:
+Write EXACTLY 3 sentences. Each one starts with "You're allowed to", is specific to this chart (use three DIFFERENT chart items), and is at most 90 characters including spaces. Plain English, Latin script only, no markdown, no guarantees.
+
 OUTPUT JSON STRUCTURE - ABSOLUTELY CRITICAL:
 You MUST return EXACTLY 9 sections. Sections 01, 07, 09 have EXACTLY 10 cards. Sections 02, 03, 04,
-05, 06, 08 have EXACTLY 11 cards (10 regular + 1 Truth Bomb, as the LAST card in that section's array).
+05, 06, 08 have EXACTLY 11 cards (Cards 1-7 analysis, Card 8 Truth Bomb, Card 9 Reframe, Card 10 Permission or Strategy, Card 11 Small Action).
 TOTAL = 96 cards. DO NOT return fewer cards. The user PAID for 96 facts. Returning less is unacceptable.
 
-Then, APPEND the closing letter as a single string field named "closingLetter".
+SECTION TITLES (the Nine Tails). Use exactly these titles as "sectionTitle", in this order:
+${TAILS.map((t) => `${String(t.n).padStart(2, '0')}. ${t.title}`).join('\n')}
+
+Then, APPEND the closing letter as a single string field named "closingLetter", and the 3 permission sentences as an array of strings named "permissions".
 
 FINAL JSON STRUCTURE (single valid JSON object):
 {
   "mainFacts": [
     {
       "sectionNumber": "01",
-      "sectionTitle": "The Core Aura: Your 4 Pillars Unlocked",
+      "sectionTitle": "${TAILS[0].title}",
       "cards": [
         { "content": "First insight about their core energy..." },
         { "content": "" },
@@ -795,12 +846,13 @@ FINAL JSON STRUCTURE (single valid JSON object):
       ]
     },
     ... (repeat this EXACT structure for all 9 sections — 10 cards for sections 01/07/09, 11 cards
-    for sections 02/03/04/05/06/08 with the 11th card being that section's Truth Bomb.)
+    for sections 02/03/04/05/06/08 with the 8th card being that section's Truth Bomb.)
   ],
-  "closingLetter": "[up to 600 characters, ending on a warm, complete final sentence, following the CLOSING LETTER RULE above]"
+  "closingLetter": "[up to 600 characters, a letter from the Gumiho ending on a warm, complete final sentence, then the signature - Your Gumiho, following the CLOSING LETTER RULE above]",
+  "permissions": ["You're allowed to ...", "You're allowed to ...", "You're allowed to ..."]
 }
 
-Generate the 96 main facts and the closingLetter now as a single JSON object.`
+Generate the 96 main facts, the closingLetter and the 3 permissions now as a single JSON object.`
 
     logTiming('prompt:assembled', { userPromptLength: userPrompt.length, systemPromptLength: PAID_REPORT_SYSTEM_PROMPT.length })
 
@@ -931,6 +983,8 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
     // 7. JSON 파싱 (더 유연한 형식 지원)
     let paidFacts: Fact[] = []
     let closingLetter = ''
+    let permissions: string[] = []
+    let rawPermissions: unknown = null
     try {
       // 시도 1: ```json ... ``` 형식 (줄바꿈 포함)
       let jsonMatch = rawResponse.match(/```json\n([\s\S]*?)\n```/)
@@ -985,7 +1039,14 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
         // 신형식: { mainFacts: [...], closingLetter: "..." }
         paidFacts = parsedData.mainFacts
         closingLetter = typeof parsedData.closingLetter === 'string' ? parsedData.closingLetter.trim() : ''
+        rawPermissions = parsedData.permissions
       }
+
+      // 섹션 제목은 모델이 아니라 코드의 Nine Tails 목록으로 고정한다.
+      paidFacts = paidFacts.map((section: any) => {
+        const tail = TAILS.find((t) => t.n === Number(section?.sectionNumber))
+        return tail ? { ...section, sectionTitle: tail.title } : section
+      })
       
       console.log('[v0] Successfully parsed', paidFacts.length, 'main facts and a closing letter of', closingLetter.length, 'chars')
 
@@ -1073,13 +1134,25 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
         console.warn(`[v0] Fixed markdown-asterisk or misplaced-term-gloss formatting in ${formattingFixed} field(s)`)
       }
 
+      // 서명은 길이 계산에서 빼고, 저장 직전에 코드가 한 번만 붙인다.
+      closingLetter = stripGumihoSignature(closingLetter)
+      permissions = normalizePermissions(rawPermissions).map((p) => {
+        let text = CJK_TEST.test(p) ? sanitizeCJKArtifacts(p) : p
+        if (text.includes('**')) text = fixFormattingArtifacts(text)
+        return text.trim()
+      })
+      if (permissions.length !== 3) console.warn(`[v0] check permissions count ${permissions.length}`)
+
       // 수리 패스: 문제 카드(길이 초과, 반복 용어, Truth Bomb 중복, 같은 말)와 700자 넘는 편지만 AI 호출 한 번으로 다시 쓴다.
       const flaggedCards = findProblemCards(paidFacts as any[], [
         finalFacts?.lovePeak?.peak?.year,
         finalFacts?.lovePeak?.upcomingPeak?.year,
       ].filter((y) => y !== undefined && y !== null)).slice(0, REPAIR_MAX_CARDS)
       const closingTooLong = closingLetter.length > CLOSING_LETTER_MAX
-      if (flaggedCards.length > 0 || closingTooLong) {
+      const longPermissions = permissions
+        .map((text, i) => ({ text, i }))
+        .filter((p) => p.text.length > PERMISSION_MAX_CHARS)
+      if (flaggedCards.length > 0 || closingTooLong || longPermissions.length > 0) {
         const countKind = (kind: ProblemKind) => flaggedCards.filter((c) => c.problems.some((p) => p.kind === kind)).length
         console.log(
           `[v0] repair pass: flagged ${flaggedCards.length} cards (long ${countKind('long')}, repeated ${countKind('repeated')}, truth-bomb ${countKind('truth-bomb')}, duplicate ${countKind('duplicate')})` +
@@ -1087,7 +1160,12 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
         )
         const repairStart = Date.now()
         try {
-          const rewrites = await repairProblemCards(flaggedCards, closingTooLong ? closingLetter : null, finalFacts)
+          const rewrites = await repairProblemCards(
+            flaggedCards,
+            closingTooLong ? closingLetter : null,
+            finalFacts,
+            longPermissions,
+          )
           const cleanRewrite = (raw: string) => {
             let text = CJK_TEST.test(raw) ? sanitizeCJKArtifacts(raw) : raw
             if (text.includes('**') || /\([A-Z][a-zA-Z]*(?:-[A-Za-z]+)+\s*-\s*[^()]+\)/.test(text)) text = fixFormattingArtifacts(text)
@@ -1105,7 +1183,13 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
           const rewrittenLetter = rewrites.get('closing')
           if (closingTooLong && rewrittenLetter) {
             const text = cleanRewrite(rewrittenLetter)
-            if (text && text.length <= CLOSING_LETTER_MAX) closingLetter = text
+            if (text && text.length <= CLOSING_LETTER_MAX) closingLetter = stripGumihoSignature(text)
+          }
+          for (const p of longPermissions) {
+            const raw = rewrites.get(`permission-${p.i}`)
+            if (!raw) continue
+            const text = normalizePermissions([cleanRewrite(raw)])[0]
+            if (text && text.length <= PERMISSION_MAX_CHARS) permissions[p.i] = text
           }
         } catch (repairError) {
           console.warn('[v0] repair pass failed, keeping original text:', repairError)
@@ -1118,6 +1202,7 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
         const before = closingLetter.length
         closingLetter = finalizeClosingLetter(closingLetter)
         if (closingLetter.length !== before) console.warn(`[v0] Closing letter finalized: ${before} -> ${closingLetter.length} chars`)
+        closingLetter = `${closingLetter}\n\n${GUMIHO_SIGNATURE}`
       }
 
     } catch (parseError) {
@@ -1140,6 +1225,11 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
 
     logTiming('postprocess:done', { cards: paidFacts.reduce((n: number, s: any) => n + (Array.isArray(s?.cards) ? s.cards.length : 0), 0) })
 
+    // hidden_cards 컬럼(레거시 이름)에 편지, 허락 문장, 구슬 데이터를 함께 저장한다.
+    const orb = finalFacts?.orb ?? null
+    const hiddenCards =
+      closingLetter || permissions.length > 0 || orb ? { closingLetter, permissions, orb } : undefined
+
     // 8. DB에 저장 (중복 방지: 기존 paid_full 있으면 upsert)
     const { data: existing } = await supabase
       .from('reports')
@@ -1154,7 +1244,7 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
       // 이미 존재하면 update
       const { error } = await supabase
         .from('reports')
-        .update({ facts: paidFacts, payment_id: payment.id, hidden_cards: closingLetter ? { closingLetter } : undefined })
+        .update({ facts: paidFacts, payment_id: payment.id, hidden_cards: hiddenCards })
         .eq('id', existing.id)
       insertError = error
     } else {
@@ -1166,7 +1256,7 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
           payment_id: payment.id,
           section_key: 'paid_full',
           facts: paidFacts,
-          ...(closingLetter ? { hidden_cards: { closingLetter } } : {}),
+          ...(hiddenCards ? { hidden_cards: hiddenCards } : {}),
           is_free: false,
         })
       insertError = error
@@ -1200,6 +1290,8 @@ Generate the 96 main facts and the closingLetter now as a single JSON object.`
     return NextResponse.json({
       facts: paidFacts,
       closingLetter,
+      permissions,
+      orb,
       cached: false,
     })
 

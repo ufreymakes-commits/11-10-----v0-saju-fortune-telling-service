@@ -1,5 +1,6 @@
 // 유료 리포트 프롬프트용 "정리된 사주 데이터". 옛 필드(조후 문자열, 옛 신살, 옛 강도 %, 과거 중심 결혼 타이밍)를 제거하고
 // 전문가 기준 확정값만 남겨 LLM 에게 모순 없는 단일 근거를 준다.
+import { buildOrb } from './orb'
 import { BRANCH_PRONUNCIATION, STEM_PRONUNCIATION, TEN_GODS_ENGLISH, STEM_TO_ELEMENT, ELEMENTS, ELEMENT_ENGLISH } from './constants'
 import { yearGanzi, yearNickname, buildLovePeak } from './romance'
 import { calculateDecadeFortune } from './decade-fortune'
@@ -142,6 +143,7 @@ export function buildPaidContext(saju: any, gender: 'male' | 'female', reportYea
     finalFacts.luckCycles = { previous: i > 0 ? fmt(decs[i - 1]) : null, current: i >= 0 ? fmt(decs[i]) : null, next: i >= 0 && decs[i + 1] ? fmt(decs[i + 1]) : null, all: decs.map(fmt), changesInYear: i >= 0 ? decs[i].endYear : null, note: 'Use these for "current / previous / next" cycle statements. Cite the YEARS (yearsActive), and if you give ages use internationalAges only (never Korean-age numbers). Do not work out the current cycle from age yourself. "all" lists EVERY 10-year cycle with its exact years and ages: when you mention any cycle (including childhood ones) use its years and ages from "all" exactly, never your own numbers, and never mention a cycle that is not in the list.' }
   }
   finalFacts.luckyItems = luckyItems(saju, groupEl)
+  finalFacts.orb = buildOrb(saju, finalFacts)
   // 신살: 전문가 기준 슬롯별 + 12신살 (옛 spirits 오탐 제거)
   finalFacts.sinsalByPillar = saju?.expertSinsal ? Object.fromEntries(Object.entries(saju.expertSinsal).map(([slot, names]) => [({ 시: 'hour', 일: 'day', 월: 'month', 연: 'year' } as any)[slot] ?? slot, (names as string[]).map(sinsalEn)])) : null
   // 연애운 정점: 만 19~39세 구간에서 점수가 가장 높은 해 (romance.ts buildLovePeak). 옛 marriageTiming 은 사용하지 않는다.
