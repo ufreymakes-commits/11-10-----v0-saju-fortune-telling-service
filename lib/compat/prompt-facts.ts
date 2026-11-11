@@ -59,8 +59,9 @@ export function firstNameOf(full: string, fallback: string): string {
 }
 
 // ---------------- 숫자 없애기 ----------------
+// 내부 값 → 자연스러운 한 마디. 모델이 라벨을 그대로 인용하지 못하게 일상어로 둔다(검사에서도 막는다).
 const lift = (v: number) =>
-  v >= 0.35 ? 'strong lift' : v >= 0.15 ? 'clear lift' : v > 0.03 ? 'slight lift' : v > -0.03 ? 'about neutral' : v > -0.15 ? 'slight drain' : 'clear drain'
+  v >= 0.35 ? 'strongly nourishes' : v >= 0.15 ? 'nourishes' : v > 0.03 ? 'slightly nourishes' : v > -0.03 ? 'evenly matched' : v > -0.15 ? 'slightly tires' : 'tires'
 
 export type CompatFacts = ReturnType<typeof buildCompatFacts>
 

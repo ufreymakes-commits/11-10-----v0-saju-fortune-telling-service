@@ -6,7 +6,7 @@ import {
   buildNotesUserPrompt, buildSectionsUserPrompt, buildRepairUserPrompt,
   groupSchema, groupSchemaWithScores, repairSchema, type GroupOutput, type SectionKey,
 } from './prompts'
-import { checkNotes, checkSection, crossSectionRepeats, stripCjk } from './checks'
+import { checkNotes, checkSection, crossSectionRepeats, repeatedAdvice, stripCjk } from './checks'
 import { buildScoreBoard, type CompatInputs, type ScoreBoard } from './prompt-facts'
 
 export interface CompatModelConfig {
@@ -123,6 +123,10 @@ export async function generateCompatReport(inp: CompatInputs, cfg: CompatModelCo
     if (c.hard.length) hardBefore[d.key] = c.hard
     if (c.soft.length) soft[d.key] = c.soft
   }
+
+  // 앞 섹션과 같은 조언을 쓴 뒤쪽 섹션도 고치기 대상(섹션 1~3 묶음이 서로 못 보기 때문에 생긴다)
+  const dupAdvice = repeatedAdvice(defs.map((d) => ({ key: d.key, paragraphs: byKey.get(d.key)! })))
+  for (const [k, v] of Object.entries(dupAdvice)) hardBefore[k] = [...(hardBefore[k] ?? []), ...v]
 
   // ---------- 고치기: 문제 섹션만, 1회, 최대 6개 ----------
   const hardAfter: Record<string, string[]> = { ...hardBefore }
