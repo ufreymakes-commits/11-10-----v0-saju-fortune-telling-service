@@ -21,6 +21,33 @@ export function CompatibilityCheckoutContent({
   const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showCoupon, setShowCoupon] = useState(false)
+  const [couponCode, setCouponCode] = useState('')
+  const [couponLoading, setCouponLoading] = useState(false)
+  const [couponError, setCouponError] = useState<string | null>(null)
+
+  const handleCouponSubmit = async () => {
+    if (!couponCode.trim() || couponLoading) return
+    setCouponLoading(true)
+    setCouponError(null)
+    try {
+      const response = await fetch('/api/compatibility/coupon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: couponCode.trim(), submissionId }),
+      })
+      const data = await response.json()
+      if (!response.ok || !data.success) {
+        setCouponError(data.error || 'Invalid coupon code')
+        setCouponLoading(false)
+        return
+      }
+      router.push(data.redirectPath)
+    } catch {
+      setCouponError('Something went wrong')
+      setCouponLoading(false)
+    }
+  }
 
   // Handle PayPal return after approval
   useEffect(() => {
@@ -90,12 +117,11 @@ export function CompatibilityCheckoutContent({
       <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-3">
         <h3 className="text-white font-semibold text-sm">What&apos;s included</h3>
         {[
-          'Full Saju chart analysis for both partners',
-          'Elemental compatibility score',
-          'Relationship dynamics & communication style',
-          'Career & financial compatibility',
-          'Long-term compatibility forecast',
-          'Personalized advice for your pairing',
+          'Both Saju charts, compared side by side',
+          'Your compatibility score board: attraction, stability, balance and climate',
+          'An honest answer to the question you ask about your relationship',
+          'Romance, marriage, children and family, each with a specific step to try',
+          'How each of you sees the other',
         ].map((item) => (
           <div key={item} className="flex items-start gap-2.5">
             <CheckIcon className="w-4 h-4 text-pink-400 flex-shrink-0 mt-0.5" />
@@ -128,6 +154,51 @@ export function CompatibilityCheckoutContent({
         <div className="flex items-center justify-center gap-2 text-white/30 text-xs">
           <ShieldCheckIcon className="w-3.5 h-3.5" />
           <span>Secured by PayPal · 256-bit encryption</span>
+        </div>
+
+        <div className="pt-1">
+          <button
+            type="button"
+            onClick={() => setShowCoupon((v) => !v)}
+            aria-expanded={showCoupon}
+            className="mx-auto block text-xs text-white/40 underline-offset-2 transition-colors hover:text-white/70 hover:underline"
+          >
+            {showCoupon ? 'Hide coupon code' : 'Have a coupon code?'}
+          </button>
+          {showCoupon && (
+            <div className="mt-3">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.nativeEvent.isComposing && e.keyCode !== 229) {
+                      handleCouponSubmit()
+                    }
+                  }}
+                  placeholder="Enter coupon code"
+                  aria-label="Coupon code"
+                  maxLength={64}
+                  autoComplete="off"
+                  className="h-10 flex-1 rounded-lg border border-white/10 bg-white/5 px-3 text-sm text-white placeholder:text-white/30 focus:border-pink-400/50 focus:outline-none"
+                />
+                <Button
+                  type="button"
+                  onClick={handleCouponSubmit}
+                  disabled={couponLoading || !couponCode.trim()}
+                  className="h-10 rounded-lg border-0 bg-pink-500 px-4 text-sm font-semibold text-white hover:bg-pink-600"
+                >
+                  {couponLoading ? <Spinner className="h-4 w-4" /> : 'Apply'}
+                </Button>
+              </div>
+              {couponError && (
+                <p role="alert" className="mt-2 text-center text-xs text-red-400">
+                  {couponError}
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
