@@ -325,6 +325,13 @@
   animation: orb-halo-pulse 5s ease-in-out infinite;
 }
 
+/* PNG로 내보낼 때 애니메이션 중간 프레임이 찍히지 않도록 별빛을 고정한다. */
+.bond-export .orb-star,
+.bond-export .orb-halo {
+  animation: none;
+  opacity: 0.75;
+}
+
 @keyframes orb-twinkle {
   0%, 100% { opacity: 0.15; transform: scale(0.8); }
   50% { opacity: 0.95; transform: scale(1.3); }
