@@ -46,6 +46,7 @@ INPUT you will receive: COMPAT FACTS (JSON computed by code, the only source of 
 HARD RULES
 - Use only facts in COMPAT FACTS. Never invent a relation, element, ten god or sinsal. Name a branch relation only if it appears in branchLinks / allowedRelationLabels / dayStem / timing. Never invent past events, jobs, family details or dates. Years come only from timing and personalLoveYears.
 - If a person's birth hour is unknown, never mention that person's Hour Pillar.
+- Never describe a person's family, upbringing or family traditions beyond what the Year Pillar links say.
 - Scores, total and matchType are fixed. Your notes must agree with them: a sub-score below 50 is a real friction area, 50-69 is mixed, 70+ is a real strength. Never call a low-attraction pair "electric" or a low-stability pair "effortless".
 - Every fact you use carries its key in brackets, e.g. [dayStem], [branchLinks Day-Day], [voids], [seenAs], [elementComplement], [temperature], [timing 2027]. The writer needs these.
 - Hopeful, warm wording is wanted. Keep the uncomfortable facts too. Do not promise specific events (marriage, pregnancy, money, health).
@@ -59,7 +60,7 @@ WRITE THESE PARTS, about 5,500 characters in total
 5. CONCERN PLAN: restate the concern in one line; what the chart actually says about it; an honest, kind answer; two concrete steps. If no concern, write "none" and skip.
 6. RELATIONSHIP LENS: how to frame things for this relationship type. crush / talking: future parts are "if it grows". dating: serious-couple view. married: partnership and household view. ex: what pulled them together, what made it hard, what reconnecting would need (from attraction, stability and timing) and what letting go well would look like. Then give exReading.lean as a lean with the reason, kindly, never as a verdict (no "inevitably", "permanent", "would recreate"). The choice stays with the reader. All advice stays about this relationship (how to reach out, what to say, how to close it), never generic self-care. Say which of children / family can be literal and which should be "if this grows".
 7. TIMING: the best years and the caution years from timing and personalLoveYears, and one thing to do in each.
-8. SECTION PLAN for the 11 report sections (1 Summary, 2 Elements Together, 3 Where You Fit, 4 Where You Clash, 5 Romance, 6 Marriage or its relationship version, 7 Children, 8 Family, 9 How A Sees B, 10 How B Sees A, 11 A Line to Keep): for each, two facts with keys and the angle. No two sections may carry the same advice.
+8. SECTION PLAN for the 11 report sections (1 Summary, 2 Elements Together, 3 Where You Fit, 4 Where You Clash, 5 Romance, 6 Marriage or its relationship version, 7 Children, 8 Family, 9 How A Sees B, 10 How B Sees A, 11 A Line to Keep): for each section 1-10 write two facts with keys, the angle, and ONE assigned ACTION (what to do or say, with its number, written in a few words). The ten ACTIONS must all be different in kind: no two sections may share a ritual, a quoted sentence, a time-boxed pause or a check-in format. Section 1's action must be about the concern itself.
 9. ADVICE USED: a list of the advice types already assigned, so the writer does not repeat them.`
 
 // ---------------- 2단계: 섹션 ----------------
@@ -74,7 +75,9 @@ Sections 1-10: exactly two paragraphs of 80-120 words each.
 Section 11: one paragraph that is one warm sentence, 25 words or fewer.
 
 RULES
-- Chart facts only from COMPAT FACTS. Name a relation only if it appears in allowedRelationLabels, branchLinks, dayStem or timing. Never invent past events, jobs, dates or family details. Years only from timing and personalLoveYears.
+- Chart facts only from COMPAT FACTS. Name a relation only if it appears in allowedRelationLabels, branchLinks, dayStem or timing. The words in elementComplement and temperature are internal labels: say the idea in your own words (who nourishes or tires whom, hot or mild), never quote the label.
+- Never describe a person's family, upbringing or family traditions. Section 8 only says how the two families' patterns (the Year Pillar links) may meet.
+- Use the ACTION assigned to your section in the NOTES' SECTION PLAN, in your own words. Never use another section's action, quoted sentence or ritual. Without notes, make each action different in kind. Never invent past events, jobs, dates or family details. Years only from timing and personalLoveYears.
 - If a person's birth hour is unknown, never mention that person's Hour Pillar.
 - Agree with the scores. Below 50 is a real friction, 70+ a real strength. No section may contradict its score.
 - Never write any number from the facts in the body except years: no score numbers (the score board shows them), no element gain values, no star counts, no "spouse star activity".

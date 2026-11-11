@@ -19,6 +19,7 @@ const REL_RE = /\b([A-Z][a-z]{0,6})-([A-Z][a-z]{0,6})\s+(Ja-Hyeong|Banhap|Chung|
 const yearsIn = (s: string) => [...new Set([...s.matchAll(/\b(19[5-9]\d|20\d{2})\b/g)].map((m) => +m[1]))]
 
 const BANNED: [RegExp, string][] = [
+  [/\b(clear|strong|slight)(ly)? (lift|drain)\b|\bnet (lift|drain)\b|\bchart readers call\b/i, 'quotes an internal label'],
   [/\bway works\b/i, 'uses the phrase "way works"'],
   [/\bguarantee[sd]?\b|\bwill definitely\b|\bcertain to\b|\bdestined to\b/i, 'promises an outcome'],
   [/\bdate night every (two|2) weeks\b/i, 'stock advice "date night every two weeks"'],
@@ -69,6 +70,37 @@ export function crossSectionRepeats(sections: { key: string; paragraphs: string[
     const prev = seen.get(n)
     if (prev && prev !== s.key) out.push(`${prev} & ${s.key}: "${sent.slice(0, 60)}..."`)
     else seen.set(n, s.key)
+  }
+  return out
+}
+
+const STOP = new Set('the a an and or of to in on at for with by from as is are was were be been it its this that these those you your yours we our us they their he she his her him them i me my not no so but if then than too very just can could may might will would should must do does did have has had into over under up out about after before while when where what which who whom how why penalty break harm clash resentment combination half harmony void gongmang branch branches pillar pillars known called hyeong pa wonjin hae chung hap banhap gwimun peach blossom red glow day month year hour stem stems'.split(' '))
+const shingles = (text: string) => {
+  const w = text.toLowerCase().replace(/[^a-z' -]/g, ' ').split(/\s+/).filter(Boolean)
+  const out = new Set<string>()
+  for (let i = 0; i + 5 <= w.length; i++) {
+    const g = w.slice(i, i + 5)
+    if (g.filter((x) => !STOP.has(x)).length >= 3) out.add(g.join(' '))
+  }
+  return out
+}
+const quotesIn = (text: string) => new Set([...text.matchAll(/["\u201c']([^"\u201d']{18,160})["\u201d']/g)].map((m) => m[1].toLowerCase().replace(/[^a-z ]/g, '').trim()).filter((q) => q.split(' ').length >= 4))
+
+/** 앞 섹션과 같은 조언(같은 인용문, 같은 5단어 구절)을 쓴 뒤쪽 섹션 → { key: ['repeats advice from section X: "..."'] } */
+export function repeatedAdvice(sections: { key: string; paragraphs: string[] }[]): Record<string, string[]> {
+  const out: Record<string, string[]> = {}
+  const seenSh = new Map<string, string>(), seenQ = new Map<string, string>()
+  for (const sec of sections) {
+    if (sec.key === 'keep') continue
+    const text = sec.paragraphs.join(' ')
+    const hits: string[] = []
+    for (const q of quotesIn(text)) { const p = seenQ.get(q); if (p && p !== sec.key) hits.push(`repeats the quoted sentence from section ${p}: "${q}"`); else seenQ.set(q, sec.key) }
+    let n = 0
+    for (const g of shingles(text)) {
+      const p = seenSh.get(g)
+      if (p && p !== sec.key) { if (n++ < 1) hits.push(`repeats advice from section ${p} ("${g}")`) } else seenSh.set(g, sec.key)
+    }
+    if (hits.length) out[sec.key] = hits
   }
   return out
 }
