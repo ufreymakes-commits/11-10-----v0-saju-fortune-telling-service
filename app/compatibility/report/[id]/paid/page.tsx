@@ -4,6 +4,7 @@ import { StarsBackground } from '@/components/stars-background'
 import { CompatibilityReportContent } from '@/components/compatibility-report-content'
 import { CompatibilityReportLoader } from '@/components/compatibility-report-loader'
 import { isScoreBoard } from '@/lib/compat/constants'
+import { HANJA_TO_ENGLISH } from '@/lib/day-master-characters'
 import { sharedOpenGraph, sharedTwitter } from '@/lib/metadata'
 
 // 궁합 점수 계산 함수 (데이터 기반 - 일관된 결과)
@@ -145,17 +146,10 @@ export default async function CompatibilityPaidReportPage({ params }: PageProps)
   const sajuDataB = submission.person_b_saju_data as any || {}
   
   // Convert Hanja day master to English
-  const hanjaToEnglish: Record<string, string> = {
-    '甲': 'Yang Wood', '乙': 'Yin Wood',
-    '丙': 'Yang Fire', '丁': 'Yin Fire',
-    '戊': 'Yang Earth', '己': 'Yin Earth',
-    '庚': 'Yang Metal', '辛': 'Yin Metal',
-    '壬': 'Yang Water', '癸': 'Yin Water'
-  }
   const dayMasterHanjaA = sajuDataA.dayMaster || ''
   const dayMasterHanjaB = sajuDataB.dayMaster || ''
-  const dayMasterA = hanjaToEnglish[dayMasterHanjaA] || dayMasterHanjaA || ''
-  const dayMasterB = hanjaToEnglish[dayMasterHanjaB] || dayMasterHanjaB || ''
+  const dayMasterA = HANJA_TO_ENGLISH[dayMasterHanjaA] || dayMasterHanjaA || ''
+  const dayMasterB = HANJA_TO_ENGLISH[dayMasterHanjaB] || dayMasterHanjaB || ''
   
   const sections = Array.isArray(report?.facts) ? report.facts : []
 

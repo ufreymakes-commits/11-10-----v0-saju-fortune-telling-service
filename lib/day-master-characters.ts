@@ -136,6 +136,14 @@ export const ENGLISH_TO_KOREAN: Record<string, string> = {
   'Yang Water': '임', 'Yin Water': '계',
 }
 
+export const HANJA_TO_ENGLISH: Record<string, string> = {
+  '甲': 'Yang Wood', '乙': 'Yin Wood',
+  '丙': 'Yang Fire', '丁': 'Yin Fire',
+  '戊': 'Yang Earth', '己': 'Yin Earth',
+  '庚': 'Yang Metal', '辛': 'Yin Metal',
+  '壬': 'Yang Water', '癸': 'Yin Water',
+}
+
 export function getDayMasterCharacter(dayMaster: string): DayMasterCharacter | null {
   return DAY_MASTER_CHARACTERS[dayMaster] || null
 }
