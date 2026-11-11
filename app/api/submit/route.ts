@@ -51,6 +51,9 @@ export async function POST(request: Request) {
     }
     
     const sajuData = calculateSaju(birthInfo)
+
+    // Vercel가 요청 IP 기반으로 붙여주는 ISO 국가 코드 (로컬 개발에서는 없음). IP 자체는 저장하지 않음.
+    const accessCountry = request.headers.get('x-vercel-ip-country')?.toUpperCase() || null
     
     // Debug: Log calculated saju pillars for verification
     console.log('[v0] Saju calculation result:', {
@@ -80,8 +83,8 @@ export async function POST(request: Request) {
         birth_city: birthCity || null,
         timezone: timezone || null,
         longitude: longitude || null,
-        latitude: latitude || null
-        // client_ip: clientIP  // TODO: Add after adding column to DB
+        latitude: latitude || null,
+        access_country: accessCountry
       })
       .select('id')
       .single()
