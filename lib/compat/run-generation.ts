@@ -7,6 +7,12 @@ import type { BirthInfo } from '@/lib/types'
 import { buildCompatInputs, cleanConcern, isRelationshipType } from './prompt-facts'
 import { generateCompatReport, type CompatModelConfig } from './pipeline'
 
+// 11~12월에 만든 리포트가 "올해(곧 끝나는 해)" 이야기를 하지 않도록, 11월부터는 다음 해를 기준 연도로 쓴다.
+function compatReportYear(now = new Date()): number {
+  return now.getMonth() >= 10 ? now.getFullYear() + 1 : now.getFullYear()
+}
+
+
 export const COMPAT_SECTION_KEY = 'compatibility_full'
 export const LOCK_MINUTES = 6
 type Supa = ReturnType<typeof createAdminClient>
@@ -106,7 +112,7 @@ export async function runCompatGeneration(submissionId: string, cfg: CompatModel
       b: { fullName: ib.name, gender: ib.gender as 'male' | 'female', birthYear: sb.birthYear, saju: sb.saju },
       relationship,
       concern: cleanConcern(sub.concern),
-      reportYear: new Date().getFullYear(),
+      reportYear: compatReportYear(),
     })
     log('[v0] compat-v2 start', submissionId, relationship, `total=${inputs.facts.total}`, inputs.facts.matchType, `hourUnknown=${inputs.hourUnknown.join(',') || '-'}`)
     const result = await generateCompatReport(inputs, cfg, log)
