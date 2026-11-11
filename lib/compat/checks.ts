@@ -28,6 +28,11 @@ const BANNED: [RegExp, string][] = [
   [/(?<!\w)\+\d+(\.\d+)?\b|\b\d+\.\d+\b/, 'prints an internal number'],
   [/\bscor(e|es|ed)\b(\s+[\w-]+){0,4}?\s+(of\s+)?\d{1,3}\b(?!\s*(minutes?|hours?|days?|weeks?|times?))|\b\d{1,3}\s*(\/\s*100|out of 100)\b/i, 'prints a score number in the body'],
   [/\b(can(?:not|'t)|unable to|will not be able to) (have|conceive)\b|\binfertil/i, 'suggests someone can or cannot have children'],
+  [/\b(ensures?|guarantees?) that\b[^.]{0,60}\bnever\b|\bwill never threaten\b/i, 'promises an outcome'],
+]
+// 로그만 남기는 검사(고치기 대상 아님: 고치기는 70초가 더 걸린다)
+const SOFT_PATTERNS: [RegExp, string][] = [
+  [/\bfamilies of origin\b|\b(her|his|their|Yuri's|\w+'s) (lineage|upbringing|family (tempo|temperament|culture))\b|\bancestral (differences|habits|customs)\b|\bemotional playbooks?\b/i, "describes a family or upbringing the facts do not contain"],
 ]
 const EX_BANNED: [RegExp, string][] = [
   [/\binevitabl\w*|\bpermanent(ly)?\b|\bdoomed\b|\bwould recreate\b|\bcannot work\b|\bcan't work\b/i, 'states a verdict instead of a lean'],
@@ -47,6 +52,7 @@ export function checkSection(key: string, paragraphs: string[], inp: CompatInput
     paragraphs.forEach((p, i) => { const w = words(p); if (w < 55 || w > 160) soft.push(`P${i + 1} ${w} words`) })
   }
   for (const [re, msg] of BANNED) if (re.test(text)) hard.push(msg)
+  for (const [re, msg] of SOFT_PATTERNS) if (re.test(text)) soft.push(msg)
   if (inp.relationship === 'ex') {
     for (const [re, msg] of EX_BANNED) if (re.test(text)) hard.push(msg)
     if (new RegExp(`\\b${escapeRe(inp.names.a)}\\b`).test(text)) hard.push(`uses the reader's own name "${inp.names.a}"; write "you"`)
@@ -84,7 +90,8 @@ const shingles = (text: string) => {
   }
   return out
 }
-const quotesIn = (text: string) => new Set([...text.matchAll(/["\u201c']([^"\u201d']{18,160})["\u201d']/g)].map((m) => m[1].toLowerCase().replace(/[^a-z ]/g, '').trim()).filter((q) => q.split(' ').length >= 4))
+// 진짜 큰따옴표(" 또는 “ ”)만 인용으로 본다. 작은따옴표(')는 소유격(Yuri's)이라 인용으로 보면 오탐이 난다.
+const quotesIn = (text: string) => new Set([...text.matchAll(/["\u201c]([^"\u201c\u201d]{18,160})["\u201d]/g)].map((m) => m[1].toLowerCase().replace(/[^a-z ]/g, '').trim()).filter((q) => q.split(' ').length >= 4))
 
 /** 앞 섹션과 같은 조언(같은 인용문, 같은 5단어 구절)을 쓴 뒤쪽 섹션 → { key: ['repeats advice from section X: "..."'] } */
 export function repeatedAdvice(sections: { key: string; paragraphs: string[] }[]): Record<string, string[]> {
@@ -95,11 +102,14 @@ export function repeatedAdvice(sections: { key: string; paragraphs: string[] }[]
     const text = sec.paragraphs.join(' ')
     const hits: string[] = []
     for (const q of quotesIn(text)) { const p = seenQ.get(q); if (p && p !== sec.key) hits.push(`repeats the quoted sentence from section ${p}: "${q}"`); else seenQ.set(q, sec.key) }
-    let n = 0
+    // 5단어 구절 하나만 겹치는 건 흔한 표현("leave both of you exhausted")이라 무시한다. 같은 섹션에서 2개 이상 겹칠 때(= 6단어 이상 이어진 구절)만 센다.
+    const byPrev = new Map<string, string[]>()
     for (const g of shingles(text)) {
       const p = seenSh.get(g)
-      if (p && p !== sec.key) { if (n++ < 1) hits.push(`repeats advice from section ${p} ("${g}")`) } else seenSh.set(g, sec.key)
+      if (p && p !== sec.key) byPrev.set(p, [...(byPrev.get(p) ?? []), g])
+      else seenSh.set(g, sec.key)
     }
+    for (const [p, gs] of byPrev) if (gs.length >= 2) { hits.push(`repeats advice from section ${p} ("${gs[0]}")`); break }
     if (hits.length) out[sec.key] = hits
   }
   return out
