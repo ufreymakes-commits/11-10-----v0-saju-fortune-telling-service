@@ -104,6 +104,16 @@ export function CompatibilityReportContent({
       {/* Header */}
       <div className="bg-gradient-to-b from-pink-950/40 to-transparent pt-12 pb-8 px-4">
         <div className="max-w-lg mx-auto text-center space-y-6">
+          {isScoreBoard(scoreBoard) && (
+            <CompatibilityBondCard
+              board={scoreBoard}
+              personABirthDate={personABirthDate}
+              personBBirthDate={personBBirthDate}
+              personADayMaster={personADayMaster}
+              personBDayMaster={personBDayMaster}
+            />
+          )}
+
           <div className="inline-flex items-center gap-2 bg-pink-500/10 border border-pink-500/20 text-pink-400 text-xs font-medium px-3 py-1.5 rounded-full">
             Saju Compatibility Report
           </div>
@@ -171,16 +181,6 @@ export function CompatibilityReportContent({
 
           {/* v2: score board replaces the old score box and theme box */}
           {isV2 && scoreBoard && <CompatibilityScoreBoard board={scoreBoard} />}
-
-          {isScoreBoard(scoreBoard) && (
-            <CompatibilityBondCard
-              board={scoreBoard}
-              personABirthDate={personABirthDate}
-              personBBirthDate={personBBirthDate}
-              personADayMaster={personADayMaster}
-              personBDayMaster={personBDayMaster}
-            />
-          )}
 
           {/* Compatibility Score (v1 reports) */}
           {!isV2 && compatibilityScore !== null && compatibilityScore !== undefined && (
