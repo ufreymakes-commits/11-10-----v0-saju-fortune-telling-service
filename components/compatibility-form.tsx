@@ -9,6 +9,8 @@ import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { Spinner } from '@/components/ui/spinner'
 import { CitySearch } from '@/components/city-search'
+import { CompatibilityRelationshipFields } from '@/components/compatibility-relationship-fields'
+import type { RelationshipType } from '@/lib/compat/constants'
 import { inferTimezone } from '@/lib/city-search'
 import type { City } from '@/lib/city-search'
 import { HeartIcon } from 'lucide-react'
@@ -199,6 +201,9 @@ export function CompatibilityForm() {
   const [personB, setPersonB] = useState<PersonFormData>(emptyPerson())
   const [cityA, setCityA] = useState<City | null>(null)
   const [cityB, setCityB] = useState<City | null>(null)
+  const [relationshipType, setRelationshipType] = useState<RelationshipType | ''>('')
+  const [concern, setConcern] = useState('')
+  const [relationshipError, setRelationshipError] = useState<string | undefined>()
 
   const validatePerson = (data: PersonFormData, city: City | null): PersonFormErrors => {
     const errs: PersonFormErrors = {}
@@ -216,7 +221,10 @@ export function CompatibilityForm() {
     const errB = validatePerson(personB, cityB)
     setErrors({ personA: errA, personB: errB })
 
-    if (Object.keys(errA).length > 0 || Object.keys(errB).length > 0) return
+    const relError = relationshipType ? undefined : 'Please choose what you two are right now.'
+    setRelationshipError(relError)
+
+    if (relError || Object.keys(errA).length > 0 || Object.keys(errB).length > 0) return
 
     setIsLoading(true)
 
@@ -251,6 +259,8 @@ export function CompatibilityForm() {
           personBLongitude: cityB?.lon || null,
           personBLatitude: cityB?.lat || null,
           personBGender: personB.gender,
+          relationshipType,
+          concern: concern.trim(),
         })
       })
 
@@ -265,6 +275,20 @@ export function CompatibilityForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
+      {/* Relationship type + concern */}
+      <div className="bg-white rounded-2xl border border-pink-100 p-6 shadow-sm">
+        <CompatibilityRelationshipFields
+          relationshipType={relationshipType}
+          concern={concern}
+          onRelationshipChange={(v) => {
+            setRelationshipType(v)
+            setRelationshipError(undefined)
+          }}
+          onConcernChange={setConcern}
+          error={relationshipError}
+        />
+      </div>
+
       {/* Person A */}
       <div className="bg-white rounded-2xl border border-pink-100 p-6 shadow-sm">
         <PersonForm

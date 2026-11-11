@@ -5,6 +5,8 @@ import Image from 'next/image'
 import { track } from '@/hooks/use-track'
 import { HeartIcon, ChevronDownIcon, DownloadIcon, LinkIcon, CheckIcon } from 'lucide-react'
 import { CompatibilityReportLoader } from './compatibility-report-loader'
+import { CompatibilityScoreBoard } from './compatibility-score-board'
+import type { ScoreBoard } from '@/lib/compat/constants'
 import { getDayMasterCharacter } from '@/lib/day-master-characters'
 
 // English to Korean day master mapping for character lookup
@@ -17,9 +19,23 @@ const ENGLISH_TO_KOREAN: Record<string, string> = {
 }
 
 interface Section {
+  key?: string
   title: string
   content: string
   score?: number | null
+}
+
+const KEEP_SECTION_KEY = 'keep'
+
+function Paragraphs({ text, className }: { text: string; className: string }) {
+  const parts = text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
+  return (
+    <div className="space-y-3">
+      {parts.map((p, i) => (
+        <p key={i} className={className}>{p}</p>
+      ))}
+    </div>
+  )
 }
 
 interface CompatibilityReportContentProps {
@@ -34,6 +50,7 @@ interface CompatibilityReportContentProps {
   sections: Section[]
   submissionId?: string
   compatibilityScore?: number | null
+  scoreBoard?: ScoreBoard | null
 }
 
 export function CompatibilityReportContent({
@@ -48,17 +65,22 @@ export function CompatibilityReportContent({
   sections,
   submissionId,
   compatibilityScore,
+  scoreBoard,
 }: CompatibilityReportContentProps) {
-  // If no sections (report not generated yet), show loader
+  const [openSections, setOpenSections] = useState<Record<number, boolean>>({ 0: true })
+  const [copied, setCopied] = useState(false)
+
+  // All hooks are above this point; the loader branch below is a plain early return.
   if (!sections || sections.length === 0) {
     if (!submissionId) {
       return <div className="text-white text-center py-20">Error: No submission ID provided</div>
     }
     return <CompatibilityReportLoader submissionId={submissionId} />
   }
-  
-  const [openSections, setOpenSections] = useState<Record<number, boolean>>({ 0: true })
-  const [copied, setCopied] = useState(false)
+
+  const isV2 = !!scoreBoard
+  const accordionSections = sections.filter((s) => s.key !== KEEP_SECTION_KEY)
+  const keepSection = sections.find((s) => s.key === KEEP_SECTION_KEY)
 
   const toggleSection = (idx: number) => {
     setOpenSections((prev) => ({ ...prev, [idx]: !prev[idx] }))
@@ -76,7 +98,7 @@ export function CompatibilityReportContent({
   const handleDownloadPDF = () => {
     if (typeof window !== 'undefined') {
       const allOpen: Record<number, boolean> = {}
-      sections.forEach((_, idx) => { allOpen[idx] = true })
+      accordionSections.forEach((_, idx) => { allOpen[idx] = true })
       setOpenSections(allOpen)
       track('download_pdf_compatibility_report', '/compatibility-report')
       setTimeout(() => { window.print() }, 300)
@@ -155,8 +177,11 @@ export function CompatibilityReportContent({
             )
           })()}
 
-          {/* Compatibility Score */}
-          {compatibilityScore !== null && compatibilityScore !== undefined && (
+          {/* v2: score board replaces the old score box and theme box */}
+          {isV2 && scoreBoard && <CompatibilityScoreBoard board={scoreBoard} />}
+
+          {/* Compatibility Score (v1 reports) */}
+          {!isV2 && compatibilityScore !== null && compatibilityScore !== undefined && (
             <div className="inline-flex flex-col items-center gap-1 bg-pink-500/10 border border-pink-500/20 rounded-2xl px-8 py-4">
               <span className="text-4xl font-bold text-pink-400">{compatibilityScore}</span>
               <span className="text-white/50 text-xs">Chemistry Score</span>
@@ -164,7 +189,7 @@ export function CompatibilityReportContent({
           )}
 
           {/* First section title + Relationship type */}
-          {(firstSectionTitle || relationshipType) && (
+          {!isV2 && (firstSectionTitle || relationshipType) && (
             <div className="bg-white/5 border border-white/10 rounded-lg p-3 space-y-2">
               {firstSectionTitle && (
                 <div>
@@ -195,7 +220,7 @@ export function CompatibilityReportContent({
 
       {/* Sections */}
       <div className="max-w-lg mx-auto px-4 space-y-3">
-        {sections.map((section, idx) => (
+        {accordionSections.map((section, idx) => (
           <div
             key={idx}
             className="rounded-2xl border border-purple-200/30 bg-gradient-to-br from-white/95 to-purple-50/90 overflow-hidden shadow-sm"
@@ -218,13 +243,28 @@ export function CompatibilityReportContent({
             {openSections[idx] && (
               <div className="px-5 pb-5">
                 <div className="h-px bg-purple-200/50 mb-4" />
-                <p className="text-purple-900/80 text-sm leading-relaxed whitespace-pre-wrap">
-                  {section.content}
-                </p>
+                {section.key ? (
+                  <Paragraphs text={section.content} className="text-purple-900/80 text-sm leading-relaxed" />
+                ) : (
+                  <p className="text-purple-900/80 text-sm leading-relaxed whitespace-pre-wrap">
+                    {section.content}
+                  </p>
+                )}
               </div>
             )}
           </div>
         ))}
+
+        {keepSection && (
+          <figure className="rounded-2xl border border-pink-400/40 bg-gradient-to-br from-pink-500/15 to-rose-500/10 p-6 text-center">
+            <figcaption className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-pink-300">
+              {keepSection.title}
+            </figcaption>
+            <blockquote className="space-y-3">
+              <Paragraphs text={keepSection.content} className="text-base leading-relaxed text-white/90 italic" />
+            </blockquote>
+          </figure>
+        )}
       </div>
 
       {/* Store Products */}

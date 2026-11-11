@@ -2,6 +2,8 @@ import { notFound, redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/server'
 import { StarsBackground } from '@/components/stars-background'
 import { CompatibilityReportContent } from '@/components/compatibility-report-content'
+import { CompatibilityReportLoader } from '@/components/compatibility-report-loader'
+import { isScoreBoard } from '@/lib/compat/constants'
 import { sharedOpenGraph, sharedTwitter } from '@/lib/metadata'
 
 // 궁합 점수 계산 함수 (데이터 기반 - 일관된 결과)
@@ -116,13 +118,13 @@ export default async function CompatibilityPaidReportPage({ params }: PageProps)
       .select('*')
       .eq('submission_id', id)
       .eq('status', 'completed')
-      .single(),
+      .maybeSingle(),
     supabase
       .from('compatibility_reports')
-      .select('*')
+      .select('facts, score_board')
       .eq('submission_id', id)
       .eq('section_key', 'compatibility_full')
-      .single()
+      .maybeSingle()
   ])
   
   if (!submissionResult.data) {
@@ -155,13 +157,23 @@ export default async function CompatibilityPaidReportPage({ params }: PageProps)
   const dayMasterA = hanjaToEnglish[dayMasterHanjaA] || dayMasterHanjaA || ''
   const dayMasterB = hanjaToEnglish[dayMasterHanjaB] || dayMasterHanjaB || ''
   
-  // Extract relationship type from last section (Section 7)
   const sections = Array.isArray(report?.facts) ? report.facts : []
-  const relationshipType = sections[sections.length - 1]?.title || ''
-  
-  // Calculate compatibility score from saju data
-  const compatibilityScore = calculateCompatibilityScore(sajuDataA, sajuDataB)
-  
+
+  // Not generated yet (or still generating): the loader starts/polls generation and refreshes when done
+  if (sections.length === 0) {
+    return (
+      <main className="min-h-screen bg-[#0f0a14] relative">
+        <StarsBackground />
+        <CompatibilityReportLoader submissionId={id} />
+      </main>
+    )
+  }
+
+  // v2 reports carry a score board; v1 reports keep the old derived score
+  const scoreBoard = isScoreBoard(report?.score_board) ? report.score_board : null
+  const relationshipType = scoreBoard ? '' : sections[sections.length - 1]?.title || ''
+  const compatibilityScore = scoreBoard ? null : calculateCompatibilityScore(sajuDataA, sajuDataB)
+
   return (
     <main className="min-h-screen bg-[#0f0a14] relative">
       <StarsBackground />
@@ -177,6 +189,7 @@ export default async function CompatibilityPaidReportPage({ params }: PageProps)
           sections={sections}
           submissionId={id}
           compatibilityScore={compatibilityScore}
+          scoreBoard={scoreBoard}
         />
     </main>
   )
