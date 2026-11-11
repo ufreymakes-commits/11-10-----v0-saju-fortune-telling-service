@@ -52,8 +52,9 @@ export async function POST(request: Request) {
     
     const sajuData = calculateSaju(birthInfo)
 
-    // Vercel가 요청 IP 기반으로 붙여주는 ISO 국가 코드 (로컬 개발에서는 없음). IP 자체는 저장하지 않음.
-    const accessCountry = request.headers.get('x-vercel-ip-country')?.toUpperCase() || null
+    // Vercel가 요청 IP 기반으로 붙여주는 ISO 국가 코드 (로컬 개발에서는 없음)를 영문 풀네임으로 저장. IP 자체는 저장하지 않음.
+    const accessCountryCode = request.headers.get('x-vercel-ip-country')
+    const accessCountry = accessCountryCode ? getCountryFullName(accessCountryCode) : null
     
     // Debug: Log calculated saju pillars for verification
     console.log('[v0] Saju calculation result:', {
