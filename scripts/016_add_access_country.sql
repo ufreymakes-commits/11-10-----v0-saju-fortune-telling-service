@@ -2,4 +2,4 @@ ALTER TABLE public.submissions
   ADD COLUMN IF NOT EXISTS access_country text;
 
 COMMENT ON COLUMN public.submissions.access_country IS
-  'ISO country code of the request origin, from the x-vercel-ip-country header (IP itself is not stored)';
+  'English full country name (e.g. South Korea) of the request origin, derived from the x-vercel-ip-country header (IP itself is not stored)';
