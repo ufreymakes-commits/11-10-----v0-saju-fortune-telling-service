@@ -6,17 +6,9 @@ import { track } from '@/hooks/use-track'
 import { HeartIcon, ChevronDownIcon, DownloadIcon, LinkIcon, CheckIcon } from 'lucide-react'
 import { CompatibilityReportLoader } from './compatibility-report-loader'
 import { CompatibilityScoreBoard } from './compatibility-score-board'
-import type { ScoreBoard } from '@/lib/compat/constants'
-import { getDayMasterCharacter } from '@/lib/day-master-characters'
-
-// English to Korean day master mapping for character lookup
-const ENGLISH_TO_KOREAN: Record<string, string> = {
-  'Yang Wood': '갑', 'Yin Wood': '을',
-  'Yang Fire': '병', 'Yin Fire': '정',
-  'Yang Earth': '무', 'Yin Earth': '기',
-  'Yang Metal': '경', 'Yin Metal': '신',
-  'Yang Water': '임', 'Yin Water': '계',
-}
+import { isScoreBoard, type ScoreBoard } from '@/lib/compat/constants'
+import { ENGLISH_TO_KOREAN, getDayMasterCharacter } from '@/lib/day-master-characters'
+import { CompatibilityBondCard } from './compatibility-bond-card'
 
 interface Section {
   key?: string
@@ -116,8 +108,18 @@ export function CompatibilityReportContent({
             Saju Compatibility Report
           </div>
 
-          {/* Unified Character Box: Name, Birth Date, Character, Heart in center */}
-          {(personADayMaster || personBDayMaster) && (() => {
+          {isScoreBoard(scoreBoard) && (
+            <CompatibilityBondCard
+              board={scoreBoard}
+              personABirthDate={personABirthDate}
+              personBBirthDate={personBBirthDate}
+              personADayMaster={personADayMaster}
+              personBDayMaster={personBDayMaster}
+            />
+          )}
+
+          {/* Unified Character Box: only for reports without the bond card, to avoid showing the characters twice */}
+          {!isScoreBoard(scoreBoard) && (personADayMaster || personBDayMaster) && (() => {
             const koreanA = ENGLISH_TO_KOREAN[personADayMaster] || ''
             const koreanB = ENGLISH_TO_KOREAN[personBDayMaster] || ''
             const characterA = getDayMasterCharacter(koreanA)

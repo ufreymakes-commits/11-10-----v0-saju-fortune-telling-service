@@ -2,6 +2,10 @@
 
 import { useState } from 'react'
 import { DownloadIcon, Share2Icon } from 'lucide-react'
+import { downloadBlob, renderCardPng } from '@/lib/card-export'
+
+export const CARD_BUTTON_CLASS =
+  'inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60'
 
 export const FOOTER_TEXT = 'Designed by Sajume \u00b7 The Eerie K-Traditional Astrology'
 
@@ -36,11 +40,12 @@ interface TarotFrameProps {
   label: string
   background: string
   accent: string
+  siteName?: string
   children: React.ReactNode
 }
 
 // 세 장의 카드가 공유하는 타로 카드 틀: 2:3 비율, 금색 이중 테두리, 모서리 장식, 별빛, 하단 문구.
-export function TarotFrame({ id, label, background, accent, children }: TarotFrameProps) {
+export function TarotFrame({ id, label, background, accent, siteName = SITE_NAME, children }: TarotFrameProps) {
   return (
     <section aria-label={label}>
       <div id={id} className="orb-card-frame relative aspect-[2/3] w-full rounded-[22px] p-[3px]">
@@ -77,7 +82,7 @@ export function TarotFrame({ id, label, background, accent, children }: TarotFra
           <p className="relative mt-2 text-center text-[7.5px] leading-snug tracking-[0.12em] text-[#e9dff7]/65">
             {FOOTER_TEXT}
             <br />
-            {SITE_NAME}
+            {siteName}
           </p>
         </div>
       </div>
@@ -109,21 +114,7 @@ interface CardActionsProps {
 async function renderPng(targetId: string, backgroundColor: string): Promise<Blob> {
   const node = document.getElementById(targetId)
   if (!node) throw new Error('Card not found')
-  const { toBlob } = await import('html-to-image')
-  const blob = await toBlob(node, { pixelRatio: 2, cacheBust: true, backgroundColor })
-  if (!blob) throw new Error('Could not render image')
-  return blob
-}
-
-function downloadBlob(blob: Blob, fileName: string) {
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = fileName
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
-  setTimeout(() => URL.revokeObjectURL(url), 2000)
+  return renderCardPng(node, { pixelRatio: 2, backgroundColor })
 }
 
 export function CardActions({
@@ -176,8 +167,7 @@ export function CardActions({
     }
   }
 
-  const buttonClass =
-    'inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60'
+  const buttonClass = CARD_BUTTON_CLASS
 
   return (
     <div className={`flex flex-col items-center gap-1.5 ${className}`}>

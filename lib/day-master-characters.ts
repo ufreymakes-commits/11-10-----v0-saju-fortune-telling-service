@@ -127,6 +127,23 @@ export const DAY_MASTER_CHARACTERS: Record<string, DayMasterCharacter> = {
 }
 
 // 일간 한글명으로 캐릭터 정보 가져오기
+// 영문 일간 이름("Yin Metal")을 한글 천간으로 바꾼다. 궁합 리포트 상단 카드와 본드 카드가 함께 쓴다.
+export const ENGLISH_TO_KOREAN: Record<string, string> = {
+  'Yang Wood': '갑', 'Yin Wood': '을',
+  'Yang Fire': '병', 'Yin Fire': '정',
+  'Yang Earth': '무', 'Yin Earth': '기',
+  'Yang Metal': '경', 'Yin Metal': '신',
+  'Yang Water': '임', 'Yin Water': '계',
+}
+
+export const HANJA_TO_ENGLISH: Record<string, string> = {
+  '甲': 'Yang Wood', '乙': 'Yin Wood',
+  '丙': 'Yang Fire', '丁': 'Yin Fire',
+  '戊': 'Yang Earth', '己': 'Yin Earth',
+  '庚': 'Yang Metal', '辛': 'Yin Metal',
+  '壬': 'Yang Water', '癸': 'Yin Water',
+}
+
 export function getDayMasterCharacter(dayMaster: string): DayMasterCharacter | null {
   return DAY_MASTER_CHARACTERS[dayMaster] || null
 }

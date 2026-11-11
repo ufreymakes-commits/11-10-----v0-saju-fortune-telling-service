@@ -4,6 +4,7 @@ import { CompatibilityReportContent } from '@/components/compatibility-report-co
 import { CompatibilityReportLoader } from '@/components/compatibility-report-loader'
 import { StarsBackground } from '@/components/stars-background'
 import { isScoreBoard } from '@/lib/compat/constants'
+import { HANJA_TO_ENGLISH } from '@/lib/day-master-characters'
 
 export default async function CompatibilityReportPage({
   params,
@@ -64,8 +65,8 @@ export default async function CompatibilityReportPage({
   const sajuDataA = submission.person_a_saju_data as any || {}
   const sajuDataB = submission.person_b_saju_data as any || {}
   
-  const dayMasterA = (sajuDataA.fourPillars?.day?.stem || '') + (sajuDataA.fourPillars?.day?.branch || '')
-  const dayMasterB = (sajuDataB.fourPillars?.day?.stem || '') + (sajuDataB.fourPillars?.day?.branch || '')
+  const dayMasterA = HANJA_TO_ENGLISH[sajuDataA.dayMaster] || sajuDataA.dayMaster || ''
+  const dayMasterB = HANJA_TO_ENGLISH[sajuDataB.dayMaster] || sajuDataB.dayMaster || ''
   
   // Extract relationship type from last section (섹션 7)
   const scoreBoard = isScoreBoard(report.score_board) ? report.score_board : null
