@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { CompatibilityReportContent } from '@/components/compatibility-report-content'
 import { CompatibilityReportLoader } from '@/components/compatibility-report-loader'
 import { StarsBackground } from '@/components/stars-background'
+import { isScoreBoard } from '@/lib/compat/constants'
 
 export default async function CompatibilityReportPage({
   params,
@@ -42,12 +43,13 @@ export default async function CompatibilityReportPage({
   // Fetch report
   const { data: report } = await supabase
     .from('compatibility_reports')
-    .select('facts')
+    .select('facts, score_board')
     .eq('submission_id', id)
-    .single()
+    .eq('section_key', 'compatibility_full')
+    .maybeSingle()
 
   // If report is not ready yet, show loader (which will trigger generation)
-  if (!report?.facts) {
+  if (!Array.isArray(report?.facts) || report.facts.length === 0) {
     return (
       <main className="min-h-screen bg-[#0f0a14] relative">
         <StarsBackground />
@@ -66,8 +68,9 @@ export default async function CompatibilityReportPage({
   const dayMasterB = (sajuDataB.fourPillars?.day?.stem || '') + (sajuDataB.fourPillars?.day?.branch || '')
   
   // Extract relationship type from last section (섹션 7)
+  const scoreBoard = isScoreBoard(report.score_board) ? report.score_board : null
   const lastSection = sections[sections.length - 1] || {}
-  const relationshipType = lastSection.title || ''
+  const relationshipType = scoreBoard ? '' : lastSection.title || ''
 
   return (
     <main className="min-h-screen bg-[#0f0a14] relative">
@@ -82,6 +85,8 @@ export default async function CompatibilityReportPage({
         relationshipType={relationshipType}
         firstSectionTitle={sections[0]?.title || ''}
         sections={sections}
+        submissionId={id}
+        scoreBoard={scoreBoard}
       />
     </main>
   )

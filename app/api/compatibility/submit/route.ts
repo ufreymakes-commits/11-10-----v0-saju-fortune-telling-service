@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { calculateSaju } from '@/lib/saju-calculator'
 import type { BirthInfo } from '@/lib/types'
+import { RELATIONSHIP_TYPES } from '@/lib/compat/constants'
+import { cleanConcern } from '@/lib/compat/prompt-facts'
 
 export async function POST(request: Request) {
   try {
@@ -15,8 +17,15 @@ export async function POST(request: Request) {
       personBName, personBBirthDate, personBBirthTime, personBBirthCountry,
       personBBirthCity, personBTimezone, personBLongitude, personBLatitude, personBGender,
       // Meta
-      referralSource
+      referralSource,
+      relationshipType, concern,
     } = body
+
+    // Old cached pages may not send relationshipType; only reject values that are present but invalid
+    if (relationshipType && !(RELATIONSHIP_TYPES as readonly string[]).includes(relationshipType)) {
+      return NextResponse.json({ error: 'Invalid relationship type' }, { status: 400 })
+    }
+    const cleanedConcern = cleanConcern(concern)
 
     // Validate required fields
     if (!personAName || !personABirthDate || !personABirthCountry || !personAGender ||
@@ -81,6 +90,8 @@ export async function POST(request: Request) {
         person_b_gender: personBGender,
         person_b_saju_data: sajuDataB,
         referral_source: referralSource || null,
+        relationship_type: relationshipType || null,
+        concern: cleanedConcern || null,
       })
       .select('id')
       .single()
