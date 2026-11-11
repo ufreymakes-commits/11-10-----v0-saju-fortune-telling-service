@@ -218,7 +218,7 @@ async function callGemini(
     system: systemPrompt,
     prompt: userPrompt,
     temperature: options?.temperature ?? 0,
-    maxTokens: options?.maxTokens ?? 3000
+    maxOutputTokens: options?.maxTokens ?? 3000
   })
   return result.text
 }
@@ -382,7 +382,7 @@ ${JSON.stringify(allSajuData, null, 2)}`
     
     console.log('[v0] Compatibility: Calculated score:', compatibilityResult.score, 'Type:', compatibilityResult.relationshipType)
 
-    const stage2UserPrompt = `두 사람을 위한 사주 궁합 레포트를 만들어라. 각각 7개의 섹션으로 이루어진 주제에 따라 문장들을 작성해라. 미국인 Gen-z 해설가가 말하는 것 처럼, 너무 가볍지 않은 선에서 gen-z 용어도 가끔 섞어서 넣어준다. (no cap, vibe, aura, for real 등). 참고로 현대에선 동성애자 커플도 종종 있으니, 같은 성별의 사주 궁합 요청이 들어와도 놀라지 말고 침착하고 친절하게 이성커플과 같은 대우로 풀이를 작성하라.
+    const stage2UserPrompt = `두 사람을 위한 사주 궁합 레포트를 만들어라. 각각 7개의 섹션으로 이루어진 주제에 ���라 문장들을 작성해라. 미국인 Gen-z 해설가가 말하는 것 처럼, 너무 가볍지 않은 선에서 gen-z 용어도 가끔 섞어서 넣어준다. (no cap, vibe, aura, for real 등). 참고로 현대에선 동성애자 커플도 종종 있으니, 같은 성별의 사주 궁합 요청이 들어와도 놀라지 말고 침착하고 친절하게 이성커플과 같은 대우로 풀이를 작성하라.
 
 === CRITICAL LENGTH REQUIREMENT ===
 EACH SECTION MUST BE AT LEAST 1,500-2,000 CHARACTERS (approximately 300-400 words).
@@ -447,7 +447,7 @@ IMPORTANT - Title format rules:
 시기 지정 (CRITICAL - 프롬프트 상단에 제공된 "결혼/연애 타이밍 계산값" 데이터를 그대로 인용, daewoon/yeonwoon을 다시 매칭해서 직접 재계산하지 말 것):
 - 2026년 이후 미래 시기: 두 사람 각각의 bestMeetingYear/bestMarriageYear와 isPast가 false인 candidates만 사용합니다. 두 사람의 유력 연도가 겹치거나 가까우면 그 시너지를 강조하고, 다르면 각자의 흐름이 언제 마주치는지 설명합니다. 만약 두 사람 중 한쪽 혹은 양쪽 모두의 미래 최강 신호가 결혼급이 아니라면(카테고리가 "무자"/"과다"이거나 신호가 도화/식신 같은 단순 연애성 신호일 뿐이거나 bestMarriageYear가 null인 경우), 이를 인정하면서 해당 연도의 에너지가 결혼이 아니라 무엇으로 나타날 수 있는지 재해석합니다 — 예: 큰 계약이나 사업 파트너십, 함께하는 큰 프로젝트, 출산/가족 확장, 이주, 또는 관계에서 의미 있는 다른 전환점. 이 재해석은 반드시 해당 연도의 실제 십신/오행 신호에 근거해야 하며, 막연한 추측이 아니어야 합니다.
 - 과거의 인상적인 시기: 두 사람 각각의 pastBestMeetingYear/pastBestMarriageYear와 isPast가 true인 candidates를 활용해 최근 과거 10년 중 짚고 넘어갈 인상적인 연애 관련 시기를 한두 개씩 짚어줍니다. 그 해에 각자에게 구체적으로 어떤 일이 있었을지 함께 상상하며 서술합니다.
-- 이별수가 있다면, '이별수가 있다' 라고 단정지어 이야기 하기 보다는, 특정 연도에 거리감이 생기거나 갈등이 일어날 수 있으니 지혜롭게 해결하는 방법에 대해서 이야기를 초점 맞추어 서술합니다.
+- 이별수가 있다면, '이별수가 있다' 라고 단정지어 이��기 하기 보다는, 특정 연도에 거리감이 생기거나 갈등이 일어날 수 있으니 지혜롭게 해결하는 방법에 대해서 이야기를 초점 맞추어 서술합니다.
 - 이 분들이 만약 결혼하게 된다면 서로에게 어떤 부부가 될지 귀엽게 상상해봅니다. windowNote가 있다면 그 의미를 자연스럽게 문장에 녹여내되 그대로 인용하지는 않습니다.
 
 섹션 7: 최종 관계 타입
@@ -492,7 +492,7 @@ Return a JSON array of 7 sections with this structure:
     if (!stage2JsonMatch) {
       const directJsonMatch = stage2Raw.match(/(\[[\s\S]*\])/)
       if (directJsonMatch) {
-        stage2JsonMatch = [null, directJsonMatch[1]]
+        stage2JsonMatch = directJsonMatch
       }
     }
     
