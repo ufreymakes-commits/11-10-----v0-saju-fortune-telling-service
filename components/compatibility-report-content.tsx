@@ -104,6 +104,10 @@ export function CompatibilityReportContent({
       {/* Header */}
       <div className="bg-gradient-to-b from-pink-950/40 to-transparent pt-12 pb-8 px-4">
         <div className="max-w-lg mx-auto text-center space-y-6">
+          <div className="inline-flex items-center gap-2 bg-pink-500/10 border border-pink-500/20 text-pink-400 text-xs font-medium px-3 py-1.5 rounded-full">
+            Saju Compatibility Report
+          </div>
+
           {isScoreBoard(scoreBoard) && (
             <CompatibilityBondCard
               board={scoreBoard}
@@ -114,12 +118,8 @@ export function CompatibilityReportContent({
             />
           )}
 
-          <div className="inline-flex items-center gap-2 bg-pink-500/10 border border-pink-500/20 text-pink-400 text-xs font-medium px-3 py-1.5 rounded-full">
-            Saju Compatibility Report
-          </div>
-
-          {/* Unified Character Box: Name, Birth Date, Character, Heart in center */}
-          {(personADayMaster || personBDayMaster) && (() => {
+          {/* Unified Character Box: only for reports without the bond card, to avoid showing the characters twice */}
+          {!isScoreBoard(scoreBoard) && (personADayMaster || personBDayMaster) && (() => {
             const koreanA = ENGLISH_TO_KOREAN[personADayMaster] || ''
             const koreanB = ENGLISH_TO_KOREAN[personBDayMaster] || ''
             const characterA = getDayMasterCharacter(koreanA)
