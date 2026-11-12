@@ -35,7 +35,8 @@ function SuccessContent() {
             gumihoQuestionId: questionId
           })
         }).then(async (res) => {
-          if (res.ok) {
+          // 202 = another request is still generating; DB polling handles the redirect
+          if (res.ok && res.status !== 202) {
             setStatus('success')
             setTimeout(() => {
               router.push(`/ask-gumiho/${submissionId}/answers?questionId=${questionId}`)
@@ -81,8 +82,8 @@ function SuccessContent() {
             gumihoQuestionId: questionId
           })
         }).then(async (res) => {
-          if (res.ok) {
-            // Generation completed within timeout - redirect immediately
+          if (res.ok && res.status !== 202) {
+            // Generation completed within timeout - redirect immediately (202 = still generating, polling handles it)
             setStatus('success')
             setTimeout(() => {
               router.push(`/ask-gumiho/${submissionId}/answers?questionId=${questionId}`)

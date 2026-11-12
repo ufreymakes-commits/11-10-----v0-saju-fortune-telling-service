@@ -59,9 +59,12 @@ export async function GET(request: Request) {
       .from('payments')
       .select('submission_id')
       .eq('status', 'completed')
-      .lte('completed_at', iso(COMPLETED_MIN_AGE_MS))
-      .gte('completed_at', iso(COMPLETED_MAX_AGE_MS))
-      .order('completed_at', { ascending: true })
+      // Older coupon rows have completed_at = null, so fall back to created_at for them.
+      .or(
+        `and(completed_at.lte.${iso(COMPLETED_MIN_AGE_MS)},completed_at.gte.${iso(COMPLETED_MAX_AGE_MS)}),` +
+          `and(completed_at.is.null,created_at.lte.${iso(COMPLETED_MIN_AGE_MS)},created_at.gte.${iso(COMPLETED_MAX_AGE_MS)})`,
+      )
+      .order('created_at', { ascending: true })
       .limit(50)
 
     if (completedError) console.error('[v0] payments-reconcile: completed query failed', completedError.message)

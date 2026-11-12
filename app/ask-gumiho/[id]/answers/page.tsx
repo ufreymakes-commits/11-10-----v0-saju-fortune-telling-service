@@ -30,6 +30,7 @@ function AnswersContent() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    let cancelled = false
     async function fetchData() {
       if (!questionId) {
         setError('Invalid question ID')
@@ -61,15 +62,40 @@ function AnswersContent() {
             body: JSON.stringify({ gumihoQuestionId: questionId })
           })
 
-          if (res.ok) {
-            const genData = await res.json()
+          if (!res.ok) {
+            setError('Failed to generate answers. Please try refreshing the page.')
+            setLoading(false)
+            return
+          }
+
+          // 202 means another request is already generating; keep the loading screen and poll the DB.
+          const genData = res.status === 202 ? null : await res.json().catch(() => null)
+          if (genData?.answers?.answer_1) {
             gumihoQuestion.answer_1 = genData.answers.answer_1
             gumihoQuestion.answer_2 = genData.answers.answer_2
             gumihoQuestion.answer_3 = genData.answers.answer_3
           } else {
-            setError('Failed to generate answers. Please try refreshing the page.')
-            setLoading(false)
-            return
+            const deadline = Date.now() + 6 * 60 * 1000
+            while (!cancelled && Date.now() < deadline && !gumihoQuestion.answer_1) {
+              await new Promise((resolve) => setTimeout(resolve, 5000))
+              if (cancelled) return
+              const { data: row } = await supabase
+                .from('gumiho_questions')
+                .select('answer_1, answer_2, answer_3')
+                .eq('id', questionId)
+                .single()
+              if (row?.answer_1) {
+                gumihoQuestion.answer_1 = row.answer_1
+                gumihoQuestion.answer_2 = row.answer_2
+                gumihoQuestion.answer_3 = row.answer_3
+              }
+            }
+            if (cancelled) return
+            if (!gumihoQuestion.answer_1) {
+              setError('Failed to generate answers. Please try refreshing the page.')
+              setLoading(false)
+              return
+            }
           }
         } catch {
           setError('Failed to generate answers')
@@ -93,6 +119,9 @@ function AnswersContent() {
     }
 
     fetchData()
+    return () => {
+      cancelled = true
+    }
   }, [questionId])
 
   if (loading) {
