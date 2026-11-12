@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { generateText } from 'ai'
 import { createAdminClient } from '@/lib/supabase/server'
+import { PAID_MODEL } from '@/lib/ai/models'
 
 // ================================================================
 // STAGE 1: Build complete allSajuData (99 facts와 동일하게)
@@ -214,7 +215,7 @@ async function callGemini(
   options?: { temperature?: number; maxTokens?: number }
 ): Promise<string> {
   const result = await generateText({
-    model: 'google/gemini-2.5-flash',
+    model: PAID_MODEL,
     system: systemPrompt,
     prompt: userPrompt,
     temperature: options?.temperature ?? 0,

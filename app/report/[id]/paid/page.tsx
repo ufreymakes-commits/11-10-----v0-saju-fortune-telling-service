@@ -44,8 +44,22 @@ export default async function PaidReportPage({ params }: PageProps) {
   // Other is_free=false rows are per-section fallbacks from generate-section and should be ignored
   const [submissionResult, paymentResult, paidReportResult] = await Promise.all([
     supabase.from('submissions').select('*').eq('id', id).single(),
-    supabase.from('payments').select('*').eq('submission_id', id).eq('status', 'completed').single(),
-    supabase.from('reports').select('*').eq('submission_id', id).eq('section_key', 'paid_full').single()
+    supabase
+      .from('payments')
+      .select('*')
+      .eq('submission_id', id)
+      .eq('status', 'completed')
+      .order('completed_at', { ascending: false, nullsFirst: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from('reports')
+      .select('*')
+      .eq('submission_id', id)
+      .eq('section_key', 'paid_full')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
   ])
   
   if (!submissionResult.data) {
