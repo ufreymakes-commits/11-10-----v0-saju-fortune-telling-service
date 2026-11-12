@@ -1,9 +1,10 @@
 // 궁합 v2 — 모델 설정. ★ v0: 아래 TODO 두 곳을 app/api/generate-paid-report 의 2단계 파이프라인이 지금 쓰는 값과 "똑같이" 채운다.
 import type { CompatModelConfig } from './pipeline'
+import { PAID_MODEL } from '@/lib/ai/models'
 
 export function getCompatModelConfig(): CompatModelConfig {
   // app/api/generate-paid-report 의 STAGE_MODEL 과 같은 값
-  const model = 'google/gemini-3.8-flash'
+  const model = PAID_MODEL
 
   // generate-paid-report 의 generateStage / 카드 호출과 같은 형식: google.thinkingConfig.thinkingLevel
   const thinkingMedium: any = { google: { thinkingConfig: { thinkingLevel: 'medium' } } }

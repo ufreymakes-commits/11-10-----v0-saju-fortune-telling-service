@@ -5,17 +5,17 @@ import { createClient } from '@/lib/supabase/server'
 import type { SajuData, Fact } from '@/lib/types'
 import { headers } from 'next/headers'
 import { buildSkeleton } from '@/lib/saju/skeleton'
+import { FREE_MODEL, THINK, googleThinking, withThinkingFallback } from '@/lib/ai/models'
 
 // SAJU_MASTERPIECE_GUIDE 연결 해제됨 - 필요시 다시 import 가능
 // import { SAJU_MASTERPIECE_GUIDE } from '@/lib/saju/masterpiece'
 
 /**
- * Gemini 3 Flash 사주 분석 API
- * 모든 프롬프트를 한 번에 발사
+ * 무료 3-facts 사주 분석 API
  * System: 마스터피스 가이드 + 역할 정의 (고정)
  * User: 고객 사주 데이터 + 최종 요청 (변수)
- * 
- * Model: google/gemini-3-flash (Gemini 3 Flash - 최신, 가장 빠르고 저렴)
+ *
+ * Model: FREE_MODEL (lib/ai/models.ts) - 저렴한 lite 모델
  */
 
 // Vercel 함수 최대 실행 시간 (AI 응답이 느릴 때 타임아웃 500 에러 방지)
@@ -699,14 +699,19 @@ ${JSON.stringify(allSajuData, null, 2)}
 
     for (let attempt = 1; attempt <= STAGE1_MAX_ATTEMPTS; attempt++) {
       try {
-        const stage1Result = await generateText({
-          model: 'google/gemini-2.5-flash',
-          system: stage1SystemPrompt,
-          prompt: stage1UserPrompt,
-          temperature: 0,
-          maxOutputTokens: 4000,
-          providerOptions: { google: { thinkingConfig: { thinkingBudget: 0 } } }
-        })
+        const stage1Result = await withThinkingFallback(
+          THINK.freeLight,
+          (thinkingConfig) =>
+            generateText({
+              model: FREE_MODEL,
+              system: stage1SystemPrompt,
+              prompt: stage1UserPrompt,
+              temperature: 0,
+              maxOutputTokens: 4000,
+              providerOptions: googleThinking(thinkingConfig),
+            }),
+          FREE_MODEL,
+        )
 
         console.log(`[v0] Gemini: Stage 1 response received (attempt ${attempt}), length:`, stage1Result.text.length)
 
@@ -879,19 +884,24 @@ OUTPUT FORMAT (JSON ONLY):
       }))
     })
 
-    const stage2Result = await generateObject({
-      model: 'google/gemini-2.5-flash',
-      schema: factSchema,
-      system: stage2SystemPrompt,
-      prompt: stage2UserPrompt,
-      temperature: 0,
-      maxOutputTokens: 3000,
-      providerOptions: { google: { thinkingConfig: { thinkingBudget: 0 } } }
-    })
+    const stage2Result = await withThinkingFallback(
+      THINK.freeLight,
+      (thinkingConfig) =>
+        generateObject({
+          model: FREE_MODEL,
+          schema: factSchema,
+          system: stage2SystemPrompt,
+          prompt: stage2UserPrompt,
+          temperature: 0,
+          maxOutputTokens: 3000,
+          providerOptions: googleThinking(thinkingConfig),
+        }),
+      FREE_MODEL,
+    )
 
     console.log(`[v0] Gemini: Stage 2 completed, generated ${stage2Result.object.facts.length} facts`)
 
-    // Force exactly 3 facts (gemini-2.5-flash sometimes generates more)
+    // Force exactly 3 facts (the model sometimes generates more)
     const rawFacts = stage2Result.object.facts.slice(0, 3)
     
     const facts: Fact[] = rawFacts.map((f: any) => ({

@@ -10,6 +10,7 @@ import { TAILS } from '@/lib/saju/tails'
 import { stripGumihoSignature } from '@/lib/letter-signature'
 import { buildGuardBlock, checkGuards } from '@/lib/saju/ten-god-guards'
 import { buildGumihoInputs, stripCjkDeep } from '@/lib/saju/gumiho-context'
+import { PAID_MODEL, THINK, googleThinking, withThinkingFallback } from '@/lib/ai/models'
 import {
   NOTES_SYSTEM_PROMPT,
   buildNotesUserPrompt,
@@ -24,7 +25,7 @@ export const maxDuration = 300
 
 // v26a: 2단계 생성(읽기 노트 -> 카드). PAID_PIPELINE=single 이면 예전 한 번 호출 방식으로 되돌린다.
 const PIPELINE: 'single' | 'two_stage' = process.env.PAID_PIPELINE === 'single' ? 'single' : 'two_stage'
-const STAGE_MODEL = 'google/gemini-3.8-flash'
+const STAGE_MODEL = PAID_MODEL
 const NOTES_TIMEOUT_MS = 90_000
 // 한 용어(작은따옴표로 묶인 간지/패턴 이름)가 카드/편지/허락 문장 전체에서 나올 수 있는 최대 횟수
 const TERM_BUDGET = 4
@@ -495,15 +496,20 @@ async function repairProblemCards(
     })
   }
 
-  const result = await generateText({
-    model: 'google/gemini-2.5-flash',
-    system: REPAIR_SYSTEM_PROMPT,
-    prompt: `=== FINAL FACTS ===\n${JSON.stringify(finalFacts, null, 2)}\n${buildGuardBlock(finalFacts)}\n\n=== CARDS TO REWRITE (JSON) ===\n${JSON.stringify(items, null, 2)}\n\nRewrite ONLY these cards and return the JSON array [{"index", "text"}].`,
-    maxOutputTokens: 6000,
-    temperature: 0.3,
-    providerOptions: { google: { thinkingConfig: { thinkingBudget: 0 } } },
-    abortSignal: AbortSignal.timeout(60000),
-  })
+  const result = await withThinkingFallback(
+    THINK.paidLow,
+    (thinkingConfig) =>
+      generateText({
+        model: PAID_MODEL,
+        system: REPAIR_SYSTEM_PROMPT,
+        prompt: `=== FINAL FACTS ===\n${JSON.stringify(finalFacts, null, 2)}\n${buildGuardBlock(finalFacts)}\n\n=== CARDS TO REWRITE (JSON) ===\n${JSON.stringify(items, null, 2)}\n\nRewrite ONLY these cards and return the JSON array [{"index", "text"}].`,
+        maxOutputTokens: 6000,
+        temperature: 0.3,
+        providerOptions: googleThinking(thinkingConfig),
+        abortSignal: AbortSignal.timeout(60000),
+      }),
+    PAID_MODEL,
+  )
 
   const rewrites = new Map<string, string>()
   const start = result.text.indexOf('[')
@@ -609,15 +615,20 @@ async function repairClosingLetter(
   finalFacts: any,
   truthBombs: string[],
 ): Promise<string> {
-  const result = await generateText({
-    model: 'google/gemini-2.5-flash',
-    system: LETTER_REPAIR_SYSTEM_PROMPT,
-    prompt: `FirstName: ${firstName}\nStart with: "${firstName},"\nWhat was wrong with the current letter: ${reason}\n\n=== FINAL FACTS ===\n${JSON.stringify(finalFacts, null, 2)}\n\n=== TRUTH BOMB THEMES (already in the report, do not contradict) ===\n${truthBombs.join('\n')}\n\n=== CURRENT LETTER (may be empty or flawed; reuse its true facts, rewrite the rest) ===\n${letter}\n\nWrite the corrected letter now.`,
-    maxOutputTokens: 2000,
-    temperature: 0.4,
-    providerOptions: { google: { thinkingConfig: { thinkingBudget: 0 } } },
-    abortSignal: AbortSignal.timeout(45000),
-  })
+  const result = await withThinkingFallback(
+    THINK.paidLow,
+    (thinkingConfig) =>
+      generateText({
+        model: PAID_MODEL,
+        system: LETTER_REPAIR_SYSTEM_PROMPT,
+        prompt: `FirstName: ${firstName}\nStart with: "${firstName},"\nWhat was wrong with the current letter: ${reason}\n\n=== FINAL FACTS ===\n${JSON.stringify(finalFacts, null, 2)}\n\n=== TRUTH BOMB THEMES (already in the report, do not contradict) ===\n${truthBombs.join('\n')}\n\n=== CURRENT LETTER (may be empty or flawed; reuse its true facts, rewrite the rest) ===\n${letter}\n\nWrite the corrected letter now.`,
+        maxOutputTokens: 2000,
+        temperature: 0.4,
+        providerOptions: googleThinking(thinkingConfig),
+        abortSignal: AbortSignal.timeout(45000),
+      }),
+    PAID_MODEL,
+  )
   return result.text
     .trim()
     .replace(/^```[a-z]*\s*/i, '')
@@ -1383,14 +1394,19 @@ ${structureBlock}`
         const result =
           pipelineUsed === 'two_stage'
             ? await generateCardsParallel(cardPrompts.system, cardPrompts.user, cardTimings)
-            : await generateText({
-                model: 'google/gemini-2.5-flash',
-                system: cardPrompts.system,
-                prompt: cardPrompts.user,
-                maxOutputTokens: 32000,
-                temperature: 0,
-                providerOptions: { google: { thinkingConfig: { thinkingBudget: 1024 } } },
-              })
+            : await withThinkingFallback(
+                THINK.paidLow,
+                (thinkingConfig) =>
+                  generateText({
+                    model: PAID_MODEL,
+                    system: cardPrompts.system,
+                    prompt: cardPrompts.user,
+                    maxOutputTokens: 32000,
+                    temperature: 0,
+                    providerOptions: googleThinking(thinkingConfig),
+                  }),
+                PAID_MODEL,
+              )
         const usage: any = result.usage
         logTiming('gemini:attempt-end', {
           attempt,
@@ -1565,7 +1581,7 @@ ${structureBlock}`
         rawPermissions = parsedData.permissions
       }
 
-      // 섹션 제목은 모델이 아니라 코드의 Nine Tails 목록으��� 고정한다.
+      // 섹션 ��목은 모델이 아니라 코드의 Nine Tails 목록으��� 고정한다.
       paidFacts = paidFacts.map((section: any) => {
         const tail = TAILS.find((t) => t.n === Number(section?.sectionNumber))
         return tail ? { ...section, sectionTitle: tail.title } : section
