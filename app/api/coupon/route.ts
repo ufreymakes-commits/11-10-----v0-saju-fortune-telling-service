@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { sendPaymentConfirmationEmail } from '@/lib/email/payment-confirmation'
 
 const VALID_COUPON = 'znvhsDlqslek123'
 
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 
   // No paid report yet — create payment record for coupon (same structure as PayPal)
-  const { error: paymentError } = await supabase
+  const { data: payment, error: paymentError } = await supabase
     .from('payments')
     .insert({
       submission_id: submissionId,
@@ -50,13 +51,24 @@ export async function POST(req: NextRequest) {
       amount: 0,
       currency: 'USD',
       status: 'completed',
+      completed_at: new Date().toISOString(),
       report_url: `${baseUrl}/report/${submissionId}/paid`,
     })
+    .select('id')
+    .single()
 
-  if (paymentError) {
+  if (paymentError || !payment) {
     console.error('[v0] Failed to create coupon payment record:', paymentError)
     return NextResponse.json({ success: false, error: 'Failed to process coupon' }, { status: 500 })
   }
+
+  after(async () => {
+    try {
+      await sendPaymentConfirmationEmail(payment.id as string)
+    } catch (e) {
+      console.error('[v0] coupon confirmation email failed:', e)
+    }
+  })
 
   // Return submissionId to client
   // Client (coupon-success page) will call generate-paid-report directly, same as PayPal flow
