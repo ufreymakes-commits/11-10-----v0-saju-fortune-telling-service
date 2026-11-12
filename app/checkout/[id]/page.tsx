@@ -44,7 +44,8 @@ export default async function CheckoutPage({ params }: PageProps) {
     .select('status')
     .eq('submission_id', id)
     .eq('status', 'completed')
-    .single()
+    .limit(1)
+    .maybeSingle()
   
   if (payment) {
     redirect(`/report/${id}/paid`)

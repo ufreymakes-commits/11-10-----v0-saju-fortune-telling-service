@@ -271,7 +271,7 @@ interface ProblemCard {
   problems: Array<{ kind: ProblemKind; detail: string }>
 }
 
-// 작은따옴표로 묶인 간지/관계/신살 이름만 용어로 센다 ('Ja-Mi Wonjin'). 'I need a minute' 같은 인용 문장이나 일반 단어는 센다.
+// 작은따옴표로 묶인 간지/관계/신살 이름만 용어로 센다 ('Ja-Mi Wonjin'). 'I need a minute' 같은 인용 문장이나 일반 단��는 센다.
 const CHART_TERM_SHAPE = /^[A-Z][A-Za-z]*(?:[- ][A-Z][A-Za-z]*){0,3}$/
 function quotedTerms(text: string): string[] {
   const terms: string[] = []
@@ -899,7 +899,8 @@ export async function POST(request: Request) {
       .select('id, status')
       .eq('submission_id', submissionId)
       .eq('status', 'completed')
-      .single()
+      .limit(1)
+      .maybeSingle()
 
     logTiming('db:payment')
 
@@ -913,7 +914,9 @@ export async function POST(request: Request) {
       .select('facts, hidden_cards')
       .eq('submission_id', submissionId)
       .eq('section_key', 'paid_full')
-      .single()
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
 
     logTiming('db:cache')
 

@@ -55,6 +55,11 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
         body: JSON.stringify({ orderId: token })
       })
 
+      if (response.status === 202) {
+        router.push(`/checkout/${submissionId}/success?token=${encodeURIComponent(token)}`)
+        return
+      }
+
       const data = await response.json()
 
       if (!response.ok || !data.success) {
@@ -89,6 +94,11 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
         throw new Error(data.error || 'Failed to create payment order')
       }
       
+      if (data.alreadyPaid) {
+        router.push(`/report/${submissionId}/paid`)
+        return
+      }
+
       if (!data.id) {
         throw new Error('No order ID received from PayPal')
       }
