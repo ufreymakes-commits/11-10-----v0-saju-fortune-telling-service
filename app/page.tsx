@@ -5,6 +5,7 @@ import { Marquee } from '@/components/marquee'
 import { TextReviewSlider } from '@/components/text-review-slider'
 import { NoticeMeButton } from '@/components/notice-me-button'
 import { AskGumihoProductCard } from '@/components/ask-gumiho-product-card'
+import { POLICIES } from '@/lib/policies'
 
 // 텍스트 기반 리뷰 데이터 (preview-content와 동일)
 const TEXT_REVIEWS = [
@@ -417,6 +418,17 @@ src="/images/shopify-logo.png"
             </button>
             <p className="text-xs text-white/30">Business: hello@sajume.com</p>
           </div>
+          <nav aria-label="Store policies" className="mt-5 px-4">
+            <ul className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[10px] text-white/30">
+              {POLICIES.map((policy) => (
+                <li key={policy.slug}>
+                  <Link href={`/policies/${policy.slug}`} className="hover:text-white/60 transition-colors">
+                    {policy.footerLabel}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
       </footer>
     </main>
