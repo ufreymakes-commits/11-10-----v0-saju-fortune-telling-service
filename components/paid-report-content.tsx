@@ -436,7 +436,7 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
             <div className="flex items-center gap-2 mb-2">
               <span className="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full border border-blue-500/30">Coming Soon</span>
             </div>
-            <h4 className="text-sm font-semibold text-foreground mb-1">12-Month Fortune Subscription</h4>
+            <h4 className="text-sm font-semibold text-foreground mb-1">2027 New Year Monthly Career / Love (Coming soon)</h4>
             <p className="text-xs text-muted-foreground mb-3">Monthly personalized fortune readings based on your Saju chart.</p>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs text-blue-400">Delivered monthly</span>

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { ReportGuarantee } from '@/components/report-guarantee'
 import { Spinner } from '@/components/ui/spinner'
 import { DayMasterCard } from '@/components/day-master-card'
 import type { Fact, SajuData } from '@/lib/types'
@@ -539,6 +540,8 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
             Pay with PayPal
           </Button>
         </Link>
+
+        <ReportGuarantee tone="light" className="mx-auto mt-3 max-w-xs" />
         
         <Button 
           onClick={() => {

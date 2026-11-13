@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { ReportGuarantee } from '@/components/report-guarantee'
 import { Input } from '@/components/ui/input'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Field, FieldLabel, FieldError } from '@/components/ui/field'
@@ -341,6 +342,8 @@ export function CompatibilityForm() {
           'See Your Compatibility — $19.99'
         )}
       </Button>
+
+      <ReportGuarantee tone="dark" />
 
       <p className="text-center text-xs text-gray-400">
         Secure payment via PayPal · Instant report delivery

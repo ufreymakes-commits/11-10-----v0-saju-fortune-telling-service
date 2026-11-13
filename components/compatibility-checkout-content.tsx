@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { ReportGuarantee } from '@/components/report-guarantee'
 import { Spinner } from '@/components/ui/spinner'
 import { ShieldCheckIcon, HeartIcon, CheckIcon } from 'lucide-react'
 
@@ -150,6 +151,8 @@ export function CompatibilityCheckoutContent({
         >
           Pay with PayPal
         </Button>
+
+        <ReportGuarantee tone="dark" />
 
         <div className="flex items-center justify-center gap-2 text-white/30 text-xs">
           <ShieldCheckIcon className="w-3.5 h-3.5" />

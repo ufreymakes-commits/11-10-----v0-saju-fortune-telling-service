@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { ReportGuarantee } from '@/components/report-guarantee'
 import { Spinner } from '@/components/ui/spinner'
 import { CheckIcon, ShieldCheckIcon } from 'lucide-react'
 
@@ -249,6 +250,8 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
           </>
         )}
       </Button>
+
+      <ReportGuarantee tone="light" className="mt-3" />
 
       {/* Credit card notice */}
       <p className="text-center text-xs text-muted-foreground mt-3">

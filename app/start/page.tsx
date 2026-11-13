@@ -4,6 +4,7 @@ import { StarsBackground } from '@/components/stars-background'
 import { BirthForm } from '@/components/birth-form'
 import { NoticeMeButton } from '@/components/notice-me-button'
 import { StartReviewsSection } from '@/components/start-reviews-section'
+import { DataBasedTrust } from '@/components/data-based-trust'
 import { AskGumihoProductCard } from '@/components/ask-gumiho-product-card'
 import { sharedOpenGraph, sharedTwitter } from '@/lib/metadata'
 import { Marquee } from '@/components/marquee'
@@ -75,6 +76,8 @@ export default function StartPage() {
           Your information is used solely to calculate your birth chart and will not be shared with third parties. By continuing, you agree to our privacy policy and receiving our Saju tips newsletter.
         </p>
       </div>
+
+      <DataBasedTrust />
 
       <StartReviewsSection />
 
@@ -275,7 +278,7 @@ export default function StartPage() {
             {/* 12 months Saju Reading */}
             <div className="group md:col-span-1">
               <div className="bg-gradient-to-br from-blue-900/40 to-purple-900/40 border border-blue-500/30 rounded-xl p-6 h-full flex flex-col">
-                <h4 className="text-base md:text-lg font-semibold text-white mb-3">12 months Saju Reading</h4>
+                <h4 className="text-base md:text-lg font-semibold text-white mb-3">2027 New Year Monthly Career / Love (Coming soon)</h4>
                 <div className="relative w-full h-40 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e]">
                   <Image
                     src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/30.png?v=1778484201"
