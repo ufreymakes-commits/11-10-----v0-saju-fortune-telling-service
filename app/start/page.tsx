@@ -7,6 +7,7 @@ import { StartReviewsSection } from '@/components/start-reviews-section'
 import { AskGumihoProductCard } from '@/components/ask-gumiho-product-card'
 import { sharedOpenGraph, sharedTwitter } from '@/lib/metadata'
 import { Marquee } from '@/components/marquee'
+import { DataBasedTrust } from '@/components/data-based-trust'
 
 export const metadata = {
   title: 'Enter Your Birth Info - Sajume',
@@ -151,6 +152,8 @@ export default function StartPage() {
               </p>
             </div>
           </div>
+
+          <DataBasedTrust />
 
           {/* No.1 Global Saju */}
           <div className="mb-10 mt-14">
