@@ -70,6 +70,10 @@ export default async function PreviewPage({ params }: PageProps) {
         teaserFacts: [],
         submission: {
           name: submission.name,
+          birthDate: submission.birth_date ?? null,
+          birthTime: submission.birth_time ?? null,
+          birthCity: submission.birth_city ?? null,
+          birthCountry: submission.birth_country ?? null,
           sajuData: submission.saju_data || {}
         }
       }

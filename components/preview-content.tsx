@@ -99,9 +99,33 @@ interface PreviewData {
     name: string
     gender?: string
     calendar?: string
+    birthDate?: string | null
+    birthTime?: string | null
+    birthCity?: string | null
+    birthCountry?: string | null
     sajuData: SajuData
   }
   allSajuDataSentToGemini?: Record<string, unknown>
+}
+
+function formatBirthTime(time?: string | null): string {
+  if (!time) return 'Time unknown'
+  const match = time.match(/^(\d{1,2}):(\d{2})/)
+  if (!match) return 'Time unknown'
+  const hours24 = Number(match[1])
+  const minutes = match[2]
+  if (hours24 > 23) return 'Time unknown'
+  const period = hours24 >= 12 ? 'PM' : 'AM'
+  const hours12 = String(hours24 % 12 === 0 ? 12 : hours24 % 12).padStart(2, '0')
+  return `${hours12}:${minutes} ${period}`
+}
+
+function formatBirthCaption(submission: PreviewData['submission']): string | null {
+  if (!submission.birthDate) return null
+  const place = submission.birthCity || submission.birthCountry
+  return [submission.birthDate.slice(0, 10), formatBirthTime(submission.birthTime), place]
+    .filter(Boolean)
+    .join(' · ')
 }
 
 // Day Master (일간) emoji mapping
@@ -139,6 +163,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
   const [data, setData] = useState<PreviewData | null>(cachedData || null)
   const [isLoading, setIsLoading] = useState(!cachedData)
   const [error, setError] = useState<string | null>(null)
+  const [limitMessage, setLimitMessage] = useState<string | null>(null)
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0)
 
   const loadingMessages = [
@@ -186,6 +211,13 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
         })
 
         clearTimeout(timeoutId)
+
+        if (response.status === 429) {
+          const limitBody = await response.json().catch(() => null)
+          setLimitMessage(limitBody?.message ?? null)
+          setError('daily_limit')
+          return
+        }
 
         if (!response.ok) {
           const errorText = await response.text()
@@ -272,6 +304,24 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
     )
   }
 
+  if (error === 'daily_limit') {
+    return (
+      <div className="flex items-center justify-center min-h-screen px-4">
+        <div className="text-center max-w-xs">
+          <p className="text-sm font-medium text-foreground mb-2">
+            You&apos;ve reached today&apos;s limit.
+          </p>
+          <p className="text-xs text-muted-foreground mb-5" title={limitMessage ?? undefined}>
+            You can create 5 free readings a day. This helps us keep readings free for everyone. Your reading is saved — if you already have a link to one, it still opens. Please come back tomorrow.
+          </p>
+          <Link href="/">
+            <Button variant="outline" size="sm">Back to home</Button>
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   if (error || !data) {
     const isTimeout = error === 'timeout'
     return (
@@ -296,6 +346,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
   const { freeFacts, teaserFacts, submission } = data
   const dayMasterChar = submission.sajuData.dayPillar?.stem || '甲'
   const dayMasterInfo = DAY_MASTER_INFO[dayMasterChar] || DAY_MASTER_INFO['甲']
+  const birthCaption = formatBirthCaption(submission)
 
   // Pillars displayed left to right: Hour, Day, Month, Year
   const pillars = [
@@ -307,6 +358,9 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
 
   return (
     <div className="px-4 py-8 max-w-2xl mx-auto">
+      {birthCaption && (
+        <p className="text-[10px] text-muted-foreground text-center mb-2">{birthCaption}</p>
+      )}
       {/* Four Pillars Card */}
       <div className="bg-card border border-border rounded-xl p-4 mb-6 shadow-lg shadow-primary/5 tarot-card-float">
         <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-3 text-center">
