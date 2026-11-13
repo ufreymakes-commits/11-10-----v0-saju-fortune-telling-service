@@ -4,7 +4,6 @@ import { StarsBackground } from '@/components/stars-background'
 import { BirthForm } from '@/components/birth-form'
 import { NoticeMeButton } from '@/components/notice-me-button'
 import { StartReviewsSection } from '@/components/start-reviews-section'
-import { DataBasedTrust } from '@/components/data-based-trust'
 import { AskGumihoProductCard } from '@/components/ask-gumiho-product-card'
 import { sharedOpenGraph, sharedTwitter } from '@/lib/metadata'
 import { Marquee } from '@/components/marquee'
@@ -76,8 +75,6 @@ export default function StartPage() {
           Your information is used solely to calculate your birth chart and will not be shared with third parties. By continuing, you agree to our privacy policy and receiving our Saju tips newsletter.
         </p>
       </div>
-
-      <DataBasedTrust />
 
       <StartReviewsSection />
 

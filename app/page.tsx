@@ -138,8 +138,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <DataBasedTrust />
-
       {/* Reviews Section - Text Based */}
       <section className="relative z-10 py-16 px-4">
         <div className="max-w-5xl mx-auto">
@@ -330,6 +328,8 @@ src="/images/shopify-logo.png"
               </p>
             </div>
           </div>
+
+          <DataBasedTrust />
 
           {/* Feature grid with white icons */}
           <div className="mb-10 mt-14">

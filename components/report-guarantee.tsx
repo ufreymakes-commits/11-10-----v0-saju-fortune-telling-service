@@ -42,7 +42,7 @@ export function ReportGuarantee({ tone = 'light', className }: ReportGuaranteePr
         <ShieldCheck className="h-5 w-5" aria-hidden="true" />
       </span>
       <div className="min-w-0">
-        <p className={cn('text-sm font-semibold leading-tight', styles.title)}>Report Guarantee</p>
+        <p className={cn('text-sm font-semibold leading-tight', styles.title)}>100% Report Guarantee</p>
         <p className={cn('mt-0.5 text-xs leading-relaxed', styles.body)}>
           If your report fails to generate, you get a 100% refund.
         </p>
