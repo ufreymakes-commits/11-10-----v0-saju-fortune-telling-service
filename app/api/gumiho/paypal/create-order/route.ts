@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getPayPalConfig } from '@/lib/paypal'
 import { createClient } from '@/lib/supabase/server'
+import { GUMIHO_PRICE_USD } from '@/lib/payments/paypal-orders'
 
 async function getPayPalAccessToken() {
   const { clientId, clientSecret, apiUrl } = getPayPalConfig()
@@ -92,7 +93,7 @@ export async function POST(request: Request) {
         description: `Ask the Gumiho 1:1 - 3 Questions for ${submission?.name || 'User'}`,
         amount: {
           currency_code: 'USD',
-          value: '9.99'
+          value: GUMIHO_PRICE_USD
         }
       }],
       application_context: {
@@ -125,7 +126,7 @@ export async function POST(request: Request) {
       gumiho_question_id: gumihoQuestionId,
       submission_id: submissionId,
       paypal_order_id: orderData.id,
-      amount: 9.99,
+      amount: Number(GUMIHO_PRICE_USD),
       currency: 'USD',
       status: 'pending'
     })

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getPayPalConfig } from '@/lib/paypal'
 import { createAdminClient } from '@/lib/supabase/server'
+import { COMPAT_PRICE_USD } from '@/lib/payments/paypal-orders'
 
 async function getPayPalAccessToken() {
   const { clientId, clientSecret, apiUrl } = getPayPalConfig()
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
       purchase_units: [{
         reference_id: submissionId,
         description: `Sajume Compatibility Report: ${submission.person_a_name} & ${submission.person_b_name}`,
-        amount: { currency_code: 'USD', value: '19.99' }
+        amount: { currency_code: 'USD', value: COMPAT_PRICE_USD }
       }],
       application_context: {
         brand_name: 'Sajume',
@@ -77,7 +78,7 @@ export async function POST(request: Request) {
     await supabase.from('compatibility_payments').insert({
       submission_id: submissionId,
       paypal_order_id: orderData.id,
-      amount: 14.99,
+      amount: Number(COMPAT_PRICE_USD),
       currency: 'USD',
       status: 'pending'
     })

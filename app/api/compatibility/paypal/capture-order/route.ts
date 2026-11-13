@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getPayPalConfig } from '@/lib/paypal'
 import { createAdminClient } from '@/lib/supabase/server'
+import { COMPAT_PRICE_USD, captureAndVerifyOrder } from '@/lib/payments/paypal-orders'
 
 function getBaseUrl(request: Request): string {
   const host = request.headers.get('host')
@@ -13,101 +14,62 @@ function getBaseUrl(request: Request): string {
   return baseUrl.replace(/\/$/, '')
 }
 
-async function getPayPalAccessToken() {
-  const { clientId, clientSecret, apiUrl } = getPayPalConfig()
-  if (!clientId || !clientSecret) return null
-
-  const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64')
-  const response = await fetch(`${apiUrl}/v1/oauth2/token`, {
-    method: 'POST',
-    headers: { 'Authorization': `Basic ${auth}`, 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: 'grant_type=client_credentials'
-  })
-  const data = await response.json()
-  if (!response.ok) return null
-  return data.access_token as string
-}
-
 export async function POST(request: Request) {
   try {
     const { orderId } = await request.json()
-    if (!orderId) return NextResponse.json({ error: 'Missing order ID' }, { status: 400 })
+    if (!orderId || typeof orderId !== 'string') {
+      return NextResponse.json({ error: 'Missing order ID' }, { status: 400 })
+    }
 
-    const { clientId, clientSecret, apiUrl } = getPayPalConfig()
+    const { clientId, clientSecret } = getPayPalConfig()
     if (!clientId || !clientSecret) return NextResponse.json({ error: 'Payment system not configured' }, { status: 500 })
 
     const supabase = createAdminClient()
 
-    // Idempotency guard: if this order is already completed, return success immediately
-    // without re-calling PayPal capture. This prevents a duplicate capture call from
-    // accidentally overwriting a successful payment as "failed".
-    const { data: existingRow } = await supabase
+    // The order must belong to a payment row we created; its submission is the only one this order can unlock.
+    const { data: row, error: rowError } = await supabase
       .from('compatibility_payments')
       .select('status, submission_id')
       .eq('paypal_order_id', orderId)
-      .single()
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
 
-    if (existingRow?.status === 'completed') {
-      console.log('[v0] Compatibility order already completed in DB, returning success:', orderId)
-      return NextResponse.json({ success: true, submissionId: existingRow.submission_id })
+    if (rowError) {
+      console.error('[v0] Compatibility capture: payment lookup failed', orderId, rowError.message)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    }
+    if (!row) {
+      console.error('[v0] Compatibility capture: unknown order, not capturing', orderId)
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 })
     }
 
-    const accessToken = await getPayPalAccessToken()
-    if (!accessToken) return NextResponse.json({ error: 'Failed to authenticate with PayPal' }, { status: 500 })
-
-    const captureResponse = await fetch(`${apiUrl}/v2/checkout/orders/${orderId}/capture`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' }
-    })
-    const captureData = await captureResponse.json()
-
-    // Enhanced logging for debugging
-    console.log('[v0] Compatibility PayPal capture response:', {
-      orderId,
-      httpStatus: captureResponse.status,
-      paypalStatus: captureData.status,
-      details: captureData.details || null
-    })
-
-    // Check if order was already captured (this means payment was successful)
-    const isAlreadyCaptured = captureData.details?.some(
-      (d: { issue?: string }) =>
-        d.issue === 'ORDER_ALREADY_CAPTURED' || d.issue === 'ORDER_ALREADY_COMPLETED'
-    )
-    
-    if (isAlreadyCaptured) {
-      console.log('[v0] Compatibility order already captured, treating as success:', orderId)
-      const { data: existingPayment } = await supabase
-        .from('compatibility_payments')
-        .select('submission_id')
-        .eq('paypal_order_id', orderId)
-        .single()
-
-      const reportUrl = existingPayment?.submission_id
-        ? `${getBaseUrl(request)}/compatibility/report/${existingPayment.submission_id}/paid`
-        : null
-
-      await supabase.from('compatibility_payments').update({ 
-        status: 'completed',
-        completed_at: new Date().toISOString(),
-        report_url: reportUrl,
-      }).eq('paypal_order_id', orderId)
-
-      return NextResponse.json({ success: true, submissionId: existingPayment?.submission_id })
+    // Idempotency guard: an already completed order never goes back through PayPal.
+    if (row.status === 'completed') {
+      return NextResponse.json({ success: true, submissionId: row.submission_id })
     }
 
-    // Accept both COMPLETED and APPROVED status
-    const validStatuses = ['COMPLETED', 'APPROVED']
-    if (!captureResponse.ok || !validStatuses.includes(captureData.status)) {
-      console.error('[v0] Compatibility PayPal capture failed:', {
-        orderId,
-        httpOk: captureResponse.ok,
-        status: captureData.status,
-        error: captureData.details || captureData.message || captureData
-      })
-      // IMPORTANT: never downgrade an already-completed payment to "failed".
-      // Only mark as failed if it is not already completed, to avoid the
-      // double-charge scenario where a retried capture overwrites a success.
+    const submissionId = row.submission_id as string
+    const result = await captureAndVerifyOrder(orderId, {
+      amountUsd: COMPAT_PRICE_USD,
+      referenceId: submissionId,
+    })
+
+    if (result.state === 'pending') {
+      return NextResponse.json(
+        { success: false, pending: true, error: 'Payment is still being confirmed. Please refresh in a minute.' },
+        { status: 202 },
+      )
+    }
+
+    if (result.state === 'mismatch') {
+      console.error(`[v0] Compatibility capture REJECTED order=${orderId} submission=${submissionId} ${result.reason}`)
+      return NextResponse.json({ error: 'Payment could not be verified. Please contact support.' }, { status: 400 })
+    }
+
+    if (result.state === 'failed') {
+      console.error(`[v0] Compatibility capture failed order=${orderId} reason=${result.reason}`)
+      // Never downgrade an already-completed payment.
       await supabase
         .from('compatibility_payments')
         .update({ status: 'failed' })
@@ -116,36 +78,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Payment capture failed' }, { status: 400 })
     }
 
-    const payerCountry =
-      captureData.payer?.address?.country_code ||
-      captureData.purchase_units?.[0]?.shipping?.address?.country_code || null
-
-    // submission_id를 조회해서 report_url 구성
-    const { data: paymentRow } = await supabase
-      .from('compatibility_payments')
-      .select('submission_id')
-      .eq('paypal_order_id', orderId)
-      .single()
-
-    const reportUrl = paymentRow?.submission_id
-      ? `${getBaseUrl(request)}/compatibility/report/${paymentRow.submission_id}/paid`
-      : null
-
-    const { data: payment, error: updateError } = await supabase
+    const { error: updateError } = await supabase
       .from('compatibility_payments')
       .update({
         status: 'completed',
         completed_at: new Date().toISOString(),
-        payer_country: payerCountry,
-        report_url: reportUrl,
+        payer_country: result.payerCountry,
+        report_url: `${getBaseUrl(request)}/compatibility/report/${submissionId}/paid`,
       })
       .eq('paypal_order_id', orderId)
-      .select('submission_id')
-      .single()
+      .neq('status', 'completed')
 
-    if (updateError) console.error('[v0] Compatibility payment update error:', updateError)
+    if (updateError) {
+      console.error('[v0] Compatibility payment update error:', updateError)
+      return NextResponse.json({ error: 'Could not record payment. Please refresh and try again.' }, { status: 500 })
+    }
 
-    return NextResponse.json({ success: true, submissionId: payment?.submission_id })
+    return NextResponse.json({ success: true, submissionId })
   } catch (error) {
     console.error('[v0] Compatibility PayPal capture error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

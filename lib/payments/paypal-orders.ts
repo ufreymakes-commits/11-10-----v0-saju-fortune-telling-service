@@ -5,7 +5,10 @@ import { paidReportUrl } from '@/lib/payments/base-url'
 import { startServerGeneration } from '@/lib/payments/start-generation'
 import { sendPaymentConfirmationEmail } from '@/lib/email/payment-confirmation'
 
+// Single source of truth per product: used for the PayPal order, the stored payment row and the capture check.
 export const PRICE_USD = '19.99'
+export const COMPAT_PRICE_USD = '19.99'
+export const GUMIHO_PRICE_USD = '9.99'
 
 const REQUEST_TIMEOUT_MS = 20_000
 const ORDER_NOT_APPROVED_FAIL_AFTER_MS = 3 * 60 * 60 * 1000
@@ -298,4 +301,87 @@ export async function settlePayment(orderId: string, source: SettleSource): Prom
   }
 
   return result('completed', true)
+}
+
+// ---------------------------------------------------------------------------
+// captureAndVerifyOrder: capture (if needed) and verify amount/currency/reference
+// for the Compatibility and Gumiho flows. Never returns 'paid' unless PayPal
+// reports a COMPLETED capture of exactly the expected USD amount for the
+// expected reference_id.
+// ---------------------------------------------------------------------------
+
+export type VerifiedCapture =
+  | { state: 'paid'; captureId: string | null; payerCountry: string | null }
+  | { state: 'pending' }
+  | { state: 'failed'; reason: string }
+  | { state: 'mismatch'; reason: string }
+
+export async function captureAndVerifyOrder(
+  orderId: string,
+  expected: { amountUsd: string; referenceId: string },
+): Promise<VerifiedCapture> {
+  const token = await getPayPalAccessToken()
+  if (!token) return { state: 'pending' }
+
+  const order = await getOrder(orderId, token)
+  if (!order || order.status >= 400) {
+    console.error(`[v0] payments: verify getOrder unavailable order=${orderId} http=${order?.status ?? 'network'}`)
+    return { state: 'pending' }
+  }
+  if (order.body?.status === 'VOIDED') return { state: 'failed', reason: 'order-voided' }
+
+  const referenceId = order.body?.purchase_units?.[0]?.reference_id ?? null
+  let capture = extractCapture(order.body)
+  let payer = order.body?.payer
+
+  if (!capture) {
+    if (order.body?.status !== 'APPROVED') return { state: 'pending' }
+
+    const cap = await captureOrder(orderId, token)
+    if (!cap || cap.status >= 500) return { state: 'pending' }
+
+    if (cap.status >= 200 && cap.status < 300) {
+      capture = extractCapture(cap.body)
+      payer = cap.body?.payer ?? payer
+    } else {
+      const issues = issuesOf(cap.body)
+      if (issues.includes('ORDER_ALREADY_CAPTURED') || issues.includes('ORDER_ALREADY_COMPLETED')) {
+        const again = await getOrder(orderId, token)
+        if (!again || again.status >= 400) return { state: 'pending' }
+        capture = extractCapture(again.body)
+        payer = again.body?.payer ?? payer
+      } else if (issues.includes('INSTRUMENT_DECLINED')) {
+        return { state: 'failed', reason: 'instrument-declined' }
+      } else {
+        console.error(`[v0] payments: verify capture http=${cap.status} order=${orderId} issues=${issues.join(',') || 'none'}`)
+        return { state: 'pending' }
+      }
+    }
+  }
+
+  if (!capture) return { state: 'pending' }
+  if (capture.status === 'DECLINED' || capture.status === 'FAILED') {
+    return { state: 'failed', reason: `capture-${String(capture.status).toLowerCase()}` }
+  }
+  if (capture.status !== 'COMPLETED') return { state: 'pending' }
+
+  const capturedCents = Math.round(Number(capture.amount?.value) * 100)
+  const expectedCents = Math.round(Number(expected.amountUsd) * 100)
+  const currency = capture.amount?.currency_code
+  if (!Number.isFinite(capturedCents) || capturedCents !== expectedCents || currency !== 'USD') {
+    const reason = `amount expected=${expected.amountUsd} USD captured=${capture.amount?.value} ${currency}`
+    console.error(`[v0] payments: AMOUNT MISMATCH order=${orderId} ${reason}`)
+    return { state: 'mismatch', reason }
+  }
+  if (referenceId !== expected.referenceId) {
+    const reason = `reference expected=${expected.referenceId} order=${referenceId}`
+    console.error(`[v0] payments: REFERENCE MISMATCH order=${orderId} ${reason}`)
+    return { state: 'mismatch', reason }
+  }
+
+  return {
+    state: 'paid',
+    captureId: (capture.id as string | undefined) ?? null,
+    payerCountry: payer?.address?.country_code ?? capture?.payer?.address?.country_code ?? null,
+  }
 }
