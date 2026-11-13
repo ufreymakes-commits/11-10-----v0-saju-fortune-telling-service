@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { ReportGuarantee } from '@/components/report-guarantee'
 import { Spinner } from '@/components/ui/spinner'
 import { DayMasterCard } from '@/components/day-master-card'
 import type { Fact, SajuData } from '@/lib/types'
@@ -99,9 +100,33 @@ interface PreviewData {
     name: string
     gender?: string
     calendar?: string
+    birthDate?: string | null
+    birthTime?: string | null
+    birthCity?: string | null
+    birthCountry?: string | null
     sajuData: SajuData
   }
   allSajuDataSentToGemini?: Record<string, unknown>
+}
+
+function formatBirthTime(time?: string | null): string {
+  if (!time) return 'Time unknown'
+  const match = time.match(/^(\d{1,2}):(\d{2})/)
+  if (!match) return 'Time unknown'
+  const hours24 = Number(match[1])
+  const minutes = match[2]
+  if (hours24 > 23) return 'Time unknown'
+  const period = hours24 >= 12 ? 'PM' : 'AM'
+  const hours12 = String(hours24 % 12 === 0 ? 12 : hours24 % 12).padStart(2, '0')
+  return `${hours12}:${minutes} ${period}`
+}
+
+function formatBirthCaption(submission: PreviewData['submission']): string | null {
+  if (!submission.birthDate) return null
+  const place = submission.birthCity || submission.birthCountry
+  return [submission.birthDate.slice(0, 10), formatBirthTime(submission.birthTime), place]
+    .filter(Boolean)
+    .join(' · ')
 }
 
 // Day Master (일간) emoji mapping
@@ -139,6 +164,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
   const [data, setData] = useState<PreviewData | null>(cachedData || null)
   const [isLoading, setIsLoading] = useState(!cachedData)
   const [error, setError] = useState<string | null>(null)
+  const [limitMessage, setLimitMessage] = useState<string | null>(null)
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0)
 
   const loadingMessages = [
@@ -186,6 +212,13 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
         })
 
         clearTimeout(timeoutId)
+
+        if (response.status === 429) {
+          const limitBody = await response.json().catch(() => null)
+          setLimitMessage(limitBody?.message ?? null)
+          setError('daily_limit')
+          return
+        }
 
         if (!response.ok) {
           const errorText = await response.text()
@@ -272,6 +305,24 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
     )
   }
 
+  if (error === 'daily_limit') {
+    return (
+      <div className="flex items-center justify-center min-h-screen px-4">
+        <div className="text-center max-w-xs">
+          <p className="text-sm font-medium text-foreground mb-2">
+            You&apos;ve reached today&apos;s limit.
+          </p>
+          <p className="text-xs text-muted-foreground mb-5" title={limitMessage ?? undefined}>
+            You can create 5 free readings a day. This helps us keep readings free for everyone. Your reading is saved — if you already have a link to one, it still opens. Please come back tomorrow.
+          </p>
+          <Link href="/">
+            <Button variant="outline" size="sm">Back to home</Button>
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   if (error || !data) {
     const isTimeout = error === 'timeout'
     return (
@@ -296,6 +347,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
   const { freeFacts, teaserFacts, submission } = data
   const dayMasterChar = submission.sajuData.dayPillar?.stem || '甲'
   const dayMasterInfo = DAY_MASTER_INFO[dayMasterChar] || DAY_MASTER_INFO['甲']
+  const birthCaption = formatBirthCaption(submission)
 
   // Pillars displayed left to right: Hour, Day, Month, Year
   const pillars = [
@@ -307,6 +359,9 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
 
   return (
     <div className="px-4 py-8 max-w-2xl mx-auto">
+      {birthCaption && (
+        <p className="text-[10px] text-muted-foreground text-center mb-2">{birthCaption}</p>
+      )}
       {/* Four Pillars Card */}
       <div className="bg-card border border-border rounded-xl p-4 mb-6 shadow-lg shadow-primary/5 tarot-card-float">
         <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-3 text-center">
@@ -478,14 +533,14 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
         </div>
         
         <Link href={`/checkout/${submissionId}`}>
-          <Button className="w-full max-w-xs bg-[#0070ba] text-white hover:bg-[#005ea6] h-11 text-sm font-semibold rounded-md shadow-lg cta-shimmer">
+          <Button className="w-full max-w-xs bg-transparent bg-gradient-to-r from-[#0a5cfc] to-[#060461] text-white hover:from-[#084ed6] hover:to-[#05054f] h-11 text-sm font-semibold rounded-md shadow-lg cta-shimmer">
             <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
               <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 3.72a.773.773 0 0 1 .763-.642h6.153c2.042 0 3.474.405 4.256 1.208.784.8 1.035 1.934.748 3.37l-.022.112h.02a3.606 3.606 0 0 1-.004.133l-.015.12-.025.127c-.002.01-.003.02-.006.03l-.012.05-.01.043-.014.054c-.34 1.47-1.162 2.472-2.386 2.98-.006.002-.012.005-.018.008l-.014.006c-.07.03-.143.058-.217.085l-.086.03c-.068.023-.138.044-.209.064l-.078.022c-.082.022-.166.042-.252.06l-.056.012c-.109.023-.222.044-.337.063l-.038.006a6.933 6.933 0 0 1-.467.057l-.052.004c-.103.009-.209.016-.316.021l-.073.003a7.93 7.93 0 0 1-.288.008h-.08l-.152.001h-2.06l-.048.32-1.026 6.499-.035.215H7.076v.001z"/>
             </svg>
             Pay with PayPal
           </Button>
         </Link>
-        
+
         <Button 
           onClick={() => {
             if (typeof window !== 'undefined') {
@@ -510,6 +565,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
             className="opacity-60"
           />
         </div>
+        <ReportGuarantee tone="light" className="mx-auto mt-3 max-w-xs" />
       </div>
       
       {/* Social Proof */}
@@ -527,8 +583,8 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
 
       {/* Reviews Section Header */}
       <div className="mt-8 text-center mb-4">
-        <p className="text-base font-semibold text-foreground">If these reviews are fake,</p>
-        <p className="text-base font-semibold text-foreground">we will stop running our service 😎</p>
+        <p className="text-lg font-semibold text-foreground">If these reviews are fake,</p>
+        <p className="text-lg font-semibold text-foreground">we will stop running our service 😎</p>
       </div>
 
       {/* Reviews Section - PC: 3 columns, Mobile: slider */}

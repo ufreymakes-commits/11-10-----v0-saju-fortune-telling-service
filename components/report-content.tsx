@@ -398,7 +398,7 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full border border-blue-500/30">Coming Soon</span>
               </div>
-              <h4 className="text-sm font-semibold text-white mb-1">12-Month Fortune Subscription</h4>
+              <h4 className="text-sm font-semibold text-white mb-1">2027 New Year Monthly Career / Love (Coming soon)</h4>
               <p className="text-xs text-white/60 mb-2">Monthly personalized fortune readings based on your Saju chart.</p>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-blue-300">Delivered monthly</span>

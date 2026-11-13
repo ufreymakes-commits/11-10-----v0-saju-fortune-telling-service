@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server'
 import { generateText, generateObject } from 'ai'
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import type { SajuData, Fact } from '@/lib/types'
+import { buildSajuKey, maskName, fillName } from '@/lib/free-report/saju-key'
+import { checkAndCount } from '@/lib/free-report/limit'
 import { headers } from 'next/headers'
 import { buildSkeleton } from '@/lib/saju/skeleton'
 import { FREE_MODEL, THINK, googleThinking, withThinkingFallback } from '@/lib/ai/models'
@@ -21,44 +23,104 @@ import { FREE_MODEL, THINK, googleThinking, withThinkingFallback } from '@/lib/a
 // Vercel 함수 최대 실행 시간 (AI 응답이 느릴 때 타임아웃 500 에러 방지)
 export const maxDuration = 300
 
+const FREE_SECTION_KEYS = ['personality', 'career', 'life']
+
+/** One fact per section (personality / career / life); also stores the yongsin on the submission. */
+async function saveFreeReport({
+  supabase,
+  submissionId,
+  facts,
+  contextInterpretation,
+  sajuData,
+  yongsin,
+}: {
+  supabase: Awaited<ReturnType<typeof createClient>>
+  submissionId: string
+  facts: Fact[]
+  contextInterpretation: string | null
+  sajuData: SajuData
+  yongsin: string
+}) {
+  for (const [idx, sectionKey] of FREE_SECTION_KEYS.entries()) {
+    const sectionFacts = facts.slice(idx, idx + 1)
+
+    const { data: existingReport, error: lookupError } = await supabase
+      .from('reports')
+      .select('id')
+      .eq('submission_id', submissionId)
+      .eq('section_key', sectionKey)
+      .eq('is_free', true)
+      .maybeSingle()
+
+    if (lookupError) {
+      throw new Error(`Free report lookup failed (${sectionKey}): ${lookupError.message}`)
+    }
+
+    if (existingReport) {
+      const { error: updateError } = await supabase
+        .from('reports')
+        .update({ facts: sectionFacts, context_interpretation: contextInterpretation })
+        .eq('id', existingReport.id)
+      if (updateError) {
+        throw new Error(`Free report update failed (${sectionKey}): ${updateError.message}`)
+      }
+    } else {
+      const { error: insertError } = await supabase.from('reports').insert({
+        submission_id: submissionId,
+        section_key: sectionKey,
+        facts: sectionFacts,
+        context_interpretation: contextInterpretation,
+        is_free: true,
+      })
+      if (insertError) {
+        throw new Error(`Free report insert failed (${sectionKey}): ${insertError.message}`)
+      }
+    }
+  }
+
+  const { error: submissionUpdateError } = await supabase
+    .from('submissions')
+    .update({ saju_data: { ...sajuData, yongsin } })
+    .eq('id', submissionId)
+
+  if (submissionUpdateError) {
+    throw new Error(`Submission yongsin update failed: ${submissionUpdateError.message}`)
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json()
 
-    let name: string
-    let gender: string
-    let birth_country: string
-    let birth_date: string
-    let saju_data: SajuData
+    // The daily limit and cache both hang off a stored submission, so a raw body is not accepted.
+    if (!body.submissionId || typeof body.submissionId !== 'string') {
+      return NextResponse.json({ error: 'Missing submission ID' }, { status: 400 })
+    }
 
-    // submissionId로 받으면 Supabase에서 조회
-    if (body.submissionId) {
-      console.log('[v0] Gemini: Fetching submission:', body.submissionId)
-      const supabase = await createClient()
-      const { data: submission, error } = await supabase
-        .from('submissions')
-        .select('*')
-        .eq('id', body.submissionId)
-        .single()
+    console.log('[v0] Gemini: Fetching submission:', body.submissionId)
+    const supabase = await createClient()
+    const { data: submission, error } = await supabase
+      .from('submissions')
+      .select('*')
+      .eq('id', body.submissionId)
+      .single()
 
-      if (error || !submission) {
-        console.error('[v0] Gemini: Submission not found:', error)
-        return NextResponse.json({ error: 'Submission not found' }, { status: 404 })
-      }
+    if (error || !submission) {
+      console.error('[v0] Gemini: Submission not found:', error)
+      return NextResponse.json({ error: 'Submission not found' }, { status: 404 })
+    }
 
-      console.log('[v0] Gemini: Submission fetched successfully')
-      name = submission.name
-      gender = submission.gender
-      birth_country = submission.birth_country
-      birth_date = submission.birth_date
-      saju_data = submission.saju_data
-    } else {
-      // 직접 데이터 전달
-      name = body.name
-      gender = body.gender
-      birth_country = body.birth_country
-      birth_date = body.birth_date
-      saju_data = body.saju_data
+    console.log('[v0] Gemini: Submission fetched successfully')
+    const name: string = submission.name
+    const gender: string = submission.gender
+    const birth_country: string = submission.birth_country
+    const birth_date: string = submission.birth_date
+    const saju_data: SajuData = submission.saju_data
+    const birthInfo = {
+      birthDate: submission.birth_date as string | null,
+      birthTime: (submission.birth_time ?? null) as string | null,
+      birthCity: (submission.birth_city ?? null) as string | null,
+      birthCountry: (submission.birth_country ?? null) as string | null,
     }
 
     if (!saju_data) {
@@ -690,73 +752,6 @@ CUSTOMER SAJU DATA:
 ${JSON.stringify(allSajuData, null, 2)}
 `
 
-    console.log('[v0] Gemini: ===== STAGE 1: Deep Analysis =====')
-    console.log('[v0] Gemini: stage1SystemPrompt length =', stage1SystemPrompt.length, 'chars')
-    console.log('[v0] Gemini: stage1UserPrompt length =', stage1UserPrompt.length, 'chars')
-
-    const STAGE1_MAX_ATTEMPTS = 2
-    let deepAnalysis: any
-
-    for (let attempt = 1; attempt <= STAGE1_MAX_ATTEMPTS; attempt++) {
-      try {
-        const stage1Result = await withThinkingFallback(
-          THINK.freeLight,
-          (thinkingConfig) =>
-            generateText({
-              model: FREE_MODEL,
-              system: stage1SystemPrompt,
-              prompt: stage1UserPrompt,
-              temperature: 0,
-              maxOutputTokens: 4000,
-              providerOptions: googleThinking(thinkingConfig),
-            }),
-          FREE_MODEL,
-        )
-
-        console.log(`[v0] Gemini: Stage 1 response received (attempt ${attempt}), length:`, stage1Result.text.length)
-
-        // Stage 1 JSON 파싱 (더 유연한 형식 지원)
-        let stage1JsonMatch = stage1Result.text.match(/```json\n([\s\S]*?)\n```/)
-
-        // 첫 번째 시도 실패시 다른 형식 시도
-        if (!stage1JsonMatch) {
-          // 형식2: ```json ... ``` (줄바꿈 없음)
-          stage1JsonMatch = stage1Result.text.match(/```json([\s\S]*?)```/)
-        }
-
-        if (!stage1JsonMatch) {
-          // 형식3: { ... } 직접 매칭
-          const directJsonMatch = stage1Result.text.match(/(\{[\s\S]*\})/)
-          if (directJsonMatch) {
-            stage1JsonMatch = [null, directJsonMatch[1]]
-          }
-        }
-
-        if (!stage1JsonMatch) {
-          throw new Error('Stage 1 JSON format not found')
-        }
-
-        deepAnalysis = JSON.parse(stage1JsonMatch[1])
-        break
-      } catch (stage1Error) {
-        console.error(
-          `[v0] Gemini: Stage 1 attempt ${attempt}/${STAGE1_MAX_ATTEMPTS} failed:`,
-          stage1Error instanceof Error ? stage1Error.message : stage1Error
-        )
-        if (attempt === STAGE1_MAX_ATTEMPTS) throw stage1Error
-      }
-    }
-
-    // ===== STAGE 2: 9문장 생성 (Final Facts) =====
-    // 사용자가 이 프롬프트를 직접 수정할 수 있습니다
-    const stage2SystemPrompt = `You are writing the final customer-facing report.
-You have access to a deep psychological analysis that was already completed.
-Your job is to translate this analysis into 9 emotionally resonant, specific facts.
-
-Tone: Gen-Z tone (ex. No cap · It's giving · Hits different · Glow up ·  Main character · Aura · Lowkey · for real · Vibe check), warm, grounded, emotionally intelligent.
-Language: English only.
-`
-
     // ===== Yongsin 처리 로직 =====
     // 조후 ���도에 따라 조후용신 또는 억부용신 선택
     // 생년월일에서 계절 파악해서 조후 정��� 판단
@@ -831,6 +826,170 @@ Language: English only.
     }
     // resolvedYongsin will be set after Fact 8 is generated; initialize with computed value
     let resolvedYongsin = yongsinElement
+
+    // ===== Free report cache + daily limit =====
+    // Order matters: refresh of the same submission -> cache hit -> daily limit -> generate.
+    const buildResponse = (responseFacts: Fact[]) =>
+      NextResponse.json({
+        freeFacts: responseFacts,
+        teaserFacts: [],
+        submission: {
+          name,
+          ...birthInfo,
+          sajuData: {
+            ...saju_data,
+            yongsin: yongsinElement,
+          },
+        },
+        allSajuDataSentToGemini: allSajuData,
+      })
+
+    // 1) Same submission already has a free report (page refresh): serve it, never call the AI.
+    const { data: existingRows, error: existingError } = await supabase
+      .from('reports')
+      .select('section_key, facts')
+      .eq('submission_id', body.submissionId)
+      .eq('is_free', true)
+
+    if (existingError) {
+      console.error('[v0] Gemini: existing report lookup failed:', existingError.message)
+    } else if (existingRows && existingRows.length > 0) {
+      const existingFacts: Fact[] = [...existingRows]
+        .sort((a, b) => FREE_SECTION_KEYS.indexOf(a.section_key) - FREE_SECTION_KEYS.indexOf(b.section_key))
+        .flatMap((row) => (Array.isArray(row.facts) ? (row.facts as Fact[]) : []))
+        .slice(0, 3)
+      if (existingFacts.length > 0) {
+        console.log('[v0] Gemini: serving existing free report for submission')
+        return buildResponse(existingFacts)
+      }
+    }
+
+    // 2) Same saju already generated for someone else: serve the stored result, no AI call.
+    const sajuKey = buildSajuKey({ sajuData: saju_data, gender, birthDate: birth_date })
+    const admin = createAdminClient()
+
+    if (sajuKey) {
+      const { data: cached, error: cacheReadError } = await admin
+        .from('free_report_cache')
+        .select('facts, context_interpretation, use_count')
+        .eq('saju_key', sajuKey)
+        .maybeSingle()
+
+      if (cacheReadError) {
+        console.error('[v0] Gemini: cache read failed (generating instead):', cacheReadError.message)
+      } else if (cached && Array.isArray(cached.facts) && cached.facts.length > 0) {
+        console.log('[v0] Gemini: cache HIT', sajuKey)
+        const cachedFacts = fillName(cached.facts as Fact[], name).slice(0, 3)
+
+        let contextInterpretation: string | null = null
+        if (cached.context_interpretation) {
+          try {
+            contextInterpretation = JSON.stringify(fillName(JSON.parse(cached.context_interpretation), name))
+          } catch {
+            contextInterpretation = fillName(cached.context_interpretation as string, name)
+          }
+        }
+
+        await saveFreeReport({
+          supabase,
+          submissionId: body.submissionId,
+          facts: cachedFacts,
+          contextInterpretation,
+          sajuData: saju_data,
+          yongsin: yongsinElement,
+        })
+
+        const { error: bumpError } = await admin
+          .from('free_report_cache')
+          .update({ use_count: (cached.use_count ?? 1) + 1, last_used_at: new Date().toISOString() })
+          .eq('saju_key', sajuKey)
+        if (bumpError) console.error('[v0] Gemini: cache use_count update failed (ignored):', bumpError.message)
+
+        return buildResponse(cachedFacts)
+      } else {
+        console.log('[v0] Gemini: cache MISS', sajuKey)
+      }
+    }
+
+    // 3) A new saju: this is the only path that costs us an AI call, so it is the only one that counts.
+    const limitResult = await checkAndCount(request)
+    if (!limitResult.allowed) {
+      return NextResponse.json(
+        {
+          error: 'daily_limit',
+          message: "You've reached today's free reading limit. Please come back tomorrow.",
+        },
+        { status: 429 },
+      )
+    }
+
+    console.log('[v0] Gemini: ===== STAGE 1: Deep Analysis =====')
+    console.log('[v0] Gemini: stage1SystemPrompt length =', stage1SystemPrompt.length, 'chars')
+    console.log('[v0] Gemini: stage1UserPrompt length =', stage1UserPrompt.length, 'chars')
+
+    const STAGE1_MAX_ATTEMPTS = 2
+    let deepAnalysis: any
+
+    for (let attempt = 1; attempt <= STAGE1_MAX_ATTEMPTS; attempt++) {
+      try {
+        const stage1Result = await withThinkingFallback(
+          THINK.freeLight,
+          (thinkingConfig) =>
+            generateText({
+              model: FREE_MODEL,
+              system: stage1SystemPrompt,
+              prompt: stage1UserPrompt,
+              temperature: 0,
+              maxOutputTokens: 4000,
+              providerOptions: googleThinking(thinkingConfig),
+            }),
+          FREE_MODEL,
+        )
+
+        console.log(`[v0] Gemini: Stage 1 response received (attempt ${attempt}), length:`, stage1Result.text.length)
+
+        // Stage 1 JSON 파싱 (더 유연한 형식 지원)
+        let stage1JsonMatch = stage1Result.text.match(/```json\n([\s\S]*?)\n```/)
+
+        // 첫 번째 시도 실패시 다른 형식 시도
+        if (!stage1JsonMatch) {
+          // 형식2: ```json ... ``` (줄바꿈 없음)
+          stage1JsonMatch = stage1Result.text.match(/```json([\s\S]*?)```/)
+        }
+
+        if (!stage1JsonMatch) {
+          // 형식3: { ... } 직접 매칭
+          const directJsonMatch = stage1Result.text.match(/(\{[\s\S]*\})/)
+          if (directJsonMatch) {
+            stage1JsonMatch = [null, directJsonMatch[1]]
+          }
+        }
+
+        if (!stage1JsonMatch) {
+          throw new Error('Stage 1 JSON format not found')
+        }
+
+        deepAnalysis = JSON.parse(stage1JsonMatch[1])
+        break
+      } catch (stage1Error) {
+        console.error(
+          `[v0] Gemini: Stage 1 attempt ${attempt}/${STAGE1_MAX_ATTEMPTS} failed:`,
+          stage1Error instanceof Error ? stage1Error.message : stage1Error
+        )
+        if (attempt === STAGE1_MAX_ATTEMPTS) throw stage1Error
+      }
+    }
+
+    // ===== STAGE 2: 9문장 생성 (Final Facts) =====
+    // 사용자가 이 프롬프트를 직접 수정할 수 있습니다
+    const stage2SystemPrompt = `You are writing the final customer-facing report.
+You have access to a deep psychological analysis that was already completed.
+Your job is to translate this analysis into 9 emotionally resonant, specific facts.
+
+Tone: Gen-Z tone (ex. No cap · It's giving · Hits different · Glow up ·  Main character · Aura · Lowkey · for real · Vibe check), warm, grounded, emotionally intelligent.
+Language: English only.
+`
+
 
     const stage2UserPrompt = `
 ===========================================
@@ -913,96 +1072,39 @@ OUTPUT FORMAT (JSON ONLY):
 
     console.log(`[v0] Gemini: Using ${facts.length} facts (limited to 3)`)
 
-    // ===== DB에 무료 레포트 저장 (유료 ��포트 생성 시 context로 사용) =====
-    if (body.submissionId) {
-      const supabase = await createClient()
+    // ===== Save the free report (used as context by the paid report) and fill the cache =====
+    await saveFreeReport({
+      supabase,
+      submissionId: body.submissionId,
+      facts,
+      contextInterpretation: JSON.stringify(deepAnalysis),
+      sajuData: saju_data,
+      yongsin: yongsinElement,
+    })
+    resolvedYongsin = yongsinElement
 
-      // 1500자 해설 역할을 하는 deepAnalysis를 문자열로 저장
-      const contextInterpretation = JSON.stringify(deepAnalysis)
-
-      // 3개 사실을 3개 섹션으로 분배 (1개씩): 성격 / 직업 / 인생 터닝포인트
-      const sectionKeys = ['personality', 'career', 'life']
-      const factsBySection: Record<string, Fact[]> = {}
-
-      sectionKeys.forEach((key, idx) => {
-        factsBySection[key] = facts.slice(idx * 1, (idx + 1) * 1)
-      })
-
-      // 각 섹션을 DB에 저장 또는 업데이트
-      for (const [sectionKey, sectionFacts] of Object.entries(factsBySection)) {
-        const { data: existingReport, error: lookupError } = await supabase
-          .from('reports')
-          .select('id')
-          .eq('submission_id', body.submissionId)
-          .eq('section_key', sectionKey)
-          .eq('is_free', true)
-          .maybeSingle()
-
-        if (lookupError) {
-          throw new Error(`Free report lookup failed (${sectionKey}): ${lookupError.message}`)
-        }
-
-        if (existingReport) {
-          const { error: updateError } = await supabase
-            .from('reports')
-            .update({
-              facts: sectionFacts,
-              context_interpretation: contextInterpretation,
-            })
-            .eq('id', existingReport.id)
-
-          if (updateError) {
-            throw new Error(`Free report update failed (${sectionKey}): ${updateError.message}`)
-          }
+    if (sajuKey) {
+      try {
+        const { error: cacheWriteError } = await admin.from('free_report_cache').upsert(
+          {
+            saju_key: sajuKey,
+            facts: maskName(facts, name),
+            context_interpretation: JSON.stringify(maskName(deepAnalysis, name)),
+            model_used: FREE_MODEL,
+          },
+          { onConflict: 'saju_key', ignoreDuplicates: true },
+        )
+        if (cacheWriteError) {
+          console.error('[v0] Gemini: cache write failed (ignored):', cacheWriteError.message)
         } else {
-          const { error: insertError } = await supabase
-            .from('reports')
-            .insert({
-              submission_id: body.submissionId,
-              section_key: sectionKey,
-              facts: sectionFacts,
-              context_interpretation: contextInterpretation,
-              is_free: true,
-            })
-
-          if (insertError) {
-            throw new Error(`Free report insert failed (${sectionKey}): ${insertError.message}`)
-          }
+          console.log('[v0] Gemini: cache STORED', sajuKey)
         }
-      }
-
-      // 용신(yongsin)은 fact가 아니라 사주 데이터에서 직접 계산된 값을 사용한다.
-      // (팔찌 업셀 문구가 submission.sajuData.yongsin 값을 읽어 개인화됨)
-      resolvedYongsin = yongsinElement
-
-      // yongsinElement를 submission의 saju_data에 저장 (캐시 로드 시 사용)
-      const { error: submissionUpdateError } = await supabase
-        .from('submissions')
-        .update({
-          saju_data: {
-            ...saju_data,
-            yongsin: resolvedYongsin
-          }
-        })
-        .eq('id', body.submissionId)
-
-      if (submissionUpdateError) {
-        throw new Error(`Submission yongsin update failed: ${submissionUpdateError.message}`)
+      } catch (cacheWriteError) {
+        console.error('[v0] Gemini: cache write threw (ignored):', cacheWriteError)
       }
     }
 
-    return NextResponse.json({
-      freeFacts: facts,
-      teaserFacts: [],
-      submission: {
-        name,
-        sajuData: {
-          ...saju_data,
-          yongsin: resolvedYongsin
-        }
-      },
-      allSajuDataSentToGemini: allSajuData
-    })
+    return buildResponse(facts)
   } catch (error) {
     console.error('[v0] Gemini: Error:', error)
     return NextResponse.json(

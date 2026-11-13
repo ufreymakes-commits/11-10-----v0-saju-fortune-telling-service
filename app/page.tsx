@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { StarsBackground } from '@/components/stars-background'
 import { Marquee } from '@/components/marquee'
 import { TextReviewSlider } from '@/components/text-review-slider'
+import { DataBasedTrust } from '@/components/data-based-trust'
 import { NoticeMeButton } from '@/components/notice-me-button'
 import { AskGumihoProductCard } from '@/components/ask-gumiho-product-card'
 import { POLICIES } from '@/lib/policies'
@@ -254,7 +255,7 @@ src="/images/shopify-logo.png"
             {/* 12 months Saju Reading */}
             <div className="group md:col-span-1">
               <div className="bg-gradient-to-br from-blue-900/40 to-purple-900/40 border border-blue-500/30 rounded-xl p-6 h-full flex flex-col">
-                <h4 className="text-base md:text-lg font-semibold text-white mb-3">12 months Saju Reading</h4>
+                <h4 className="text-base md:text-lg font-semibold text-white mb-3">2027 New Year Monthly Career / Love (Coming soon)</h4>
                 <div className="relative w-full h-40 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e]">
                   <Image
                     src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/30.png?v=1778484201"
@@ -327,6 +328,8 @@ src="/images/shopify-logo.png"
               </p>
             </div>
           </div>
+
+          <DataBasedTrust />
 
           {/* Feature grid with white icons */}
           <div className="mb-10 mt-14">

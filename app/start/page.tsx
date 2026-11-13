@@ -7,6 +7,7 @@ import { StartReviewsSection } from '@/components/start-reviews-section'
 import { AskGumihoProductCard } from '@/components/ask-gumiho-product-card'
 import { sharedOpenGraph, sharedTwitter } from '@/lib/metadata'
 import { Marquee } from '@/components/marquee'
+import { DataBasedTrust } from '@/components/data-based-trust'
 
 export const metadata = {
   title: 'Enter Your Birth Info - Sajume',
@@ -152,6 +153,8 @@ export default function StartPage() {
             </div>
           </div>
 
+          <DataBasedTrust />
+
           {/* No.1 Global Saju */}
           <div className="mb-10 mt-14">
             <h4 className="text-center text-3xl md:text-4xl font-semibold text-white/90 mb-2">No.1 Global Saju</h4>
@@ -275,7 +278,7 @@ export default function StartPage() {
             {/* 12 months Saju Reading */}
             <div className="group md:col-span-1">
               <div className="bg-gradient-to-br from-blue-900/40 to-purple-900/40 border border-blue-500/30 rounded-xl p-6 h-full flex flex-col">
-                <h4 className="text-base md:text-lg font-semibold text-white mb-3">12 months Saju Reading</h4>
+                <h4 className="text-base md:text-lg font-semibold text-white mb-3">2027 New Year Monthly Career / Love (Coming soon)</h4>
                 <div className="relative w-full h-40 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e]">
                   <Image
                     src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/30.png?v=1778484201"
