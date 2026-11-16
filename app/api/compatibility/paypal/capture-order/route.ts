@@ -3,6 +3,7 @@ import { getPayPalConfig } from '@/lib/paypal'
 import { createAdminClient } from '@/lib/supabase/server'
 import { COMPAT_PRICE_USD, COMPAT_BUYER_PRICE_USD, captureAndVerifyOrder } from '@/lib/payments/paypal-orders'
 import { offerIdFromCustomId, redeemBuyerOffer } from '@/lib/payments/buyer-offer'
+import { sendCompatConfirmationEmail, wasCompatConfirmationEmailSent } from '@/lib/email/compat-confirmation'
 
 function getBaseUrl(request: Request): string {
   const host = request.headers.get('host')
@@ -47,7 +48,11 @@ export async function POST(request: Request) {
 
     // Idempotency guard: an already completed order never goes back through PayPal.
     if (row.status === 'completed') {
-      return NextResponse.json({ success: true, submissionId: row.submission_id })
+      return NextResponse.json({
+        success: true,
+        submissionId: row.submission_id,
+        emailSent: await wasCompatConfirmationEmailSent(row.id as string),
+      })
     }
 
     const submissionId = row.submission_id as string
@@ -115,7 +120,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Could not record payment. Please refresh and try again.' }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, submissionId })
+    // Best effort and idempotent: sendCompatConfirmationEmail never throws and never blocks the report.
+    const emailSent = await sendCompatConfirmationEmail({
+      paymentId: row.id as string,
+      submissionId,
+      to: result.payerEmail,
+    })
+
+    return NextResponse.json({ success: true, submissionId, emailSent })
   } catch (error) {
     console.error('[v0] Compatibility PayPal capture error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

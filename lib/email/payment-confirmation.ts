@@ -12,7 +12,7 @@ export function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;')
 }
 
-function greetingName(rawName: string | null | undefined): string {
+export function greetingName(rawName: string | null | undefined): string {
   const name = (rawName ?? '').trim()
   if (!name) return 'there'
   if (hasCJK(name)) return romanizeName(name) || 'there'

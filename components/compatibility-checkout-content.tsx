@@ -45,7 +45,7 @@ export function CompatibilityCheckoutContent({
       const response = await fetch('/api/compatibility/coupon', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: couponCode.trim(), submissionId }),
+        body: JSON.stringify({ code: couponCode.trim(), submissionId, offerReportId }),
       })
       const data = await response.json()
       if (!response.ok || !data.success) {

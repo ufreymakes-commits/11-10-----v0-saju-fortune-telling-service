@@ -336,6 +336,149 @@
   }
 }
 
+/* Buyer-only compat offer ticket: notches are real mask cut-outs, so they show whatever is behind the card. */
+.ticket-shadow {
+  filter: drop-shadow(0 18px 26px rgb(110 20 120 / 0.38));
+}
+
+.ticket-top {
+  background: linear-gradient(165deg, #1b0836 0%, #2e0f58 55%, #46146f 100%);
+  border-radius: 1.25rem 1.25rem 0 0;
+  -webkit-mask:
+    radial-gradient(circle 12px at 0 100%, #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 12px at 100% 100%, #0000 98%, #000) right / 51% 100% no-repeat;
+  mask:
+    radial-gradient(circle 12px at 0 100%, #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 12px at 100% 100%, #0000 98%, #000) right / 51% 100% no-repeat;
+}
+
+.ticket-bottom {
+  background: linear-gradient(165deg, #46146f 0%, #7a1672 55%, #b3166a 100%);
+  border-radius: 0 0 1.25rem 1.25rem;
+  -webkit-mask:
+    radial-gradient(circle 12px at 0 0, #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 12px at 100% 0, #0000 98%, #000) right / 51% 100% no-repeat;
+  mask:
+    radial-gradient(circle 12px at 0 0, #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 12px at 100% 0, #0000 98%, #000) right / 51% 100% no-repeat;
+}
+
+.ticket-bottom::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  border-top: 2px dashed rgb(255 255 255 / 0.5);
+}
+
+.ticket-price {
+  background-image:
+    linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 0.95) 50%, transparent 65%),
+    linear-gradient(90deg, #ff9ad0 0%, #ff4fa3 45%, #c9a0ff 100%);
+  background-size: 250% 100%, 100% 100%;
+  background-repeat: no-repeat;
+  background-position: 150% 0, 0 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: ticket-price-sweep 2.5s ease-in-out infinite;
+}
+
+@keyframes ticket-price-sweep {
+  0% { background-position: 150% 0, 0 0; }
+  55%, 100% { background-position: -50% 0, 0 0; }
+}
+
+.ticket-cta {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: #1d0733;
+  background: linear-gradient(135deg, #ff9ad0 0%, #ff4fa3 60%, #ff2e93 100%);
+  box-shadow: 0 8px 22px -6px rgb(255 79 163 / 0.65);
+  animation: ticket-cta-pulse 3.2s ease-in-out infinite;
+}
+
+.ticket-cta::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 40%;
+  z-index: 1;
+  background: linear-gradient(105deg, transparent 0%, rgb(255 255 255 / 0.7) 50%, transparent 100%);
+  transform: translateX(-140%) skewX(-18deg);
+  animation: ticket-cta-sweep 3.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes ticket-cta-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 8px 22px -6px rgb(255 79 163 / 0.55); }
+  50% { transform: scale(1.025); box-shadow: 0 10px 30px -4px rgb(255 79 163 / 0.85); }
+}
+
+@keyframes ticket-cta-sweep {
+  0%, 40% { transform: translateX(-140%) skewX(-18deg); }
+  75%, 100% { transform: translateX(340%) skewX(-18deg); }
+}
+
+.ticket-pop {
+  animation: ticket-pop 0.55s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+@keyframes ticket-pop {
+  0% { opacity: 0; transform: translateY(28px) scale(0.86); }
+  60% { opacity: 1; transform: translateY(-4px) scale(1.04); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.ticket-glow {
+  background: radial-gradient(closest-side, rgb(255 79 163 / 0.5), rgb(124 58 237 / 0.28) 55%, transparent 85%);
+  filter: blur(22px);
+  animation: ticket-glow-pulse 4s ease-in-out infinite;
+}
+
+@keyframes ticket-glow-pulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+.ticket-sparkle {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  background: #fff;
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+  animation: ticket-twinkle 2.4s ease-in-out infinite;
+}
+
+@keyframes ticket-twinkle {
+  0%, 100% { opacity: 0.25; transform: scale(0.6); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticket-price,
+  .ticket-cta,
+  .ticket-cta::after,
+  .ticket-pop,
+  .ticket-glow,
+  .ticket-sparkle {
+    animation: none;
+  }
+
+  .ticket-cta::after {
+    display: none;
+  }
+
+  .ticket-sparkle {
+    opacity: 0.8;
+  }
+}
+
 .orb-card-frame {
   background: linear-gradient(145deg, #f6e6b4 0%, #c79a3c 28%, #8a6a22 50%, #e9c872 75%, #fbf1d2 100%);
   box-shadow:

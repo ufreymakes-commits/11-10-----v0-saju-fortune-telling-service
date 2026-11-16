@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createHash, timingSafeEqual } from 'crypto'
 import { createAdminClient } from '@/lib/supabase/server'
+import { findPaidReportEmail, sendCompatConfirmationEmail } from '@/lib/email/compat-confirmation'
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const MAX_CODE_LENGTH = 64
@@ -66,15 +67,18 @@ export async function POST(request: Request) {
     }
 
     const now = new Date().toISOString()
-    const { error: insertError } = await supabase.from('compatibility_payments').insert({
-      submission_id: submissionId,
-      paypal_order_id: `COUPON-${submissionId}`,
-      amount: 0,
-      currency: 'USD',
-      status: 'completed',
-      completed_at: now,
-      report_url: null,
-    })
+    const { data: inserted, error: insertError } = await supabase
+      .from('compatibility_payments')
+      .insert({
+        submission_id: submissionId,
+        paypal_order_id: `COUPON-${submissionId}`,
+        amount: 0,
+        currency: 'USD',
+        status: 'completed',
+        completed_at: now,
+        report_url: null,
+      })
+      .select('id')
 
     if (insertError) {
       if (insertError.code === '23505' && (await hasCompletedPayment())) {
@@ -85,7 +89,20 @@ export async function POST(request: Request) {
     }
 
     console.log(`[v0] compat coupon applied ${submissionId}`)
-    return NextResponse.json({ success: true, redirectPath })
+
+    // No payer address on this path: only a verified 99 Facts buyer's own email (via their report id) is used.
+    const offerReportId = typeof body?.offerReportId === 'string' ? body.offerReportId : ''
+    const paymentId = inserted?.[0]?.id as string | undefined
+    let emailSent = false
+    if (paymentId && UUID_REGEX.test(offerReportId)) {
+      emailSent = await sendCompatConfirmationEmail({
+        paymentId,
+        submissionId,
+        to: await findPaidReportEmail(offerReportId),
+      })
+    }
+
+    return NextResponse.json({ success: true, redirectPath, emailSent })
   } catch (error) {
     console.error('[v0] compat coupon error:', error instanceof Error ? error.message : 'unknown')
     return NextResponse.json({ success: false, error: 'Something went wrong' }, { status: 500 })
