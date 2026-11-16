@@ -10,7 +10,9 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 export const isUuid = (value: unknown): value is string => typeof value === 'string' && UUID_RE.test(value)
 
 // Why the offer is (not) live. "no-payment" also covers a paid report whose offer clock has not started yet.
-export type BuyerOfferReason = 'none' | 'expired' | 'redeemed' | 'no-payment'
+// "already-purchased" = this customer already has a completed compatibility payment (PayPal or coupon), so the
+// buyer-only price never applies, even if an offer row exists.
+export type BuyerOfferReason = 'none' | 'expired' | 'redeemed' | 'no-payment' | 'already-purchased'
 
 export interface BuyerOfferStatus {
   eligible: boolean
@@ -47,6 +49,68 @@ async function completedPaymentIds(reportId: string): Promise<string[]> {
   return (data ?? []).map((p) => p.id as string)
 }
 
+const normalizeName = (value: unknown) => String(value ?? '').trim().replace(/\s+/g, ' ').toLowerCase()
+const dateOnly = (value: unknown) => String(value ?? '').slice(0, 10)
+
+// compatibility_submissions carries no link to the 99 Facts report, so "this customer" is identified by the
+// report owner's name + birth date appearing as person A or B of a compat submission with a completed payment
+// (PayPal-verified or coupon). Returns null when the lookup fails so callers can fail closed.
+async function hasCompletedCompatPurchase(reportId: string): Promise<boolean | null> {
+  const admin = createAdminClient()
+
+  const { data: owner, error: ownerError } = await admin
+    .from('submissions')
+    .select('name, birth_date')
+    .eq('id', reportId)
+    .maybeSingle()
+  if (ownerError) {
+    console.error('[v0] buyer-offer: owner lookup failed', ownerError.message)
+    return null
+  }
+  const ownerName = normalizeName(owner?.name)
+  const ownerBirthDate = dateOnly(owner?.birth_date)
+  if (!ownerName || !ownerBirthDate) return false
+
+  const { data: candidates, error: candidateError } = await admin
+    .from('compatibility_submissions')
+    .select('id, person_a_name, person_a_birth_date, person_b_name, person_b_birth_date')
+    .or(`person_a_birth_date.eq.${ownerBirthDate},person_b_birth_date.eq.${ownerBirthDate}`)
+    .limit(500)
+  if (candidateError) {
+    console.error('[v0] buyer-offer: compat submission lookup failed', candidateError.message)
+    return null
+  }
+
+  const matchingIds = (candidates ?? [])
+    .filter(
+      (c) =>
+        (dateOnly(c.person_a_birth_date) === ownerBirthDate && normalizeName(c.person_a_name) === ownerName) ||
+        (dateOnly(c.person_b_birth_date) === ownerBirthDate && normalizeName(c.person_b_name) === ownerName),
+    )
+    .map((c) => c.id as string)
+  if (matchingIds.length === 0) return false
+
+  const { data: payments, error: paymentError } = await admin
+    .from('compatibility_payments')
+    .select('id')
+    .in('submission_id', matchingIds)
+    .eq('status', 'completed')
+    .limit(1)
+  if (paymentError) {
+    console.error('[v0] buyer-offer: compat payment lookup failed', paymentError.message)
+    return null
+  }
+  return (payments ?? []).length > 0
+}
+
+const alreadyPurchased = (): BuyerOfferStatus => ({
+  eligible: false,
+  expiresAt: null,
+  priceUsd: COMPAT_PRICE_USD,
+  offerId: null,
+  reason: 'already-purchased',
+})
+
 // Eligible only when: the 99 Facts payment is completed (PayPal-verified or coupon-paid), an offer row exists,
 // the server clock is before expires_at, and the offer has not been redeemed.
 export async function getBuyerOffer(reportId: string): Promise<BuyerOfferStatus> {
@@ -73,13 +137,21 @@ export async function getBuyerOffer(reportId: string): Promise<BuyerOfferStatus>
 
   const expiresAtMs = new Date(data.expires_at as string).getTime()
   const expired = Date.now() >= expiresAtMs
-  const eligible = !data.redeemed_at && !expired
-  return {
-    eligible,
+  const base = {
     expiresAt: new Date(expiresAtMs).toISOString(),
-    priceUsd: eligible ? COMPAT_BUYER_PRICE_USD : COMPAT_PRICE_USD,
     offerId: data.id as string,
-    reason: data.redeemed_at ? 'redeemed' : expired ? 'expired' : 'none',
+  }
+  if (data.redeemed_at) return { ...base, eligible: false, priceUsd: COMPAT_PRICE_USD, reason: 'redeemed' }
+
+  // The offer is for the first compatibility purchase only. Fails closed if the lookup errors.
+  const purchased = await hasCompletedCompatPurchase(reportId)
+  if (purchased !== false) return alreadyPurchased()
+
+  return {
+    ...base,
+    eligible: !expired,
+    priceUsd: expired ? COMPAT_PRICE_USD : COMPAT_BUYER_PRICE_USD,
+    reason: expired ? 'expired' : 'none',
   }
 }
 
@@ -101,6 +173,10 @@ export async function startBuyerOffer(reportId: string): Promise<BuyerOfferStatu
 
   const paymentIds = await completedPaymentIds(reportId)
   if (paymentIds.length === 0) return noOffer()
+
+  // Customers who already bought compatibility never get an offer row (and so never get a clock).
+  const purchased = await hasCompletedCompatPurchase(reportId)
+  if (purchased !== false) return alreadyPurchased()
 
   const now = new Date()
   const { error } = await admin.from('buyer_offers').upsert(
