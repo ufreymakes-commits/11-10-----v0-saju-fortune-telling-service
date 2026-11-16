@@ -12,16 +12,17 @@ import { focusYearFor } from '@/lib/report-year'
 
 const MODEL = PAID_MODEL
 const MAX_RETRIES = 3
-const MIN_WORDS = 700
+const MIN_WORDS = 380
+const MAX_WORDS = 800
 
 // In-memory guard so the same order cannot be generated twice at once (same 202 response as the paid report route).
 const inFlightGenerations = new Map<string, number>()
 const IN_FLIGHT_STALE_MS = 5 * 60 * 1000
 
 const answerSchema = z.object({
-  answer_1: z.string().describe('Answer to question 1. 800-950 words, plain paragraphs, no headings or bullets.'),
-  answer_2: z.string().describe('Answer to question 2. 800-950 words, plain paragraphs, no headings or bullets.'),
-  answer_3: z.string().describe('Answer to question 3. 800-950 words, plain paragraphs, no headings or bullets.'),
+  answer_1: z.string().describe('Answer to question 1. 450-650 words, simple Markdown: bold bottom line first, short sections, bullets, ends with a bold Key takeaway line.'),
+  answer_2: z.string().describe('Answer to question 2. 450-650 words, simple Markdown: bold bottom line first, short sections, bullets, ends with a bold Key takeaway line.'),
+  answer_3: z.string().describe('Answer to question 3. 450-650 words, simple Markdown: bold bottom line first, short sections, bullets, ends with a bold Key takeaway line.'),
 })
 type Answers = z.infer<typeof answerSchema>
 const ANSWER_KEYS = ['answer_1', 'answer_2', 'answer_3'] as const
@@ -43,12 +44,19 @@ READING NOTES (when a READING NOTES block is present)
 
 TODAY: ${todayISO}. The customer's question is being answered on this date. The current calendar year is ${currentYear} with ${weeksLeftInYear} weeks left. The focus year of this answer is ${focusYear}.
 
-ANSWER STRUCTURE (each answer 800-950 words, plain paragraphs, no headings, no bullets, no numbered lists, no markdown)
-1. Start with one sentence of real empathy about their situation (specific to what they wrote, not generic), then a DIRECT answer in the first 3 sentences: a clear lean with probability wording ("the chart leans toward...", "there is a good chance...", "I would not rush this because...").
-2. The chart evidence: 3-4 chart facts that bear on THIS question, mostly NEW facts not in the report (use monthlyWindows, romanceFacts, childFacts, careerLean, the current and next luck cycles). Name specific months (from monthlyWindows.supportiveMonthsFor and each month's themes) and years, only from the data.
-3. Decision lens: if the question is a choice (stay/leave, wait/act), lay out when each option fits better, using the chart: what conditions would make it a yes, and what would make it better to wait. Give the user a way to decide, not only a verdict.
-4. A concrete plan: 3 steps with timing (this week, next 1-3 months, 6-12 months), real-world actions (conversations, applications, saving, courses), not journaling.
-5. One honest caution (a risk or thing to prepare for) and a short, warm closing line. No generic motivational filler.
+ANSWER FORMAT (each answer 450-650 words, written in simple Markdown so it is easy to scan; shorter is better)
+Allowed Markdown only: **bold**, bullet lists with "- ", and short sub-headings written as "### Heading". No tables, no numbered lists, no HTML, no code blocks, no emojis.
+1. BOTTOM LINE FIRST: the answer starts with a 1-2 sentence **bold** direct answer to the question, with probability wording ("the chart leans toward...", "there is a good chance...", "I would not rush this because..."). One short, specific empathy clause for what they wrote may sit inside or right after it. Never open with a generic greeting.
+2. Then 3-4 short sections, each introduced by a short "### " sub-heading (2-4 words) or a bold label such as **Timing:**, **Best-fit roles:**, **Watch out:**. Suggested sections, use only the ones that fit the question: why the chart says this; timing; what to do; watch out.
+3. PULL SPECIFICS OUT AS BULLETS. Whenever the answer contains specifics, put each one on its own "- " bullet instead of burying it in a paragraph: specific job titles or examples, fields or industries, love/marriage timing with explicit years or months (e.g. "- **Likely window: 2027-2028**, because ..."), money or career timing, what to do, what to avoid. Each bullet is one or two short lines.
+4. Chart evidence: 2-3 chart facts that bear on THIS question, mostly NEW facts not in the report (use monthlyWindows, romanceFacts, childFacts, careerLean, the current and next luck cycles), each in plain English with one short reason. Name months only from monthlyWindows and years only from ALLOWED YEARS.
+5. If the question is a choice (stay/leave, wait/act), give a decision lens as two bullets: "Lean toward acting if ..." and "Lean toward waiting if ...".
+6. A concrete plan as 3 bullets with timing (this week, next 1-3 months, 6-12 months) and real-world actions (conversations, applications, saving, courses), not journaling.
+7. BOLD: use **bold** on roughly 2-4 key spots per answer (the bottom line, years, job names, the decisive advice). Never bold whole paragraphs.
+8. PARAGRAPHS: any paragraph is 2-3 short sentences at most. No long unbroken text. Leave a blank line between paragraphs, headings and lists.
+9. PLAIN ENGLISH FIRST: when a saju term is needed, lead with the plain meaning and put the term in parentheses, e.g. "your drive to earn through your own skills (Output Star)". Explain a term in one short clause the first time it appears and never stack two or more terms in one sentence.
+10. END WITH ONE LINE in this exact form: **Key takeaway:** one plain-language sentence with the decisive advice. Nothing after it.
+Keep the warm, calm Gumiho voice. No generic motivational filler. Keep every rule below about timing, sensitive topics, and chart terms.
 
 TONE
 - Warm, practical, honest. Encouraging but not flattering: if the chart suggests challenges, frame them as things to prepare for. Do not scare or confuse the person.
@@ -137,7 +145,11 @@ function checkAnswer(
     if (!/probab|tend|lean|chance|signal/i.test(answer)) repairReasons.push('child question answered without tendency/probability wording')
     if (/will have a child|will get pregnant|infertil|miscarri/i.test(answer)) repairReasons.push('states a child certainty or mentions infertility/miscarriage')
   }
-  if (wordCount(answer) < MIN_WORDS) repairReasons.push(`too short (${wordCount(answer)} words; needs at least ${MIN_WORDS}, target 800-950)`)
+  if (wordCount(answer) < MIN_WORDS) repairReasons.push(`too short (${wordCount(answer)} words; needs at least ${MIN_WORDS}, target 450-650)`)
+  if (wordCount(answer) > MAX_WORDS) repairReasons.push(`too long (${wordCount(answer)} words; trim to 450-650 by shortening, not by removing the bottom line, bullets or Key takeaway)`)
+  if (!/^\s*\*\*[^*]+\*\*/.test(answer)) repairReasons.push('does not start with a bold 1-2 sentence direct answer')
+  if (!/\*\*Key takeaway:?\*\*/i.test(answer)) repairReasons.push('does not end with a bold "**Key takeaway:**" line')
+  if (!/^\s*[-*]\s+\S/m.test(answer)) repairReasons.push('has no bullet points; pull specifics (roles, timing with years, what to do or avoid) out as "- " bullets')
 
   return { badYearList, repairReasons, guardReasons: checkGuards(answer) }
 }
@@ -145,7 +157,9 @@ function checkAnswer(
 const REPAIR_SYSTEM_PROMPT = `You are an editor fixing ONE 1:1 Saju answer written by the Gumiho (a calm, perceptive, kind fox spirit) in English.
 Rules:
 - Fix ONLY the listed problems. Keep everything else: the facts, structure, warmth, empathy opening, plan and closing.
-- Keep the length at 800-950 words (never shorter than the original unless the original is longer than 950 words). Plain paragraphs, no headings, bullets or markdown.
+- Keep the scannable Markdown format: the answer starts with a 1-2 sentence **bold** direct answer; short "### " sub-headings or bold labels; specifics (job titles, fields, timing with years, what to do or avoid) as "- " bullets; paragraphs of 2-3 short sentences; roughly 2-4 **bold** spots; it ends with one line "**Key takeaway:** ...". Only **bold**, "- " bullets and "### " headings are allowed (no HTML, tables, numbered lists or emojis).
+- Keep the length between 450 and 650 words. If the original is longer than 650 words, trim it by shortening, never by removing the bottom line, bullets or Key takeaway.
+- Explain saju terms in plain English first, term in parentheses; never stack jargon.
 - English only: never write Hangul or Hanja.
 - Years: use only the ALLOWED YEARS given. Months: use only the ALLOWED MONTHS given. If no allowed year or month fits, say "in the coming years" or "in the coming months".
 - No endearments ("dear", "sweetheart", "child"); do not start with "Ah," or "Oh,"; use the customer's first name at most twice.

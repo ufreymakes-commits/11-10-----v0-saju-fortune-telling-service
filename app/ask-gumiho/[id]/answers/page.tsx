@@ -5,6 +5,7 @@ import { useParams, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
+import { GumihoAnswer } from '@/components/gumiho-answer'
 import Link from 'next/link'
 
 interface GumihoData {
@@ -165,7 +166,7 @@ function AnswersContent() {
             </div>
             <div className="border-t border-border pt-3">
               <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Gumiho&apos;s Answer</span>
-              <p className="text-foreground mt-2 whitespace-pre-wrap leading-relaxed">{data.answer_1}</p>
+              <GumihoAnswer text={data.answer_1} />
             </div>
           </div>
 
@@ -177,7 +178,7 @@ function AnswersContent() {
             </div>
             <div className="border-t border-border pt-3">
               <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Gumiho&apos;s Answer</span>
-              <p className="text-foreground mt-2 whitespace-pre-wrap leading-relaxed">{data.answer_2}</p>
+              <GumihoAnswer text={data.answer_2} />
             </div>
           </div>
 
@@ -189,7 +190,7 @@ function AnswersContent() {
             </div>
             <div className="border-t border-border pt-3">
               <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Gumiho&apos;s Answer</span>
-              <p className="text-foreground mt-2 whitespace-pre-wrap leading-relaxed">{data.answer_3}</p>
+              <GumihoAnswer text={data.answer_3} />
             </div>
           </div>
         </div>
