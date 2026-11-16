@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { settlePayment } from '@/lib/payments/paypal-orders'
 import { hasPaidReport, startServerGeneration } from '@/lib/payments/start-generation'
+import { repairMissingGumihoEntitlements } from '@/lib/payments/gumiho-entitlement'
 
 export const maxDuration = 300
 
@@ -82,5 +83,8 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.json({ reconciled, completedNow, generated: generatedSubmission })
+  // 3. Completed add-on payments whose Gumiho entitlement is missing (bounded window and limits).
+  const gumihoRepaired = await repairMissingGumihoEntitlements()
+
+  return NextResponse.json({ reconciled, completedNow, generated: generatedSubmission, gumihoRepaired })
 }

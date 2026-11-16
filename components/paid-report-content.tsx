@@ -25,6 +25,7 @@ interface PaidReportContentProps {
   submission: Submission
   paidReport: any
   hasGumihoBundle?: boolean
+  gumihoRefunded?: boolean
   buyerOffer?: BuyerOfferInfo | null
 }
 
@@ -37,7 +38,7 @@ const KOREAN_TO_HANJA_STEM: Record<string, string> = {
   '기': '己', '경': '庚', '신': '辛', '임': '壬', '계': '癸',
 }
 
-export function PaidReportContent({ submission, paidReport: initialPaidReport, hasGumihoBundle = false, buyerOffer: initialBuyerOffer = null }: PaidReportContentProps) {
+export function PaidReportContent({ submission, paidReport: initialPaidReport, hasGumihoBundle = false, gumihoRefunded = false, buyerOffer: initialBuyerOffer = null }: PaidReportContentProps) {
   const [buyerOffer, setBuyerOffer] = useState<BuyerOfferInfo | null>(initialBuyerOffer)
   const [copied, setCopied] = useState(false)
   const [openSections, setOpenSections] = useState<Record<number, boolean>>({})
@@ -377,7 +378,9 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport, h
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs text-primary">Personalized AI Reading</span>
                   <div className="flex items-center gap-2">
-                    {hasGumihoBundle ? (
+                    {gumihoRefunded ? (
+                      <span className="text-sm font-bold text-foreground">Refunded</span>
+                    ) : hasGumihoBundle ? (
                       <span className="text-sm font-bold text-foreground">Included in your order</span>
                     ) : (
                       <>
@@ -388,7 +391,7 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport, h
                   </div>
                 </div>
                 <span className="w-full py-2 text-xs font-semibold bg-primary hover:bg-primary/90 rounded-lg transition-colors text-primary-foreground text-center block">
-                  {hasGumihoBundle ? 'Ask Your 3 Questions' : 'Ask Now (3 mins)'}
+                  {gumihoRefunded ? 'Add-on refunded' : hasGumihoBundle ? 'Ask Your 3 Questions' : 'Ask Now (3 mins)'}
                 </span>
               </div>
             </div>
