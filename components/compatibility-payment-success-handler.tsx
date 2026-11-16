@@ -17,7 +17,6 @@ export function CompatibilityPaymentSuccessHandler({ submissionId, orderId }: Co
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing')
   const [error, setError] = useState<string | null>(null)
   const [emailSent, setEmailSent] = useState(false)
-  const [emailSent, setEmailSent] = useState(false)
   const startedRef = useRef(false)
 
   useEffect(() => {
@@ -46,7 +45,6 @@ export function CompatibilityPaymentSuccessHandler({ submissionId, orderId }: Co
 
         const emailSent = captureData.emailSent === true
         setEmailSent(emailSent)
-        setEmailSent(captureData.emailSent === true)
         setStatus('success')
 
         // The route answers 202 right away and generates in the background.
@@ -93,11 +91,6 @@ export function CompatibilityPaymentSuccessHandler({ submissionId, orderId }: Co
         <CheckCircleIcon className="w-16 h-16 mx-auto mb-4 text-pink-400" />
         <h2 className="text-2xl font-bold text-white mb-2">Payment Successful!</h2>
         <p className="text-white/70 mb-4">Thank you for your purchase</p>
-        {emailSent && (
-          <p className="mb-4 text-sm text-white/70">
-            We&apos;ve sent a link to your compatibility report to your email.
-          </p>
-        )}
         {emailSent && (
           <p className="text-sm text-white/80 mb-4">
             We sent a link to your compatibility report to your email.
