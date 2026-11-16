@@ -261,15 +261,21 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
               <span className="block text-sm leading-snug text-muted-foreground">
                 3 questions &middot; answered after your report
               </span>
+              <span className="mt-1.5 inline-block rounded-full bg-gradient-to-r from-violet-700 via-fuchsia-700 to-pink-700 px-2.5 py-0.5 text-[11px] font-semibold leading-4 text-white">
+                Checkout-only price
+              </span>
             </span>
             <span className="flex-shrink-0 whitespace-nowrap text-right">
-              <span className="block text-xl font-bold leading-6 text-foreground">$7.99</span>
+              <span className="offer-price block text-3xl font-extrabold leading-8">$7.99</span>
               <span className="block text-sm leading-snug text-muted-foreground line-through">$9.99</span>
-              <span className="block text-xs leading-snug text-muted-foreground">later: $9.99</span>
             </span>
           </span>
         </span>
         <span className="mt-2 block text-sm leading-relaxed text-muted-foreground">
+          Later: <span className="line-through">$9.99</span>
+          {' \u2014 '}only in this checkout: $7.99
+        </span>
+        <span className="mt-1 block text-sm leading-relaxed text-muted-foreground">
           You&apos;ll get your report first, then ask your 3 questions whenever you&apos;re ready.
         </span>
       </label>

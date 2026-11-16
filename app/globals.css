@@ -304,6 +304,38 @@
   70%, 100% { transform: translateX(330%) skewX(-18deg); }
 }
 
+.offer-price {
+  background-image: linear-gradient(
+    100deg,
+    #6d28d9 0%,
+    #a21caf 30%,
+    #d946ef 48%,
+    #be185d 66%,
+    #6d28d9 100%
+  );
+  background-size: 250% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: offer-price-shimmer 2.5s ease-in-out infinite;
+}
+
+@keyframes offer-price-shimmer {
+  0% { background-position: 100% 0; }
+  60%, 100% { background-position: 0% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .offer-price {
+    animation: none;
+    background-size: 100% 100%;
+    background-position: 0 0;
+    background-image: linear-gradient(100deg, #6d28d9 0%, #a21caf 55%, #be185d 100%);
+  }
+}
+
 .orb-card-frame {
   background: linear-gradient(145deg, #f6e6b4 0%, #c79a3c 28%, #8a6a22 50%, #e9c872 75%, #fbf1d2 100%);
   box-shadow:
