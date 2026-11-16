@@ -9,14 +9,29 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 export const isUuid = (value: unknown): value is string => typeof value === 'string' && UUID_RE.test(value)
 
+// Why the offer is (not) live. "no-payment" also covers a paid report whose offer clock has not started yet.
+export type BuyerOfferReason = 'none' | 'expired' | 'redeemed' | 'no-payment'
+
 export interface BuyerOfferStatus {
   eligible: boolean
   expiresAt: string | null
   priceUsd: string
   offerId: string | null
+  reason: BuyerOfferReason
 }
 
-const noOffer = (): BuyerOfferStatus => ({ eligible: false, expiresAt: null, priceUsd: COMPAT_PRICE_USD, offerId: null })
+const noOffer = (): BuyerOfferStatus => ({
+  eligible: false,
+  expiresAt: null,
+  priceUsd: COMPAT_PRICE_USD,
+  offerId: null,
+  reason: 'no-payment',
+})
+
+// Single log line for support: explains why a given test showed the regular price. Contains no PII or ids.
+export function logBuyerOfferResolved(offer: BuyerOfferStatus) {
+  console.log(`[v0] compat offer resolved: eligible=${offer.eligible} reason=${offer.reason}`)
+}
 
 async function completedPaymentIds(reportId: string): Promise<string[]> {
   const admin = createAdminClient()
@@ -57,12 +72,14 @@ export async function getBuyerOffer(reportId: string): Promise<BuyerOfferStatus>
   if (!data) return noOffer()
 
   const expiresAtMs = new Date(data.expires_at as string).getTime()
-  const eligible = !data.redeemed_at && Date.now() < expiresAtMs
+  const expired = Date.now() >= expiresAtMs
+  const eligible = !data.redeemed_at && !expired
   return {
     eligible,
     expiresAt: new Date(expiresAtMs).toISOString(),
     priceUsd: eligible ? COMPAT_BUYER_PRICE_USD : COMPAT_PRICE_USD,
     offerId: data.id as string,
+    reason: data.redeemed_at ? 'redeemed' : expired ? 'expired' : 'none',
   }
 }
 

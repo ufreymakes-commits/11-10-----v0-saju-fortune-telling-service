@@ -193,7 +193,13 @@ const emptyPerson = (): PersonFormData => ({
   birthCountry: '', gender: ''
 })
 
-export function CompatibilityForm({ offerReportId }: { offerReportId?: string }) {
+interface CompatibilityFormProps {
+  offerReportId?: string
+  buyerOffer?: { priceUsd: string } | null
+  regularPriceUsd: string
+}
+
+export function CompatibilityForm({ offerReportId, buyerOffer = null, regularPriceUsd }: CompatibilityFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({ personA: {}, personB: {} })
@@ -205,6 +211,7 @@ export function CompatibilityForm({ offerReportId }: { offerReportId?: string })
   const [relationshipType, setRelationshipType] = useState<RelationshipType | ''>('')
   const [concern, setConcern] = useState('')
   const [relationshipError, setRelationshipError] = useState<string | undefined>()
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const validatePerson = (data: PersonFormData, city: City | null): PersonFormErrors => {
     const errs: PersonFormErrors = {}
@@ -227,6 +234,7 @@ export function CompatibilityForm({ offerReportId }: { offerReportId?: string })
 
     if (relError || Object.keys(errA).length > 0 || Object.keys(errB).length > 0) return
 
+    setSubmitError(null)
     setIsLoading(true)
 
     try {
@@ -270,6 +278,7 @@ export function CompatibilityForm({ offerReportId }: { offerReportId?: string })
       router.push(`/compatibility/checkout/${data.submissionId}${offerReportId ? `?offer=${offerReportId}` : ''}`)
     } catch (err) {
       console.error('[v0] Compatibility form submit error:', err)
+      setSubmitError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
       setIsLoading(false)
     }
   }
@@ -327,6 +336,12 @@ export function CompatibilityForm({ offerReportId }: { offerReportId?: string })
         />
       </div>
 
+      {submitError && (
+        <p role="alert" className="rounded-lg border border-red-400/20 bg-red-400/10 px-4 py-2 text-center text-sm text-red-400">
+          {submitError}
+        </p>
+      )}
+
       {/* Submit */}
       <Button
         type="submit"
@@ -338,8 +353,17 @@ export function CompatibilityForm({ offerReportId }: { offerReportId?: string })
             <Spinner className="w-4 h-4" />
             Processing...
           </span>
+        ) : buyerOffer ? (
+          <span className="flex items-baseline justify-center gap-2">
+            <span>
+              See Your Compatibility — <span className="sr-only">buyer-only price </span>${buyerOffer.priceUsd}
+            </span>
+            <span className="text-sm font-normal text-white/75 line-through">
+              <span className="sr-only">regular price </span>${regularPriceUsd}
+            </span>
+          </span>
         ) : (
-          'See Your Compatibility — $19.99'
+          `See Your Compatibility — $${regularPriceUsd}`
         )}
       </Button>
 

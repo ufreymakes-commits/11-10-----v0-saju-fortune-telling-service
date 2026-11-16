@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getPayPalConfig } from '@/lib/paypal'
 import { createAdminClient } from '@/lib/supabase/server'
 import { COMPAT_PRICE_USD, COMPAT_BUYER_PRICE_USD } from '@/lib/payments/paypal-orders'
-import { BUYER_OFFER_CUSTOM_ID_PREFIX, getBuyerOffer, isUuid } from '@/lib/payments/buyer-offer'
+import { BUYER_OFFER_CUSTOM_ID_PREFIX, getBuyerOffer, isUuid, logBuyerOfferResolved } from '@/lib/payments/buyer-offer'
 
 async function getPayPalAccessToken() {
   const { clientId, clientSecret, apiUrl } = getPayPalConfig()
@@ -51,11 +51,13 @@ export async function POST(request: Request) {
     let offerQuery = ''
     if (isUuid(offerReportId)) {
       const offer = await getBuyerOffer(offerReportId)
+      logBuyerOfferResolved(offer)
       if (offer.eligible && offer.offerId) {
         amountUsd = COMPAT_BUYER_PRICE_USD
         customId = `${BUYER_OFFER_CUSTOM_ID_PREFIX}${offer.offerId}`
-        offerQuery = `?offer=${offerReportId}`
       }
+      // Always carry the offer id back on PayPal cancel so the checkout page can re-resolve it (or explain it ended).
+      offerQuery = `?offer=${offerReportId}`
     }
 
     // If the price the buyer saw is no longer the price we would charge (e.g. the offer just ended), stop and say so.

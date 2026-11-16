@@ -13,9 +13,9 @@ interface CompatibilityCheckoutContentProps {
   personBName: string
   buyerOffer?: { expiresAt: string; priceUsd: string } | null
   offerReportId?: string
+  offerEnded?: boolean
+  regularPriceUsd: string
 }
-
-const REGULAR_PRICE_USD = '19.99'
 
 export function CompatibilityCheckoutContent({
   submissionId,
@@ -23,7 +23,10 @@ export function CompatibilityCheckoutContent({
   personBName,
   buyerOffer = null,
   offerReportId,
+  offerEnded = false,
+  regularPriceUsd,
 }: CompatibilityCheckoutContentProps) {
+  const REGULAR_PRICE_USD = regularPriceUsd
   const displayedPriceUsd = buyerOffer ? buyerOffer.priceUsd : REGULAR_PRICE_USD
   const offerEndLabel = buyerOffer
     ? new Date(buyerOffer.expiresAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
@@ -99,7 +102,7 @@ export function CompatibilityCheckoutContent({
         // The server no longer honors the price on screen; reload so the page shows the real price.
         setError(data.error)
         setIsLoading(false)
-        router.replace(`/compatibility/checkout/${submissionId}`)
+        router.replace(`/compatibility/checkout/${submissionId}${offerReportId ? `?offer=${offerReportId}` : ''}`)
         router.refresh()
         return
       }
@@ -168,6 +171,11 @@ export function CompatibilityCheckoutContent({
         </div>
         {offerEndLabel && (
           <p className="px-1 text-xs text-pink-400">Buyer-only price. Offer ends {offerEndLabel}.</p>
+        )}
+        {offerEnded && !buyerOffer && (
+          <p className="px-1 text-xs text-white/60">
+            Buyer-only price already used / ended — regular price ${REGULAR_PRICE_USD}.
+          </p>
         )}
 
         {error && (

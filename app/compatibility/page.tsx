@@ -1,6 +1,10 @@
 import type { Metadata } from 'next'
 import { CompatibilityForm } from '@/components/compatibility-form'
 import { StarsBackground } from '@/components/stars-background'
+import { getBuyerOffer, logBuyerOfferResolved } from '@/lib/payments/buyer-offer'
+import { COMPAT_PRICE_USD } from '@/lib/payments/paypal-orders'
+
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Saju Compatibility | Sajume',
@@ -16,6 +20,12 @@ export default async function CompatibilityPage({
 }) {
   const { offer } = await searchParams
   const offerReportId = typeof offer === 'string' && UUID_RE.test(offer) ? offer : undefined
+
+  // The server decides which price applies; the form only displays it.
+  const offerStatus = offerReportId ? await getBuyerOffer(offerReportId) : null
+  if (offerStatus) logBuyerOfferResolved(offerStatus)
+  const buyerOffer = offerStatus?.eligible ? { priceUsd: offerStatus.priceUsd } : null
+  const offerEnded = Boolean(offerStatus && !offerStatus.eligible)
 
   return (
     <main className="min-h-screen bg-[#0f0a14] relative overflow-x-hidden pt-10 pb-20">
@@ -37,7 +47,17 @@ export default async function CompatibilityPage({
         </div>
 
         {/* Form */}
-        <CompatibilityForm offerReportId={offerReportId} />
+        {offerEnded && (
+          <p className="mb-6 rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-center text-xs text-white/70">
+            Buyer-only price already used / ended — regular price ${COMPAT_PRICE_USD}.
+          </p>
+        )}
+
+        <CompatibilityForm
+          offerReportId={buyerOffer ? offerReportId : undefined}
+          buyerOffer={buyerOffer}
+          regularPriceUsd={COMPAT_PRICE_USD}
+        />
       </div>
     </main>
   )
