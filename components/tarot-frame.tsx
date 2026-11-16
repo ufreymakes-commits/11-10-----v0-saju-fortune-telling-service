@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { DownloadIcon, Share2Icon } from 'lucide-react'
-import { downloadBlob, renderCardPng } from '@/lib/card-export'
+import { downloadBlob, needsWarmupCapture, renderCardPng } from '@/lib/card-export'
 
 export const CARD_BUTTON_CLASS =
   'inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60'
@@ -114,7 +114,12 @@ interface CardActionsProps {
 async function renderPng(targetId: string, backgroundColor: string): Promise<Blob> {
   const node = document.getElementById(targetId)
   if (!node) throw new Error('Card not found')
-  return renderCardPng(node, { pixelRatio: 2, backgroundColor })
+  return renderCardPng(node, {
+    pixelRatio: 2,
+    backgroundColor,
+    waitForAssets: true,
+    warmup: needsWarmupCapture(),
+  })
 }
 
 export function CardActions({
