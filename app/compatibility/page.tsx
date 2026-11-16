@@ -7,7 +7,16 @@ export const metadata: Metadata = {
   description: 'Discover your cosmic compatibility through the ancient wisdom of Korean Saju.',
 }
 
-export default function CompatibilityPage() {
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+export default async function CompatibilityPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ offer?: string }>
+}) {
+  const { offer } = await searchParams
+  const offerReportId = typeof offer === 'string' && UUID_RE.test(offer) ? offer : undefined
+
   return (
     <main className="min-h-screen bg-[#0f0a14] relative overflow-x-hidden pt-10 pb-20">
       <StarsBackground />
@@ -28,7 +37,7 @@ export default function CompatibilityPage() {
         </div>
 
         {/* Form */}
-        <CompatibilityForm />
+        <CompatibilityForm offerReportId={offerReportId} />
       </div>
     </main>
   )

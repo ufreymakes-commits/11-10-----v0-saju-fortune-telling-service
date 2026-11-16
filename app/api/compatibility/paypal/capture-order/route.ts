@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getPayPalConfig } from '@/lib/paypal'
 import { createAdminClient } from '@/lib/supabase/server'
-import { COMPAT_PRICE_USD, captureAndVerifyOrder } from '@/lib/payments/paypal-orders'
+import { COMPAT_PRICE_USD, COMPAT_BUYER_PRICE_USD, captureAndVerifyOrder } from '@/lib/payments/paypal-orders'
+import { offerIdFromCustomId, redeemBuyerOffer } from '@/lib/payments/buyer-offer'
 
 function getBaseUrl(request: Request): string {
   const host = request.headers.get('host')
@@ -29,7 +30,7 @@ export async function POST(request: Request) {
     // The order must belong to a payment row we created; its submission is the only one this order can unlock.
     const { data: row, error: rowError } = await supabase
       .from('compatibility_payments')
-      .select('status, submission_id')
+      .select('id, status, submission_id, amount')
       .eq('paypal_order_id', orderId)
       .order('created_at', { ascending: false })
       .limit(1)
@@ -50,8 +51,16 @@ export async function POST(request: Request) {
     }
 
     const submissionId = row.submission_id as string
+
+    // The amount stored when the order was created is the only amount PayPal's capture may match.
+    const storedUsd = row.amount == null ? COMPAT_PRICE_USD : Number(row.amount).toFixed(2)
+    if (storedUsd !== COMPAT_PRICE_USD && storedUsd !== COMPAT_BUYER_PRICE_USD) {
+      console.error(`[v0] Compatibility capture REJECTED order=${orderId} unexpected stored amount=${storedUsd}`)
+      return NextResponse.json({ error: 'Payment could not be verified. Please contact support.' }, { status: 400 })
+    }
+
     const result = await captureAndVerifyOrder(orderId, {
-      amountUsd: COMPAT_PRICE_USD,
+      amountUsd: storedUsd,
       referenceId: submissionId,
     })
 
@@ -76,6 +85,18 @@ export async function POST(request: Request) {
         .eq('paypal_order_id', orderId)
         .neq('status', 'completed')
       return NextResponse.json({ error: 'Payment capture failed' }, { status: 400 })
+    }
+
+    // Redeem before marking completed so a failure here is retried on the next capture call (both steps are idempotent).
+    if (storedUsd === COMPAT_BUYER_PRICE_USD) {
+      const offerId = offerIdFromCustomId(result.customId)
+      if (!offerId) {
+        console.error(`[v0] Compatibility capture: buyer-priced order without offer reference order=${orderId}`)
+        return NextResponse.json({ error: 'Payment could not be verified. Please contact support.' }, { status: 400 })
+      }
+      if (!(await redeemBuyerOffer(offerId, row.id as string))) {
+        return NextResponse.json({ error: 'Could not record payment. Please refresh and try again.' }, { status: 500 })
+      }
     }
 
     const { error: updateError } = await supabase

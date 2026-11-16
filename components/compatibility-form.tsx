@@ -193,7 +193,7 @@ const emptyPerson = (): PersonFormData => ({
   birthCountry: '', gender: ''
 })
 
-export function CompatibilityForm() {
+export function CompatibilityForm({ offerReportId }: { offerReportId?: string }) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({ personA: {}, personB: {} })
@@ -267,7 +267,7 @@ export function CompatibilityForm() {
 
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Submission failed')
-      router.push(`/compatibility/checkout/${data.submissionId}`)
+      router.push(`/compatibility/checkout/${data.submissionId}${offerReportId ? `?offer=${offerReportId}` : ''}`)
     } catch (err) {
       console.error('[v0] Compatibility form submit error:', err)
       setIsLoading(false)
