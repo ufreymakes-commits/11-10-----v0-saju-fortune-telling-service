@@ -8,6 +8,7 @@ import { sendPaymentConfirmationEmail } from '@/lib/email/payment-confirmation'
 // Single source of truth per product: used for the PayPal order, the stored payment row and the capture check.
 export const PRICE_USD = '19.99'
 export const COMPAT_PRICE_USD = '19.99'
+export const COMPAT_BUYER_PRICE_USD = '15.99'
 export const GUMIHO_PRICE_USD = '9.99'
 export const GUMIHO_ADDON_PRICE_USD = '7.99'
 
@@ -411,7 +412,7 @@ export async function settlePayment(orderId: string, source: SettleSource): Prom
 // ---------------------------------------------------------------------------
 
 export type VerifiedCapture =
-  | { state: 'paid'; captureId: string | null; payerCountry: string | null }
+  | { state: 'paid'; captureId: string | null; payerCountry: string | null; customId: string | null }
   | { state: 'pending' }
   | { state: 'failed'; reason: string }
   | { state: 'mismatch'; reason: string }
@@ -483,5 +484,6 @@ export async function captureAndVerifyOrder(
     state: 'paid',
     captureId: (capture.id as string | undefined) ?? null,
     payerCountry: payer?.address?.country_code ?? capture?.payer?.address?.country_code ?? null,
+    customId: (order.body?.purchase_units?.[0]?.custom_id as string | undefined) ?? null,
   }
 }

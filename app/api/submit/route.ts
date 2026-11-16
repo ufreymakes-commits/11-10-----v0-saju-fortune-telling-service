@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { calculateSaju } from '@/lib/saju-calculator'
-import { runSajuTests } from '@/lib/saju-test'
 import type { BirthInfo } from '@/lib/types'
 import { isValidEmail } from '@/lib/validation'
 import { getCountryFullName } from '@/lib/country-name'
@@ -56,20 +55,6 @@ export async function POST(request: Request) {
     const accessCountryCode = request.headers.get('x-vercel-ip-country')
     const accessCountry = accessCountryCode ? getCountryFullName(accessCountryCode) : null
     
-    // Debug: Log calculated saju pillars for verification
-    console.log('[v0] Saju calculation result:', {
-      input: { birthDate, birthTime, birthCountry, birthCity, timezone, longitude },
-      pillars: {
-        year: sajuData.fourPillars?.year,
-        month: sajuData.fourPillars?.month,
-        day: sajuData.fourPillars?.day,
-        hour: sajuData.fourPillars?.hour
-      }
-    })
-    
-    // Run test suite once per deployment (only logs to console, no side effects)
-    runSajuTests()
-    
     const { data, error } = await supabase
       .from('submissions')
       .insert({
@@ -98,23 +83,7 @@ export async function POST(request: Request) {
       )
     }
     
-    return NextResponse.json({ 
-      submissionId: data.id,
-      _debug: {
-        raw_birthCountry: birthCountry,
-        raw_timezone: timezone,
-        raw_longitude: longitude,
-        raw_birthCity: birthCity,
-        birthDate,
-        birthTime,
-        fourPillars: {
-          year: sajuData.fourPillars?.year,
-          month: sajuData.fourPillars?.month,
-          day: sajuData.fourPillars?.day,
-          hour: sajuData.fourPillars?.hour
-        }
-      }
-    })
+    return NextResponse.json({ submissionId: data.id })
   } catch (error) {
     console.error('[v0] Submit error:', error)
     return NextResponse.json(

@@ -7,7 +7,7 @@ import { CheckCircleIcon } from 'lucide-react'
 export default function CouponSuccessPage() {
   const params = useParams()
   const submissionId = params.id as string
-  const { status, error, attempt, retry, checkNow } = useReportGeneration(submissionId)
+  const { status, error, attempt, retry, checkNow, emailSent } = useReportGeneration(submissionId)
 
   if (status === 'success') {
     return (
@@ -23,7 +23,7 @@ export default function CouponSuccessPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <ReportProgress key={attempt} error={error} onRetry={retry} onCheckAgain={checkNow} />
+      <ReportProgress key={attempt} emailSent={emailSent} error={error} onRetry={retry} onCheckAgain={checkNow} />
     </div>
   )
 }

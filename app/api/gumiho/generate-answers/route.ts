@@ -12,16 +12,17 @@ import { focusYearFor } from '@/lib/report-year'
 
 const MODEL = PAID_MODEL
 const MAX_RETRIES = 3
-const MIN_WORDS = 700
+const MIN_WORDS = 380
+const MAX_WORDS = 800
 
 // In-memory guard so the same order cannot be generated twice at once (same 202 response as the paid report route).
 const inFlightGenerations = new Map<string, number>()
 const IN_FLIGHT_STALE_MS = 5 * 60 * 1000
 
 const answerSchema = z.object({
-  answer_1: z.string().describe('Answer to question 1. 800-950 words, plain paragraphs, no headings or bullets.'),
-  answer_2: z.string().describe('Answer to question 2. 800-950 words, plain paragraphs, no headings or bullets.'),
-  answer_3: z.string().describe('Answer to question 3. 800-950 words, plain paragraphs, no headings or bullets.'),
+  answer_1: z.string().describe('Answer to question 1. 450-650 words, simple Markdown: bold bottom line, one short bullet summary block, then prose paragraphs (not bullets), ends with a bold Key takeaway line.'),
+  answer_2: z.string().describe('Answer to question 2. 450-650 words, simple Markdown: bold bottom line, one short bullet summary block, then prose paragraphs (not bullets), ends with a bold Key takeaway line.'),
+  answer_3: z.string().describe('Answer to question 3. 450-650 words, simple Markdown: bold bottom line, one short bullet summary block, then prose paragraphs (not bullets), ends with a bold Key takeaway line.'),
 })
 type Answers = z.infer<typeof answerSchema>
 const ANSWER_KEYS = ['answer_1', 'answer_2', 'answer_3'] as const
@@ -43,12 +44,18 @@ READING NOTES (when a READING NOTES block is present)
 
 TODAY: ${todayISO}. The customer's question is being answered on this date. The current calendar year is ${currentYear} with ${weeksLeftInYear} weeks left. The focus year of this answer is ${focusYear}.
 
-ANSWER STRUCTURE (each answer 800-950 words, plain paragraphs, no headings, no bullets, no numbered lists, no markdown)
-1. Start with one sentence of real empathy about their situation (specific to what they wrote, not generic), then a DIRECT answer in the first 3 sentences: a clear lean with probability wording ("the chart leans toward...", "there is a good chance...", "I would not rush this because...").
-2. The chart evidence: 3-4 chart facts that bear on THIS question, mostly NEW facts not in the report (use monthlyWindows, romanceFacts, childFacts, careerLean, the current and next luck cycles). Name specific months (from monthlyWindows.supportiveMonthsFor and each month's themes) and years, only from the data.
-3. Decision lens: if the question is a choice (stay/leave, wait/act), lay out when each option fits better, using the chart: what conditions would make it a yes, and what would make it better to wait. Give the user a way to decide, not only a verdict.
-4. A concrete plan: 3 steps with timing (this week, next 1-3 months, 6-12 months), real-world actions (conversations, applications, saving, courses), not journaling.
-5. One honest caution (a risk or thing to prepare for) and a short, warm closing line. No generic motivational filler.
+ANSWER FORMAT (each answer 450-650 words, simple Markdown, easy to scan; shorter is better)
+Allowed Markdown only: **bold**, "- " bullets (in ONE summary block only) and optional short "### Heading" lines. No tables, no numbered lists, no HTML, no code blocks, no emojis.
+The answer has exactly this structure, in this order:
+1. BOTTOM LINE: a 1-2 sentence **bold** direct answer to the question, with probability wording ("the chart leans toward...", "there is a good chance...", "I would not rush this because..."). One short, specific empathy clause for what they wrote may sit inside or right after it. Never open with a generic greeting.
+2. QUICK SUMMARY: ONE compact block of 3-5 "- " bullets, each one short line, holding only the key specifics: specific job titles or examples, fields or industries, love/marriage timing with explicit years or months (e.g. "- Likely window: 2027-2028"), money or career timing, one thing to do, one thing to avoid. Introduce the block with a short label line such as "### Quick summary" or **At a glance:**. Bullets are the summary layer only.
+3. EXPLANATION IN PROSE: then 3-4 short paragraphs of normal flowing text (NOT bullets) that give the concrete reasoning behind the bullets: why the chart says this, the 2-3 chart facts that bear on THIS question (mostly NEW facts not in the report: monthlyWindows, romanceFacts, childFacts, careerLean, the current and next luck cycles, each in plain English with one short reason), what the timing means in real life, and a concrete next step with timing (this week, next 1-3 months, 6-12 months) using real-world actions (conversations, applications, saving, courses), not journaling. If the question is a choice (stay/leave, wait/act), explain in prose when leaning toward acting makes sense and when waiting does. You may put a short "### " sub-heading (2-4 words) above a paragraph, but never turn the explanation into bullets. Name months only from monthlyWindows and years only from ALLOWED YEARS.
+4. BOLD inside the prose: roughly 2-4 **bold** key sentences or phrases in the whole answer (years, job names, the decisive advice). Never bold whole paragraphs.
+5. PARAGRAPHS: each is 2-3 short sentences at most. No long unbroken text. Leave a blank line between paragraphs, headings and lists.
+6. NEVER write an answer that is only bullets. The prose paragraphs must carry most of the words (at least 60% of the answer); the bullet block stays short.
+7. PLAIN ENGLISH FIRST: when a saju term is needed, lead with the plain meaning and put the term in parentheses, e.g. "your drive to earn through your own skills (Output Star)". Explain a term in one short clause the first time it appears and never stack two or more terms in one sentence.
+8. END WITH ONE LINE in this exact form: **Key takeaway:** one plain-language sentence with the decisive advice. Nothing after it.
+Keep the warm, calm Gumiho voice. No generic motivational filler. Keep every rule below about timing, sensitive topics, and chart terms.
 
 TONE
 - Warm, practical, honest. Encouraging but not flattering: if the chart suggests challenges, frame them as things to prepare for. Do not scare or confuse the person.
@@ -137,7 +144,21 @@ function checkAnswer(
     if (!/probab|tend|lean|chance|signal/i.test(answer)) repairReasons.push('child question answered without tendency/probability wording')
     if (/will have a child|will get pregnant|infertil|miscarri/i.test(answer)) repairReasons.push('states a child certainty or mentions infertility/miscarriage')
   }
-  if (wordCount(answer) < MIN_WORDS) repairReasons.push(`too short (${wordCount(answer)} words; needs at least ${MIN_WORDS}, target 800-950)`)
+  if (wordCount(answer) < MIN_WORDS) repairReasons.push(`too short (${wordCount(answer)} words; needs at least ${MIN_WORDS}, target 450-650)`)
+  if (wordCount(answer) > MAX_WORDS) repairReasons.push(`too long (${wordCount(answer)} words; trim to 450-650 by shortening, not by removing the bottom line, bullets or Key takeaway)`)
+  if (!/^\s*\*\*[^*]+\*\*/.test(answer)) repairReasons.push('does not start with a bold 1-2 sentence direct answer')
+  if (!/\*\*Key takeaway:?\*\*/i.test(answer)) repairReasons.push('does not end with a bold "**Key takeaway:**" line')
+  const bulletLines = answer.split('\n').filter((l) => /^\s*[-*]\s+\S/.test(l))
+  if (bulletLines.length === 0) repairReasons.push('has no bullet summary; add one block of 3-5 short "- " bullets with the key specifics (roles, timing with years, what to do or avoid) right after the bold bottom line')
+  else if (bulletLines.length > 7) repairReasons.push(`has ${bulletLines.length} bullets; keep ONE summary block of 3-5 bullets and turn the rest into prose paragraphs`)
+  const bulletWords = wordCount(bulletLines.join(' '))
+  const proseParagraphs = answer
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter((p) => p && !/^[-*]\s/.test(p) && !/^#{1,4}\s/.test(p) && !/^\*\*Key takeaway/i.test(p) && wordCount(p) >= 20)
+  if (proseParagraphs.length < 3 || bulletWords > wordCount(answer) * 0.4) {
+    repairReasons.push('is too bullet-heavy; bullets must be only a short summary block, followed by at least 3 normal prose paragraphs (2-3 short sentences each, not bullets) that explain the reasoning behind the bullets')
+  }
 
   return { badYearList, repairReasons, guardReasons: checkGuards(answer) }
 }
@@ -145,7 +166,9 @@ function checkAnswer(
 const REPAIR_SYSTEM_PROMPT = `You are an editor fixing ONE 1:1 Saju answer written by the Gumiho (a calm, perceptive, kind fox spirit) in English.
 Rules:
 - Fix ONLY the listed problems. Keep everything else: the facts, structure, warmth, empathy opening, plan and closing.
-- Keep the length at 800-950 words (never shorter than the original unless the original is longer than 950 words). Plain paragraphs, no headings, bullets or markdown.
+- Keep this structure: (1) a 1-2 sentence **bold** direct answer; (2) ONE compact summary block of 3-5 short "- " bullets with the key specifics (job titles, fields, timing with years, what to do or avoid); (3) then at least 3 normal prose paragraphs of 2-3 short sentences each, NOT bullets, that explain the reasoning behind the bullets; (4) roughly 2-4 **bold** key sentences or phrases inside the prose; (5) it ends with one line "**Key takeaway:** ...". Never turn the explanation into bullets and never return an answer that is only bullets. Only **bold**, "- " bullets (in the one summary block) and short "### " headings are allowed (no HTML, tables, numbered lists or emojis).
+- Keep the length between 450 and 650 words. If the original is longer than 650 words, trim it by shortening, never by removing the bottom line, the bullet summary, the prose or the Key takeaway.
+- Explain saju terms in plain English first, term in parentheses; never stack jargon.
 - English only: never write Hangul or Hanja.
 - Years: use only the ALLOWED YEARS given. Months: use only the ALLOWED MONTHS given. If no allowed year or month fits, say "in the coming years" or "in the coming months".
 - No endearments ("dear", "sweetheart", "child"); do not start with "Ah," or "Oh,"; use the customer's first name at most twice.

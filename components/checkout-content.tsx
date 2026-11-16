@@ -24,7 +24,9 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
   const [couponLoading, setCouponLoading] = useState(false)
   const [couponError, setCouponError] = useState<string | null>(null)
   const [includeGumiho, setIncludeGumiho] = useState(false)
-  const totalLabel = includeGumiho ? '$27.98' : '$19.99'
+  const couponMode = couponCode.trim().length > 0
+  const gumihoSelected = includeGumiho && !couponMode
+  const totalLabel = gumihoSelected ? '$27.98' : '$19.99'
 
   const handleCouponSubmit = async () => {
     if (!couponCode.trim()) return
@@ -86,7 +88,7 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
       const response = await fetch('/api/paypal/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ submissionId, includeGumiho })
+        body: JSON.stringify({ submissionId, includeGumiho: gumihoSelected })
       })
       
       const data = await response.json()
@@ -184,7 +186,7 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
           </div>
         </div>
         
-        {includeGumiho && (
+        {gumihoSelected && (
           <div className="flex justify-between items-center text-sm mb-4">
             <span className="text-foreground/80">Ask the Gumiho 1:1 (3 questions)</span>
             <span className="font-semibold text-primary">$7.99</span>
@@ -240,6 +242,7 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
       )}
 
       {/* Gumiho 1:1 add-on */}
+      {!couponMode && (
       <label
         htmlFor="gumiho-addon"
         className="block bg-card border border-border rounded-xl p-4 mb-4 cursor-pointer transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:ring-1 has-[:checked]:ring-primary/40 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring"
@@ -261,18 +264,25 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
               <span className="block text-sm leading-snug text-muted-foreground">
                 3 questions &middot; answered after your report
               </span>
+              <span className="mt-1.5 inline-block rounded-full bg-gradient-to-r from-violet-700 via-fuchsia-700 to-pink-700 px-2.5 py-0.5 text-[11px] font-semibold leading-4 text-white">
+                Checkout-only price
+              </span>
             </span>
             <span className="flex-shrink-0 whitespace-nowrap text-right">
-              <span className="block text-xl font-bold leading-6 text-foreground">$7.99</span>
+              <span className="offer-price block text-3xl font-extrabold leading-8">$7.99</span>
               <span className="block text-sm leading-snug text-muted-foreground line-through">$9.99</span>
-              <span className="block text-xs leading-snug text-muted-foreground">later: $9.99</span>
             </span>
           </span>
         </span>
         <span className="mt-2 block text-sm leading-relaxed text-muted-foreground">
+          Later: <span className="line-through">$9.99</span>
+          {' \u2014 '}only in this checkout: $7.99
+        </span>
+        <span className="mt-1 block text-sm leading-relaxed text-muted-foreground">
           You&apos;ll get your report first, then ask your 3 questions whenever you&apos;re ready.
         </span>
       </label>
+      )}
 
       {/* PayPal Button */}
       <Button
@@ -324,7 +334,10 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
             <input
               type="text"
               value={couponCode}
-              onChange={e => setCouponCode(e.target.value)}
+              onChange={e => {
+                setCouponCode(e.target.value)
+                if (e.target.value.trim()) setIncludeGumiho(false)
+              }}
               onKeyDown={e => e.key === 'Enter' && handleCouponSubmit()}
               placeholder="Enter coupon code"
               className="flex-1 bg-muted border border-border rounded-lg px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/40"

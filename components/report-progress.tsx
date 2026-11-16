@@ -8,11 +8,9 @@ import { Spinner } from '@/components/ui/spinner'
 import { AlertTriangleIcon } from 'lucide-react'
 
 const STAGES: { from: number; label: string }[] = [
-  { from: 0, label: 'Reading your four pillars…' },
-  { from: 12, label: 'Mapping your luck cycles…' },
-  { from: 28, label: 'Checking your elements and Useful God…' },
-  { from: 45, label: 'Writing your 96 cards…' },
-  { from: 100, label: 'Adding the final touches…' },
+  { from: 0, label: 'Reading your chart…' },
+  { from: 15, label: 'Writing your 99 facts…' },
+  { from: 100, label: 'Final polish…' },
 ]
 
 const PROGRESS_CAP = 90
@@ -42,6 +40,7 @@ export function useReportGeneration(submissionId: string, enabled = true) {
   const [status, setStatus] = useState<GenerationStatus>('generating')
   const [error, setError] = useState<string | null>(null)
   const [attempt, setAttempt] = useState(0)
+  const [emailSent, setEmailSent] = useState(false)
   const startedRef = useRef(false)
   const doneRef = useRef(false)
 
@@ -57,6 +56,7 @@ export function useReportGeneration(submissionId: string, enabled = true) {
       const res = await fetch(`/api/check-paid-report?submissionId=${submissionId}`, { cache: 'no-store' })
       if (!res.ok) return false
       const data = await res.json()
+      if (data.emailSent === true) setEmailSent(true)
       if (Array.isArray(data.facts) && data.facts.length > 0) {
         finish()
         return true
@@ -112,16 +112,17 @@ export function useReportGeneration(submissionId: string, enabled = true) {
     generate()
   }, [generate])
 
-  return { status, error, attempt, retry, checkNow }
+  return { status, error, attempt, retry, checkNow, emailSent }
 }
 
 interface ReportProgressProps {
+  emailSent?: boolean
   error?: string | null
   onRetry?: () => void
   onCheckAgain?: () => Promise<boolean>
 }
 
-export function ReportProgress({ error, onRetry, onCheckAgain }: ReportProgressProps) {
+export function ReportProgress({ emailSent = false, error, onRetry, onCheckAgain }: ReportProgressProps) {
   const [elapsed, setElapsed] = useState(0)
   const [checking, setChecking] = useState(false)
   const [notReady, setNotReady] = useState(false)
@@ -187,7 +188,14 @@ export function ReportProgress({ error, onRetry, onCheckAgain }: ReportProgressP
         <h2 className="text-lg font-semibold">{stage.label}</h2>
       </div>
       <p className="text-muted-foreground text-sm tabular-nums mb-1">{formatElapsed(elapsed)}</p>
-      <p className="text-muted-foreground text-sm mb-2">Usually about 1–2 minutes. You can keep this tab open.</p>
+      <p className="text-muted-foreground text-sm mb-2">Usually 1–2 minutes.</p>
+      {emailSent ? (
+        <p className="text-muted-foreground text-sm mb-2">
+          You can close this page &mdash; your report link has also been sent to your email.
+        </p>
+      ) : (
+        <p className="text-muted-foreground text-sm mb-2">Keep this tab open and we&apos;ll take you there when it&apos;s ready.</p>
+      )}
       <p className="text-muted-foreground/60 text-xs">You&apos;ll be redirected automatically when it&apos;s ready.</p>
 
       {isLong && (

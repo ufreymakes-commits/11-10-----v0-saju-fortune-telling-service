@@ -5,6 +5,7 @@ import { PaidReportContent } from '@/components/paid-report-content'
 import type { Submission } from '@/lib/types'
 import { findUnusedGumihoEntitlement } from '@/lib/payments/gumiho-entitlement'
 import { sharedOpenGraph, sharedTwitter } from '@/lib/metadata'
+import { startBuyerOffer } from '@/lib/payments/buyer-offer'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -75,6 +76,10 @@ export default async function PaidReportPage({ params }: PageProps) {
   // paidReport will be null if not generated yet - client component will handle generation
   const paidReport = paidReportResult.data
   const hasGumihoBundle = Boolean(await findUnusedGumihoEntitlement(id))
+
+  // The 24h clock starts on the first successful open of the generated report and never restarts (idempotent).
+  const offer = paidReport ? await startBuyerOffer(id) : null
+  const buyerOffer = offer?.eligible && offer.expiresAt ? { expiresAt: offer.expiresAt, priceUsd: offer.priceUsd } : null
   
   return (
     <main className="min-h-screen bg-[#0a0a14] relative overflow-hidden">
@@ -85,6 +90,7 @@ export default async function PaidReportPage({ params }: PageProps) {
           submission={submissionResult.data as Submission}
           paidReport={paidReport}
           hasGumihoBundle={hasGumihoBundle}
+          buyerOffer={buyerOffer}
         />
       </div>
     </main>

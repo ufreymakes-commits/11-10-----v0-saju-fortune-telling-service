@@ -34,7 +34,11 @@ export async function sendEmail(params: {
       signal: AbortSignal.timeout(15_000),
     })
     if (!res.ok) {
-      console.error('[v0] email send failed: http', res.status)
+      const body = await res.json().catch(() => null)
+      const reason = body && typeof body === 'object' ? { name: body.name, message: body.message } : null
+      const fromDomain = from.match(/@([^>\s]+)/)?.[1] ?? 'unparsed'
+      const toDomain = params.to.split('@')[1] ?? 'unknown'
+      console.error('[v0] email send failed', { status: res.status, fromDomain, toDomain, resend: reason })
       return 'failed'
     }
     return 'sent'

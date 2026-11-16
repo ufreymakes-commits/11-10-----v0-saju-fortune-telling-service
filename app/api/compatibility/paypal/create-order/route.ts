@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getPayPalConfig } from '@/lib/paypal'
 import { createAdminClient } from '@/lib/supabase/server'
-import { COMPAT_PRICE_USD } from '@/lib/payments/paypal-orders'
+import { COMPAT_PRICE_USD, COMPAT_BUYER_PRICE_USD } from '@/lib/payments/paypal-orders'
+import { BUYER_OFFER_CUSTOM_ID_PREFIX, getBuyerOffer, isUuid } from '@/lib/payments/buyer-offer'
 
 async function getPayPalAccessToken() {
   const { clientId, clientSecret, apiUrl } = getPayPalConfig()
@@ -29,7 +30,7 @@ function getBaseUrl(request: Request): string {
 
 export async function POST(request: Request) {
   try {
-    const { submissionId } = await request.json()
+    const { submissionId, offerReportId, displayedPriceUsd } = await request.json()
     if (!submissionId) return NextResponse.json({ error: 'Missing submission ID' }, { status: 400 })
 
     const { clientId, clientSecret, apiUrl } = getPayPalConfig()
@@ -44,6 +45,27 @@ export async function POST(request: Request) {
 
     if (fetchError || !submission) return NextResponse.json({ error: 'Submission not found' }, { status: 404 })
 
+    // The amount is decided here, never by the client: buyer price only for a valid, unexpired, unredeemed offer.
+    let amountUsd = COMPAT_PRICE_USD
+    let customId: string | undefined
+    let offerQuery = ''
+    if (isUuid(offerReportId)) {
+      const offer = await getBuyerOffer(offerReportId)
+      if (offer.eligible && offer.offerId) {
+        amountUsd = COMPAT_BUYER_PRICE_USD
+        customId = `${BUYER_OFFER_CUSTOM_ID_PREFIX}${offer.offerId}`
+        offerQuery = `?offer=${offerReportId}`
+      }
+    }
+
+    // If the price the buyer saw is no longer the price we would charge (e.g. the offer just ended), stop and say so.
+    if (typeof displayedPriceUsd === 'string' && displayedPriceUsd !== amountUsd) {
+      return NextResponse.json(
+        { error: `The buyer-only offer has ended. The regular price is $${amountUsd}.`, priceUsd: amountUsd, priceChanged: true },
+        { status: 409 },
+      )
+    }
+
     const accessToken = await getPayPalAccessToken()
     if (!accessToken) return NextResponse.json({ error: 'Failed to authenticate with PayPal' }, { status: 500 })
 
@@ -52,15 +74,16 @@ export async function POST(request: Request) {
       intent: 'CAPTURE',
       purchase_units: [{
         reference_id: submissionId,
+        ...(customId ? { custom_id: customId } : {}),
         description: `Sajume Compatibility Report: ${submission.person_a_name} & ${submission.person_b_name}`,
-        amount: { currency_code: 'USD', value: COMPAT_PRICE_USD }
+        amount: { currency_code: 'USD', value: amountUsd }
       }],
       application_context: {
         brand_name: 'Sajume',
         landing_page: 'NO_PREFERENCE',
         user_action: 'PAY_NOW',
         return_url: `${baseUrl}/compatibility/checkout/${submissionId}/success`,
-        cancel_url: `${baseUrl}/compatibility/checkout/${submissionId}`
+        cancel_url: `${baseUrl}/compatibility/checkout/${submissionId}${offerQuery}`
       }
     }
 
@@ -78,7 +101,7 @@ export async function POST(request: Request) {
     await supabase.from('compatibility_payments').insert({
       submission_id: submissionId,
       paypal_order_id: orderData.id,
-      amount: Number(COMPAT_PRICE_USD),
+      amount: Number(amountUsd),
       currency: 'USD',
       status: 'pending'
     })

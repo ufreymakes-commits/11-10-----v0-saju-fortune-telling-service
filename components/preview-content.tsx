@@ -737,7 +737,6 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
             <div className="flex flex-col gap-0.5">
               <span className="text-xs text-pink-300">Compare two birth charts</span>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-white/40 line-through">$39.99</span>
                 <span className="text-sm font-bold text-white">$19.99</span>
               </div>
             </div>

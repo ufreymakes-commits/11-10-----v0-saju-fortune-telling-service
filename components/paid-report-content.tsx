@@ -19,11 +19,13 @@ import { ClosingLetter } from '@/components/closing-letter'
 import { getDayMasterCharacter } from '@/lib/day-master-characters'
 import { track } from '@/hooks/use-track'
 import { useScreenshotDetect } from '@/hooks/use-screenshot-detect'
+import { CompatBuyerOfferCard, CompatBuyerOfferPopup, type BuyerOfferInfo } from '@/components/compat-buyer-offer'
 
 interface PaidReportContentProps {
   submission: Submission
   paidReport: any
   hasGumihoBundle?: boolean
+  buyerOffer?: BuyerOfferInfo | null
 }
 
 const HANJA_TO_KOREAN_STEM: Record<string, string> = {
@@ -35,7 +37,8 @@ const KOREAN_TO_HANJA_STEM: Record<string, string> = {
   '기': '己', '경': '庚', '신': '辛', '임': '壬', '계': '癸',
 }
 
-export function PaidReportContent({ submission, paidReport: initialPaidReport, hasGumihoBundle = false }: PaidReportContentProps) {
+export function PaidReportContent({ submission, paidReport: initialPaidReport, hasGumihoBundle = false, buyerOffer: initialBuyerOffer = null }: PaidReportContentProps) {
+  const [buyerOffer, setBuyerOffer] = useState<BuyerOfferInfo | null>(initialBuyerOffer)
   const [copied, setCopied] = useState(false)
   const [openSections, setOpenSections] = useState<Record<number, boolean>>({})
   const [paidReport, setPaidReport] = useState<any>(initialPaidReport)
@@ -75,6 +78,21 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport, h
         setClosingLetter(data.closingLetter || '')
         setPermissions(Array.isArray(data.permissions) ? data.permissions : [])
         setOrb(data.orb || null)
+
+        // First successful open of a freshly generated report: start the buyer offer clock (idempotent server-side).
+        try {
+          const offerRes = await fetch('/api/offers/compat-buyer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reportId: submissionId }),
+          })
+          if (offerRes.ok) {
+            const offer = await offerRes.json()
+            if (offer.eligible && offer.expiresAt) setBuyerOffer({ expiresAt: offer.expiresAt, priceUsd: offer.priceUsd })
+          }
+        } catch {
+          // The offer is optional; never block the report.
+        }
       } catch (e: any) {
         setGenerateError(e.message || 'Failed to generate report')
       } finally {
@@ -329,6 +347,14 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport, h
         </div>
       )}
 
+      {/* Buyer-only Compatibility offer: shown only while the server-enforced offer is live */}
+      {!isGenerating && !generateError && buyerOffer && (
+        <>
+          <CompatBuyerOfferCard offer={buyerOffer} reportId={submissionId} />
+          <CompatBuyerOfferPopup offer={buyerOffer} reportId={submissionId} />
+        </>
+      )}
+
       {/* Store Products */}
       <div className="mt-8">
         <h3 className="text-sm font-semibold text-white mb-4 text-center">More from Sajume</h3>
@@ -425,7 +451,6 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport, h
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs text-pink-400">Compare two birth charts</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground line-through">$39.99</span>
                   <span className="text-sm font-bold text-foreground">$19.99</span>
                 </div>
               </div>

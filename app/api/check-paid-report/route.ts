@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -20,10 +20,24 @@ export async function GET(request: Request) {
     .limit(1)
     .maybeSingle()
 
-  if (error || !data?.facts) {
-    // Not ready yet
-    return NextResponse.json({ ready: false }, { status: 200 })
+  let emailSent = false
+  try {
+    const { data: sentRow } = await createAdminClient()
+      .from('payments')
+      .select('id')
+      .eq('submission_id', submissionId)
+      .not('confirmation_email_sent_at', 'is', null)
+      .limit(1)
+      .maybeSingle()
+    emailSent = Boolean(sentRow)
+  } catch {
+    emailSent = false
   }
 
-  return NextResponse.json({ ready: true, facts: data.facts, decadeFortuneCards: data.hidden_cards || [] })
+  if (error || !data?.facts) {
+    // Not ready yet
+    return NextResponse.json({ ready: false, emailSent }, { status: 200 })
+  }
+
+  return NextResponse.json({ ready: true, emailSent, facts: data.facts, decadeFortuneCards: data.hidden_cards || [] })
 }

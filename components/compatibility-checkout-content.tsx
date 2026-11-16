@@ -11,13 +11,23 @@ interface CompatibilityCheckoutContentProps {
   submissionId: string
   personAName: string
   personBName: string
+  buyerOffer?: { expiresAt: string; priceUsd: string } | null
+  offerReportId?: string
 }
+
+const REGULAR_PRICE_USD = '19.99'
 
 export function CompatibilityCheckoutContent({
   submissionId,
   personAName,
   personBName,
+  buyerOffer = null,
+  offerReportId,
 }: CompatibilityCheckoutContentProps) {
+  const displayedPriceUsd = buyerOffer ? buyerOffer.priceUsd : REGULAR_PRICE_USD
+  const offerEndLabel = buyerOffer
+    ? new Date(buyerOffer.expiresAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+    : null
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(false)
@@ -82,9 +92,17 @@ export function CompatibilityCheckoutContent({
       const response = await fetch('/api/compatibility/paypal/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ submissionId })
+        body: JSON.stringify({ submissionId, offerReportId, displayedPriceUsd })
       })
       const data = await response.json()
+      if (data.priceChanged) {
+        // The server no longer honors the price on screen; reload so the page shows the real price.
+        setError(data.error)
+        setIsLoading(false)
+        router.replace(`/compatibility/checkout/${submissionId}`)
+        router.refresh()
+        return
+      }
       if (!response.ok || !data.approvalUrl) throw new Error(data.error || 'Failed to create order')
       window.location.href = data.approvalUrl
     } catch (err) {
@@ -135,8 +153,22 @@ export function CompatibilityCheckoutContent({
       <div className="space-y-3">
         <div className="flex items-baseline justify-between px-1">
           <span className="text-white/60 text-sm">Compatibility Report</span>
-          <span className="text-white font-bold text-xl">$19.99</span>
+          {buyerOffer ? (
+            <span className="flex items-baseline gap-2">
+              <span className="text-white/50 text-sm line-through">
+                <span className="sr-only">Regular price </span>${REGULAR_PRICE_USD}
+              </span>
+              <span className="text-white font-bold text-xl">
+                <span className="sr-only">Buyer-only price </span>${buyerOffer.priceUsd}
+              </span>
+            </span>
+          ) : (
+            <span className="text-white font-bold text-xl">${REGULAR_PRICE_USD}</span>
+          )}
         </div>
+        {offerEndLabel && (
+          <p className="px-1 text-xs text-pink-400">Buyer-only price. Offer ends {offerEndLabel}.</p>
+        )}
 
         {error && (
           <p className="text-red-400 text-sm text-center bg-red-400/10 border border-red-400/20 rounded-lg px-4 py-2">

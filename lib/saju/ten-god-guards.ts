@@ -41,17 +41,81 @@ export function buildGuardBlock(finalFacts: any): string {
   ].join('\n')
 }
 
+export type GuardHit = { why: string; fix: string; sentence: string; start: number; end: number }
+
+type GuardRule = {
+  re: RegExp
+  why: string
+  fix: string
+  /** Length of the ten-god name at the start of the match; the contrast check only looks after it. */
+  subjectLength?: number
+}
+
+// `(?<![a-z])` keeps "Indirect Wealth" / "Indirect Seal" from matching the "Direct ..." rules.
+const GUARD_RULES: GuardRule[] = [
+  {
+    re: /rob wealth fighting wealth[^.]{0,120}(attract|draw|magnet|easily (make|earn)|excellent at|knack for)/gi,
+    why: 'Rob Wealth Fighting Wealth described as attracting wealth',
+    fix: 'Rob Wealth Fighting Wealth means many peers compete for little wealth: money tends to leak or be contested.',
+  },
+  {
+    re: /(attract|draw|magnet)[^.]{0,60}rob wealth fighting wealth/gi,
+    why: 'Rob Wealth Fighting Wealth described as attracting wealth',
+    fix: 'Rob Wealth Fighting Wealth means many peers compete for little wealth: money tends to leak or be contested.',
+  },
+  {
+    re: /(?<![a-z])direct seal[^.]{0,100}(pioneer|rebel|risk-taking|trailblaz)/gi,
+    why: 'Direct Seal described as pioneering/rebellious',
+    fix: 'Direct Seal means learning, credentials, protection and support; never pioneering, rebellion or risk-taking.',
+    subjectLength: 11,
+  },
+  {
+    re: /hurting officer[^.]{0,80}(obedien|rule-following|conformi)/gi,
+    why: 'Hurting Officer described as obedient',
+    fix: 'Hurting Officer means sharp expression, originality and challenging rules; never obedience.',
+    subjectLength: 14,
+  },
+  {
+    re: /(?<![a-z])direct wealth[^.]{0,80}(windfall|gambl|speculat)/gi,
+    why: 'Direct Wealth described as windfall money',
+    fix: 'Direct Wealth means steady earned income, saving and reliability; never windfall, gambling, speculative or lucky money. Windfall or irregular money belongs to Indirect Wealth only.',
+    subjectLength: 13,
+  },
+]
+
+// A statement that denies the flagged idea ("not a windfall", "avoids speculation") is what the guard wants, not a violation.
+const NEGATION = /\b(not|never|no|without|rather than|instead of|unlike|avoids?|away from|far from|opposite of|steer(s)? clear of)\b|n't\b|\bn['’]t\b/i
+// "Direct Wealth is steady, while Indirect Wealth brings windfalls": the flagged word belongs to another star.
+const CONTRAST = /indirect wealth|indirect seal|rob wealth|eating god|hurting officer|seven killings|\b(while|whereas|but|versus|vs)\b|;/i
+
+function sentenceBounds(text: string, start: number, end: number) {
+  let s = start
+  while (s > 0 && !/[.!?\n]/.test(text[s - 1])) s--
+  let e = end
+  while (e < text.length && !/[.!?\n]/.test(text[e])) e++
+  if (e < text.length && text[e] !== '\n') e++
+  return { start: s, end: e }
+}
+
+/** Violations of the known ten-god inversions, with the sentence that holds each one. Negated or contrasted mentions are skipped. */
+export function findGuardHits(text: string): GuardHit[] {
+  const hits: GuardHit[] = []
+  for (const rule of GUARD_RULES) {
+    for (const m of text.matchAll(rule.re)) {
+      const span = m[0]
+      const idx = m.index ?? 0
+      const tail = rule.subjectLength ? span.slice(rule.subjectLength) : span
+      if (NEGATION.test(span)) continue
+      if (rule.subjectLength && CONTRAST.test(tail)) continue
+      const b = sentenceBounds(text, idx, idx + span.length)
+      if (hits.some((h) => h.start === b.start && h.why === rule.why)) continue
+      hits.push({ why: rule.why, fix: rule.fix, sentence: text.slice(b.start, b.end), start: b.start, end: b.end })
+    }
+  }
+  return hits
+}
+
 /** Cheap post-check for the known inversions. Returns human-readable reasons (empty = ok). */
 export function checkGuards(text: string): string[] {
-  const t = text.toLowerCase()
-  const out: string[] = []
-  const rules: [RegExp, string][] = [
-    [/rob wealth fighting wealth[^.]{0,120}(attract|draw|magnet|easily (make|earn)|excellent at|knack for)/, 'Rob Wealth Fighting Wealth described as attracting wealth'],
-    [/(attract|draw|magnet)[^.]{0,60}rob wealth fighting wealth/, 'Rob Wealth Fighting Wealth described as attracting wealth'],
-    [/direct seal[^.]{0,100}(pioneer|rebel|risk-taking|trailblaz)/, 'Direct Seal described as pioneering/rebellious'],
-    [/hurting officer[^.]{0,80}(obedien|rule-following|conformi)/, 'Hurting Officer described as obedient'],
-    [/direct wealth[^.]{0,80}(windfall|gambl|speculat)/, 'Direct Wealth described as windfall money'],
-  ]
-  for (const [re, why] of rules) if (re.test(t) && !out.includes(why)) out.push(why)
-  return out
+  return [...new Set(findGuardHits(text).map((h) => h.why))]
 }
