@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { StarsBackground } from '@/components/stars-background'
 import { PaidReportContent } from '@/components/paid-report-content'
 import type { Submission } from '@/lib/types'
+import { findUnusedGumihoEntitlement } from '@/lib/payments/gumiho-entitlement'
 import { sharedOpenGraph, sharedTwitter } from '@/lib/metadata'
 
 interface PageProps {
@@ -73,6 +74,7 @@ export default async function PaidReportPage({ params }: PageProps) {
   
   // paidReport will be null if not generated yet - client component will handle generation
   const paidReport = paidReportResult.data
+  const hasGumihoBundle = Boolean(await findUnusedGumihoEntitlement(id))
   
   return (
     <main className="min-h-screen bg-[#0a0a14] relative overflow-hidden">
@@ -82,6 +84,7 @@ export default async function PaidReportPage({ params }: PageProps) {
         <PaidReportContent 
           submission={submissionResult.data as Submission}
           paidReport={paidReport}
+          hasGumihoBundle={hasGumihoBundle}
         />
       </div>
     </main>
