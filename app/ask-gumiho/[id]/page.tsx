@@ -22,6 +22,7 @@ export default function AskGumihoPage() {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [hasBundle, setHasBundle] = useState(false)
 
   const [question1, setQuestion1] = useState('')
   const [question2, setQuestion2] = useState('')
@@ -58,6 +59,16 @@ export default function AskGumihoPage() {
         return
       }
 
+      try {
+        const ent = await fetch(`/api/gumiho/entitlement?submissionId=${encodeURIComponent(submissionId)}`)
+        if (ent.ok) {
+          const entData = await ent.json()
+          setHasBundle(Boolean(entData.gumihoQuestionId))
+        }
+      } catch {
+        // No entitlement info: fall back to the regular paid flow.
+      }
+
       setSubmission(sub)
       setLoading(false)
     }
@@ -91,6 +102,11 @@ export default function AskGumihoPage() {
       if (!res.ok) {
         setError(data.error || 'Failed to submit questions')
         setSubmitting(false)
+        return
+      }
+
+      if (data.bundled) {
+        router.push(`/ask-gumiho/${submissionId}/success?questionId=${data.gumihoQuestionId}&bundle=true`)
         return
       }
 
@@ -220,12 +236,14 @@ export default function AskGumihoPage() {
               Submitting...
             </>
           ) : (
-            'Ask the Gumiho - $9.99'
+            hasBundle ? 'Ask the Gumiho' : 'Ask the Gumiho - $9.99'
           )}
         </Button>
 
         <p className="text-xs text-muted-foreground text-center mt-3">
-          You&apos;ll be redirected to PayPal to complete your purchase
+          {hasBundle
+            ? 'Already paid. This is included with your report.'
+            : 'You\u2019ll be redirected to PayPal to complete your purchase'}
         </p>
       </div>
     </div>

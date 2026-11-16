@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getPayPalConfig } from '@/lib/paypal'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
-import { PRICE_USD, getPayPalAccessToken, settlePayment } from '@/lib/payments/paypal-orders'
+import { expectedTotalUsd, getPayPalAccessToken, settlePayment } from '@/lib/payments/paypal-orders'
 
 function getBaseUrl(request: Request): string {
   const host = request.headers.get('host')
@@ -18,11 +18,15 @@ export const maxDuration = 60
 
 export async function POST(request: Request) {
   try {
-    const { submissionId } = await request.json()
+    const { submissionId, includeGumiho } = await request.json()
 
     if (!submissionId) {
       return NextResponse.json({ error: 'Missing submission ID' }, { status: 400 })
     }
+
+    // Only a boolean comes from the client; the price is always computed on the server.
+    const gumihoAddon = includeGumiho === true
+    const totalUsd = expectedTotalUsd(gumihoAddon)
 
     const { clientId, clientSecret, apiUrl } = getPayPalConfig()
 
@@ -84,10 +88,10 @@ export async function POST(request: Request) {
       purchase_units: [
         {
           reference_id: submissionId,
-          description: `Sajume 99 Facts Birth Chart Report for ${submission.name}`,
+          description: `Sajume 99 Facts Birth Chart Report${gumihoAddon ? ' + Ask the Gumiho 1:1' : ''} for ${submission.name}`,
           amount: {
             currency_code: 'USD',
-            value: PRICE_USD,
+            value: totalUsd,
           },
         },
       ],
@@ -123,9 +127,10 @@ export async function POST(request: Request) {
     const { error: insertError } = await admin.from('payments').insert({
       submission_id: submissionId,
       paypal_order_id: orderData.id,
-      amount: Number(PRICE_USD),
+      amount: Number(totalUsd),
       currency: 'USD',
       status: 'pending',
+      gumiho_addon: gumihoAddon,
     })
 
     if (insertError) {

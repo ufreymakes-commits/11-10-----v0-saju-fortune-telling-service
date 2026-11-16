@@ -19,7 +19,13 @@ function greetingName(rawName: string | null | undefined): string {
   return name.split(/\s+/)[0]
 }
 
-export function buildConfirmationEmail(params: { name: string; reportUrl: string; refundUrl: string; supportEmail?: string }) {
+export function buildConfirmationEmail(params: {
+  name: string
+  reportUrl: string
+  refundUrl: string
+  supportEmail?: string
+  gumihoUrl?: string
+}) {
   const firstName = escapeHtml(params.name)
   const support = params.supportEmail ? escapeHtml(params.supportEmail) : null
 
@@ -34,6 +40,9 @@ export function buildConfirmationEmail(params: { name: string; reportUrl: string
     '',
     'If your report is still being written, open the link and it will finish. It usually takes 2 to 3 minutes.',
     '',
+    ...(params.gumihoUrl
+      ? [`Your Ask the Gumiho 1:1 (3 questions) is included. Ask whenever you are ready: ${params.gumihoUrl}`, '']
+      : []),
     support ? `Need help? Write to us at ${params.supportEmail}.` : 'Need help? Just reply to this email.',
     '',
     `Refund policy: ${params.refundUrl}`,
@@ -54,6 +63,11 @@ export function buildConfirmationEmail(params: { name: string; reportUrl: string
               </td>
             </tr>
             <tr><td style="font-size:14px;line-height:1.6;color:#4a4760;padding-bottom:20px;">If your report is still being written, open the link and it will finish. It usually takes 2 to 3 minutes.</td></tr>
+            ${
+              params.gumihoUrl
+                ? `<tr><td style="font-size:14px;line-height:1.6;color:#4a4760;padding-bottom:20px;">Your Ask the Gumiho 1:1 (3 questions) is included. <a href="${params.gumihoUrl}" style="color:#5b3fd1;">Ask whenever you are ready</a>.</td></tr>`
+                : ''
+            }
             <tr><td style="font-size:14px;line-height:1.6;color:#4a4760;padding-bottom:24px;">${support ? `Need help? Write to us at <a href="mailto:${support}" style="color:#5b3fd1;">${support}</a>.` : 'Need help? Just reply to this email.'}</td></tr>
             <tr><td style="font-size:12px;line-height:1.6;color:#8a869f;border-top:1px solid #ece9f5;padding-top:16px;">Sajume &middot; <a href="${params.refundUrl}" style="color:#8a869f;">Refund policy</a></td></tr>
           </table>
@@ -80,7 +94,7 @@ export async function sendPaymentConfirmationEmail(paymentId: string): Promise<v
 
   const { data: payment } = await admin
     .from('payments')
-    .select('id, submission_id')
+    .select('id, submission_id, gumiho_addon')
     .eq('id', paymentId)
     .maybeSingle()
   if (!payment) return
@@ -116,6 +130,7 @@ export async function sendPaymentConfirmationEmail(paymentId: string): Promise<v
     reportUrl: `${site}/report/${payment.submission_id}/paid`,
     refundUrl: `${site}/policies/refund-dispute-policy`,
     supportEmail: process.env.SUPPORT_EMAIL,
+    gumihoUrl: payment.gumiho_addon ? `${site}/ask-gumiho/${payment.submission_id}` : undefined,
   })
 
   const result = await sendEmail({ to, ...email })

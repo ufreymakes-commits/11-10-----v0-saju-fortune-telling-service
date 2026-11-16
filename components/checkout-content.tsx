@@ -23,6 +23,8 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
   const [couponCode, setCouponCode] = useState('')
   const [couponLoading, setCouponLoading] = useState(false)
   const [couponError, setCouponError] = useState<string | null>(null)
+  const [includeGumiho, setIncludeGumiho] = useState(false)
+  const totalLabel = includeGumiho ? '$27.98' : '$19.99'
 
   const handleCouponSubmit = async () => {
     if (!couponCode.trim()) return
@@ -84,7 +86,7 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
       const response = await fetch('/api/paypal/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ submissionId })
+        body: JSON.stringify({ submissionId, includeGumiho })
       })
       
       const data = await response.json()
@@ -178,13 +180,20 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
           </div>
           <div className="text-right">
             <p className="text-muted-foreground line-through text-sm">$39.99</p>
-            <p className="text-lg font-bold text-secondary">$19.99</p>
+            <p className="text-lg font-bold text-primary">$19.99</p>
           </div>
         </div>
         
+        {includeGumiho && (
+          <div className="flex justify-between items-center text-sm mb-4">
+            <span className="text-foreground/80">Ask the Gumiho 1:1 (3 questions)</span>
+            <span className="font-semibold text-primary">$7.99</span>
+          </div>
+        )}
+
         <div className="border-t border-border/30 pt-4 flex justify-between items-center">
           <span className="font-medium">Total</span>
-          <span className="text-xl font-bold text-gradient">$19.99 USD</span>
+          <span className="text-xl font-bold text-primary">{totalLabel} USD</span>
         </div>
       </div>
 
@@ -229,6 +238,41 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
           </a>
         </div>
       )}
+
+      {/* Gumiho 1:1 add-on */}
+      <label
+        htmlFor="gumiho-addon"
+        className="block bg-card border border-border rounded-xl p-4 mb-4 cursor-pointer transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:ring-1 has-[:checked]:ring-primary/40 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring"
+      >
+        <span className="flex items-start gap-3">
+          <span className="-ml-2.5 -mt-2.5 flex h-11 w-11 flex-shrink-0 items-center justify-center">
+            <input
+              id="gumiho-addon"
+              type="checkbox"
+              checked={includeGumiho}
+              onChange={e => setIncludeGumiho(e.target.checked)}
+              disabled={isLoading}
+              className="h-5 w-5 accent-primary"
+            />
+          </span>
+          <span className="flex min-w-0 flex-1 flex-wrap items-start justify-between gap-x-3 gap-y-2">
+            <span className="block min-w-40 flex-1">
+              <span className="block text-base font-semibold leading-6 text-foreground">Ask the Gumiho 1:1</span>
+              <span className="block text-sm leading-snug text-muted-foreground">
+                3 questions &middot; answered after your report
+              </span>
+            </span>
+            <span className="flex-shrink-0 whitespace-nowrap text-right">
+              <span className="block text-xl font-bold leading-6 text-foreground">$7.99</span>
+              <span className="block text-sm leading-snug text-muted-foreground line-through">$9.99</span>
+              <span className="block text-xs leading-snug text-muted-foreground">later: $9.99</span>
+            </span>
+          </span>
+        </span>
+        <span className="mt-2 block text-sm leading-relaxed text-muted-foreground">
+          You&apos;ll get your report first, then ask your 3 questions whenever you&apos;re ready.
+        </span>
+      </label>
 
       {/* PayPal Button */}
       <Button

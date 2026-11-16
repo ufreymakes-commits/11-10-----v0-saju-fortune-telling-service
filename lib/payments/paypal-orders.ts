@@ -5,7 +5,22 @@ import { paidReportUrl } from '@/lib/payments/base-url'
 import { startServerGeneration } from '@/lib/payments/start-generation'
 import { sendPaymentConfirmationEmail } from '@/lib/email/payment-confirmation'
 
+// Single source of truth per product: used for the PayPal order, the stored payment row and the capture check.
 export const PRICE_USD = '19.99'
+export const COMPAT_PRICE_USD = '19.99'
+export const GUMIHO_PRICE_USD = '9.99'
+export const GUMIHO_ADDON_PRICE_USD = '7.99'
+
+const toCents = (usd: string) => Math.round(Number(usd) * 100)
+
+// Expected total for a 99 Facts payment row: base price, plus the Gumiho add-on when the row has the flag.
+export function expectedTotalCents(gumihoAddon: boolean | null | undefined): number {
+  return toCents(PRICE_USD) + (gumihoAddon ? toCents(GUMIHO_ADDON_PRICE_USD) : 0)
+}
+
+export function expectedTotalUsd(gumihoAddon: boolean | null | undefined): string {
+  return (expectedTotalCents(gumihoAddon) / 100).toFixed(2)
+}
 
 const REQUEST_TIMEOUT_MS = 20_000
 const ORDER_NOT_APPROVED_FAIL_AFTER_MS = 3 * 60 * 60 * 1000
@@ -133,6 +148,85 @@ function log(orderId: string, source: SettleSource, state: string, extra = '') {
 }
 
 // ---------------------------------------------------------------------------
+// Gumiho add-on entitlement: one completed gumiho_payments row (key BUNDLE-<order id>,
+// protected by a unique index) plus one placeholder gumiho_questions row (empty questions
+// until the buyer asks them). Safe to call any number of times; never throws.
+// ---------------------------------------------------------------------------
+
+export async function ensureGumihoEntitlement(orderId: string, submissionId: string): Promise<string | null> {
+  try {
+    const admin = createAdminClient()
+    const bundleKey = `BUNDLE-${orderId}`
+    const findPayment = () =>
+      admin.from('gumiho_payments').select('id, gumiho_question_id').eq('paypal_order_id', bundleKey).limit(1).maybeSingle()
+
+    const existing = await findPayment()
+    if (existing.error) {
+      console.error(`[v0] payments: GUMIHO ENTITLEMENT lookup failed order=${orderId} msg=${existing.error.message}`)
+      return null
+    }
+    let gumihoPayment = existing.data
+
+    if (!gumihoPayment) {
+      const inserted = await admin
+        .from('gumiho_payments')
+        .insert({
+          submission_id: submissionId,
+          paypal_order_id: bundleKey,
+          amount: Number(GUMIHO_ADDON_PRICE_USD),
+          currency: 'USD',
+          status: 'completed',
+          completed_at: new Date().toISOString(),
+        })
+        .select('id, gumiho_question_id')
+        .single()
+
+      if (inserted.error && inserted.error.code !== '23505') {
+        console.error(`[v0] payments: GUMIHO ENTITLEMENT payment insert FAILED order=${orderId} code=${inserted.error.code} msg=${inserted.error.message}`)
+        return null
+      }
+      gumihoPayment = inserted.error ? (await findPayment()).data : inserted.data
+    }
+
+    if (!gumihoPayment) return null
+    if (gumihoPayment.gumiho_question_id) return gumihoPayment.gumiho_question_id as string
+
+    const question = await admin
+      .from('gumiho_questions')
+      .insert({ submission_id: submissionId, question_1: '', question_2: '', question_3: '' })
+      .select('id')
+      .single()
+    if (question.error || !question.data) {
+      console.error(`[v0] payments: GUMIHO ENTITLEMENT question insert FAILED order=${orderId} msg=${question.error?.message}`)
+      return null
+    }
+
+    const linked = await admin
+      .from('gumiho_payments')
+      .update({ gumiho_question_id: question.data.id })
+      .eq('id', gumihoPayment.id)
+      .is('gumiho_question_id', null)
+      .select('gumiho_question_id')
+
+    if (linked.error || !linked.data || linked.data.length === 0) {
+      // Lost a race with another path (or the link failed): drop our spare placeholder.
+      await admin.from('gumiho_questions').delete().eq('id', question.data.id)
+      if (linked.error) {
+        console.error(`[v0] payments: GUMIHO ENTITLEMENT link FAILED order=${orderId} msg=${linked.error.message}`)
+        return null
+      }
+      return ((await findPayment()).data?.gumiho_question_id as string | null | undefined) ?? null
+    }
+
+    console.log(`[v0] payments: gumiho entitlement created order=${orderId} question=${question.data.id}`)
+    return question.data.id as string
+  } catch (e) {
+    console.error(`[v0] payments: GUMIHO ENTITLEMENT error order=${orderId}:`, e instanceof Error ? e.message : 'unknown')
+    return null
+  }
+}
+
+// ---------------------------------------------------------------------------
 // settlePayment: idempotent, safe to call many times from browser/webhook/cron
 // ---------------------------------------------------------------------------
 
@@ -141,7 +235,7 @@ export async function settlePayment(orderId: string, source: SettleSource): Prom
 
   const { data: row, error: rowError } = await admin
     .from('payments')
-    .select('id, submission_id, status, created_at')
+    .select('id, submission_id, status, created_at, gumiho_addon')
     .eq('paypal_order_id', orderId)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -159,7 +253,11 @@ export async function settlePayment(orderId: string, source: SettleSource): Prom
   const submissionId = row.submission_id as string
   const result = (state: SettleState, changed = false): SettleResult => ({ state, changed, submissionId })
 
-  if (row.status === 'completed') return result('completed')
+  if (row.status === 'completed') {
+    // Re-running settle repairs a missing Gumiho entitlement (idempotent).
+    if (row.gumiho_addon) await ensureGumihoEntitlement(orderId, submissionId)
+    return result('completed')
+  }
   if (row.status === 'duplicate_paid') return result('duplicate')
   if (row.status === 'refunded') return result('failed')
 
@@ -222,11 +320,12 @@ export async function settlePayment(orderId: string, source: SettleSource): Prom
     return result('pending')
   }
 
+  const expectedCents = expectedTotalCents(row.gumiho_addon as boolean | null)
   const amountOk =
-    Number(capture.amount?.value) === Number(PRICE_USD) && capture.amount?.currency_code === 'USD'
+    Math.round(Number(capture.amount?.value) * 100) === expectedCents && capture.amount?.currency_code === 'USD'
   if (!amountOk) {
     console.error(
-      `[v0] payments: AMOUNT MISMATCH order=${orderId} amount=${capture.amount?.value} currency=${capture.amount?.currency_code}`,
+      `[v0] payments: AMOUNT MISMATCH order=${orderId} expected=${(expectedCents / 100).toFixed(2)} amount=${capture.amount?.value} currency=${capture.amount?.currency_code}`,
     )
     return result('pending')
   }
@@ -287,10 +386,14 @@ export async function settlePayment(orderId: string, source: SettleSource): Prom
 
   if (!update.data || update.data.length === 0) {
     // Someone else (webhook / browser) completed it between our read and write.
+    if (row.gumiho_addon) await ensureGumihoEntitlement(orderId, submissionId)
     return result('completed')
   }
 
   log(orderId, source, 'completed', 'changed=true')
+
+  // A failure here never undoes the paid report; the next settle / report page view repairs it.
+  if (row.gumiho_addon) await ensureGumihoEntitlement(orderId, submissionId)
 
   runAfter(() => sendPaymentConfirmationEmail(row.id as string))
   if (source === 'webhook') {
@@ -298,4 +401,87 @@ export async function settlePayment(orderId: string, source: SettleSource): Prom
   }
 
   return result('completed', true)
+}
+
+// ---------------------------------------------------------------------------
+// captureAndVerifyOrder: capture (if needed) and verify amount/currency/reference
+// for the Compatibility and Gumiho flows. Never returns 'paid' unless PayPal
+// reports a COMPLETED capture of exactly the expected USD amount for the
+// expected reference_id.
+// ---------------------------------------------------------------------------
+
+export type VerifiedCapture =
+  | { state: 'paid'; captureId: string | null; payerCountry: string | null }
+  | { state: 'pending' }
+  | { state: 'failed'; reason: string }
+  | { state: 'mismatch'; reason: string }
+
+export async function captureAndVerifyOrder(
+  orderId: string,
+  expected: { amountUsd: string; referenceId: string },
+): Promise<VerifiedCapture> {
+  const token = await getPayPalAccessToken()
+  if (!token) return { state: 'pending' }
+
+  const order = await getOrder(orderId, token)
+  if (!order || order.status >= 400) {
+    console.error(`[v0] payments: verify getOrder unavailable order=${orderId} http=${order?.status ?? 'network'}`)
+    return { state: 'pending' }
+  }
+  if (order.body?.status === 'VOIDED') return { state: 'failed', reason: 'order-voided' }
+
+  const referenceId = order.body?.purchase_units?.[0]?.reference_id ?? null
+  let capture = extractCapture(order.body)
+  let payer = order.body?.payer
+
+  if (!capture) {
+    if (order.body?.status !== 'APPROVED') return { state: 'pending' }
+
+    const cap = await captureOrder(orderId, token)
+    if (!cap || cap.status >= 500) return { state: 'pending' }
+
+    if (cap.status >= 200 && cap.status < 300) {
+      capture = extractCapture(cap.body)
+      payer = cap.body?.payer ?? payer
+    } else {
+      const issues = issuesOf(cap.body)
+      if (issues.includes('ORDER_ALREADY_CAPTURED') || issues.includes('ORDER_ALREADY_COMPLETED')) {
+        const again = await getOrder(orderId, token)
+        if (!again || again.status >= 400) return { state: 'pending' }
+        capture = extractCapture(again.body)
+        payer = again.body?.payer ?? payer
+      } else if (issues.includes('INSTRUMENT_DECLINED')) {
+        return { state: 'failed', reason: 'instrument-declined' }
+      } else {
+        console.error(`[v0] payments: verify capture http=${cap.status} order=${orderId} issues=${issues.join(',') || 'none'}`)
+        return { state: 'pending' }
+      }
+    }
+  }
+
+  if (!capture) return { state: 'pending' }
+  if (capture.status === 'DECLINED' || capture.status === 'FAILED') {
+    return { state: 'failed', reason: `capture-${String(capture.status).toLowerCase()}` }
+  }
+  if (capture.status !== 'COMPLETED') return { state: 'pending' }
+
+  const capturedCents = Math.round(Number(capture.amount?.value) * 100)
+  const expectedCents = Math.round(Number(expected.amountUsd) * 100)
+  const currency = capture.amount?.currency_code
+  if (!Number.isFinite(capturedCents) || capturedCents !== expectedCents || currency !== 'USD') {
+    const reason = `amount expected=${expected.amountUsd} USD captured=${capture.amount?.value} ${currency}`
+    console.error(`[v0] payments: AMOUNT MISMATCH order=${orderId} ${reason}`)
+    return { state: 'mismatch', reason }
+  }
+  if (referenceId !== expected.referenceId) {
+    const reason = `reference expected=${expected.referenceId} order=${referenceId}`
+    console.error(`[v0] payments: REFERENCE MISMATCH order=${orderId} ${reason}`)
+    return { state: 'mismatch', reason }
+  }
+
+  return {
+    state: 'paid',
+    captureId: (capture.id as string | undefined) ?? null,
+    payerCountry: payer?.address?.country_code ?? capture?.payer?.address?.country_code ?? null,
+  }
 }

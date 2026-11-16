@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { findUnusedGumihoEntitlement } from '@/lib/payments/gumiho-entitlement'
 
 const MAX_QUESTION_LENGTH = 300
 
@@ -52,6 +53,27 @@ export async function POST(request: Request) {
 
     if (!paidReport) {
       return NextResponse.json({ error: '99 Facts report required' }, { status: 403 })
+    }
+
+    // Bundled entitlement: fill the pre-paid placeholder instead of creating a new (unpaid) row.
+    const entitlementId = await findUnusedGumihoEntitlement(submissionId)
+    if (entitlementId) {
+      const admin = createAdminClient()
+      const { data: filled, error: fillError } = await admin
+        .from('gumiho_questions')
+        .update({ question_1: questions[0], question_2: questions[1], question_3: questions[2] })
+        .eq('id', entitlementId)
+        .eq('submission_id', submissionId)
+        .eq('question_1', '')
+        .select('id')
+
+      if (fillError) {
+        console.error('[v0] Gumiho bundled question update error:', fillError)
+        return NextResponse.json({ error: 'Failed to save questions' }, { status: 500 })
+      }
+      if (filled && filled.length > 0) {
+        return NextResponse.json({ success: true, gumihoQuestionId: entitlementId, bundled: true })
+      }
     }
 
     // Create gumiho question entry

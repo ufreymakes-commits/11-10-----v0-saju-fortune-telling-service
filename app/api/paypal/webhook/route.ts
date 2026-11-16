@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getPayPalConfig } from '@/lib/paypal'
 import { createAdminClient } from '@/lib/supabase/server'
-import { PRICE_USD, getPayPalAccessToken, settlePayment } from '@/lib/payments/paypal-orders'
+import { expectedTotalCents, getPayPalAccessToken, settlePayment } from '@/lib/payments/paypal-orders'
 
 // Needed because settlePayment starts report generation through after() for webhook events.
 export const maxDuration = 300
@@ -56,34 +56,47 @@ function orderIdFromResource(resource: any): string | null {
 async function markRefunded(resource: any, eventType: string) {
   const admin = createAdminClient()
 
-  // Ignore partial refunds: the buyer still owns the report.
-  if (eventType === 'PAYMENT.CAPTURE.REFUNDED') {
-    const refunded = Number(resource?.amount?.value)
-    if (Number.isFinite(refunded) && refunded < Number(PRICE_USD)) {
-      console.log('[v0] payments: partial refund ignored')
-      return
-    }
-  }
-
   const orderId = orderIdFromResource(resource)
   const upLink = Array.isArray(resource?.links) ? resource.links.find((l: any) => l.rel === 'up')?.href : null
   const captureFromLink = typeof upLink === 'string' ? upLink.split('/captures/')[1]?.split(/[/?]/)[0] : null
   const captureIds = [captureFromLink, resource?.id].filter(Boolean) as string[]
 
   let paymentId: string | null = null
+  let gumihoAddon = false
 
   if (orderId) {
-    const { data } = await admin.from('payments').select('id').eq('paypal_order_id', orderId).limit(1).maybeSingle()
+    const { data } = await admin
+      .from('payments')
+      .select('id, gumiho_addon')
+      .eq('paypal_order_id', orderId)
+      .limit(1)
+      .maybeSingle()
     paymentId = (data?.id as string | undefined) ?? null
+    gumihoAddon = Boolean(data?.gumiho_addon)
   }
   if (!paymentId && captureIds.length > 0) {
-    const { data } = await admin.from('payments').select('id').in('paypal_capture_id', captureIds).limit(1).maybeSingle()
+    const { data } = await admin
+      .from('payments')
+      .select('id, gumiho_addon')
+      .in('paypal_capture_id', captureIds)
+      .limit(1)
+      .maybeSingle()
     paymentId = (data?.id as string | undefined) ?? null
+    gumihoAddon = Boolean(data?.gumiho_addon)
   }
 
   if (!paymentId) {
     console.log(`[v0] payments: ${eventType} for unknown payment`)
     return
+  }
+
+  // Ignore partial refunds: the buyer still owns the report. Full amount is derived from the payment row.
+  if (eventType === 'PAYMENT.CAPTURE.REFUNDED') {
+    const refundedCents = Math.round(Number(resource?.amount?.value) * 100)
+    if (Number.isFinite(refundedCents) && refundedCents < expectedTotalCents(gumihoAddon)) {
+      console.log('[v0] payments: partial refund ignored')
+      return
+    }
   }
 
   const { error } = await admin.from('payments').update({ status: 'refunded' }).eq('id', paymentId)

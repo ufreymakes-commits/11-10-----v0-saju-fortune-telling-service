@@ -12,7 +12,8 @@ function SuccessContent() {
   const submissionId = params.id as string
   const questionId = searchParams.get('questionId')
   const token = searchParams.get('token') // PayPal order ID
-  const isCoupon = searchParams.get('coupon') === 'true'
+  // Coupon and bundled (paid with the report) both skip the PayPal capture step.
+  const isCoupon = searchParams.get('coupon') === 'true' || searchParams.get('bundle') === 'true'
 
   const [status, setStatus] = useState<'capturing' | 'generating' | 'success' | 'error'>('capturing')
   const [error, setError] = useState<string | null>(null)

@@ -23,6 +23,7 @@ import { useScreenshotDetect } from '@/hooks/use-screenshot-detect'
 interface PaidReportContentProps {
   submission: Submission
   paidReport: any
+  hasGumihoBundle?: boolean
 }
 
 const HANJA_TO_KOREAN_STEM: Record<string, string> = {
@@ -34,7 +35,7 @@ const KOREAN_TO_HANJA_STEM: Record<string, string> = {
   '기': '己', '경': '庚', '신': '辛', '임': '壬', '계': '癸',
 }
 
-export function PaidReportContent({ submission, paidReport: initialPaidReport }: PaidReportContentProps) {
+export function PaidReportContent({ submission, paidReport: initialPaidReport, hasGumihoBundle = false }: PaidReportContentProps) {
   const [copied, setCopied] = useState(false)
   const [openSections, setOpenSections] = useState<Record<number, boolean>>({})
   const [paidReport, setPaidReport] = useState<any>(initialPaidReport)
@@ -350,12 +351,18 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport }:
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs text-primary">Personalized AI Reading</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground line-through">$19.99</span>
-                    <span className="text-sm font-bold text-foreground">$9.99</span>
+                    {hasGumihoBundle ? (
+                      <span className="text-sm font-bold text-foreground">Included in your order</span>
+                    ) : (
+                      <>
+                        <span className="text-xs text-muted-foreground line-through">$19.99</span>
+                        <span className="text-sm font-bold text-foreground">$9.99</span>
+                      </>
+                    )}
                   </div>
                 </div>
                 <span className="w-full py-2 text-xs font-semibold bg-primary hover:bg-primary/90 rounded-lg transition-colors text-primary-foreground text-center block">
-                  Ask Now (3 mins)
+                  {hasGumihoBundle ? 'Ask Your 3 Questions' : 'Ask Now (3 mins)'}
                 </span>
               </div>
             </div>
