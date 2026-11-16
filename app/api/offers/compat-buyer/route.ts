@@ -9,6 +9,7 @@ const toBody = (offer: Awaited<ReturnType<typeof getBuyerOffer>>) => ({
   eligible: offer.eligible,
   expiresAt: offer.expiresAt,
   priceUsd: offer.priceUsd,
+  serverNow: new Date().toISOString(),
 })
 
 // Read-only: reports whether the buyer-only price currently applies.

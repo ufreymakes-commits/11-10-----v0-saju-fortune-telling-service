@@ -269,7 +269,7 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
               </span>
             </span>
             <span className="flex-shrink-0 whitespace-nowrap text-right">
-              <span className="offer-price block text-3xl font-extrabold leading-8">$7.99</span>
+              <span className="offer-price block text-2xl font-extrabold leading-7">$7.99</span>
               <span className="block text-sm leading-snug text-muted-foreground line-through">$9.99</span>
             </span>
           </span>

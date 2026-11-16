@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
-import { findUnusedGumihoEntitlement } from '@/lib/payments/gumiho-entitlement'
+import { getGumihoEntitlementState } from '@/lib/payments/gumiho-entitlement'
 
 const MAX_QUESTION_LENGTH = 300
 
@@ -56,7 +56,14 @@ export async function POST(request: Request) {
     }
 
     // Bundled entitlement: fill the pre-paid placeholder instead of creating a new (unpaid) row.
-    const entitlementId = await findUnusedGumihoEntitlement(submissionId)
+    const entitlement = await getGumihoEntitlementState(submissionId)
+    if (entitlement.refunded) {
+      return NextResponse.json(
+        { error: 'The Gumiho add-on for this order was refunded, so new questions cannot be submitted.', code: 'gumiho_refunded' },
+        { status: 403 },
+      )
+    }
+    const entitlementId = entitlement.unusedQuestionId
     if (entitlementId) {
       const admin = createAdminClient()
       const { data: filled, error: fillError } = await admin

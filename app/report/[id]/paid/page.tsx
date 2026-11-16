@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { StarsBackground } from '@/components/stars-background'
 import { PaidReportContent } from '@/components/paid-report-content'
 import type { Submission } from '@/lib/types'
-import { findUnusedGumihoEntitlement } from '@/lib/payments/gumiho-entitlement'
+import { getGumihoEntitlementState, healGumihoEntitlementForSubmission } from '@/lib/payments/gumiho-entitlement'
 import { sharedOpenGraph, sharedTwitter } from '@/lib/metadata'
 import { startBuyerOffer } from '@/lib/payments/buyer-offer'
 
@@ -75,7 +75,9 @@ export default async function PaidReportPage({ params }: PageProps) {
   
   // paidReport will be null if not generated yet - client component will handle generation
   const paidReport = paidReportResult.data
-  const hasGumihoBundle = Boolean(await findUnusedGumihoEntitlement(id))
+  await healGumihoEntitlementForSubmission(id)
+  const gumihoState = await getGumihoEntitlementState(id)
+  const hasGumihoBundle = Boolean(gumihoState.unusedQuestionId)
 
   // The 24h clock starts on the first successful open of the generated report and never restarts (idempotent).
   const offer = paidReport ? await startBuyerOffer(id) : null
@@ -90,6 +92,7 @@ export default async function PaidReportPage({ params }: PageProps) {
           submission={submissionResult.data as Submission}
           paidReport={paidReport}
           hasGumihoBundle={hasGumihoBundle}
+          gumihoRefunded={gumihoState.refunded}
           buyerOffer={buyerOffer}
         />
       </div>

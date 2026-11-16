@@ -23,6 +23,7 @@ export default function AskGumihoPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [hasBundle, setHasBundle] = useState(false)
+  const [refunded, setRefunded] = useState(false)
 
   const [question1, setQuestion1] = useState('')
   const [question2, setQuestion2] = useState('')
@@ -64,6 +65,7 @@ export default function AskGumihoPage() {
         if (ent.ok) {
           const entData = await ent.json()
           setHasBundle(Boolean(entData.gumihoQuestionId))
+          setRefunded(Boolean(entData.refunded))
         }
       } catch {
         // No entitlement info: fall back to the regular paid flow.
@@ -133,6 +135,22 @@ export default function AskGumihoPage() {
         <Link href="/">
           <Button>Go Home</Button>
         </Link>
+      </div>
+    )
+  }
+
+  if (refunded) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+        <div className="max-w-md w-full bg-card border border-border rounded-xl p-6 text-center" role="status">
+          <h1 className="text-xl font-bold text-foreground mb-2">Gumiho add-on refunded</h1>
+          <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
+            The Ask the Gumiho 1:1 add-on on this order was refunded, so new questions can no longer be submitted. Any answers that were already generated stay available to you.
+          </p>
+          <Link href={`/report/${submissionId}/paid`}>
+            <Button className="w-full">Back to my report</Button>
+          </Link>
+        </div>
       </div>
     )
   }

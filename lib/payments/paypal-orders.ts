@@ -412,7 +412,13 @@ export async function settlePayment(orderId: string, source: SettleSource): Prom
 // ---------------------------------------------------------------------------
 
 export type VerifiedCapture =
-  | { state: 'paid'; captureId: string | null; payerCountry: string | null; customId: string | null }
+  | {
+      state: 'paid'
+      captureId: string | null
+      payerCountry: string | null
+      payerEmail: string | null
+      customId: string | null
+    }
   | { state: 'pending' }
   | { state: 'failed'; reason: string }
   | { state: 'mismatch'; reason: string }
@@ -484,6 +490,7 @@ export async function captureAndVerifyOrder(
     state: 'paid',
     captureId: (capture.id as string | undefined) ?? null,
     payerCountry: payer?.address?.country_code ?? capture?.payer?.address?.country_code ?? null,
+    payerEmail: (payer?.email_address ?? capture?.payer?.email_address ?? null) as string | null,
     customId: (order.body?.purchase_units?.[0]?.custom_id as string | undefined) ?? null,
   }
 }

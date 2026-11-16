@@ -2,7 +2,8 @@ import { notFound } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/server'
 import { CompatibilityCheckoutContent } from '@/components/compatibility-checkout-content'
 import { StarsBackground } from '@/components/stars-background'
-import { getBuyerOffer, isUuid } from '@/lib/payments/buyer-offer'
+import { getBuyerOffer, isUuid, logBuyerOfferResolved } from '@/lib/payments/buyer-offer'
+import { COMPAT_PRICE_USD } from '@/lib/payments/paypal-orders'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,7 +20,9 @@ export default async function CompatibilityCheckoutPage({
 
   // Server decides: the buyer price is shown only while the offer is valid, unexpired and unredeemed.
   const offer = isUuid(offerParam) ? await getBuyerOffer(offerParam) : null
+  if (offer) logBuyerOfferResolved(offer)
   const buyerOffer = offer?.eligible && offer.expiresAt ? { expiresAt: offer.expiresAt, priceUsd: offer.priceUsd } : null
+  const offerEnded = Boolean(offer && !offer.eligible)
 
   const { data: submission, error } = await supabase
     .from('compatibility_submissions')
@@ -49,6 +52,8 @@ export default async function CompatibilityCheckoutPage({
           personBName={submission.person_b_name}
           buyerOffer={buyerOffer}
           offerReportId={buyerOffer ? offerParam : undefined}
+          offerEnded={offerEnded}
+          regularPriceUsd={COMPAT_PRICE_USD}
         />
       </div>
     </main>

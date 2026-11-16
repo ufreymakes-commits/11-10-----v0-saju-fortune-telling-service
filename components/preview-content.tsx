@@ -7,9 +7,12 @@ import { Button } from '@/components/ui/button'
 import { ReportGuarantee } from '@/components/report-guarantee'
 import { Spinner } from '@/components/ui/spinner'
 import { DayMasterCard } from '@/components/day-master-card'
+import { CardActions } from '@/components/tarot-frame'
 import type { Fact, SajuData } from '@/lib/types'
 import { LockIcon, Share2Icon, CheckIcon } from 'lucide-react'
 
+
+const FREE_FIRST_CARD_ID = 'free-four-pillars-card'
 
 function ShareButton() {
   const [copied, setCopied] = useState(false)
@@ -362,8 +365,10 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
       {birthCaption && (
         <p className="text-[10px] text-muted-foreground text-center mb-2">{birthCaption}</p>
       )}
-      {/* Four Pillars Card */}
-      <div className="bg-card border border-border rounded-xl p-4 mb-6 shadow-lg shadow-primary/5 tarot-card-float">
+      {/* Four Pillars Card: the export node holds only the card; the actions sit outside it */}
+      <div className="mb-6">
+      <div id={FREE_FIRST_CARD_ID} className="-m-3 p-3">
+      <div className="bg-card border border-border rounded-xl p-4 shadow-lg shadow-primary/5 tarot-card-float">
         <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-3 text-center">
           <span className="text-gradient font-semibold">{submission.name}&apos;s</span> Four Pillars
         </h2>
@@ -394,6 +399,16 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
             dayMasterKorean={submission.sajuData.dayMasterKorean}
           />
         </div>
+      </div>
+      </div>
+      <CardActions
+        targetId={FREE_FIRST_CARD_ID}
+        slug="four-pillars"
+        firstName={submission.name}
+        shareText="My Four Pillars from Sajume"
+        backgroundColor="#f6f2fb"
+        className="mt-4"
+      />
       </div>
 
       {/* Free Facts */}
