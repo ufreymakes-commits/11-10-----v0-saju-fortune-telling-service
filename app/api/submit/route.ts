@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { calculateSaju } from '@/lib/saju-calculator'
-import { runSajuTests } from '@/lib/saju-test'
 import type { BirthInfo } from '@/lib/types'
 import { isValidEmail } from '@/lib/validation'
 import { getCountryFullName } from '@/lib/country-name'
@@ -55,20 +54,6 @@ export async function POST(request: Request) {
     // Vercel가 요청 IP 기반으로 붙여주는 ISO 국가 코드 (로컬 개발에서는 없음)를 영문 풀네임으로 저장. IP 자체는 저장하지 않음.
     const accessCountryCode = request.headers.get('x-vercel-ip-country')
     const accessCountry = accessCountryCode ? getCountryFullName(accessCountryCode) : null
-    
-    // Debug: Log calculated saju pillars for verification
-    console.log('[v0] Saju calculation result:', {
-      input: { birthDate, birthTime, birthCountry, birthCity, timezone, longitude },
-      pillars: {
-        year: sajuData.fourPillars?.year,
-        month: sajuData.fourPillars?.month,
-        day: sajuData.fourPillars?.day,
-        hour: sajuData.fourPillars?.hour
-      }
-    })
-    
-    // Run test suite once per deployment (only logs to console, no side effects)
-    runSajuTests()
     
     const { data, error } = await supabase
       .from('submissions')

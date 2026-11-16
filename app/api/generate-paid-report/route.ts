@@ -8,7 +8,7 @@ import { buildPaidContext, refreshDecadeFortune } from '@/lib/saju/paid-context'
 import { romanizeName, hasCJK } from '@/lib/romanize-name'
 import { TAILS } from '@/lib/saju/tails'
 import { stripGumihoSignature } from '@/lib/letter-signature'
-import { buildGuardBlock, checkGuards } from '@/lib/saju/ten-god-guards'
+import { buildGuardBlock, checkGuards, findGuardHits, type GuardHit } from '@/lib/saju/ten-god-guards'
 import { buildGumihoInputs, stripCjkDeep } from '@/lib/saju/gumiho-context'
 import { PAID_MODEL, THINK, googleThinking, withThinkingFallback } from '@/lib/ai/models'
 import {
@@ -271,7 +271,7 @@ interface ProblemCard {
   problems: Array<{ kind: ProblemKind; detail: string }>
 }
 
-// 작은따옴표로 묶인 간지/관계/신살 이름만 용어로 센다 ('Ja-Mi Wonjin'). 'I need a minute' 같은 인용 문장이나 일반 단��는 센다.
+// 작은따옴표로 묶인 간지/관계/신살 이름만 용어로 센다 ('Ja-Mi Wonjin'). 'I need a minute' 같은 인용 문장이나 일반 단���는 센다.
 const CHART_TERM_SHAPE = /^[A-Z][A-Za-z]*(?:[- ][A-Z][A-Za-z]*){0,3}$/
 function quotedTerms(text: string): string[] {
   const terms: string[] = []
@@ -777,6 +777,36 @@ function ensureLetterFirstName(letter: string, firstName: string): { text: strin
   return { text: `${firstName}, ${lowered}`, repaired: true }
 }
 
+const GUARD_PATCH_SYSTEM = `You fix single sentences inside private reading notes for a Saju report. For each numbered sentence you get the rule it breaks. Rewrite ONLY that sentence so it follows the rule, keeping the same chart items, years, names and warm tone, and about the same length. Do not add new facts. English only, no Korean or Chinese characters. Reply with a JSON array only, no markdown: [{"index": 1, "text": "..."}].`
+
+// 가드에 걸린 문장만 작은 호출로 고쳐 끼워 넣는다. 실패하면 null (호출한 쪽이 전체 재생성으로 넘어간다).
+async function patchGuardSentences(text: string, hits: GuardHit[]): Promise<string | null> {
+  const targets = hits.slice(0, 12)
+  const items = targets.map((h, i) => `${i + 1}. RULE: ${h.fix}\nSENTENCE: ${h.sentence.trim()}`).join('\n\n')
+  const result = await generateStage({
+    system: GUARD_PATCH_SYSTEM,
+    prompt: items,
+    maxOutputTokens: 2000,
+    levels: ['low'],
+    timeoutMs: 30_000,
+  })
+  const json = result.text.match(/\[[\s\S]*\]/)?.[0]
+  if (!json) return null
+  const parsed = JSON.parse(json) as Array<{ index: number; text: string }>
+  let patched = text
+  let applied = 0
+  for (const entry of [...parsed].sort((a, b) => b.index - a.index)) {
+    const hit = targets[entry.index - 1]
+    const replacement = stripCjkDeep(String(entry.text ?? '').trim())
+    if (!hit || !replacement || replacement.length > hit.sentence.length * 2 + 100) continue
+    const lead = hit.sentence.match(/^\s*/)?.[0] ?? ''
+    const trail = hit.sentence.match(/\s*$/)?.[0] ?? ''
+    patched = patched.slice(0, hit.start) + lead + replacement + trail + patched.slice(hit.end)
+    applied++
+  }
+  return applied > 0 ? patched : null
+}
+
 type NotesStageResult =
   | { ok: true; notes: string; monthlyWindows: unknown; englishChart: unknown; finalFactsForPrompt: unknown; romanceFactsForPrompt: unknown; decadeSummary: unknown; freeFactsForPrompt: unknown; attempts: number; issues: string[] }
   | { ok: false; reason: string }
@@ -827,6 +857,7 @@ async function runNotesStage(a: {
     monthlyWindows: inputs.monthlyWindows,
     freeFacts: freeFactsForPrompt,
     freeInterpretation: stripCjkDeep(a.freeInterpretation),
+    guardBlock: buildGuardBlock(inputs.finalFacts),
   })
 
   const checkCtx = {
@@ -835,29 +866,59 @@ async function runNotesStage(a: {
     birthYear: a.birthYear,
   }
 
-  // 한 번 만들고, 검사에 걸리면 한 번만 더 만든다(두 번째는 high). 둘 중 문제가 적은 쪽을 쓴다.
+  // 한 번 만들고, 가드에 걸린 문장은 그 문장만 고친다. 그래도 남는 문제가 있으면 전체 재생성은 최대 한 번(마지막 수단).
+  const levels: ThinkingLevel[] = ['medium', 'low']
+  const generateNotes = async (label: string) => {
+    const started = Date.now()
+    const result = await generateStage({ system: NOTES_SYSTEM_PROMPT, prompt, maxOutputTokens: 12000, levels, timeoutMs: NOTES_TIMEOUT_MS })
+    if (result.finishReason === 'length') throw new Error('notes truncated (finishReason: length)')
+    const text = stripCjkDeep(result.text.trim())
+    const issues = checkNotes(text, checkCtx)
+    console.log(`[v0] notes ${label}: ${text.length} chars in ${Date.now() - started}ms, issues: ${issues.join(' | ') || 'none'}`)
+    return { text, issues }
+  }
+
   let best: { text: string; issues: string[] } | null = null
-  const plan: ThinkingLevel[][] = [['medium', 'low'], ['high', 'medium']]
-  for (let i = 0; i < plan.length; i++) {
+  let attempts = 0
+  let patched = false
+  try {
+    attempts++
+    best = await generateNotes('attempt 1')
+  } catch (e) {
+    console.warn('[v0] notes attempt 1 failed:', e instanceof Error ? e.message : e)
+  }
+
+  if (best && best.issues.some((x) => x.startsWith('guard:'))) {
+    const patchStart = Date.now()
     try {
-      const result = await generateStage({
-        system: NOTES_SYSTEM_PROMPT,
-        prompt,
-        maxOutputTokens: 12000,
-        levels: plan[i],
-        timeoutMs: NOTES_TIMEOUT_MS,
-      })
-      if (result.finishReason === 'length') throw new Error('notes truncated (finishReason: length)')
-      const text = stripCjkDeep(result.text.trim())
-      const issues = checkNotes(text, checkCtx)
-      console.log(`[v0] notes attempt ${i + 1}: ${text.length} chars, issues: ${issues.join(' | ') || 'none'}`)
-      if (!best || issues.length < best.issues.length) best = { text, issues }
-      if (issues.length === 0) break
+      const hits = findGuardHits(best.text)
+      const fixed = hits.length ? await patchGuardSentences(best.text, hits) : null
+      if (fixed) {
+        const issues = checkNotes(fixed, checkCtx)
+        console.log(`[v0] notes guard patch: ${hits.length} sentence(s) in ${Date.now() - patchStart}ms, issues: ${issues.join(' | ') || 'none'}`)
+        if (issues.length <= best.issues.length) {
+          best = { text: fixed, issues }
+          patched = true
+        }
+      } else {
+        console.warn(`[v0] notes guard patch produced no change (${Date.now() - patchStart}ms)`)
+      }
     } catch (e) {
-      console.warn(`[v0] notes attempt ${i + 1} failed:`, e instanceof Error ? e.message : e)
+      console.warn('[v0] notes guard patch failed:', e instanceof Error ? e.message : e)
+    }
+  }
+
+  if (!best || best.issues.length > 0) {
+    try {
+      attempts++
+      const retry = await generateNotes('full regeneration (last resort)')
+      if (!best || retry.issues.length < best.issues.length) best = retry
+    } catch (e) {
+      console.warn('[v0] notes regeneration failed:', e instanceof Error ? e.message : e)
     }
   }
   if (!best) return { ok: false, reason: 'notes generation failed' }
+  if (patched) console.log('[v0] notes: guard issues fixed by targeted patch')
   if (best.issues.includes('too short')) return { ok: false, reason: 'notes too short' }
 
   return {
@@ -869,7 +930,7 @@ async function runNotesStage(a: {
     romanceFactsForPrompt: inputs.romanceFacts,
     decadeSummary,
     freeFactsForPrompt,
-    attempts: plan.length,
+    attempts,
     issues: best.issues,
   }
 }
@@ -1312,8 +1373,8 @@ ${structureBlock}`
         freeFacts,
         freeInterpretation: contextInterpretation,
       })
-      logTiming('notes:done', stage.ok ? { chars: stage.notes.length, attempts: stage.attempts, issues: stage.issues } : { failed: stage.reason })
       notesMs = Date.now() - notesStart
+      logTiming('notes:done', stage.ok ? { notesMs, chars: stage.notes.length, attempts: stage.attempts, issues: stage.issues } : { notesMs, failed: stage.reason })
       if (stage.ok) {
         paidNotes = stage.notes
         notesMonthlyWindows = stage.monthlyWindows

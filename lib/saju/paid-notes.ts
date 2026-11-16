@@ -18,14 +18,15 @@ Write these parts:
 4. BY AREA, 2-3 sentences each, specific (what to do, what to avoid, which structure fits): (a) childhood, family and parents, (b) the present: social mask vs inner self and the current cycle, (c) career and working conditions with at least two concrete fields, (d) money: how it comes, how it leaks, which vehicles suit them, (e) love: spouse palace, partner type, patterns, (f) people around them, (g) environment: Useful God, health and energy tendencies, and the kind of place that suits the Useful God and climate element (for example coastal or waterside when it is Water), with the direction; when the birth country is known, name two real places there and one abroad, (h) the next chapter (current and next cycle only) and the long-held worry this person likely carries.
 5. TIMING: using only the cycles, years and months present in the facts: what the report year, the next 3-5 years and the next cycle change are for, with the concrete traps and windows (clashes, combinations, penalties).
 6. ONE-PARAGRAPH SUMMARY of the story the whole report should tell, so every section agrees with every other (for example, if partnerships are risky for money, never advise a joint venture elsewhere). State in warm words how this chart succeeds, as a strength, not a rule (for example "she does best when she builds things that are fully hers"), so the reader finishes thinking "I can be happy and successful in my own way".
+Money words: Direct Wealth (Jeongjae) is steady earned income, salary, saving and reliability: never call it windfall, lucky, speculative or gambling money. Windfall, irregular or opportunity money belongs to Indirect Wealth only, and only when Indirect Wealth is in the facts.
 Rules: stay consistent with the free facts and the free interpretation the customer already saw. Use the strength rule and the Useful God order given in the facts. Keep every fact, including uncomfortable ones. No promises; describe tendencies.`
 
 export function buildNotesUserPrompt(a: {
   displayName: string; gender: string; birthDate: string; birthCountry: string; reportYear: number; todayISO: string
   englishChart: unknown; finalFacts: unknown; romanceFacts: unknown; decadeSummary: unknown; monthlyWindows: unknown
-  freeFacts: unknown; freeInterpretation: string
+  freeFacts: unknown; freeInterpretation: string; guardBlock?: string
 }) {
-  return `=== CUSTOMER ===
+  return `${a.guardBlock ? a.guardBlock + '\n\n' : ''}=== CUSTOMER ===
 Name: ${a.displayName}
 Gender: ${a.gender}
 Birth date: ${a.birthDate}

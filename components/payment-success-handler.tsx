@@ -144,8 +144,9 @@ export function PaymentSuccessHandler({ submissionId, orderId }: PaymentSuccessH
         <h2 className="text-2xl font-bold text-gradient mb-2">Payment Successful!</h2>
         <p className="text-muted-foreground mb-8">Now generating your personalized report...</p>
         <ReportProgress
-          key={generation.attempt}
-          error={generation.error}
+  key={generation.attempt}
+  emailSent={generation.emailSent}
+  error={generation.error}
           onRetry={generation.retry}
           onCheckAgain={generation.checkNow}
         />

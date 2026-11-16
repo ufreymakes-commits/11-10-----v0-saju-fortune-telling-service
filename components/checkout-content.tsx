@@ -24,7 +24,9 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
   const [couponLoading, setCouponLoading] = useState(false)
   const [couponError, setCouponError] = useState<string | null>(null)
   const [includeGumiho, setIncludeGumiho] = useState(false)
-  const totalLabel = includeGumiho ? '$27.98' : '$19.99'
+  const couponMode = couponCode.trim().length > 0
+  const gumihoSelected = includeGumiho && !couponMode
+  const totalLabel = gumihoSelected ? '$27.98' : '$19.99'
 
   const handleCouponSubmit = async () => {
     if (!couponCode.trim()) return
@@ -86,7 +88,7 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
       const response = await fetch('/api/paypal/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ submissionId, includeGumiho })
+        body: JSON.stringify({ submissionId, includeGumiho: gumihoSelected })
       })
       
       const data = await response.json()
@@ -184,7 +186,7 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
           </div>
         </div>
         
-        {includeGumiho && (
+        {gumihoSelected && (
           <div className="flex justify-between items-center text-sm mb-4">
             <span className="text-foreground/80">Ask the Gumiho 1:1 (3 questions)</span>
             <span className="font-semibold text-primary">$7.99</span>
@@ -240,6 +242,7 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
       )}
 
       {/* Gumiho 1:1 add-on */}
+      {!couponMode && (
       <label
         htmlFor="gumiho-addon"
         className="block bg-card border border-border rounded-xl p-4 mb-4 cursor-pointer transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:ring-1 has-[:checked]:ring-primary/40 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring"
@@ -279,6 +282,7 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
           You&apos;ll get your report first, then ask your 3 questions whenever you&apos;re ready.
         </span>
       </label>
+      )}
 
       {/* PayPal Button */}
       <Button
@@ -330,7 +334,10 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
             <input
               type="text"
               value={couponCode}
-              onChange={e => setCouponCode(e.target.value)}
+              onChange={e => {
+                setCouponCode(e.target.value)
+                if (e.target.value.trim()) setIncludeGumiho(false)
+              }}
               onKeyDown={e => e.key === 'Enter' && handleCouponSubmit()}
               placeholder="Enter coupon code"
               className="flex-1 bg-muted border border-border rounded-lg px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/40"
