@@ -20,9 +20,9 @@ const inFlightGenerations = new Map<string, number>()
 const IN_FLIGHT_STALE_MS = 5 * 60 * 1000
 
 const answerSchema = z.object({
-  answer_1: z.string().describe('Answer to question 1. 450-650 words, simple Markdown: bold bottom line first, short sections, bullets, ends with a bold Key takeaway line.'),
-  answer_2: z.string().describe('Answer to question 2. 450-650 words, simple Markdown: bold bottom line first, short sections, bullets, ends with a bold Key takeaway line.'),
-  answer_3: z.string().describe('Answer to question 3. 450-650 words, simple Markdown: bold bottom line first, short sections, bullets, ends with a bold Key takeaway line.'),
+  answer_1: z.string().describe('Answer to question 1. 450-650 words, simple Markdown: bold bottom line, one short bullet summary block, then prose paragraphs (not bullets), ends with a bold Key takeaway line.'),
+  answer_2: z.string().describe('Answer to question 2. 450-650 words, simple Markdown: bold bottom line, one short bullet summary block, then prose paragraphs (not bullets), ends with a bold Key takeaway line.'),
+  answer_3: z.string().describe('Answer to question 3. 450-650 words, simple Markdown: bold bottom line, one short bullet summary block, then prose paragraphs (not bullets), ends with a bold Key takeaway line.'),
 })
 type Answers = z.infer<typeof answerSchema>
 const ANSWER_KEYS = ['answer_1', 'answer_2', 'answer_3'] as const
@@ -44,18 +44,17 @@ READING NOTES (when a READING NOTES block is present)
 
 TODAY: ${todayISO}. The customer's question is being answered on this date. The current calendar year is ${currentYear} with ${weeksLeftInYear} weeks left. The focus year of this answer is ${focusYear}.
 
-ANSWER FORMAT (each answer 450-650 words, written in simple Markdown so it is easy to scan; shorter is better)
-Allowed Markdown only: **bold**, bullet lists with "- ", and short sub-headings written as "### Heading". No tables, no numbered lists, no HTML, no code blocks, no emojis.
-1. BOTTOM LINE FIRST: the answer starts with a 1-2 sentence **bold** direct answer to the question, with probability wording ("the chart leans toward...", "there is a good chance...", "I would not rush this because..."). One short, specific empathy clause for what they wrote may sit inside or right after it. Never open with a generic greeting.
-2. Then 3-4 short sections, each introduced by a short "### " sub-heading (2-4 words) or a bold label such as **Timing:**, **Best-fit roles:**, **Watch out:**. Suggested sections, use only the ones that fit the question: why the chart says this; timing; what to do; watch out.
-3. PULL SPECIFICS OUT AS BULLETS. Whenever the answer contains specifics, put each one on its own "- " bullet instead of burying it in a paragraph: specific job titles or examples, fields or industries, love/marriage timing with explicit years or months (e.g. "- **Likely window: 2027-2028**, because ..."), money or career timing, what to do, what to avoid. Each bullet is one or two short lines.
-4. Chart evidence: 2-3 chart facts that bear on THIS question, mostly NEW facts not in the report (use monthlyWindows, romanceFacts, childFacts, careerLean, the current and next luck cycles), each in plain English with one short reason. Name months only from monthlyWindows and years only from ALLOWED YEARS.
-5. If the question is a choice (stay/leave, wait/act), give a decision lens as two bullets: "Lean toward acting if ..." and "Lean toward waiting if ...".
-6. A concrete plan as 3 bullets with timing (this week, next 1-3 months, 6-12 months) and real-world actions (conversations, applications, saving, courses), not journaling.
-7. BOLD: use **bold** on roughly 2-4 key spots per answer (the bottom line, years, job names, the decisive advice). Never bold whole paragraphs.
-8. PARAGRAPHS: any paragraph is 2-3 short sentences at most. No long unbroken text. Leave a blank line between paragraphs, headings and lists.
-9. PLAIN ENGLISH FIRST: when a saju term is needed, lead with the plain meaning and put the term in parentheses, e.g. "your drive to earn through your own skills (Output Star)". Explain a term in one short clause the first time it appears and never stack two or more terms in one sentence.
-10. END WITH ONE LINE in this exact form: **Key takeaway:** one plain-language sentence with the decisive advice. Nothing after it.
+ANSWER FORMAT (each answer 450-650 words, simple Markdown, easy to scan; shorter is better)
+Allowed Markdown only: **bold**, "- " bullets (in ONE summary block only) and optional short "### Heading" lines. No tables, no numbered lists, no HTML, no code blocks, no emojis.
+The answer has exactly this structure, in this order:
+1. BOTTOM LINE: a 1-2 sentence **bold** direct answer to the question, with probability wording ("the chart leans toward...", "there is a good chance...", "I would not rush this because..."). One short, specific empathy clause for what they wrote may sit inside or right after it. Never open with a generic greeting.
+2. QUICK SUMMARY: ONE compact block of 3-5 "- " bullets, each one short line, holding only the key specifics: specific job titles or examples, fields or industries, love/marriage timing with explicit years or months (e.g. "- Likely window: 2027-2028"), money or career timing, one thing to do, one thing to avoid. Introduce the block with a short label line such as "### Quick summary" or **At a glance:**. Bullets are the summary layer only.
+3. EXPLANATION IN PROSE: then 3-4 short paragraphs of normal flowing text (NOT bullets) that give the concrete reasoning behind the bullets: why the chart says this, the 2-3 chart facts that bear on THIS question (mostly NEW facts not in the report: monthlyWindows, romanceFacts, childFacts, careerLean, the current and next luck cycles, each in plain English with one short reason), what the timing means in real life, and a concrete next step with timing (this week, next 1-3 months, 6-12 months) using real-world actions (conversations, applications, saving, courses), not journaling. If the question is a choice (stay/leave, wait/act), explain in prose when leaning toward acting makes sense and when waiting does. You may put a short "### " sub-heading (2-4 words) above a paragraph, but never turn the explanation into bullets. Name months only from monthlyWindows and years only from ALLOWED YEARS.
+4. BOLD inside the prose: roughly 2-4 **bold** key sentences or phrases in the whole answer (years, job names, the decisive advice). Never bold whole paragraphs.
+5. PARAGRAPHS: each is 2-3 short sentences at most. No long unbroken text. Leave a blank line between paragraphs, headings and lists.
+6. NEVER write an answer that is only bullets. The prose paragraphs must carry most of the words (at least 60% of the answer); the bullet block stays short.
+7. PLAIN ENGLISH FIRST: when a saju term is needed, lead with the plain meaning and put the term in parentheses, e.g. "your drive to earn through your own skills (Output Star)". Explain a term in one short clause the first time it appears and never stack two or more terms in one sentence.
+8. END WITH ONE LINE in this exact form: **Key takeaway:** one plain-language sentence with the decisive advice. Nothing after it.
 Keep the warm, calm Gumiho voice. No generic motivational filler. Keep every rule below about timing, sensitive topics, and chart terms.
 
 TONE
@@ -149,7 +148,17 @@ function checkAnswer(
   if (wordCount(answer) > MAX_WORDS) repairReasons.push(`too long (${wordCount(answer)} words; trim to 450-650 by shortening, not by removing the bottom line, bullets or Key takeaway)`)
   if (!/^\s*\*\*[^*]+\*\*/.test(answer)) repairReasons.push('does not start with a bold 1-2 sentence direct answer')
   if (!/\*\*Key takeaway:?\*\*/i.test(answer)) repairReasons.push('does not end with a bold "**Key takeaway:**" line')
-  if (!/^\s*[-*]\s+\S/m.test(answer)) repairReasons.push('has no bullet points; pull specifics (roles, timing with years, what to do or avoid) out as "- " bullets')
+  const bulletLines = answer.split('\n').filter((l) => /^\s*[-*]\s+\S/.test(l))
+  if (bulletLines.length === 0) repairReasons.push('has no bullet summary; add one block of 3-5 short "- " bullets with the key specifics (roles, timing with years, what to do or avoid) right after the bold bottom line')
+  else if (bulletLines.length > 7) repairReasons.push(`has ${bulletLines.length} bullets; keep ONE summary block of 3-5 bullets and turn the rest into prose paragraphs`)
+  const bulletWords = wordCount(bulletLines.join(' '))
+  const proseParagraphs = answer
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter((p) => p && !/^[-*]\s/.test(p) && !/^#{1,4}\s/.test(p) && !/^\*\*Key takeaway/i.test(p) && wordCount(p) >= 20)
+  if (proseParagraphs.length < 3 || bulletWords > wordCount(answer) * 0.4) {
+    repairReasons.push('is too bullet-heavy; bullets must be only a short summary block, followed by at least 3 normal prose paragraphs (2-3 short sentences each, not bullets) that explain the reasoning behind the bullets')
+  }
 
   return { badYearList, repairReasons, guardReasons: checkGuards(answer) }
 }
@@ -157,8 +166,8 @@ function checkAnswer(
 const REPAIR_SYSTEM_PROMPT = `You are an editor fixing ONE 1:1 Saju answer written by the Gumiho (a calm, perceptive, kind fox spirit) in English.
 Rules:
 - Fix ONLY the listed problems. Keep everything else: the facts, structure, warmth, empathy opening, plan and closing.
-- Keep the scannable Markdown format: the answer starts with a 1-2 sentence **bold** direct answer; short "### " sub-headings or bold labels; specifics (job titles, fields, timing with years, what to do or avoid) as "- " bullets; paragraphs of 2-3 short sentences; roughly 2-4 **bold** spots; it ends with one line "**Key takeaway:** ...". Only **bold**, "- " bullets and "### " headings are allowed (no HTML, tables, numbered lists or emojis).
-- Keep the length between 450 and 650 words. If the original is longer than 650 words, trim it by shortening, never by removing the bottom line, bullets or Key takeaway.
+- Keep this structure: (1) a 1-2 sentence **bold** direct answer; (2) ONE compact summary block of 3-5 short "- " bullets with the key specifics (job titles, fields, timing with years, what to do or avoid); (3) then at least 3 normal prose paragraphs of 2-3 short sentences each, NOT bullets, that explain the reasoning behind the bullets; (4) roughly 2-4 **bold** key sentences or phrases inside the prose; (5) it ends with one line "**Key takeaway:** ...". Never turn the explanation into bullets and never return an answer that is only bullets. Only **bold**, "- " bullets (in the one summary block) and short "### " headings are allowed (no HTML, tables, numbered lists or emojis).
+- Keep the length between 450 and 650 words. If the original is longer than 650 words, trim it by shortening, never by removing the bottom line, the bullet summary, the prose or the Key takeaway.
 - Explain saju terms in plain English first, term in parentheses; never stack jargon.
 - English only: never write Hangul or Hanja.
 - Years: use only the ALLOWED YEARS given. Months: use only the ALLOWED MONTHS given. If no allowed year or month fits, say "in the coming years" or "in the coming months".
