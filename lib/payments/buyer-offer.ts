@@ -30,9 +30,17 @@ const noOffer = (): BuyerOfferStatus => ({
   reason: 'no-payment',
 })
 
-// Single log line for support: explains why a given test showed the regular price. Contains no PII or ids.
-export function logBuyerOfferResolved(offer: BuyerOfferStatus) {
-  console.log(`[v0] compat offer resolved: eligible=${offer.eligible} reason=${offer.reason}`)
+// First 8 chars of a report/payment id: enough to correlate log lines, not enough to be a usable identifier.
+const shortId = (id: string | null | undefined) => (id ? id.slice(0, 8) : 'none')
+
+// Single log line for support: explains why a given test showed the regular price. Contains no PII; the optional
+// context adds a short id prefix and the call site.
+export function logBuyerOfferResolved(
+  offer: Pick<BuyerOfferStatus, 'eligible' | 'reason'>,
+  context?: { source: string; id?: string | null },
+) {
+  const suffix = context ? ` id=${shortId(context.id)} src=${context.source}` : ''
+  console.log(`[v0] compat offer resolved: eligible=${offer.eligible} reason=${offer.reason}${suffix}`)
 }
 
 async function completedPaymentIds(reportId: string): Promise<string[]> {
@@ -65,6 +73,7 @@ async function hasCompletedCompatPurchase(reportId: string): Promise<boolean | n
     .maybeSingle()
   if (ownerError) {
     console.error('[v0] buyer-offer: owner lookup failed', ownerError.message)
+    console.log(`[v0] compat purchase check: lookup error (fail-closed) id=${shortId(reportId)}`)
     return null
   }
   const ownerName = normalizeName(owner?.name)
@@ -78,29 +87,40 @@ async function hasCompletedCompatPurchase(reportId: string): Promise<boolean | n
     .limit(500)
   if (candidateError) {
     console.error('[v0] buyer-offer: compat submission lookup failed', candidateError.message)
+    console.log(`[v0] compat purchase check: lookup error (fail-closed) id=${shortId(reportId)}`)
     return null
   }
 
-  const matchingIds = (candidates ?? [])
-    .filter(
-      (c) =>
-        (dateOnly(c.person_a_birth_date) === ownerBirthDate && normalizeName(c.person_a_name) === ownerName) ||
-        (dateOnly(c.person_b_birth_date) === ownerBirthDate && normalizeName(c.person_b_name) === ownerName),
-    )
-    .map((c) => c.id as string)
-  if (matchingIds.length === 0) return false
+  const isPersonA = (c: NonNullable<typeof candidates>[number]) =>
+    dateOnly(c.person_a_birth_date) === ownerBirthDate && normalizeName(c.person_a_name) === ownerName
+  const isPersonB = (c: NonNullable<typeof candidates>[number]) =>
+    dateOnly(c.person_b_birth_date) === ownerBirthDate && normalizeName(c.person_b_name) === ownerName
+
+  const matches = (candidates ?? []).filter((c) => isPersonA(c) || isPersonB(c))
+  if (matches.length === 0) return false
 
   const { data: payments, error: paymentError } = await admin
     .from('compatibility_payments')
-    .select('id')
-    .in('submission_id', matchingIds)
+    .select('submission_id')
+    .in(
+      'submission_id',
+      matches.map((c) => c.id as string),
+    )
     .eq('status', 'completed')
     .limit(1)
   if (paymentError) {
     console.error('[v0] buyer-offer: compat payment lookup failed', paymentError.message)
+    console.log(`[v0] compat purchase check: lookup error (fail-closed) id=${shortId(reportId)}`)
     return null
   }
-  return (payments ?? []).length > 0
+
+  const paid = (payments ?? [])[0]
+  if (!paid) return false
+  const matched = matches.find((c) => c.id === paid.submission_id)
+  console.log(
+    `[v0] compat purchase check: matched ${matched && isPersonA(matched) ? 'A' : 'B'} id=${shortId(reportId)}`,
+  )
+  return true
 }
 
 const alreadyPurchased = (): BuyerOfferStatus => ({
@@ -169,29 +189,48 @@ export async function startBuyerOffer(reportId: string): Promise<BuyerOfferStatu
     .eq('section_key', 'paid_full')
     .limit(1)
     .maybeSingle()
-  if (!report) return noOffer()
+  if (!report) {
+    console.log(`[v0] buyer-offer start: skipped (paid report not generated) id=${shortId(reportId)}`)
+    return noOffer()
+  }
 
   const paymentIds = await completedPaymentIds(reportId)
-  if (paymentIds.length === 0) return noOffer()
+  if (paymentIds.length === 0) {
+    console.log(`[v0] buyer-offer start: skipped (no completed payment) id=${shortId(reportId)}`)
+    return noOffer()
+  }
 
   // Customers who already bought compatibility never get an offer row (and so never get a clock).
   const purchased = await hasCompletedCompatPurchase(reportId)
-  if (purchased !== false) return alreadyPurchased()
+  if (purchased !== false) {
+    console.log(
+      `[v0] buyer-offer start: skipped (${purchased === null ? 'lookup error, fail-closed' : 'already-purchased'}) id=${shortId(reportId)}`,
+    )
+    return alreadyPurchased()
+  }
 
   const now = new Date()
-  const { error } = await admin.from('buyer_offers').upsert(
-    {
-      payment_id: paymentIds[0],
-      offer_key: COMPAT_BUYER_OFFER_KEY,
-      first_seen_at: now.toISOString(),
-      expires_at: new Date(now.getTime() + COMPAT_BUYER_OFFER_HOURS * 3_600_000).toISOString(),
-    },
-    { onConflict: 'payment_id,offer_key', ignoreDuplicates: true },
-  )
+  // With ignoreDuplicates only newly inserted rows are returned, so an empty result means the row already existed.
+  const { data: inserted, error } = await admin
+    .from('buyer_offers')
+    .upsert(
+      {
+        payment_id: paymentIds[0],
+        offer_key: COMPAT_BUYER_OFFER_KEY,
+        first_seen_at: now.toISOString(),
+        expires_at: new Date(now.getTime() + COMPAT_BUYER_OFFER_HOURS * 3_600_000).toISOString(),
+      },
+      { onConflict: 'payment_id,offer_key', ignoreDuplicates: true },
+    )
+    .select('id')
   if (error) {
     console.error('[v0] buyer-offer: start failed', error.code, error.message)
+    console.log(`[v0] buyer-offer start: skipped (lookup error) id=${shortId(reportId)}`)
     return noOffer()
   }
+  console.log(
+    `[v0] buyer-offer start: ${(inserted ?? []).length > 0 ? 'row created' : 'row already existed'} id=${shortId(reportId)}`,
+  )
 
   return getBuyerOffer(reportId)
 }

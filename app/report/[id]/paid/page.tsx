@@ -5,7 +5,7 @@ import { PaidReportContent } from '@/components/paid-report-content'
 import type { Submission } from '@/lib/types'
 import { getGumihoEntitlementState, healGumihoEntitlementForSubmission } from '@/lib/payments/gumiho-entitlement'
 import { sharedOpenGraph, sharedTwitter } from '@/lib/metadata'
-import { startBuyerOffer } from '@/lib/payments/buyer-offer'
+import { logBuyerOfferResolved, startBuyerOffer } from '@/lib/payments/buyer-offer'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -81,6 +81,7 @@ export default async function PaidReportPage({ params }: PageProps) {
 
   // The 24h clock starts on the first successful open of the generated report and never restarts (idempotent).
   const offer = paidReport ? await startBuyerOffer(id) : null
+  logBuyerOfferResolved(offer ?? { eligible: false, reason: 'no-payment' }, { source: 'paid-page', id })
   const buyerOffer = offer?.eligible && offer.expiresAt ? { expiresAt: offer.expiresAt, priceUsd: offer.priceUsd } : null
   
   return (

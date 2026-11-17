@@ -139,6 +139,7 @@ export async function sendCompatConfirmationEmail(params: {
         .eq('id', params.paymentId)
       return false
     }
+    console.log('[v0] email sent: compat status=ok')
     return true
   } catch (e) {
     console.error('[v0] compat email error:', e instanceof Error ? e.message : 'unknown')
