@@ -136,5 +136,7 @@ export async function sendPaymentConfirmationEmail(paymentId: string): Promise<v
   const result = await sendEmail({ to, ...email })
   if (result === 'failed') {
     await admin.from('payments').update({ confirmation_email_sent_at: null }).eq('id', paymentId)
+  } else if (result === 'sent') {
+    console.log('[v0] email sent: payment status=ok')
   }
 }
