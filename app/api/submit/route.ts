@@ -4,6 +4,7 @@ import { calculateSaju } from '@/lib/saju-calculator'
 import type { BirthInfo } from '@/lib/types'
 import { isValidEmail } from '@/lib/validation'
 import { getCountryFullName } from '@/lib/country-name'
+import { enqueueFreeReportSequence, runInBackground } from '@/lib/email/queue'
 
 export async function POST(request: Request) {
   try {
@@ -83,6 +84,9 @@ export async function POST(request: Request) {
       )
     }
     
+    // Fire-and-forget: a CRM failure must never affect the free report flow.
+    runInBackground('free report sequence', () => enqueueFreeReportSequence(data.id as string))
+
     return NextResponse.json({ submissionId: data.id })
   } catch (error) {
     console.error('[v0] Submit error:', error)

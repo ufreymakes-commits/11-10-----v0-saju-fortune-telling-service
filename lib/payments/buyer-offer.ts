@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { COMPAT_BUYER_PRICE_USD, COMPAT_PRICE_USD } from '@/lib/payments/paypal-orders'
+import { enqueueCompatDeadline, runInBackground } from '@/lib/email/queue'
 
 export const COMPAT_BUYER_OFFER_KEY = 'compat_buyer_1599'
 export const COMPAT_BUYER_OFFER_HOURS = 24
@@ -228,9 +229,12 @@ export async function startBuyerOffer(reportId: string): Promise<BuyerOfferStatu
     console.log(`[v0] buyer-offer start: skipped (lookup error) id=${shortId(reportId)}`)
     return noOffer()
   }
+  const createdOfferId = inserted?.[0]?.id as string | undefined
   console.log(
-    `[v0] buyer-offer start: ${(inserted ?? []).length > 0 ? 'row created' : 'row already existed'} id=${shortId(reportId)}`,
+    `[v0] buyer-offer start: ${createdOfferId ? 'row created' : 'row already existed'} id=${shortId(reportId)}`,
   )
+  // Only a newly created row schedules the deadline reminder; the status returned below is unaffected.
+  if (createdOfferId) runInBackground('compat deadline', () => enqueueCompatDeadline(createdOfferId))
 
   return getBuyerOffer(reportId)
 }

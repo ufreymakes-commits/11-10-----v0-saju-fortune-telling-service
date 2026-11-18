@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getPayPalConfig } from '@/lib/paypal'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { expectedTotalUsd, getPayPalAccessToken, settlePayment } from '@/lib/payments/paypal-orders'
+import { enqueueCheckoutAbandonByOrder, runInBackground } from '@/lib/email/queue'
 
 function getBaseUrl(request: Request): string {
   const host = request.headers.get('host')
@@ -140,6 +141,8 @@ export async function POST(request: Request) {
         { status: 500 },
       )
     }
+
+    runInBackground('checkout abandon', () => enqueueCheckoutAbandonByOrder(orderData.id as string))
 
     const approvalUrl = orderData.links?.find((link: { rel: string }) => link.rel === 'approve')?.href
     if (!approvalUrl) {
