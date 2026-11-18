@@ -4,7 +4,7 @@ import { StarsBackground } from '@/components/stars-background'
 import { Marquee } from '@/components/marquee'
 import { TextReviewSlider } from '@/components/text-review-slider'
 import { DataBasedTrust } from '@/components/data-based-trust'
-import { NoticeMeButton } from '@/components/notice-me-button'
+import { WaitlistNotify } from '@/components/waitlist-notify'
 import { AskGumihoProductCard } from '@/components/ask-gumiho-product-card'
 import { POLICIES } from '@/lib/policies'
 
@@ -269,10 +269,7 @@ src="/images/shopify-logo.png"
                   <span className="text-xs text-blue-300">12 monthly readings</span>
                   <span className="text-lg font-bold text-white/50">$79</span>
                 </div>
-                <NoticeMeButton
-                  product="subscription"
-                  className="w-full text-center py-2 px-4 rounded-lg text-sm font-medium bg-blue-500/20 hover:bg-blue-500/30 text-blue-200 border border-blue-500/30 hover:border-blue-400/50 transition-all"
-                />
+                <WaitlistNotify />
               </div>
             </div>
           </div>
@@ -430,6 +427,11 @@ src="/images/shopify-logo.png"
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link href="/privacy" className="hover:text-white/60 transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
             </ul>
           </nav>
         </div>

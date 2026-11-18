@@ -28,6 +28,7 @@ export const STALE_AFTER_MS: Record<string, number> = {
   C3: 48 * HOUR,
   C4: 48 * HOUR,
   TEST: 24 * HOUR,
+  W1: 24 * HOUR,
 }
 export const DEFAULT_STALE_AFTER_MS = 24 * HOUR
 

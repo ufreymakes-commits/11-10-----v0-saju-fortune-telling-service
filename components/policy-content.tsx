@@ -102,6 +102,13 @@ export function PolicyContent({ policy }: { policy: Policy }) {
                 </Link>
               </li>
             ))}
+            {policy.slug !== 'privacy' && (
+              <li>
+                <Link href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
+            )}
           </ul>
         </nav>
       </div>
