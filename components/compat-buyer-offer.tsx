@@ -13,7 +13,7 @@ export interface BuyerOfferInfo {
 }
 
 const REGULAR_PRICE = '19.99'
-const SCROLL_TRIGGER = 0.6
+const SCROLL_TRIGGER = 0.85
 const HOUR_MS = 60 * 60 * 1000
 
 interface OfferStatus {
@@ -134,6 +134,9 @@ function OfferTicket({
         >
           Are you meant to be?
         </Heading>
+        <p className="mt-1.5 text-xs font-medium uppercase tracking-[0.18em] text-white/75">
+          Relationship Compatibility
+        </p>
         <p className="mx-auto mt-2 max-w-xs text-pretty text-sm leading-relaxed text-white/85">
           Your crush, partner, favorite idol, even your ex.
         </p>
@@ -158,7 +161,10 @@ function OfferTicket({
               lastHour ? 'font-extrabold text-[#ff7ac0]' : 'font-semibold text-white',
             )}
           >
-            {lastHour ? 'Last hour' : 'Ends in'} <span role="timer">{formatCountdown(clock.remainingMs)}</span>
+            {lastHour ? 'Last hour' : 'Ends in'}{' '}
+            <span role="timer" className="font-extrabold tabular-nums text-[#e4ff1a]">
+              {formatCountdown(clock.remainingMs)}
+            </span>
           </p>
           <p className="mt-0.5 text-xs text-white/75">Offer ends {clock.expiryLabel}</p>
         </div>

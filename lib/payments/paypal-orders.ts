@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { paidReportUrl } from '@/lib/payments/base-url'
 import { startServerGeneration } from '@/lib/payments/start-generation'
 import { sendPaymentConfirmationEmail } from '@/lib/email/payment-confirmation'
+import { enqueuePostPurchase } from '@/lib/email/queue'
 
 // Single source of truth per product: used for the PayPal order, the stored payment row and the capture check.
 export const PRICE_USD = '19.99'
@@ -397,6 +398,7 @@ export async function settlePayment(orderId: string, source: SettleSource): Prom
   if (row.gumiho_addon) await ensureGumihoEntitlement(orderId, submissionId)
 
   runAfter(() => sendPaymentConfirmationEmail(row.id as string))
+  runAfter(() => enqueuePostPurchase(row.id as string))
   if (source === 'webhook') {
     runAfter(() => startServerGeneration(submissionId, 'webhook'))
   }

@@ -362,7 +362,7 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport, h
         <div className="space-y-4">
 
           {/* Ask the Gumiho 1:1 */}
-          <Link href={`/ask-gumiho/${submissionId}`}>
+          <Link href={`/ask-gumiho/${submissionId}`} className="block">
             <div className="bg-card border border-primary/30 rounded-xl overflow-hidden shadow-sm hover:border-primary/50 transition-colors cursor-pointer">
               <div className="relative w-full" style={{ aspectRatio: '796/531' }}>
                 <Image

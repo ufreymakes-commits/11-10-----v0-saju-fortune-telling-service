@@ -73,7 +73,7 @@ export default function StartPage() {
 
         {/* Info */}
         <p className="mt-6 text-[10px] text-white/60 text-center max-w-sm leading-relaxed">
-          Your information is used solely to calculate your birth chart and will not be shared with third parties. By continuing, you agree to our privacy policy and receiving our Saju tips newsletter.
+          Your information is used to calculate your birth chart and is not shared with third parties. By continuing, you agree to our Privacy Policy and to receive your reading by email, plus occasional Saju tips and offers. Unsubscribe anytime.
         </p>
       </div>
 
