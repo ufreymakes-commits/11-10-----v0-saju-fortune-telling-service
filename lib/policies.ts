@@ -147,6 +147,54 @@ export const POLICIES: Policy[] = [
   },
 ]
 
+// Served at /privacy (not part of POLICIES, which are served under /policies/[slug]).
+export const PRIVACY_POLICY: Policy = {
+  slug: 'privacy',
+  footerLabel: 'Privacy Policy',
+  title: 'Privacy Policy',
+  blocks: [
+    { type: 'p', text: 'This page explains what Sajume collects, why, and who helps us handle it.' },
+    { type: 'p', text: 'What we collect:' },
+    {
+      type: 'ul',
+      items: [
+        'Your name, birth date, birth time and other details you enter in our forms.',
+        'Your email address.',
+        'Payment details processed by PayPal when you buy. We never see or store your card number.',
+      ],
+    },
+    { type: 'p', text: 'How we use it:' },
+    {
+      type: 'ul',
+      items: [
+        'To create your Saju report.',
+        'To email you your report, your private report link and your receipts.',
+        'To send you occasional Saju tips and offers. You can unsubscribe anytime with the link in every email, and you will still receive receipts and reports you purchase.',
+      ],
+    },
+    { type: 'p', text: 'Who processes your data for us:' },
+    {
+      type: 'ul',
+      items: [
+        'Supabase (database)',
+        'Vercel (website hosting)',
+        'Resend (email delivery)',
+        'PayPal (payments)',
+        'Google (AI report generation)',
+      ],
+    },
+    { type: 'p', text: 'We do not sell your personal information and we do not share it with third parties for their own use.' },
+    {
+      type: 'p',
+      text: `To ask us to delete your data or to ask any privacy question, email ${SUPPORT_EMAIL}.`,
+    },
+    {
+      type: 'p',
+      text: 'Business: Sajume, 22, Sumyeong-ro 2ga-gil, Gangseo-gu, Seoul 07642, Republic of Korea',
+    },
+  ],
+}
+
 export function getPolicy(slug: string) {
   return POLICIES.find((p) => p.slug === slug)
 }
