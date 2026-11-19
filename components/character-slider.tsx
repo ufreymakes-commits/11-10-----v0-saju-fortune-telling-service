@@ -48,10 +48,7 @@ function FixedRow({ items, offset }: { items: typeof CHARACTERS; offset: number 
 export function CharacterSlider({ fixed = false }: { fixed?: boolean }) {
   if (fixed) {
     return (
-      <div className="flex flex-col gap-2">
-        <FixedRow items={CHARACTERS.slice(0, 5)} offset={0} />
-        <FixedRow items={CHARACTERS.slice(5)} offset={5} />
-      </div>
+      <FixedRow items={CHARACTERS.slice(5)} offset={5} />
     )
   }
 

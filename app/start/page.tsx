@@ -26,9 +26,9 @@ export default function StartPage() {
       <Marquee />
       <StarsBackground />
 
-      <div id="top" className="relative z-10 flex flex-col items-center px-4 py-8">
-        {/* Character slider */}
-        <div className="w-full max-w-md mb-6">
+<div id="top" className="relative z-10 flex flex-col items-center px-4 pt-5 pb-8">
+  {/* Character slider */}
+  <div className="w-full max-w-md mb-5">
           <CharacterSlider fixed />
         </div>
 
