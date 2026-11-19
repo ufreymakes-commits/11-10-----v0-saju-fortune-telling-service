@@ -34,8 +34,8 @@ export default function StartPage() {
 
         {/* Title */}
         <h1 className="flex flex-col items-center gap-1.5 text-center mb-4 whitespace-nowrap">
-          <span className="text-silver-sweep block font-bold leading-tight text-[clamp(26px,8.6vw,40px)]">Enter your birth info</span>
-          <span className="block font-normal leading-snug text-[#C8CCD4] text-[clamp(11px,3.7vw,17px)]">and get 99 valuable facts from your birth chart</span>
+          <span className="text-silver-sweep block font-bold leading-tight text-[clamp(26px,8.6vw,30px)]">Enter your birth info</span>
+          <span className="block font-normal leading-snug text-[#C8CCD4] text-[clamp(11px,3.7vw,16px)]">and get 99 valuable facts from your birth chart</span>
         </h1>
 
         {/* Checks */}

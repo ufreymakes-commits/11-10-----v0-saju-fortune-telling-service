@@ -30,7 +30,7 @@ function Row({ items, rowKey, className }: { items: typeof CHARACTERS; rowKey: s
 
 function FixedRow({ items, offset }: { items: typeof CHARACTERS; offset: number }) {
   return (
-    <ul className="flex items-center justify-between">
+    <ul className="flex items-center justify-center gap-0">
       {items.map((char, i) => (
         <li key={char.name} className="shrink-0">
           <div
