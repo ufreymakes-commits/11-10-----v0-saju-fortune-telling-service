@@ -30,16 +30,15 @@ function Row({ items, rowKey, className }: { items: typeof CHARACTERS; rowKey: s
 
 function FixedRow({ items, offset }: { items: typeof CHARACTERS; offset: number }) {
   return (
-    <ul className="grid grid-cols-5 gap-x-1">
+    <ul className="flex items-center justify-between">
       {items.map((char, i) => (
-        <li key={char.name} className="min-w-0 text-center">
+        <li key={char.name} className="shrink-0">
           <div
-            className="animate-char-bob relative mx-auto mb-1 aspect-square w-full max-w-16"
+            className="animate-char-bob relative size-[54px]"
             style={{ animationDelay: `${(((offset + i) * 7) % 10) * 0.2}s` }}
           >
-            <Image src={char.image} alt={char.name} fill sizes="64px" className="object-contain" />
+            <Image src={char.image} alt={char.name} fill sizes="54px" className="object-contain" />
           </div>
-          <p className="text-[9px] text-foreground/70 truncate">{char.name}</p>
         </li>
       ))}
     </ul>
@@ -49,7 +48,7 @@ function FixedRow({ items, offset }: { items: typeof CHARACTERS; offset: number 
 export function CharacterSlider({ fixed = false }: { fixed?: boolean }) {
   if (fixed) {
     return (
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
         <FixedRow items={CHARACTERS.slice(0, 5)} offset={0} />
         <FixedRow items={CHARACTERS.slice(5)} offset={5} />
       </div>

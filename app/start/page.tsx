@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { Check } from 'lucide-react'
 import { StarsBackground } from '@/components/stars-background'
 import { BirthForm } from '@/components/birth-form'
 import { NewYear2027ProductCard } from '@/components/new-year-2027-product-card'
@@ -27,25 +28,27 @@ export default function StartPage() {
 
       <div id="top" className="relative z-10 flex flex-col items-center px-4 py-8">
         {/* Character slider */}
-        <div className="w-full max-w-md mb-6 [&_p]:text-white/70">
+        <div className="w-full max-w-md mb-6">
           <CharacterSlider fixed />
         </div>
 
         {/* Title */}
-        <h1 className="text-silver-sweep text-center font-semibold mb-4 whitespace-nowrap">
-          <span className="block leading-tight text-[clamp(26px,8.6vw,40px)]">Enter your birth info</span>
-          <span className="block leading-snug text-[clamp(11px,3.7vw,17px)]">and get 99 valuable facts from your birth chart</span>
+        <h1 className="flex flex-col items-center gap-1.5 text-center mb-4 whitespace-nowrap">
+          <span className="text-silver-sweep block font-bold leading-tight text-[clamp(26px,8.6vw,40px)]">Enter your birth info</span>
+          <span className="block font-normal leading-snug text-[#C8CCD4] text-[clamp(11px,3.7vw,17px)]">and get 99 valuable facts from your birth chart</span>
         </h1>
 
-        {/* Badges */}
-        <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
-          <span className="cursor-default select-none rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-[15px] md:text-base font-medium text-white">
+        {/* Checks */}
+        <ul className="mb-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[15px] text-[#C8CCD4] cursor-default select-none">
+          <li className="flex items-center gap-1.5 whitespace-nowrap">
+            <Check aria-hidden="true" className="size-4 text-[#E8C46B]" strokeWidth={3} />
             No sign-up
-          </span>
-          <span className="cursor-default select-none rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-[15px] md:text-base font-medium text-white">
-            First 3 Facts Free
-          </span>
-        </div>
+          </li>
+          <li className="flex items-center gap-1.5 whitespace-nowrap">
+            <Check aria-hidden="true" className="size-4 text-[#E8C46B]" strokeWidth={3} />
+            First 3 facts free
+          </li>
+        </ul>
 
         {/* Form Card */}
         <div className="w-full max-w-md bg-white border border-primary/20 rounded-2xl p-6 md:p-8 shadow-xl">
