@@ -440,9 +440,9 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport, h
 
           {/* Saju Compatibility */}
           <div className="bg-card border border-pink-500/30 rounded-xl overflow-hidden shadow-sm">
-            <div className="relative w-full" style={{ aspectRatio: '796/531' }}>
+            <div className="relative mx-auto w-full max-w-sm" style={{ aspectRatio: '1/1' }}>
               <Image
-                src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/29.png?v=1778483455"
+                src="/media/thumb-compatibility.webp" sizes="(min-width: 768px) 384px, 100vw"
                 alt="Relationship Compatibility"
                 fill
                 className="object-cover"

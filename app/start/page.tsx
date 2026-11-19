@@ -1,13 +1,15 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { Check } from 'lucide-react'
 import { StarsBackground } from '@/components/stars-background'
 import { BirthForm } from '@/components/birth-form'
-import { NoticeMeButton } from '@/components/notice-me-button'
+import { NewYear2027ProductCard } from '@/components/new-year-2027-product-card'
 import { StartReviewsSection } from '@/components/start-reviews-section'
 import { AskGumihoProductCard } from '@/components/ask-gumiho-product-card'
 import { sharedOpenGraph, sharedTwitter } from '@/lib/metadata'
 import { Marquee } from '@/components/marquee'
 import { DataBasedTrust } from '@/components/data-based-trust'
+import { CharacterSlider } from '@/components/character-slider'
 
 export const metadata = {
   title: 'Enter Your Birth Info - Sajume',
@@ -24,47 +26,29 @@ export default function StartPage() {
       <Marquee />
       <StarsBackground />
 
-      <div id="top" className="relative z-10 flex flex-col items-center px-4 py-8">
-        {/* Characters in V-formation */}
-        <div className="relative w-64 md:w-80 h-44 md:h-56 mx-auto mb-0">
-          {/* Left outer - Eulmok (green) */}
-          <div className="absolute w-14 h-14 z-0 opacity-30" style={{ left: '0%', top: '20%' }}>
-            <Image src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/eulmok.png?v=1777872574" alt="Eulmok" width={56} height={56} className="object-contain w-full h-full" priority />
-          </div>
-          {/* Left inner - Gyesu (purple) */}
-          <div className="absolute w-16 h-16 z-0 opacity-40" style={{ left: '15%', top: '30%' }}>
-            <Image src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/gyesu.png?v=1777872574" alt="Gyesu" width={64} height={64} className="object-contain w-full h-full" priority />
-          </div>
-          {/* Main mascot - center, floating */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-36 h-36 z-10 animate-float">
-            <Image
-              src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/9.png?v=1777987978"
-              alt="Sajume mascot"
-              width={144}
-              height={144}
-              className="object-contain drop-shadow-2xl w-full h-full"
-              priority
-            />
-          </div>
-          {/* Right inner - Gyeonggeum (gray) */}
-          <div className="absolute w-16 h-16 z-0 opacity-40" style={{ right: '15%', top: '30%' }}>
-            <Image src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/gyeonggeum.png?v=1777872574" alt="Gyeonggeum" width={64} height={64} className="object-contain w-full h-full" priority />
-          </div>
-          {/* Right outer - Byeonghwa (orange) */}
-          <div className="absolute w-14 h-14 z-0 opacity-30" style={{ right: '0%', top: '20%' }}>
-            <Image src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/byeonghwa.png?v=1777872574" alt="Byeonghwa" width={56} height={56} className="object-contain w-full h-full" priority />
-          </div>
+<div id="top" className="relative z-10 flex flex-col items-center gap-[5px] px-4 pt-[47px] pb-8">
+  {/* Character slider */}
+  <div className="w-full max-w-md mb-5">
+          <CharacterSlider fixed />
         </div>
 
         {/* Title */}
-        <h1 className="text-xl font-semibold text-gradient text-center -mt-2 mb-3">
-          Enter Your Birth Info
+        <h1 className="flex flex-col items-center gap-1.5 text-center mb-4 whitespace-nowrap">
+          <span className="text-silver-sweep block font-bold leading-tight text-[clamp(26px,8.6vw,30px)]">Enter your birth info</span>
+          <span className="block font-normal leading-snug text-[#C8CCD4] text-[clamp(11px,3.7vw,16px)]">and get 99 valuable facts from your birth chart</span>
         </h1>
-        
-        {/* Subtitle */}
-        <p className="text-white text-center mb-6 text-sm md:text-base font-medium">
-          No Sign-up, First 3 Facts Free
-        </p>
+
+        {/* Checks */}
+        <ul className="mb-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[15px] text-[#C8CCD4] cursor-default select-none">
+          <li className="flex items-center gap-1.5 whitespace-nowrap">
+            <Check aria-hidden="true" className="size-4 text-[#E8C46B]" strokeWidth={3} />
+            No sign-up
+          </li>
+          <li className="flex items-center gap-1.5 whitespace-nowrap">
+            <Check aria-hidden="true" className="size-4 text-[#E8C46B]" strokeWidth={3} />
+            First 3 facts free
+          </li>
+        </ul>
 
         {/* Form Card */}
         <div className="w-full max-w-md bg-white border border-primary/20 rounded-2xl p-6 md:p-8 shadow-xl">
@@ -78,6 +62,78 @@ export default function StartPage() {
       </div>
 
       <StartReviewsSection />
+
+      {/* Our Products Section */}
+      <section className="relative z-10 py-16 px-4 pb-20">
+        <div className="max-w-2xl mx-auto">
+          <h3 className="text-center text-3xl md:text-4xl font-semibold text-white/90 mb-2">Our Products</h3>
+          <p className="text-center text-sm md:text-base text-white/50 mb-8 leading-relaxed">
+            From ancient Korea eerie fortune telling<br />to lucky charm bracelets
+          </p>
+          <div className="grid grid-cols-2 gap-3 md:gap-4">
+            {/* 99 Facts */}
+            <Link href="#top" className="group">
+              <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/30 rounded-xl p-3 hover:border-purple-400/50 transition-all h-full flex flex-col">
+                <h4 className="text-sm font-semibold text-white mb-2">99 Facts</h4>
+                <div className="relative w-full mb-3 rounded-lg overflow-hidden bg-[#1a1a2e] flex-shrink-0 aspect-square">
+                  <Image src="/media/thumb-99facts.webp" alt="99 Facts of your birth chart" width={800} height={800} sizes="(min-width: 768px) 300px, 45vw" className="w-full h-full object-cover" />
+                </div>
+                <p className="text-xs text-white/70 mb-3 flex-grow leading-relaxed">Deep dive into your complete birth chart with 99 personalized insights.</p>
+                <div className="flex items-center justify-between mt-auto">
+                  <span className="text-[11px] text-purple-300">99 facts</span>
+                  <span className="text-base font-bold text-white">$19.99</span>
+                </div>
+              </div>
+            </Link>
+
+            {/* Relationship Compatibility */}
+            <div className="group">
+              <div className="bg-gradient-to-br from-pink-900/40 to-rose-900/40 border border-pink-500/30 rounded-xl p-3 h-full flex flex-col">
+                <h4 className="text-sm font-semibold text-white mb-2">Relationship Compatibility</h4>
+                <div className="relative w-full mb-3 rounded-lg overflow-hidden bg-[#1a1a2e] flex-shrink-0 aspect-square">
+                  <Image src="/media/thumb-compatibility.webp" alt="Relationship Compatibility" width={800} height={800} sizes="(min-width: 768px) 300px, 45vw" className="w-full h-full object-cover" />
+                </div>
+                <p className="text-xs text-white/70 mb-3 flex-grow leading-relaxed">The Art of Saju Compatibility: Are You Meant to Be?</p>
+                <div className="flex items-center justify-between mb-2 mt-auto">
+                  <span className="text-[11px] text-pink-300">Discover your match</span>
+                  <span className="text-base font-bold text-white">$19.99</span>
+                </div>
+                <Link
+                  href="/compatibility"
+                  className="w-full text-center py-1.5 px-2 rounded-lg text-xs font-medium bg-pink-500/20 hover:bg-pink-500/30 text-pink-200 border border-pink-500/30 hover:border-pink-400/50 transition-all block"
+                >
+                  Now Available
+                </Link>
+              </div>
+            </div>
+
+            {/* Bracelet */}
+            <div className="group">
+              <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-amber-500/30 rounded-xl p-3 h-full flex flex-col">
+                <h4 className="text-sm font-semibold text-white mb-2">Your Personal Lucky Element Bracelet</h4>
+                <div className="relative w-full mb-3 rounded-lg overflow-hidden bg-[#1a1a2e] flex-shrink-0" style={{ aspectRatio: '796/531' }}>
+                  <Image src="/images/saju-bracelet-new.png" alt="Signature Saju Elemental Bracelet" width={796} height={531} sizes="(min-width: 768px) 300px, 45vw" className="w-full h-full object-cover object-center" />
+                </div>
+                <p className="text-xs text-white/70 mb-3 flex-grow leading-relaxed">A signature bracelet designed to fill the missing energies in your personal Saju chart and attract good fortune.</p>
+                <div className="flex items-center justify-between mb-2 mt-auto gap-2">
+                  <div className="flex items-center gap-1">
+                    <Image src="/images/shopify-logo.png" alt="Shopify" width={14} height={14} className="object-contain" />
+                    <span className="text-[10px] text-amber-300/70 leading-tight">Sajume Shopify</span>
+                  </div>
+                  <span className="text-base font-bold text-white">$38</span>
+                </div>
+                <a href="https://sajume.com/products/personal-luck-bracelet" target="_blank" rel="noopener noreferrer" className="w-full text-center py-1.5 px-2 rounded-lg text-xs font-medium bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/30 hover:border-amber-400/50 transition-all block">Shop Now</a>
+              </div>
+            </div>
+
+            {/* Ask the Gumiho 1:1 */}
+            <AskGumihoProductCard compact />
+
+            {/* 2027 New Year Monthly */}
+            <NewYear2027ProductCard compact />
+          </div>
+        </div>
+      </section>
 
       {/* Ancient Eastern Wisdom Section */}
       <section className="relative z-10 py-12 px-4">
@@ -111,10 +167,10 @@ export default function StartPage() {
             No more stress from wrong AI answers.<br />Let sajume&apos;s certified expertise ease your mind.
           </p>
 
-          {/* 4,071+ Reports */}
+          {/* 6,425+ Reports */}
           <div className="mb-12 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div className="order-2 md:order-1">
-              <h4 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent mb-3">4,071+</h4>
+              <h4 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent mb-3">6,425+</h4>
               <p className="text-2xl font-semibold text-white mb-4">Reports Delivered</p>
               <p className="text-sm md:text-base text-white/60 leading-relaxed">
                 The world&apos;s only saju service that analyzes your chart based on exact global local birth time &amp; delivers a full report in English.
@@ -199,101 +255,6 @@ export default function StartPage() {
                   Get Your First 3 Facts
                   <span className="text-white/70 font-normal text-sm">(1 min)</span>
               </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Our Products Section */}
-      <section className="relative z-10 py-16 px-4 pb-20">
-        <div className="max-w-2xl mx-auto">
-          <h3 className="text-center text-3xl md:text-4xl font-semibold text-white/90 mb-2">Our Products</h3>
-          <p className="text-center text-sm md:text-base text-white/50 mb-8 leading-relaxed">
-            From ancient Korea eerie fortune telling<br />to lucky charm bracelets
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* 99 Facts */}
-            <Link href="#top" className="group md:col-span-1">
-              <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/30 rounded-xl p-6 hover:border-purple-400/50 transition-all hover:scale-[1.02] h-full flex flex-col">
-                <h4 className="text-base md:text-lg font-semibold text-white mb-3">99 Facts</h4>
-                <div className="relative w-full mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex-shrink-0" style={{ aspectRatio: '800/533' }}>
-                  <Image src="/images/99facts.jpg" alt="99 Facts" width={800} height={533} className="w-full h-full object-cover object-center" />
-                </div>
-                <p className="text-sm text-white/70 mb-3 flex-grow">Deep dive into your complete birth chart with 99 personalized insights.</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-purple-300">99 facts</span>
-                  <span className="text-lg font-bold text-white">$19.99</span>
-                </div>
-              </div>
-            </Link>
-
-            {/* Ask the Gumiho 1:1 */}
-            <AskGumihoProductCard />
-
-            {/* Bracelet */}
-            <div className="group md:col-span-1">
-              <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-amber-500/30 rounded-xl p-6 h-full flex flex-col">
-                <h4 className="text-base md:text-lg font-semibold text-white mb-3">Your Personal Lucky Element Bracelet</h4>
-                <div className="relative w-full mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex-shrink-0" style={{ aspectRatio: '796/531' }}>
-                  <Image src="/images/saju-bracelet-new.png" alt="Signature Saju Elemental Bracelet" width={796} height={531} className="w-full h-full object-cover object-center" />
-                </div>
-                <p className="text-sm text-white/70 mb-3 flex-grow">A signature bracelet designed to fill the missing energies in your personal Saju chart and attract good fortune.</p>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-1.5">
-                    <Image src="/images/shopify-logo.png" alt="Shopify" width={16} height={16} className="object-contain" />
-                    <span className="text-[10px] text-amber-300/70">Shop at Sajume Shopify</span>
-                  </div>
-                  <span className="text-lg font-bold text-white">$38</span>
-                </div>
-                <a href="https://sajume.com/products/personal-luck-bracelet" target="_blank" rel="noopener noreferrer" className="w-full text-center py-2 px-4 rounded-lg text-sm font-medium bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/30 hover:border-amber-400/50 transition-all block">Shop Now</a>
-              </div>
-            </div>
-
-            {/* Relationship Compatibility */}
-            <div className="group md:col-span-1">
-              <div className="bg-gradient-to-br from-pink-900/40 to-rose-900/40 border border-pink-500/30 rounded-xl p-6 h-full flex flex-col">
-                <h4 className="text-base md:text-lg font-semibold text-white mb-3">Relationship Compatibility</h4>
-                <div className="relative w-full h-40 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e]">
-                  <Image
-                    src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/29.png?v=1778483455"
-                    alt="Relationship Compatibility"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <p className="text-sm text-white/70 mb-3 flex-grow">The Art of Saju Compatibility: Are You Meant to Be?</p>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs text-pink-300">Discover your match</span>
-                  <span className="text-lg font-bold text-white">$19.99</span>
-                </div>
-                <Link
-                  href="/compatibility"
-                  className="w-full text-center py-2 px-4 rounded-lg text-sm font-medium bg-pink-500/20 hover:bg-pink-500/30 text-pink-200 border border-pink-500/30 hover:border-pink-400/50 transition-all block"
-                >
-                  Now Available
-                </Link>
-              </div>
-            </div>
-
-            {/* 12 months Saju Reading */}
-            <div className="group md:col-span-1">
-              <div className="bg-gradient-to-br from-blue-900/40 to-purple-900/40 border border-blue-500/30 rounded-xl p-6 h-full flex flex-col">
-                <h4 className="text-base md:text-lg font-semibold text-white mb-3">2027 New Year Monthly Career / Love (Coming soon)</h4>
-                <div className="relative w-full h-40 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e]">
-                  <Image
-                    src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/30.png?v=1778484201"
-                    alt="12 months Saju Reading"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <p className="text-sm text-white/70 mb-3 flex-grow">Monthly personalized Saju readings delivered to you every month throughout 2026.</p>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs text-blue-300">12 monthly readings</span>
-                  <span className="text-lg font-bold text-white/50">$79</span>
-                </div>
-                <NoticeMeButton product="subscription" className="w-full text-center py-2 px-4 rounded-lg text-sm font-medium bg-blue-500/20 hover:bg-blue-500/30 text-blue-200 border border-blue-500/30 hover:border-blue-400/50 transition-all" />
-              </div>
             </div>
           </div>
         </div>

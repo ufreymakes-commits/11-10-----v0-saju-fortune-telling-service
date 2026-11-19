@@ -170,7 +170,7 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
         <div className="flex items-start gap-4 mb-4">
           <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
             <Image
-              src="/images/99facts.jpg"
+              src="/media/thumb-99facts.webp"
               alt="99 Facts"
               fill
               className="object-cover"
