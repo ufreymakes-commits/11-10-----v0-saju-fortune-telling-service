@@ -196,6 +196,55 @@
   .animate-slide-left {
     animation: slide-left 20s linear infinite;
   }
+
+  /* /start fixed character grid: gentle floating bob */
+  @keyframes char-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  .animate-char-bob {
+    animation: char-bob 3.5s ease-in-out infinite;
+  }
+
+  /* White title with a silver sheen sweeping left to right (1.2s sweep, 3s rest) */
+  @keyframes silver-sweep {
+    0% { background-position: 100% 0; }
+    28.57%, 100% { background-position: 0% 0; }
+  }
+
+  .text-silver-sweep {
+    color: #ffffff;
+    background-image: linear-gradient(
+      110deg,
+      #ffffff 0%,
+      #ffffff 40%,
+      #d9dde3 46%,
+      #c4cad3 50%,
+      #d9dde3 54%,
+      #ffffff 60%,
+      #ffffff 100%
+    );
+    background-size: 250% 100%;
+    background-position: 100% 0;
+    background-repeat: no-repeat;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: silver-sweep 4.2s linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-char-bob {
+      animation: none;
+    }
+
+    .text-silver-sweep {
+      animation: none;
+      background-image: none;
+      -webkit-text-fill-color: #ffffff;
+    }
+  }
   
   /* Hide scrollbar */
   .scrollbar-hide {

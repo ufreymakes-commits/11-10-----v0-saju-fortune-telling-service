@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { StarsBackground } from '@/components/stars-background'
 import { BirthForm } from '@/components/birth-form'
-import { NoticeMeButton } from '@/components/notice-me-button'
+import { NewYear2027ProductCard } from '@/components/new-year-2027-product-card'
 import { StartReviewsSection } from '@/components/start-reviews-section'
 import { AskGumihoProductCard } from '@/components/ask-gumiho-product-card'
 import { sharedOpenGraph, sharedTwitter } from '@/lib/metadata'
@@ -28,21 +28,21 @@ export default function StartPage() {
       <div id="top" className="relative z-10 flex flex-col items-center px-4 py-8">
         {/* Character slider */}
         <div className="w-full max-w-md mb-6 [&_p]:text-white/70">
-          <CharacterSlider />
+          <CharacterSlider fixed />
         </div>
 
         {/* Title */}
-        <h1 className="text-gradient text-center font-semibold mb-4 whitespace-nowrap">
+        <h1 className="text-silver-sweep text-center font-semibold mb-4 whitespace-nowrap">
           <span className="block leading-tight text-[clamp(26px,8.6vw,40px)]">Enter your birth info</span>
           <span className="block leading-snug text-[clamp(11px,3.7vw,17px)]">and get 99 valuable facts from your birth chart</span>
         </h1>
 
         {/* Badges */}
         <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
-          <span className="cursor-default select-none rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs md:text-sm font-medium text-white">
+          <span className="cursor-default select-none rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-[15px] md:text-base font-medium text-white">
             No sign-up
           </span>
-          <span className="cursor-default select-none rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs md:text-sm font-medium text-white">
+          <span className="cursor-default select-none rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-[15px] md:text-base font-medium text-white">
             First 3 Facts Free
           </span>
         </div>
@@ -59,6 +59,78 @@ export default function StartPage() {
       </div>
 
       <StartReviewsSection />
+
+      {/* Our Products Section */}
+      <section className="relative z-10 py-16 px-4 pb-20">
+        <div className="max-w-2xl mx-auto">
+          <h3 className="text-center text-3xl md:text-4xl font-semibold text-white/90 mb-2">Our Products</h3>
+          <p className="text-center text-sm md:text-base text-white/50 mb-8 leading-relaxed">
+            From ancient Korea eerie fortune telling<br />to lucky charm bracelets
+          </p>
+          <div className="grid grid-cols-2 gap-3 md:gap-4">
+            {/* 99 Facts */}
+            <Link href="#top" className="group">
+              <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/30 rounded-xl p-3 hover:border-purple-400/50 transition-all h-full flex flex-col">
+                <h4 className="text-sm font-semibold text-white mb-2">99 Facts</h4>
+                <div className="relative w-full mb-3 rounded-lg overflow-hidden bg-[#1a1a2e] flex-shrink-0 aspect-square">
+                  <Image src="/media/thumb-99facts.webp" alt="99 Facts of your birth chart" width={800} height={800} sizes="(min-width: 768px) 300px, 45vw" className="w-full h-full object-cover" />
+                </div>
+                <p className="text-xs text-white/70 mb-3 flex-grow leading-relaxed">Deep dive into your complete birth chart with 99 personalized insights.</p>
+                <div className="flex items-center justify-between mt-auto">
+                  <span className="text-[11px] text-purple-300">99 facts</span>
+                  <span className="text-base font-bold text-white">$19.99</span>
+                </div>
+              </div>
+            </Link>
+
+            {/* Relationship Compatibility */}
+            <div className="group">
+              <div className="bg-gradient-to-br from-pink-900/40 to-rose-900/40 border border-pink-500/30 rounded-xl p-3 h-full flex flex-col">
+                <h4 className="text-sm font-semibold text-white mb-2">Relationship Compatibility</h4>
+                <div className="relative w-full mb-3 rounded-lg overflow-hidden bg-[#1a1a2e] flex-shrink-0 aspect-square">
+                  <Image src="/media/thumb-compatibility.webp" alt="Relationship Compatibility" width={800} height={800} sizes="(min-width: 768px) 300px, 45vw" className="w-full h-full object-cover" />
+                </div>
+                <p className="text-xs text-white/70 mb-3 flex-grow leading-relaxed">The Art of Saju Compatibility: Are You Meant to Be?</p>
+                <div className="flex items-center justify-between mb-2 mt-auto">
+                  <span className="text-[11px] text-pink-300">Discover your match</span>
+                  <span className="text-base font-bold text-white">$19.99</span>
+                </div>
+                <Link
+                  href="/compatibility"
+                  className="w-full text-center py-1.5 px-2 rounded-lg text-xs font-medium bg-pink-500/20 hover:bg-pink-500/30 text-pink-200 border border-pink-500/30 hover:border-pink-400/50 transition-all block"
+                >
+                  Now Available
+                </Link>
+              </div>
+            </div>
+
+            {/* Bracelet */}
+            <div className="group">
+              <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-amber-500/30 rounded-xl p-3 h-full flex flex-col">
+                <h4 className="text-sm font-semibold text-white mb-2">Your Personal Lucky Element Bracelet</h4>
+                <div className="relative w-full mb-3 rounded-lg overflow-hidden bg-[#1a1a2e] flex-shrink-0" style={{ aspectRatio: '796/531' }}>
+                  <Image src="/images/saju-bracelet-new.png" alt="Signature Saju Elemental Bracelet" width={796} height={531} sizes="(min-width: 768px) 300px, 45vw" className="w-full h-full object-cover object-center" />
+                </div>
+                <p className="text-xs text-white/70 mb-3 flex-grow leading-relaxed">A signature bracelet designed to fill the missing energies in your personal Saju chart and attract good fortune.</p>
+                <div className="flex items-center justify-between mb-2 mt-auto gap-2">
+                  <div className="flex items-center gap-1">
+                    <Image src="/images/shopify-logo.png" alt="Shopify" width={14} height={14} className="object-contain" />
+                    <span className="text-[10px] text-amber-300/70 leading-tight">Sajume Shopify</span>
+                  </div>
+                  <span className="text-base font-bold text-white">$38</span>
+                </div>
+                <a href="https://sajume.com/products/personal-luck-bracelet" target="_blank" rel="noopener noreferrer" className="w-full text-center py-1.5 px-2 rounded-lg text-xs font-medium bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/30 hover:border-amber-400/50 transition-all block">Shop Now</a>
+              </div>
+            </div>
+
+            {/* Ask the Gumiho 1:1 */}
+            <AskGumihoProductCard compact />
+
+            {/* 2027 New Year Monthly */}
+            <NewYear2027ProductCard compact />
+          </div>
+        </div>
+      </section>
 
       {/* Ancient Eastern Wisdom Section */}
       <section className="relative z-10 py-12 px-4">
@@ -92,10 +164,10 @@ export default function StartPage() {
             No more stress from wrong AI answers.<br />Let sajume&apos;s certified expertise ease your mind.
           </p>
 
-          {/* 4,071+ Reports */}
+          {/* 6,425+ Reports */}
           <div className="mb-12 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div className="order-2 md:order-1">
-              <h4 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent mb-3">4,071+</h4>
+              <h4 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent mb-3">6,425+</h4>
               <p className="text-2xl font-semibold text-white mb-4">Reports Delivered</p>
               <p className="text-sm md:text-base text-white/60 leading-relaxed">
                 The world&apos;s only saju service that analyzes your chart based on exact global local birth time &amp; delivers a full report in English.
@@ -180,91 +252,6 @@ export default function StartPage() {
                   Get Your First 3 Facts
                   <span className="text-white/70 font-normal text-sm">(1 min)</span>
               </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Our Products Section */}
-      <section className="relative z-10 py-16 px-4 pb-20">
-        <div className="max-w-2xl mx-auto">
-          <h3 className="text-center text-3xl md:text-4xl font-semibold text-white/90 mb-2">Our Products</h3>
-          <p className="text-center text-sm md:text-base text-white/50 mb-8 leading-relaxed">
-            From ancient Korea eerie fortune telling<br />to lucky charm bracelets
-          </p>
-          <div className="grid grid-cols-2 gap-3 md:gap-4">
-            {/* 99 Facts */}
-            <Link href="#top" className="group">
-              <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/30 rounded-xl p-3 hover:border-purple-400/50 transition-all h-full flex flex-col">
-                <h4 className="text-sm font-semibold text-white mb-2">99 Facts</h4>
-                <div className="relative w-full mb-3 rounded-lg overflow-hidden bg-[#1a1a2e] flex-shrink-0 aspect-square">
-                  <Image src="/media/thumb-99facts.webp" alt="99 Facts of your birth chart" width={800} height={800} sizes="(min-width: 768px) 300px, 45vw" className="w-full h-full object-cover" />
-                </div>
-                <p className="text-xs text-white/70 mb-3 flex-grow leading-relaxed">Deep dive into your complete birth chart with 99 personalized insights.</p>
-                <div className="flex items-center justify-between mt-auto">
-                  <span className="text-[11px] text-purple-300">99 facts</span>
-                  <span className="text-base font-bold text-white">$19.99</span>
-                </div>
-              </div>
-            </Link>
-
-            {/* Relationship Compatibility */}
-            <div className="group">
-              <div className="bg-gradient-to-br from-pink-900/40 to-rose-900/40 border border-pink-500/30 rounded-xl p-3 h-full flex flex-col">
-                <h4 className="text-sm font-semibold text-white mb-2">Relationship Compatibility</h4>
-                <div className="relative w-full mb-3 rounded-lg overflow-hidden bg-[#1a1a2e] flex-shrink-0 aspect-square">
-                  <Image src="/media/thumb-compatibility.webp" alt="Relationship Compatibility" width={800} height={800} sizes="(min-width: 768px) 300px, 45vw" className="w-full h-full object-cover" />
-                </div>
-                <p className="text-xs text-white/70 mb-3 flex-grow leading-relaxed">The Art of Saju Compatibility: Are You Meant to Be?</p>
-                <div className="flex items-center justify-between mb-2 mt-auto">
-                  <span className="text-[11px] text-pink-300">Discover your match</span>
-                  <span className="text-base font-bold text-white">$19.99</span>
-                </div>
-                <Link
-                  href="/compatibility"
-                  className="w-full text-center py-1.5 px-2 rounded-lg text-xs font-medium bg-pink-500/20 hover:bg-pink-500/30 text-pink-200 border border-pink-500/30 hover:border-pink-400/50 transition-all block"
-                >
-                  Now Available
-                </Link>
-              </div>
-            </div>
-
-            {/* Bracelet */}
-            <div className="group">
-              <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-amber-500/30 rounded-xl p-3 h-full flex flex-col">
-                <h4 className="text-sm font-semibold text-white mb-2">Your Personal Lucky Element Bracelet</h4>
-                <div className="relative w-full mb-3 rounded-lg overflow-hidden bg-[#1a1a2e] flex-shrink-0" style={{ aspectRatio: '796/531' }}>
-                  <Image src="/images/saju-bracelet-new.png" alt="Signature Saju Elemental Bracelet" width={796} height={531} sizes="(min-width: 768px) 300px, 45vw" className="w-full h-full object-cover object-center" />
-                </div>
-                <p className="text-xs text-white/70 mb-3 flex-grow leading-relaxed">A signature bracelet designed to fill the missing energies in your personal Saju chart and attract good fortune.</p>
-                <div className="flex items-center justify-between mb-2 mt-auto gap-2">
-                  <div className="flex items-center gap-1">
-                    <Image src="/images/shopify-logo.png" alt="Shopify" width={14} height={14} className="object-contain" />
-                    <span className="text-[10px] text-amber-300/70 leading-tight">Sajume Shopify</span>
-                  </div>
-                  <span className="text-base font-bold text-white">$38</span>
-                </div>
-                <a href="https://sajume.com/products/personal-luck-bracelet" target="_blank" rel="noopener noreferrer" className="w-full text-center py-1.5 px-2 rounded-lg text-xs font-medium bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/30 hover:border-amber-400/50 transition-all block">Shop Now</a>
-              </div>
-            </div>
-
-            {/* Ask the Gumiho 1:1 */}
-            <AskGumihoProductCard compact />
-
-            {/* 2027 New Year Monthly */}
-            <div className="group">
-              <div className="bg-gradient-to-br from-blue-900/40 to-purple-900/40 border border-blue-500/30 rounded-xl p-3 h-full flex flex-col">
-                <h4 className="text-sm font-semibold text-white mb-2">2027 New Year Monthly Career / Love (Coming soon)</h4>
-                <div className="relative w-full mb-3 rounded-lg overflow-hidden bg-[#1a1a2e] flex-shrink-0 aspect-square">
-                  <Image src="/media/thumb-2027.webp" alt="2027 New Year Monthly Career and Love reading" width={800} height={800} sizes="(min-width: 768px) 300px, 45vw" className="w-full h-full object-cover" />
-                </div>
-                <p className="text-xs text-white/70 mb-3 flex-grow leading-relaxed">Monthly personalized Saju readings delivered to you every month throughout 2026.</p>
-                <div className="flex items-center justify-between mb-2 mt-auto gap-2">
-                  <span className="text-[11px] text-blue-300">12 monthly readings</span>
-                  <span className="text-base font-bold text-white/50">$79</span>
-                </div>
-                <NoticeMeButton product="subscription" className="w-full text-center py-1.5 px-2 rounded-lg text-xs font-medium bg-blue-500/20 hover:bg-blue-500/30 text-blue-200 border border-blue-500/30 hover:border-blue-400/50 transition-all block" />
-              </div>
             </div>
           </div>
         </div>

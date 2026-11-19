@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { ReportGuarantee } from '@/components/report-guarantee'
 import { LoadingVideoScreen } from '@/components/loading-video-screen'
 import { Marquee } from '@/components/marquee'
+import { NewYear2027ProductCard } from '@/components/new-year-2027-product-card'
 import { DayMasterCard } from '@/components/day-master-card'
 import { CardActions } from '@/components/tarot-frame'
 import type { Fact, SajuData } from '@/lib/types'
@@ -309,7 +310,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
     <>
     <Marquee
       messages={['💌 6,425+ reports delivered', '🚀 Prices go up after December 2026']}
-      className="bg-[#E8FF3A] border-b-0"
+      className="bg-gradient-to-r from-[#2a0f4a] to-[#6b1a5e] text-white border-b-0"
       durationSeconds={16}
     />
     <div className="px-4 py-8 max-w-2xl mx-auto">
@@ -488,24 +489,9 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           Full Report · 9 Sections Included
         </p>
 
-        <ul className="mx-auto mb-3 grid max-w-xs grid-flow-col grid-cols-2 grid-rows-5 gap-x-3 gap-y-1 text-left text-[13px] leading-snug text-foreground/80">
-          {[
-            'Core Aura',
-            'Inner Child Era',
-            'Present Energy',
-            'Career Motion',
-            'Money Flow',
-            'Love & Endgame',
-            'Future Self Sneak Peek',
-            'Lucky Environment',
-            'The Next Chapter',
-          ].map((section) => (
-            <li key={section} className="flex items-start gap-1.5">
-              <CheckIcon className="mt-[3px] size-3.5 shrink-0 text-primary" aria-hidden="true" />
-              <span>{section}</span>
-            </li>
-          ))}
-        </ul>
+        <p className="text-xs text-muted-foreground/70 leading-relaxed mb-3 px-2 text-balance">
+          Core Aura · Inner Child Era · Present Energy · Career Motion · Money Flow · Love &amp; Endgame · Future Self Sneak Peek · Lucky Environment · The Next Chapter
+        </p>
         
         <div className="flex items-center justify-center gap-2 mb-3">
           <span className="text-muted-foreground line-through text-xs">$39.99</span>
@@ -558,7 +544,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
             </svg>
           ))}
         </div>
-        <p className="text-xs text-muted-foreground">4,071 users got their reports</p>
+        <p className="text-xs text-muted-foreground">6,425 users got their reports</p>
         <p className="text-[10px] text-muted-foreground">4.9/5 from 100% genuine reviews</p>
       </div>
 
@@ -730,6 +716,9 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           </div>
         </div>
       </div>
+
+      {/* 2027 New Year Monthly card */}
+      <NewYear2027ProductCard />
 
       {/* Footer */}
       <div className="mt-10 pt-6 border-t border-border text-center">

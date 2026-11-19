@@ -28,7 +28,34 @@ function Row({ items, rowKey, className }: { items: typeof CHARACTERS; rowKey: s
   )
 }
 
-export function CharacterSlider() {
+function FixedRow({ items, offset }: { items: typeof CHARACTERS; offset: number }) {
+  return (
+    <ul className="grid grid-cols-5 gap-x-1">
+      {items.map((char, i) => (
+        <li key={char.name} className="min-w-0 text-center">
+          <div
+            className="animate-char-bob relative mx-auto mb-1 aspect-square w-full max-w-16"
+            style={{ animationDelay: `${(((offset + i) * 7) % 10) * 0.2}s` }}
+          >
+            <Image src={char.image} alt={char.name} fill sizes="64px" className="object-contain" />
+          </div>
+          <p className="text-[9px] text-foreground/70 truncate">{char.name}</p>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+export function CharacterSlider({ fixed = false }: { fixed?: boolean }) {
+  if (fixed) {
+    return (
+      <div className="flex flex-col gap-3">
+        <FixedRow items={CHARACTERS.slice(0, 5)} offset={0} />
+        <FixedRow items={CHARACTERS.slice(5)} offset={5} />
+      </div>
+    )
+  }
+
   const second = [...CHARACTERS.slice(5), ...CHARACTERS.slice(0, 5)]
   return (
     <div className="overflow-hidden">
