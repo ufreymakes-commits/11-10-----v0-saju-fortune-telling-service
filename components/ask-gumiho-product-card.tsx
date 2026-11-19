@@ -2,7 +2,38 @@
 
 import Image from 'next/image'
 
-export function AskGumihoProductCard() {
+export function AskGumihoProductCard({ compact = false }: { compact?: boolean }) {
+  if (compact) {
+    return (
+      <div className="group">
+        <div className="bg-gradient-to-br from-fuchsia-900/40 to-purple-900/40 border border-fuchsia-500/30 rounded-xl p-3 h-full flex flex-col">
+          <h4 className="text-sm font-semibold text-white mb-2">Ask the Gumiho 1:1</h4>
+          <div className="relative w-full mb-3 rounded-lg overflow-hidden bg-[#1a1a2e] flex-shrink-0" style={{ aspectRatio: '800/533' }}>
+            <Image
+              src="/images/ask-gumiho.png"
+              alt="Ask the Gumiho 1:1"
+              width={800}
+              height={533}
+              sizes="(min-width: 768px) 300px, 45vw"
+              className="w-full h-full object-cover object-center"
+            />
+          </div>
+          <p className="text-xs text-white/70 mb-3 flex-grow leading-relaxed">Your 3 Burning Questions Answered - Personalized guidance from the nine-tailed fox.</p>
+          <div className="flex items-center justify-between mb-2 mt-auto gap-2">
+            <span className="text-[11px] text-fuchsia-300 leading-tight">99 Facts customers only</span>
+            <span className="text-base font-bold text-white">$9.99</span>
+          </div>
+          <button
+            onClick={() => alert('This product is exclusively available to customers who have purchased the 99 Facts Report. Please purchase the 99 Facts Report first.')}
+            className="w-full text-center py-1.5 px-2 rounded-lg text-xs font-medium bg-fuchsia-500/20 hover:bg-fuchsia-500/30 text-fuchsia-200 border border-fuchsia-500/30 hover:border-fuchsia-400/50 transition-all"
+          >
+            Ask Now
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="group md:col-span-1">
       <div className="bg-gradient-to-br from-fuchsia-900/40 to-purple-900/40 border border-fuchsia-500/30 rounded-xl p-6 h-full flex flex-col">

@@ -5,7 +5,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ReportGuarantee } from '@/components/report-guarantee'
-import { Spinner } from '@/components/ui/spinner'
+import { LoadingVideoScreen } from '@/components/loading-video-screen'
+import { Marquee } from '@/components/marquee'
 import { DayMasterCard } from '@/components/day-master-card'
 import { CardActions } from '@/components/tarot-frame'
 import type { Fact, SajuData } from '@/lib/types'
@@ -248,64 +249,8 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
     fetchPreview()
   }, [submissionId, cachedData])
 
-  // Character slider data for loading screen
-  const characters = [
-    { name: 'The Pioneer', image: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/gabmok.png?v=1777872574' },
-    { name: 'The Adapter', image: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/eulmok.png?v=1777872574' },
-    { name: 'The Energizer', image: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/byeonghwa.png?v=1777872574' },
-    { name: 'The Empath', image: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/jeonghwa.png?v=1777872574' },
-    { name: 'The Anchor', image: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/muto.png?v=1777872573' },
-    { name: 'The Nurturer', image: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/gito.png?v=1777872574' },
-    { name: 'The Straight Shooter', image: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/gyeonggeum.png?v=1777872574' },
-    { name: 'The Perfectionist', image: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/singeum.png?v=1777872573' },
-    { name: 'The Explorer', image: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/imsu.png?v=1777872574' },
-    { name: 'The Intuitive', image: 'https://cdn.shopify.com/s/files/1/0662/7350/9464/files/gyesu.png?v=1777872574' },
-  ]
-
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen overflow-hidden">
-        <div className="text-center max-w-sm px-6">
-          {/* Character Slider - 2 rows auto-sliding */}
-          <div className="mb-6 overflow-hidden">
-            {/* Row 1 - slides right */}
-            <div className="flex animate-slide-right mb-2">
-              {[...characters, ...characters].map((char, i) => (
-                <div key={`r1-${i}`} className="flex-shrink-0 w-20 mx-1 text-center">
-                  <div className="relative w-16 h-16 mx-auto mb-1">
-                    <Image src={char.image} alt={char.name} fill className="object-contain" />
-                  </div>
-                  <p className="text-[9px] text-foreground/70 truncate">{char.name}</p>
-                </div>
-              ))}
-            </div>
-            {/* Row 2 - slides left */}
-            <div className="flex animate-slide-left">
-              {[...characters.slice(5), ...characters.slice(0, 5), ...characters.slice(5), ...characters.slice(0, 5)].map((char, i) => (
-                <div key={`r2-${i}`} className="flex-shrink-0 w-20 mx-1 text-center">
-                  <div className="relative w-16 h-16 mx-auto mb-1">
-                    <Image src={char.image} alt={char.name} fill className="object-contain" />
-                  </div>
-                  <p className="text-[9px] text-foreground/70 truncate">{char.name}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          <h2 className="text-lg font-semibold text-foreground mb-2">
-            {loadingMessages[loadingMessageIndex]}
-          </h2>
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <Spinner className="w-5 h-5" />
-          </div>
-          <p className="text-sm text-foreground/70 mb-6">
-            Please don&apos;t close the window or resubmit<br />
-            unless a &apos;Load Failed&apos; message appears❗️<br />
-            We&apos;ll be finished in less than 2 mins.
-          </p>
-        </div>
-      </div>
-    )
+    return <LoadingVideoScreen message={loadingMessages[loadingMessageIndex]} />
   }
 
   if (error === 'daily_limit') {
@@ -361,6 +306,12 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
   ]
 
   return (
+    <>
+    <Marquee
+      messages={['💌 6,425+ reports delivered', '🚀 Prices go up after December 2026']}
+      className="bg-[#E8FF3A] border-b-0"
+      durationSeconds={16}
+    />
     <div className="px-4 py-8 max-w-2xl mx-auto">
       {birthCaption && (
         <p className="text-[10px] text-muted-foreground text-center mb-2">{birthCaption}</p>
@@ -515,7 +466,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
       {/* CTA intro text - outside the card */}
       <div className="text-center mb-4">
         <p className="text-sm text-foreground/80 leading-relaxed text-balance">
-          You build your own path. We just have the <strong>cheat code for your ultimate version</strong>. Ready to see <strong>this strategy report</strong> for your <strong>best-case scenario?</strong>
+          We found where you shine in work and who you flow with in love. Unlock your <strong>cheat-code report</strong> for your <strong>best-case scenario!</strong>
         </p>
       </div>
 
@@ -534,12 +485,27 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           Unlock 99 Secret Facts!
         </h3>
         <p className="text-sm font-bold text-foreground/80 mb-2">
-          Full Report
+          Full Report · 9 Sections Included
         </p>
 
-        <p className="text-[10px] text-muted-foreground/70 leading-relaxed mb-3 px-2 text-balance">
-          Core Aura · Inner Child Era · Present Energy · Career Motion · Money Flow · Love &amp; Endgame · Future Self Sneak Peek · Lucky Environment · The Next Chapter
-        </p>
+        <ul className="mx-auto mb-3 grid max-w-xs grid-flow-col grid-cols-2 grid-rows-5 gap-x-3 gap-y-1 text-left text-[13px] leading-snug text-foreground/80">
+          {[
+            'Core Aura',
+            'Inner Child Era',
+            'Present Energy',
+            'Career Motion',
+            'Money Flow',
+            'Love & Endgame',
+            'Future Self Sneak Peek',
+            'Lucky Environment',
+            'The Next Chapter',
+          ].map((section) => (
+            <li key={section} className="flex items-start gap-1.5">
+              <CheckIcon className="mt-[3px] size-3.5 shrink-0 text-primary" aria-hidden="true" />
+              <span>{section}</span>
+            </li>
+          ))}
+        </ul>
         
         <div className="flex items-center justify-center gap-2 mb-3">
           <span className="text-muted-foreground line-through text-xs">$39.99</span>
@@ -739,9 +705,9 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
       <div className="mt-6">
         <div className="bg-gradient-to-br from-pink-900/40 to-rose-900/40 border border-pink-500/30 rounded-xl p-5">
           <h4 className="text-sm font-semibold text-white mb-3">Saju Compatibility</h4>
-          <div className="relative w-full mb-3 rounded-lg overflow-hidden bg-[#1a1a2e]" style={{ aspectRatio: '796/531' }}>
+          <div className="relative w-full mb-3 rounded-lg overflow-hidden bg-[#1a1a2e]" style={{ aspectRatio: '1/1' }}>
             <Image
-              src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/29.png?v=1778483455"
+              src="/media/thumb-compatibility.webp" sizes="(min-width: 768px) 384px, 100vw"
               alt="Relationship Compatibility"
               fill
               className="object-cover"
@@ -789,5 +755,6 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
       {/* Share Button - Fixed bottom right */}
       <ShareButton />
     </div>
+    </>
   )
 }

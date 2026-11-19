@@ -137,7 +137,7 @@ export function composeEmail(key: CrmTemplateKey, data: TemplateData): ComposedE
           hi,
           paragraph('Here are the three questions we hear most:'),
           strongParagraph('How long does it take?'),
-          paragraph('Most reports are ready in a few minutes. You can watch it being written.'),
+          paragraph('Most reports are ready in about 2 minutes.'),
           strongParagraph('How do I get it?'),
           paragraph(
             'It opens right in your browser, and we email you a private link so you can come back to it anytime.',

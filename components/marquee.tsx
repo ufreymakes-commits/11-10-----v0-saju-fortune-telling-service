@@ -1,28 +1,40 @@
 'use client'
 
-export function Marquee() {
+import { cn } from '@/lib/utils'
+
+const DEFAULT_MESSAGES = ['SJPJ \u00b7 Global local time & English Report']
+
+interface MarqueeProps {
+  messages?: string[]
+  className?: string
+  durationSeconds?: number
+}
+
+export function Marquee({ messages = DEFAULT_MESSAGES, className, durationSeconds }: MarqueeProps) {
+  const items = Array.from({ length: 4 }, () => messages).flat()
+  const style = durationSeconds ? { animationDuration: `${durationSeconds}s` } : undefined
+
   return (
-    <div 
-      className="w-full overflow-hidden bg-white text-black text-sm border-b border-black/10 relative z-20"
-      role="region" 
+    <div
+      className={cn(
+        'w-full overflow-hidden bg-white text-black text-sm border-b border-black/10 relative z-20',
+        className,
+      )}
+      role="region"
       aria-label="Site announcement"
     >
       <div className="flex whitespace-nowrap">
-        <div className="flex animate-marquee">
-          {[1, 2, 3, 4].map((i) => (
+        <div className="flex animate-marquee" style={style}>
+          {items.map((message, i) => (
             <div key={i} className="flex items-center px-7 py-3">
-              <span className="font-bold tracking-wide">
-                SJPJ &middot; Global local time &amp; English Report
-              </span>
+              <span className="font-bold tracking-wide">{message}</span>
             </div>
           ))}
         </div>
-        <div className="flex animate-marquee" aria-hidden="true">
-          {[1, 2, 3, 4].map((i) => (
+        <div className="flex animate-marquee" style={style} aria-hidden="true">
+          {items.map((message, i) => (
             <div key={i} className="flex items-center px-7 py-3">
-              <span className="font-bold tracking-wide">
-                SJPJ &middot; Global local time &amp; English Report
-              </span>
+              <span className="font-bold tracking-wide">{message}</span>
             </div>
           ))}
         </div>

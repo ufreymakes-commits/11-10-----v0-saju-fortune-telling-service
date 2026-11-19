@@ -175,12 +175,12 @@ export default function LandingPage() {
             <Link href="/start" className="group md:col-span-1">
               <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/30 rounded-xl p-6 hover:border-purple-400/50 transition-all hover:scale-[1.02] h-full flex flex-col">
                 <h4 className="text-base md:text-lg font-semibold text-white mb-3">99 Facts</h4>
-                <div className="relative w-full mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center flex-shrink-0" style={{ aspectRatio: '800/533' }}>
+                <div className="relative w-full mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center flex-shrink-0" style={{ aspectRatio: '1/1' }}>
                   <Image
-                    src="/images/99facts.jpg"
+                    src="/media/thumb-99facts.webp"
                     alt="99 Facts of your birth chart"
                     width={800}
-                    height={533}
+                    height={800}
                     className="w-full h-full object-cover object-center"
                   />
                 </div>
@@ -230,9 +230,9 @@ src="/images/shopify-logo.png"
             <div className="group md:col-span-1">
               <div className="bg-gradient-to-br from-pink-900/40 to-rose-900/40 border border-pink-500/30 rounded-xl p-6 h-full flex flex-col">
                 <h4 className="text-base md:text-lg font-semibold text-white mb-3">Relationship Compatibility</h4>
-                <div className="relative w-full h-40 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e]">
+                <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-[#1a1a2e]">
                   <Image
-                    src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/29.png?v=1778483455"
+                    src="/media/thumb-compatibility.webp" sizes="(min-width: 768px) 384px, 100vw"
                     alt="Relationship Compatibility"
                     fill
                     className="object-cover"
@@ -256,9 +256,9 @@ src="/images/shopify-logo.png"
             <div className="group md:col-span-1">
               <div className="bg-gradient-to-br from-blue-900/40 to-purple-900/40 border border-blue-500/30 rounded-xl p-6 h-full flex flex-col">
                 <h4 className="text-base md:text-lg font-semibold text-white mb-3">2027 New Year Monthly Career / Love (Coming soon)</h4>
-                <div className="relative w-full h-40 mb-4 rounded-lg overflow-hidden bg-[#1a1a2e]">
+                <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-[#1a1a2e]">
                   <Image
-                    src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/30.png?v=1778484201"
+                    src="/media/thumb-2027.webp" sizes="(min-width: 768px) 384px, 100vw"
                     alt="12 months Saju Reading"
                     fill
                     className="object-cover"

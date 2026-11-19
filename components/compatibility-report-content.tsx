@@ -313,9 +313,9 @@ export function CompatibilityReportContent({
 
           {/* 12-Month Fortune Subscription */}
           <div className="bg-white/[0.03] border border-blue-500/30 rounded-xl overflow-hidden">
-            <div className="relative w-full h-32">
+            <div className="relative mx-auto aspect-square w-full max-w-sm">
               <Image
-                src="https://cdn.shopify.com/s/files/1/0662/7350/9464/files/30.png?v=1778484201"
+                src="/media/thumb-2027.webp" sizes="(min-width: 768px) 384px, 100vw"
                 alt="12-Month Fortune Subscription"
                 fill
                 className="object-cover"
