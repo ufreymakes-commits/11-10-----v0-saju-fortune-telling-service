@@ -39,7 +39,7 @@ export default function StartPage() {
         </h1>
 
         {/* Checks */}
-        <ul className="mb-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[15px] text-[#C8CCD4] cursor-default select-none">
+        <ul className="mb-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-base font-extrabold text-white cursor-default select-none">
           <li className="flex items-center gap-1.5 whitespace-nowrap">
             <Check aria-hidden="true" className="size-4 text-[#E8C46B]" strokeWidth={3} />
             No sign-up
