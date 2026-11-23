@@ -6,12 +6,17 @@ import { startServerGeneration } from '@/lib/payments/start-generation'
 import { sendPaymentConfirmationEmail } from '@/lib/email/payment-confirmation'
 import { enqueuePostPurchase } from '@/lib/email/queue'
 
-// Single source of truth per product: used for the PayPal order, the stored payment row and the capture check.
-export const PRICE_USD = '19.99'
-export const COMPAT_PRICE_USD = '19.99'
-export const COMPAT_BUYER_PRICE_USD = '15.99'
-export const GUMIHO_PRICE_USD = '9.99'
-export const GUMIHO_ADDON_PRICE_USD = '7.99'
+// Single source of truth per product (defined in prices.ts so client code can import it too):
+// used for the PayPal order, the stored payment row and the capture check.
+import {
+  PRICE_USD,
+  COMPAT_PRICE_USD,
+  COMPAT_BUYER_PRICE_USD,
+  GUMIHO_PRICE_USD,
+  GUMIHO_ADDON_PRICE_USD,
+} from '@/lib/payments/prices'
+
+export { PRICE_USD, COMPAT_PRICE_USD, COMPAT_BUYER_PRICE_USD, GUMIHO_PRICE_USD, GUMIHO_ADDON_PRICE_USD }
 
 const toCents = (usd: string) => Math.round(Number(usd) * 100)
 

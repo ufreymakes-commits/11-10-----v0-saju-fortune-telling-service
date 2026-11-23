@@ -8,6 +8,8 @@ import { Spinner } from '@/components/ui/spinner'
 import { Button } from '@/components/ui/button'
 import { ReportProgress, useReportGeneration } from '@/components/report-progress'
 import { CheckCircleIcon } from 'lucide-react'
+import { PRICE_USD } from '@/lib/payments/prices'
+import { eventIdFor, fireOnce, ttTrack } from '@/lib/analytics/tiktok'
 
 interface PaymentSuccessHandlerProps {
   submissionId: string
@@ -22,6 +24,21 @@ const POLL_TIMEOUT_MS = 3 * 60 * 1000
 
 function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+// The page polls and can be reloaded, so the once-per-browser guard keeps purchases from being counted twice.
+function trackPaymentCompleted(submissionId: string) {
+  fireOnce(`pay:${submissionId}`, () =>
+    ttTrack(
+      'CompletePayment',
+      {
+        contents: [{ content_id: '99-facts', content_type: 'product', content_name: '99 Facts Report' }],
+        value: Number(PRICE_USD),
+        currency: 'USD',
+      },
+      eventIdFor(submissionId, 'CompletePayment'),
+    ),
+  )
 }
 
 export function PaymentSuccessHandler({ submissionId, orderId }: PaymentSuccessHandlerProps) {
@@ -50,6 +67,7 @@ export function PaymentSuccessHandler({ submissionId, orderId }: PaymentSuccessH
         const state = await fetchPaymentState()
         if (cancelledRef.current) return
         if (state === 'completed') {
+          trackPaymentCompleted(submissionId)
           setPhase('generating')
           return
         }
@@ -92,6 +110,7 @@ export function PaymentSuccessHandler({ submissionId, orderId }: PaymentSuccessH
 
         const data = await res.json().catch(() => ({}))
         if (res.ok && data.success) {
+          trackPaymentCompleted(submissionId)
           setPhase('generating')
           return
         }

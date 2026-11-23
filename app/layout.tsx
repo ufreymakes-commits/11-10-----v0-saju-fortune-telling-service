@@ -2,7 +2,11 @@ import type { Metadata, Viewport } from 'next'
 import { Poppins, Geist_Mono, Montserrat } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { NavSidebar } from '@/components/nav-sidebar'
+import { TikTokPageView } from '@/components/tiktok-page-view'
 import './globals.css'
+
+// An unset variable falls back to the current pixel; an empty string turns the pixel off.
+const TIKTOK_PIXEL_ID = process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID ?? 'D85I0ERC77UDFECN32MG'
 
 const poppins = Poppins({ 
   subsets: ["latin"],
@@ -70,6 +74,7 @@ export default function RootLayout({
         <meta property="og:url" content="https://my.sajume.com" />
         <script async src="https://tally.so/widgets/embed.js"></script>
         {/* TikTok Pixel Code */}
+        {TIKTOK_PIXEL_ID && (
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -77,15 +82,17 @@ export default function RootLayout({
                 w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(
                 var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var r="https://analytics.tiktok.com/i18n/pixel/events.js",o=n&&n.partner;ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=r,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};n=document.createElement("script")
                 ;n.type="text/javascript",n.async=!0,n.src=r+"?sdkid="+e+"&lib="+t;e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)};
-                ttq.load('D85I0ERC77UDFECN32MG');
+                ttq.load(${JSON.stringify(TIKTOK_PIXEL_ID)});
                 ttq.page();
               }(window, document, 'ttq');
             `,
           }}
         />
+        )}
       </head>
       <body className={`${poppins.variable} ${montserrat.variable} ${geistMono.variable} font-sans antialiased`} suppressHydrationWarning>
         <NavSidebar />
+        <TikTokPageView />
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>

@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { GUMIHO_PRICE_USD } from '@/lib/payments/prices'
+import { eventIdFor, ttTrack } from '@/lib/analytics/tiktok'
 
 export default function AskGumihoCheckoutPage() {
   const params = useParams()
@@ -105,6 +107,16 @@ export default function AskGumihoCheckoutPage() {
         setProcessing(false)
         return
       }
+
+      ttTrack(
+        'InitiateCheckout',
+        {
+          contents: [{ content_id: 'gumiho', content_type: 'product', content_name: 'Ask the Gumiho' }],
+          value: Number(GUMIHO_PRICE_USD),
+          currency: 'USD',
+        },
+        eventIdFor(questionId ?? submissionId, 'InitiateCheckout'),
+      )
 
       // Redirect to PayPal
       window.location.href = data.approvalUrl

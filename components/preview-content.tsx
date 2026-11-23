@@ -12,6 +12,8 @@ import { DayMasterCard } from '@/components/day-master-card'
 import { CardActions } from '@/components/tarot-frame'
 import type { Fact, SajuData } from '@/lib/types'
 import { LockIcon, Share2Icon, CheckIcon } from 'lucide-react'
+import { PRICE_USD } from '@/lib/payments/prices'
+import { eventIdFor, fireOnce, ttTrack } from '@/lib/analytics/tiktok'
 
 
 const FREE_FIRST_CARD_ID = 'free-four-pillars-card'
@@ -249,6 +251,23 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
     
     fetchPreview()
   }, [submissionId, cachedData])
+
+  const reportOnScreen = Boolean(data) && !isLoading && !error
+
+  useEffect(() => {
+    if (!reportOnScreen) return
+    fireOnce(`view:${submissionId}`, () =>
+      ttTrack(
+        'ViewContent',
+        {
+          contents: [{ content_id: '99-facts', content_type: 'product', content_name: '99 Facts Report' }],
+          value: Number(PRICE_USD),
+          currency: 'USD',
+        },
+        eventIdFor(submissionId, 'ViewContent'),
+      ),
+    )
+  }, [reportOnScreen, submissionId])
 
   if (isLoading) {
     return <LoadingVideoScreen message={loadingMessages[loadingMessageIndex]} />

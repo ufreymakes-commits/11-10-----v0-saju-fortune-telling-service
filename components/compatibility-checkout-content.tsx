@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { ReportGuarantee } from '@/components/report-guarantee'
 import { Spinner } from '@/components/ui/spinner'
 import { ShieldCheckIcon, HeartIcon, CheckIcon } from 'lucide-react'
+import { eventIdFor, fireOnce, ttTrack } from '@/lib/analytics/tiktok'
 
 interface CompatibilityCheckoutContentProps {
   submissionId: string
@@ -81,6 +82,17 @@ export function CompatibilityCheckoutContent({
       })
       const data = await response.json()
       if (!response.ok || !data.success) throw new Error(data.error || 'Payment capture failed')
+      fireOnce(`pay:compat:${data.submissionId}`, () =>
+        ttTrack(
+          'CompletePayment',
+          {
+            contents: [{ content_id: 'compatibility', content_type: 'product', content_name: 'Compatibility Report' }],
+            value: Number(displayedPriceUsd),
+            currency: 'USD',
+          },
+          eventIdFor(data.submissionId, 'CompletePayment'),
+        ),
+      )
       router.push(`/compatibility/report/${data.submissionId}/paid`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Payment verification failed')
@@ -107,6 +119,20 @@ export function CompatibilityCheckoutContent({
         return
       }
       if (!response.ok || !data.approvalUrl) throw new Error(data.error || 'Failed to create order')
+      try {
+        sessionStorage.setItem(`compat-price:${submissionId}`, String(displayedPriceUsd))
+      } catch {
+        // storage can be unavailable; the success page falls back to the regular price
+      }
+      ttTrack(
+        'InitiateCheckout',
+        {
+          contents: [{ content_id: 'compatibility', content_type: 'product', content_name: 'Compatibility Report' }],
+          value: Number(displayedPriceUsd),
+          currency: 'USD',
+        },
+        eventIdFor(submissionId, 'InitiateCheckout'),
+      )
       window.location.href = data.approvalUrl
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Payment failed')

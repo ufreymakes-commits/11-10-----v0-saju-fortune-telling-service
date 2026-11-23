@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button'
 import { ReportGuarantee } from '@/components/report-guarantee'
 import { Spinner } from '@/components/ui/spinner'
 import { CheckIcon, ShieldCheckIcon } from 'lucide-react'
+import { PRICE_USD } from '@/lib/payments/prices'
+import { eventIdFor, ttTrack } from '@/lib/analytics/tiktok'
 
 interface CheckoutContentProps {
   submissionId: string
@@ -114,6 +116,15 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
       // Redirect to PayPal
       if (data.approvalUrl) {
         console.log('[v0] Redirecting to PayPal:', data.approvalUrl)
+        ttTrack(
+          'InitiateCheckout',
+          {
+            contents: [{ content_id: '99-facts', content_type: 'product', content_name: '99 Facts Report' }],
+            value: Number(PRICE_USD),
+            currency: 'USD',
+          },
+          eventIdFor(submissionId, 'InitiateCheckout'),
+        )
         window.location.href = data.approvalUrl
       } else {
         throw new Error('No approval URL received from PayPal')
