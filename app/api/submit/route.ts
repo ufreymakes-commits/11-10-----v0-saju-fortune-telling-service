@@ -5,6 +5,7 @@ import type { BirthInfo } from '@/lib/types'
 import { isValidEmail } from '@/lib/validation'
 import { getCountryFullName } from '@/lib/country-name'
 import { enqueueFreeReportSequence, runInBackground } from '@/lib/email/queue'
+import { readUtmFromCookieHeader } from '@/lib/utm-attribution'
 
 export async function POST(request: Request) {
   try {
@@ -55,6 +56,7 @@ export async function POST(request: Request) {
     // Vercel가 요청 IP 기반으로 붙여주는 ISO 국가 코드 (로컬 개발에서는 없음)를 영문 풀네임으로 저장. IP 자체는 저장하지 않음.
     const accessCountryCode = request.headers.get('x-vercel-ip-country')
     const accessCountry = accessCountryCode ? getCountryFullName(accessCountryCode) : null
+    const utm = readUtmFromCookieHeader(request.headers.get('cookie'))
     
     const { data, error } = await supabase
       .from('submissions')
@@ -71,7 +73,8 @@ export async function POST(request: Request) {
         timezone: timezone || null,
         longitude: longitude || null,
         latitude: latitude || null,
-        access_country: accessCountry
+        access_country: accessCountry,
+        ...utm
       })
       .select('id')
       .single()
