@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ReportGuarantee } from '@/components/report-guarantee'
+import { TypingUserCount } from '@/components/typing-user-count'
 import { LoadingVideoScreen } from '@/components/loading-video-screen'
 import { Marquee } from '@/components/marquee'
 import { NewYear2027ProductCard } from '@/components/new-year-2027-product-card'
@@ -563,7 +564,9 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
             </svg>
           ))}
         </div>
-        <p className="text-xs text-muted-foreground">6,425 users got their reports</p>
+        <p className="text-xs text-muted-foreground">
+          <TypingUserCount />
+        </p>
         <p className="text-[10px] text-muted-foreground">4.9/5 from 100% genuine reviews</p>
       </div>
 
