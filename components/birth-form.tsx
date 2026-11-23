@@ -458,7 +458,7 @@ export function BirthForm() {
         <Button 
           type="submit" 
           disabled={isLoading}
-          className="w-full bg-primary text-white hover:bg-primary/90 h-12 text-lg font-semibold rounded-full shadow-lg shadow-primary/30 mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-primary text-white hover:bg-primary/90 h-12 text-lg font-bold rounded-full shadow-lg shadow-primary/30 mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <>
@@ -466,7 +466,7 @@ export function BirthForm() {
               Calculating your chart...
             </>
           ) : (
-            'Reveal My Destiny'
+            'Reveal My Destiny (2 mins)'
           )}
         </Button>
       </FieldGroup>

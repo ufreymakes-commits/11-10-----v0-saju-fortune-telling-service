@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
   // Check if paid report already exists (e.g. paid via PayPal)
   const { data: existing } = await supabase
     .from('submissions')
-    .select('paid_report_url')
+    .select('paid_report_url, utm_source, utm_medium, utm_campaign, utm_content')
     .eq('id', submissionId)
     .single()
 
@@ -53,6 +53,10 @@ export async function POST(req: NextRequest) {
       status: 'completed',
       completed_at: new Date().toISOString(),
       report_url: `${baseUrl}/report/${submissionId}/paid`,
+      utm_source: existing?.utm_source ?? null,
+      utm_medium: existing?.utm_medium ?? null,
+      utm_campaign: existing?.utm_campaign ?? null,
+      utm_content: existing?.utm_content ?? null,
     })
     .select('id')
     .single()

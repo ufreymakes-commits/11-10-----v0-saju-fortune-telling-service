@@ -41,7 +41,7 @@ export async function POST(request: Request) {
 
     const { data: submission, error: fetchError } = await supabase
       .from('submissions')
-      .select('id, name')
+      .select('id, name, utm_source, utm_medium, utm_campaign, utm_content')
       .eq('id', submissionId)
       .single()
 
@@ -132,6 +132,10 @@ export async function POST(request: Request) {
       currency: 'USD',
       status: 'pending',
       gumiho_addon: gumihoAddon,
+      utm_source: submission.utm_source,
+      utm_medium: submission.utm_medium,
+      utm_campaign: submission.utm_campaign,
+      utm_content: submission.utm_content,
     })
 
     if (insertError) {
