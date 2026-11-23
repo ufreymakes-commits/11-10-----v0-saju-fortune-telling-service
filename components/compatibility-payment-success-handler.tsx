@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { Spinner } from '@/components/ui/spinner'
 import { Button } from '@/components/ui/button'
 import { CheckCircleIcon, HeartIcon } from 'lucide-react'
+import { COMPAT_PRICE_USD } from '@/lib/payments/prices'
+import { eventIdFor, fireOnce, ttTrack } from '@/lib/analytics/tiktok'
 
 interface CompatibilityPaymentSuccessHandlerProps {
   submissionId: string
@@ -42,6 +44,24 @@ export function CompatibilityPaymentSuccessHandler({ submissionId, orderId }: Co
         if (!captureResponse.ok || !captureData.success) {
           throw new Error(captureData.error || 'Payment capture failed')
         }
+
+        let paidPrice = COMPAT_PRICE_USD
+        try {
+          paidPrice = sessionStorage.getItem(`compat-price:${submissionId}`) ?? COMPAT_PRICE_USD
+        } catch {
+          // keep the regular price
+        }
+        fireOnce(`pay:compat:${submissionId}`, () =>
+          ttTrack(
+            'CompletePayment',
+            {
+              contents: [{ content_id: 'compatibility', content_type: 'product', content_name: 'Compatibility Report' }],
+              value: Number(paidPrice),
+              currency: 'USD',
+            },
+            eventIdFor(submissionId, 'CompletePayment'),
+          ),
+        )
 
         const emailSent = captureData.emailSent === true
         setEmailSent(emailSent)

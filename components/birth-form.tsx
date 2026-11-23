@@ -20,6 +20,7 @@ import { CitySearch } from '@/components/city-search'
 import type { City } from '@/lib/city-search'
 import { inferTimezone } from '@/lib/city-search'
 import { isValidEmail } from '@/lib/validation'
+import { eventIdFor, fireOnce, ttIdentifyEmail, ttTrack } from '@/lib/analytics/tiktok'
 
 interface FormErrors {
   name?: string
@@ -173,6 +174,22 @@ export function BirthForm() {
       }
       
       const { submissionId } = await response.json()
+
+      try {
+        await ttIdentifyEmail(formData.email)
+      } catch {
+        // never block the redirect
+      }
+      fireOnce(`reg:${submissionId}`, () =>
+        ttTrack(
+          'CompleteRegistration',
+          {
+            contents: [{ content_id: 'free-reading', content_type: 'product', content_name: 'Free Saju Reading' }],
+          },
+          eventIdFor(submissionId, 'CompleteRegistration'),
+        ),
+      )
+
       router.push(`/preview/${submissionId}`)
     } catch {
       setErrors({ name: 'Something went wrong. Please try again.' })

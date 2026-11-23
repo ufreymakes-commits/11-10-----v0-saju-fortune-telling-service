@@ -4,6 +4,8 @@ import { useState, useEffect, Suspense } from 'react'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Loader2, CheckCircle } from 'lucide-react'
+import { GUMIHO_PRICE_USD } from '@/lib/payments/prices'
+import { eventIdFor, fireOnce, ttTrack } from '@/lib/analytics/tiktok'
 
 function SuccessContent() {
   const params = useParams()
@@ -73,6 +75,18 @@ function SuccessContent() {
           setStatus('error')
           return
         }
+
+        fireOnce(`pay:${questionId}`, () =>
+          ttTrack(
+            'CompletePayment',
+            {
+              contents: [{ content_id: 'gumiho', content_type: 'product', content_name: 'Ask the Gumiho' }],
+              value: Number(GUMIHO_PRICE_USD),
+              currency: 'USD',
+            },
+            eventIdFor(questionId, 'CompletePayment'),
+          ),
+        )
 
         // 2. Generate answers - fire and forget (polling will catch completion)
         setStatus('generating')
