@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 const FALLBACK_COUNT = 6425
 const POLL_MS = 20000
 const TYPE_DELAY_MS = 120
+const RETYPE_EVERY_MS = 6000 // re-types the same real number so the line feels alive
 
 function format(value: number) {
   return value.toLocaleString('en-US')
@@ -42,28 +43,30 @@ export function TypingUserCount() {
     }
   }, [])
 
-  // Type the new number only when the real count goes up.
-  const prevCount = useRef(count)
+  // Typing animation of the current real number: right away when it changes, then again every few seconds.
+  // The number itself only changes when the real count goes up.
   useEffect(() => {
-    if (count <= prevCount.current) {
-      prevCount.current = count
-      setShown(format(count))
-      return
-    }
-    prevCount.current = count
     const full = format(count)
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setShown(full)
       return
     }
-    let index = 0
-    setShown('')
-    const id = setInterval(() => {
-      index += 1
-      setShown(full.slice(0, index))
-      if (index >= full.length) clearInterval(id)
-    }, TYPE_DELAY_MS)
-    return () => clearInterval(id)
+    let typer: ReturnType<typeof setInterval> | null = null
+    const type = () => {
+      if (typer) clearInterval(typer)
+      let index = 0
+      setShown('')
+      typer = setInterval(() => {
+        index += 1
+        setShown(full.slice(0, index))
+        if (index >= full.length && typer) clearInterval(typer)
+      }, TYPE_DELAY_MS)
+    }
+    const loop = setInterval(type, RETYPE_EVERY_MS)
+    return () => {
+      clearInterval(loop)
+      if (typer) clearInterval(typer)
+    }
   }, [count])
 
   return (
@@ -75,6 +78,7 @@ export function TypingUserCount() {
         </span>
         <span aria-hidden="true" className="absolute left-0 top-0 whitespace-nowrap">
           {shown}
+          <span className="ml-px inline-block h-[0.9em] w-[2px] translate-y-[0.1em] animate-pulse bg-current align-baseline" />
         </span>
       </span>
       <span className="text-foreground/80">users got their reports</span>
