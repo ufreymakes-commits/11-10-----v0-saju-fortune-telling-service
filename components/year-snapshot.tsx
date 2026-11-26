@@ -1,6 +1,7 @@
 'use client'
 
 import { Loader2 } from 'lucide-react'
+import { NoticeMeButton } from '@/components/notice-me-button'
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 const monthName = (ym?: string | null) => {
@@ -168,9 +169,15 @@ export function YearSnapshot({ data, questions }: { data: YearSnapshotData; ques
         </Block>
       )}
 
-      <p className="border-t border-border pt-4 text-center text-sm text-muted-foreground">
-        Your full month-by-month {data.year} Love &amp; Money Calendar is coming soon.
-      </p>
+      <div className="border-t border-border pt-4 flex flex-col items-center gap-3 text-center">
+        <p className="text-sm font-semibold text-foreground text-balance">
+          My Life Map: 100-Year Luck Timeline + 2027 Monthly Calendar (Coming soon)
+        </p>
+        <NoticeMeButton
+          product="subscription"
+          className="inline-block rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+        />
+      </div>
     </div>
   )
 }

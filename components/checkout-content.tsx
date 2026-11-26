@@ -292,6 +292,9 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
         <span className="mt-1 block text-sm leading-relaxed text-muted-foreground">
           You&apos;ll get your report first, then ask your 3 questions whenever you&apos;re ready.
         </span>
+        <span className="mt-1.5 block text-sm font-semibold leading-relaxed text-primary">
+          You won&apos;t regret it 😎
+        </span>
       </label>
       )}
 
