@@ -1,9 +1,9 @@
 import Image from 'next/image'
 import { NoticeMeButton } from '@/components/notice-me-button'
 
-const TITLE = '2027 New Year Monthly Career / Love (Coming soon)'
-const DESCRIPTION = 'Monthly personalized Saju readings delivered to you every month throughout 2026.'
-const IMAGE_ALT = '2027 New Year Monthly Career and Love reading'
+const TITLE = 'My Life Map: 100-Year Luck Timeline + 2027 Monthly Calendar (Coming soon)'
+const DESCRIPTION = 'Your 10-year luck cycles from birth to age 100, plus a month-by-month 2027 calendar for love, money and energy.'
+const IMAGE_ALT = 'My Life Map: 100-Year Luck Timeline and 2027 Monthly Calendar'
 
 export function NewYear2027ProductCard({ compact = false }: { compact?: boolean }) {
   if (compact) {
@@ -16,8 +16,8 @@ export function NewYear2027ProductCard({ compact = false }: { compact?: boolean 
           </div>
           <p className="text-xs text-white/70 mb-3 flex-grow leading-relaxed">{DESCRIPTION}</p>
           <div className="flex items-center justify-between mb-2 mt-auto gap-2">
-            <span className="text-[11px] text-blue-300">12 monthly readings</span>
-            <span className="text-base font-bold text-white/50">$79</span>
+            <span className="text-[11px] text-blue-300">Life map + 12-month calendar</span>
+            <span className="text-base font-bold text-white/50">$19.99</span>
           </div>
           <NoticeMeButton product="subscription" className="w-full text-center py-1.5 px-2 rounded-lg text-xs font-medium bg-blue-500/20 hover:bg-blue-500/30 text-blue-200 border border-blue-500/30 hover:border-blue-400/50 transition-all block" />
         </div>
@@ -41,8 +41,8 @@ export function NewYear2027ProductCard({ compact = false }: { compact?: boolean 
         <p className="text-xs text-white/60 mb-3">{DESCRIPTION}</p>
         <div className="flex items-end justify-between gap-3">
           <div className="flex flex-col gap-0.5">
-            <span className="text-xs text-blue-300">12 monthly readings</span>
-            <span className="text-sm font-bold text-white/50">$79</span>
+            <span className="text-xs text-blue-300">Life map + 12-month calendar</span>
+            <span className="text-sm font-bold text-white/50">$19.99</span>
           </div>
           <NoticeMeButton
             product="subscription"

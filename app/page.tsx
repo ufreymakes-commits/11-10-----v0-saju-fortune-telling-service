@@ -255,19 +255,19 @@ src="/images/shopify-logo.png"
             {/* 12 months Saju Reading */}
             <div className="group md:col-span-1">
               <div className="bg-gradient-to-br from-blue-900/40 to-purple-900/40 border border-blue-500/30 rounded-xl p-6 h-full flex flex-col">
-                <h4 className="text-base md:text-lg font-semibold text-white mb-3">2027 New Year Monthly Career / Love (Coming soon)</h4>
+                <h4 className="text-base md:text-lg font-semibold text-white mb-3">My Life Map: 100-Year Luck Timeline + 2027 Monthly Calendar (Coming soon)</h4>
                 <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-[#1a1a2e]">
                   <Image
                     src="/media/thumb-2027.webp" sizes="(min-width: 768px) 384px, 100vw"
-                    alt="12 months Saju Reading"
+                    alt="My Life Map: 100-Year Luck Timeline and 2027 Monthly Calendar"
                     fill
                     className="object-cover"
                   />
                 </div>
-                <p className="text-sm text-white/70 mb-3 flex-grow">Monthly personalized Saju readings delivered to you every month throughout 2026.</p>
+                <p className="text-sm text-white/70 mb-3 flex-grow">Your 10-year luck cycles from birth to age 100, plus a month-by-month 2027 calendar for love, money and energy.</p>
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs text-blue-300">12 monthly readings</span>
-                  <span className="text-lg font-bold text-white/50">$79</span>
+                  <span className="text-xs text-blue-300">Life map + 12-month calendar</span>
+                  <span className="text-lg font-bold text-white/50">$19.99</span>
                 </div>
                 <WaitlistNotify />
               </div>

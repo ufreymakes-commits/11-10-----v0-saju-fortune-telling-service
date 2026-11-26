@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { getGumihoEntitlementState } from '@/lib/payments/gumiho-entitlement'
+import { isRelationship, isSituation } from '@/lib/saju/year-snapshot'
 
 const MAX_QUESTION_LENGTH = 300
 
@@ -8,7 +9,7 @@ const stripControlChars = (s: string) => s.replace(/[\u0000-\u0008\u000B\u000C\u
 
 export async function POST(request: Request) {
   try {
-    const { submissionId, question1, question2, question3 } = await request.json()
+    const { submissionId, question1, question2, question3, currentSituation, relationshipStatus } = await request.json()
 
     if (!submissionId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -79,6 +80,14 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Failed to save questions' }, { status: 500 })
       }
       if (filled && filled.length > 0) {
+        // Add-on only: situation + relationship status for the Year Snapshot. Best effort, never blocks the questions.
+        if (isSituation(currentSituation) && isRelationship(relationshipStatus)) {
+          const { error: extraError } = await admin
+            .from('gumiho_questions')
+            .update({ current_situation: currentSituation, relationship_status: relationshipStatus, year_snapshot_status: 'generating' })
+            .eq('id', entitlementId)
+          if (extraError) console.error('[v0] Gumiho add-on profile save error:', extraError.message)
+        }
         return NextResponse.json({ success: true, gumihoQuestionId: entitlementId, bundled: true })
       }
     }

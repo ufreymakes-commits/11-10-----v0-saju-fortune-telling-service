@@ -94,6 +94,7 @@ export default async function PaidReportPage({ params }: PageProps) {
           paidReport={paidReport}
           hasGumihoBundle={hasGumihoBundle}
           gumihoRefunded={gumihoState.refunded}
+          gumihoAnsweredQuestionId={gumihoState.answeredQuestionId}
           buyerOffer={buyerOffer}
         />
       </div>

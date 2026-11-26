@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { NextResponse, after } from 'next/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { generateObject, generateText } from 'ai'
 import { z } from 'zod'
 import { buildPaidContext, refreshDecadeFortune } from '@/lib/saju/paid-context'
@@ -9,6 +9,9 @@ import { buildGumihoInputs, stripCjkDeep, countCjk, badYears, sanitizeAnswer } f
 import { buildGuardBlock, checkGuards } from '@/lib/saju/ten-god-guards'
 import { PAID_MODEL, THINK, googleThinking, withThinkingFallback } from '@/lib/ai/models'
 import { focusYearFor } from '@/lib/report-year'
+import { runYearSnapshot } from '@/lib/saju/year-snapshot-ai'
+
+export const maxDuration = 300
 
 const MODEL = PAID_MODEL
 const MAX_RETRIES = 3
@@ -216,6 +219,18 @@ async function repairAnswer(args: {
   return text || null
 }
 
+async function scheduleYearSnapshot(questionId: string) {
+  try {
+    const admin = createAdminClient()
+    await admin.from('gumiho_questions').update({ year_snapshot_status: 'generating' }).eq('id', questionId)
+    after(async () => {
+      await runYearSnapshot(questionId)
+    })
+  } catch (e) {
+    console.error('[v0] Year snapshot schedule error:', e instanceof Error ? e.message : e)
+  }
+}
+
 // ---------------------------------------------------------------- route
 export async function POST(request: Request) {
   let lockedId: string | null = null
@@ -231,13 +246,16 @@ export async function POST(request: Request) {
     // 1. Verify payment is completed
     const { data: payment } = await supabase
       .from('gumiho_payments')
-      .select('status, submission_id')
+      .select('status, submission_id, paypal_order_id')
       .eq('gumiho_question_id', gumihoQuestionId)
       .single()
 
     if (!payment || payment.status !== 'completed') {
       return NextResponse.json({ error: 'Payment required' }, { status: 403 })
     }
+
+    // $7.99 checkout add-on (not the standalone $9.99 purchase) also gets the Year Snapshot.
+    const isAddon = String(payment.paypal_order_id ?? '').startsWith('BUNDLE-')
 
     // 2. Get the questions
     const { data: gumihoQuestion, error: questionError } = await supabase
@@ -252,6 +270,10 @@ export async function POST(request: Request) {
 
     // 3. Check if already answered
     if (gumihoQuestion.answer_1 && gumihoQuestion.answer_2 && gumihoQuestion.answer_3) {
+      // Retry/backfill the Year Snapshot for add-on orders whose snapshot is missing or failed.
+      if (isAddon && 'year_snapshot_status' in gumihoQuestion && !gumihoQuestion.year_snapshot && gumihoQuestion.year_snapshot_status !== 'generating') {
+        await scheduleYearSnapshot(String(gumihoQuestionId))
+      }
       return NextResponse.json({
         success: true,
         answers: {
@@ -568,6 +590,11 @@ Write three deeply personal answers (answer_1, answer_2, answer_3), one per ques
 
     if (updateError) {
       console.error('[v0] Gumiho: Failed to save answers:', updateError)
+    }
+
+    // 9. Year Snapshot for the $7.99 add-on: generated after the response so the answers are not delayed.
+    if (!updateError && isAddon && 'year_snapshot_status' in gumihoQuestion) {
+      await scheduleYearSnapshot(String(gumihoQuestionId))
     }
 
     return NextResponse.json({ success: true, answers: final })
