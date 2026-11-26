@@ -171,7 +171,7 @@ export function YearSnapshot({ data, questions }: { data: YearSnapshotData; ques
 
       <div className="border-t border-border pt-4 flex flex-col items-center gap-3 text-center">
         <p className="text-sm font-semibold text-foreground text-balance">
-          My Life Map: 100-Year Luck Timeline + 2027 Monthly Calendar (Coming soon)
+          My 100-Year Golden Luck Timeline + 2027 Monthly Calendar (Coming soon)
         </p>
         <NoticeMeButton
           product="subscription"

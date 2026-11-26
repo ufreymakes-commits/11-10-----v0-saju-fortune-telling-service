@@ -255,11 +255,11 @@ src="/images/shopify-logo.png"
             {/* 12 months Saju Reading */}
             <div className="group md:col-span-1">
               <div className="bg-gradient-to-br from-blue-900/40 to-purple-900/40 border border-blue-500/30 rounded-xl p-6 h-full flex flex-col">
-                <h4 className="text-base md:text-lg font-semibold text-white mb-3">My Life Map: 100-Year Luck Timeline + 2027 Monthly Calendar (Coming soon)</h4>
+                <h4 className="text-base md:text-lg font-semibold text-white mb-3">My 100-Year Golden Luck Timeline + 2027 Monthly Calendar (Coming soon)</h4>
                 <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-[#1a1a2e]">
                   <Image
                     src="/media/thumb-2027.webp" sizes="(min-width: 768px) 384px, 100vw"
-                    alt="My Life Map: 100-Year Luck Timeline and 2027 Monthly Calendar"
+                    alt="My 100-Year Golden Luck Timeline and 2027 Monthly Calendar"
                     fill
                     className="object-cover"
                   />

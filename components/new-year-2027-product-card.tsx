@@ -1,9 +1,9 @@
 import Image from 'next/image'
 import { NoticeMeButton } from '@/components/notice-me-button'
 
-const TITLE = 'My Life Map: 100-Year Luck Timeline + 2027 Monthly Calendar (Coming soon)'
+const TITLE = 'My 100-Year Golden Luck Timeline + 2027 Monthly Calendar (Coming soon)'
 const DESCRIPTION = 'Your 10-year luck cycles from birth to age 100, plus a month-by-month 2027 calendar for love, money and energy.'
-const IMAGE_ALT = 'My Life Map: 100-Year Luck Timeline and 2027 Monthly Calendar'
+const IMAGE_ALT = 'My 100-Year Golden Luck Timeline and 2027 Monthly Calendar'
 
 export function NewYear2027ProductCard({ compact = false }: { compact?: boolean }) {
   if (compact) {
