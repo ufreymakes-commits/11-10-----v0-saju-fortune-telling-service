@@ -12,7 +12,7 @@ export function NewYear2027ProductCard({ compact = false }: { compact?: boolean 
         <div className="bg-gradient-to-br from-blue-900/40 to-purple-900/40 border border-blue-500/30 rounded-xl p-3 h-full flex flex-col">
           <h4 className="text-sm font-semibold text-white mb-2">{TITLE}</h4>
           <div className="relative w-full mb-3 rounded-lg overflow-hidden bg-[#1a1a2e] flex-shrink-0 aspect-square">
-            <Image src="/media/thumb-2027.webp" alt={IMAGE_ALT} width={800} height={800} sizes="(min-width: 768px) 300px, 45vw" className="w-full h-full object-cover" />
+            <Image src="/media/thumb-golden-luck-2027.webp" alt={IMAGE_ALT} width={800} height={800} sizes="(min-width: 768px) 300px, 45vw" className="w-full h-full object-cover" />
           </div>
           <p className="text-xs text-white/70 mb-3 flex-grow leading-relaxed">{DESCRIPTION}</p>
           <div className="flex items-center justify-between mb-2 mt-auto gap-2">
@@ -31,7 +31,7 @@ export function NewYear2027ProductCard({ compact = false }: { compact?: boolean 
         <h4 className="text-sm font-semibold text-white mb-3">{TITLE}</h4>
         <div className="relative w-full mb-3 rounded-lg overflow-hidden bg-[#1a1a2e]" style={{ aspectRatio: '1/1' }}>
           <Image
-            src="/media/thumb-2027.webp"
+            src="/media/thumb-golden-luck-2027.webp"
             sizes="(min-width: 768px) 384px, 100vw"
             alt={IMAGE_ALT}
             fill

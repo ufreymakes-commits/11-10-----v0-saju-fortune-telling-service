@@ -316,7 +316,7 @@ export function CompatibilityReportContent({
           <div className="bg-white/[0.03] border border-blue-500/30 rounded-xl overflow-hidden">
             <div className="relative mx-auto aspect-square w-full max-w-sm">
               <Image
-                src="/media/thumb-2027.webp" sizes="(min-width: 768px) 384px, 100vw"
+                src="/media/thumb-golden-luck-2027.webp" sizes="(min-width: 768px) 384px, 100vw"
                 alt="My 100-Year Golden Luck Timeline and 2027 Monthly Calendar"
                 fill
                 className="object-cover"
