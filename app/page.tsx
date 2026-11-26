@@ -258,7 +258,7 @@ src="/images/shopify-logo.png"
                 <h4 className="text-base md:text-lg font-semibold text-white mb-3">My 100-Year Golden Luck Timeline + 2027 Monthly Calendar (Coming soon)</h4>
                 <div className="relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-[#1a1a2e]">
                   <Image
-                    src="/media/thumb-2027.webp" sizes="(min-width: 768px) 384px, 100vw"
+                    src="/media/thumb-golden-luck-2027.webp" sizes="(min-width: 768px) 384px, 100vw"
                     alt="My 100-Year Golden Luck Timeline and 2027 Monthly Calendar"
                     fill
                     className="object-cover"
