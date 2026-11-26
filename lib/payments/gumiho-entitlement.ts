@@ -44,13 +44,15 @@ export interface GumihoEntitlementState {
   unusedQuestionId: string | null
   /** True when the only unused bundled entitlement was refunded/revoked. */
   refunded: boolean
+  /** Id of an active bundled entitlement whose 3 questions were already asked (link back to the answers). */
+  answeredQuestionId: string | null
 }
 
 export async function getGumihoEntitlementState(submissionId: string): Promise<GumihoEntitlementState> {
   try {
     const admin = createAdminClient()
     const bundles = (await loadBundles(admin, submissionId)).filter((b) => b.gumiho_question_id)
-    if (bundles.length === 0) return { unusedQuestionId: null, refunded: false }
+    if (bundles.length === 0) return { unusedQuestionId: null, refunded: false, answeredQuestionId: null }
 
     const orderIds = bundles.map((b) => b.paypal_order_id.slice(BUNDLE_PREFIX.length))
     const [{ data: refundedPayments }, { data: questions }] = await Promise.all([
@@ -64,18 +66,23 @@ export async function getGumihoEntitlementState(submissionId: string): Promise<G
     const unusedIds = new Set((questions ?? []).filter((q) => q.question_1 === '').map((q) => q.id as string))
 
     let unusedQuestionId: string | null = null
+    let answeredQuestionId: string | null = null
     let refunded = false
     for (const bundle of bundles) {
       const questionId = bundle.gumiho_question_id as string
-      if (!unusedIds.has(questionId)) continue
+      if (!unusedIds.has(questionId)) {
+        const active = !bundle.revoked_at && !refundedOrders.has(bundle.paypal_order_id.slice(BUNDLE_PREFIX.length))
+        if (active && (questions ?? []).some((q) => q.id === questionId)) answeredQuestionId = answeredQuestionId ?? questionId
+        continue
+      }
       const revoked = Boolean(bundle.revoked_at) || refundedOrders.has(bundle.paypal_order_id.slice(BUNDLE_PREFIX.length))
       if (revoked) refunded = true
       else unusedQuestionId = unusedQuestionId ?? questionId
     }
-    return { unusedQuestionId, refunded: refunded && !unusedQuestionId }
+    return { unusedQuestionId, refunded: refunded && !unusedQuestionId, answeredQuestionId }
   } catch (e) {
     console.error('[v0] gumiho entitlement lookup error:', e instanceof Error ? e.message : 'unknown')
-    return { unusedQuestionId: null, refunded: false }
+    return { unusedQuestionId: null, refunded: false, answeredQuestionId: null }
   }
 }
 

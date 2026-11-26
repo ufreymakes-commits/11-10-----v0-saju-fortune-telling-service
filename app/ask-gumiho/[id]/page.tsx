@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import { RELATIONSHIP_OPTIONS, SITUATION_OPTIONS } from '@/lib/saju/year-snapshot'
 
 export default function AskGumihoPage() {
   const params = useParams()
@@ -28,6 +29,10 @@ export default function AskGumihoPage() {
   const [question1, setQuestion1] = useState('')
   const [question2, setQuestion2] = useState('')
   const [question3, setQuestion3] = useState('')
+  const [situation, setSituation] = useState('')
+  const [relationship, setRelationship] = useState('')
+  // Add-on buyers also pick their situation and relationship status for the Year Snapshot.
+  const profileMissing = hasBundle && (!situation || !relationship)
 
   useEffect(() => {
     async function fetchData() {
@@ -83,6 +88,10 @@ export default function AskGumihoPage() {
       setError('Please fill in all 3 questions')
       return
     }
+    if (profileMissing) {
+      setError('Please choose your current situation and relationship status')
+      return
+    }
 
     setSubmitting(true)
     setError(null)
@@ -95,7 +104,8 @@ export default function AskGumihoPage() {
           submissionId,
           question1: question1.trim(),
           question2: question2.trim(),
-          question3: question3.trim()
+          question3: question3.trim(),
+          ...(hasBundle ? { currentSituation: situation, relationshipStatus: relationship } : {}),
         })
       })
 
@@ -161,7 +171,9 @@ export default function AskGumihoPage() {
         {/* Header */}
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-gradient mb-2">Ask the Gumiho 1:1</h1>
-          <p className="text-sm text-muted-foreground">Your 3 Burning Questions Answered</p>
+          <p className="text-sm text-muted-foreground">
+            {hasBundle ? 'Your 3 questions + your 2027 Snapshot' : 'Your 3 Burning Questions Answered'}
+          </p>
         </div>
 
         {/* Video Banner */}
@@ -235,6 +247,43 @@ export default function AskGumihoPage() {
               />
               <p className="text-xs text-muted-foreground mt-1 text-right">{question3.length}/500</p>
             </div>
+
+            {hasBundle && (
+              <div className="bg-card border border-border rounded-xl p-4 space-y-4">
+                <p className="text-xs text-muted-foreground">
+                  For your 2027 Snapshot, tell the Gumiho a little about where you are now.
+                </p>
+                {[
+                  { label: 'Your current situation', options: SITUATION_OPTIONS, value: situation, set: setSituation },
+                  { label: 'Relationship status', options: RELATIONSHIP_OPTIONS, value: relationship, set: setRelationship },
+                ].map((group) => (
+                  <div key={group.label} role="radiogroup" aria-label={group.label}>
+                    <p className="text-sm text-muted-foreground mb-2">{group.label}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {group.options.map((opt) => {
+                        const selected = group.value === opt
+                        return (
+                          <button
+                            key={opt}
+                            type="button"
+                            role="radio"
+                            aria-checked={selected}
+                            onClick={() => group.set(opt)}
+                            className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                              selected
+                                ? 'border-primary bg-primary/10 text-foreground'
+                                : 'border-border text-muted-foreground hover:border-primary/50'
+                            }`}
+                          >
+                            {opt}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -245,7 +294,7 @@ export default function AskGumihoPage() {
         {/* Submit Button */}
         <Button
           onClick={handleSubmit}
-          disabled={submitting || !question1.trim() || !question2.trim() || !question3.trim()}
+          disabled={submitting || !question1.trim() || !question2.trim() || !question3.trim() || profileMissing}
           className="w-full h-12 bg-primary text-primary-foreground font-semibold"
         >
           {submitting ? (
@@ -260,7 +309,7 @@ export default function AskGumihoPage() {
 
         <p className="text-xs text-muted-foreground text-center mt-3">
           {hasBundle
-            ? 'Already paid. This is included with your report.'
+            ? 'Already paid. Your answers and your 2027 Snapshot will appear on the next page.'
             : 'You\u2019ll be redirected to PayPal to complete your purchase'}
         </p>
       </div>

@@ -199,7 +199,7 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
         
         {gumihoSelected && (
           <div className="flex justify-between items-center text-sm mb-4">
-            <span className="text-foreground/80">Ask the Gumiho 1:1 (3 questions)</span>
+            <span className="text-foreground/80">1:1 Gumiho Questions + My 2027 Snapshot</span>
             <span className="font-semibold text-primary">$7.99</span>
           </div>
         )}
@@ -271,9 +271,9 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
           </span>
           <span className="flex min-w-0 flex-1 flex-wrap items-start justify-between gap-x-3 gap-y-2">
             <span className="block min-w-40 flex-1">
-              <span className="block text-base font-semibold leading-6 text-foreground">Ask the Gumiho 1:1</span>
+              <span className="block text-base font-semibold leading-6 text-foreground">1:1 Gumiho Questions + My 2027 Snapshot</span>
               <span className="block text-sm leading-snug text-muted-foreground">
-                3 questions &middot; answered after your report
+                3 personal questions &middot; plus your 2027 fortune summary
               </span>
               <span className="mt-1.5 inline-block rounded-full bg-gradient-to-r from-violet-700 via-fuchsia-700 to-pink-700 px-2.5 py-0.5 text-[11px] font-semibold leading-4 text-white">
                 Checkout-only price
@@ -291,6 +291,9 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
         </span>
         <span className="mt-1 block text-sm leading-relaxed text-muted-foreground">
           You&apos;ll get your report first, then ask your 3 questions whenever you&apos;re ready.
+        </span>
+        <span className="mt-1.5 block text-sm font-semibold leading-relaxed text-primary">
+          You won&apos;t regret it 😎
         </span>
       </label>
       )}

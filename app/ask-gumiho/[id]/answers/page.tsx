@@ -7,6 +7,11 @@ import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
 import { GumihoAnswer } from '@/components/gumiho-answer'
 import Link from 'next/link'
+import { YearSnapshot, YearSnapshotPending, type YearSnapshotData } from '@/components/year-snapshot'
+import { focusYearFor } from '@/lib/report-year'
+
+const SNAPSHOT_POLL_MS = 5000
+const SNAPSHOT_POLL_LIMIT_MS = 3 * 60 * 1000
 
 interface GumihoData {
   question_1: string
@@ -29,6 +34,9 @@ function AnswersContent() {
   const [data, setData] = useState<GumihoData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  // Year Snapshot ($7.99 add-on only). null status = not an add-on order (or older order): render nothing.
+  const [snapshot, setSnapshot] = useState<YearSnapshotData | null>(null)
+  const [snapshotStatus, setSnapshotStatus] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -117,6 +125,17 @@ function AnswersContent() {
         submission: submission || { name: 'User' }
       })
       setLoading(false)
+
+      // Separate query so a missing column (migration not run yet) never breaks the answers.
+      const { data: snap } = await supabase
+        .from('gumiho_questions')
+        .select('year_snapshot, year_snapshot_status')
+        .eq('id', questionId)
+        .maybeSingle()
+      if (!cancelled && snap) {
+        setSnapshot((snap.year_snapshot as YearSnapshotData) ?? null)
+        setSnapshotStatus(snap.year_snapshot_status ?? null)
+      }
     }
 
     fetchData()
@@ -124,6 +143,31 @@ function AnswersContent() {
       cancelled = true
     }
   }, [questionId])
+
+  // Poll while the snapshot is being written (it is generated right after the answers).
+  useEffect(() => {
+    if (snapshotStatus !== 'generating' || !questionId) return
+    const supabase = createClient()
+    const started = Date.now()
+    const interval = setInterval(async () => {
+      if (Date.now() - started > SNAPSHOT_POLL_LIMIT_MS) {
+        clearInterval(interval)
+        setSnapshotStatus('timeout')
+        return
+      }
+      const { data: snap } = await supabase
+        .from('gumiho_questions')
+        .select('year_snapshot, year_snapshot_status')
+        .eq('id', questionId)
+        .maybeSingle()
+      if (snap && snap.year_snapshot_status !== 'generating') {
+        clearInterval(interval)
+        setSnapshot((snap.year_snapshot as YearSnapshotData) ?? null)
+        setSnapshotStatus(snap.year_snapshot_status ?? null)
+      }
+    }, SNAPSHOT_POLL_MS)
+    return () => clearInterval(interval)
+  }, [snapshotStatus, questionId])
 
   if (loading) {
     return (
@@ -153,7 +197,16 @@ function AnswersContent() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-gradient mb-2">The Gumiho Has Spoken</h1>
-          <p className="text-sm text-muted-foreground">Your 3 Questions Answered for {data.submission.name}</p>
+          <p className="text-sm text-muted-foreground">
+            {snapshotStatus
+              ? `Your 3 Questions Answered + Your ${snapshot?.year ?? focusYearFor()} Snapshot for ${data.submission.name}`
+              : `Your 3 Questions Answered for ${data.submission.name}`}
+          </p>
+          {snapshotStatus && snapshotStatus !== 'failed' && snapshotStatus !== 'timeout' && (
+            <a href="#year-snapshot" className="mt-2 inline-block text-sm font-medium text-primary underline-offset-4 hover:underline">
+              Jump to your {snapshot?.year ?? focusYearFor()} Snapshot ↓
+            </a>
+          )}
         </div>
 
         {/* Answers */}
@@ -194,6 +247,17 @@ function AnswersContent() {
             </div>
           </div>
         </div>
+
+        {/* Year Snapshot ($7.99 add-on only) */}
+        {snapshotStatus === 'done' && snapshot ? (
+          <div id="year-snapshot" className="mt-6 scroll-mt-6">
+            <YearSnapshot data={snapshot} questions={[data.question_1, data.question_2, data.question_3]} />
+          </div>
+        ) : snapshotStatus === 'generating' ? (
+          <div id="year-snapshot" className="mt-6 scroll-mt-6">
+            <YearSnapshotPending year={focusYearFor()} />
+          </div>
+        ) : null}
 
         {/* Back to Report Button */}
         <div className="mt-8 text-center">

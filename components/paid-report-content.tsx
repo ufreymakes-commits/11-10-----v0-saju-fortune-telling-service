@@ -26,6 +26,7 @@ interface PaidReportContentProps {
   paidReport: any
   hasGumihoBundle?: boolean
   gumihoRefunded?: boolean
+  gumihoAnsweredQuestionId?: string | null
   buyerOffer?: BuyerOfferInfo | null
 }
 
@@ -38,7 +39,7 @@ const KOREAN_TO_HANJA_STEM: Record<string, string> = {
   '기': '己', '경': '庚', '신': '辛', '임': '壬', '계': '癸',
 }
 
-export function PaidReportContent({ submission, paidReport: initialPaidReport, hasGumihoBundle = false, gumihoRefunded = false, buyerOffer: initialBuyerOffer = null }: PaidReportContentProps) {
+export function PaidReportContent({ submission, paidReport: initialPaidReport, hasGumihoBundle = false, gumihoRefunded = false, gumihoAnsweredQuestionId = null, buyerOffer: initialBuyerOffer = null }: PaidReportContentProps) {
   const [buyerOffer, setBuyerOffer] = useState<BuyerOfferInfo | null>(initialBuyerOffer)
   const [copied, setCopied] = useState(false)
   const [openSections, setOpenSections] = useState<Record<number, boolean>>({})
@@ -362,7 +363,14 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport, h
         <div className="space-y-4">
 
           {/* Ask the Gumiho 1:1 */}
-          <Link href={`/ask-gumiho/${submissionId}`} className="block">
+          <Link
+            href={
+              !gumihoRefunded && !hasGumihoBundle && gumihoAnsweredQuestionId
+                ? `/ask-gumiho/${submissionId}/answers?questionId=${gumihoAnsweredQuestionId}`
+                : `/ask-gumiho/${submissionId}`
+            }
+            className="block"
+          >
             <div className="bg-card border border-primary/30 rounded-xl overflow-hidden shadow-sm hover:border-primary/50 transition-colors cursor-pointer">
               <div className="relative w-full" style={{ aspectRatio: '796/531' }}>
                 <Image
@@ -380,7 +388,7 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport, h
                   <div className="flex items-center gap-2">
                     {gumihoRefunded ? (
                       <span className="text-sm font-bold text-foreground">Refunded</span>
-                    ) : hasGumihoBundle ? (
+                    ) : hasGumihoBundle || gumihoAnsweredQuestionId ? (
                       <span className="text-sm font-bold text-foreground">Included in your order</span>
                     ) : (
                       <>
@@ -390,8 +398,17 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport, h
                     )}
                   </div>
                 </div>
+                {!gumihoRefunded && (hasGumihoBundle || gumihoAnsweredQuestionId) && (
+                  <p className="text-xs text-primary mb-3">Includes your 2027 Snapshot</p>
+                )}
                 <span className="w-full py-2 text-xs font-semibold bg-primary hover:bg-primary/90 rounded-lg transition-colors text-primary-foreground text-center block">
-                  {gumihoRefunded ? 'Add-on refunded' : hasGumihoBundle ? 'Ask Your 3 Questions' : 'Ask Now (3 mins)'}
+                  {gumihoRefunded
+                    ? 'Add-on refunded'
+                    : hasGumihoBundle
+                      ? 'Ask Your 3 Questions'
+                      : gumihoAnsweredQuestionId
+                        ? 'View Your Answers + 2027 Snapshot'
+                        : 'Ask Now (3 mins)'}
                 </span>
               </div>
             </div>
@@ -471,11 +488,11 @@ export function PaidReportContent({ submission, paidReport: initialPaidReport, h
             <div className="flex items-center gap-2 mb-2">
               <span className="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full border border-blue-500/30">Coming Soon</span>
             </div>
-            <h4 className="text-sm font-semibold text-foreground mb-1">2027 New Year Monthly Career / Love (Coming soon)</h4>
-            <p className="text-xs text-muted-foreground mb-3">Monthly personalized fortune readings based on your Saju chart.</p>
+            <h4 className="text-sm font-semibold text-foreground mb-1">My 100-Year Golden Luck Timeline + 2027 Monthly Calendar (Coming soon)</h4>
+            <p className="text-xs text-muted-foreground mb-3">Your 10-year luck cycles from birth to age 100, plus a month-by-month 2027 calendar for love, money and energy.</p>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs text-blue-400">Delivered monthly</span>
-              <span className="text-sm font-bold text-foreground">$6.58/mo</span>
+              <span className="text-xs text-blue-400">Life map + 12-month calendar</span>
+              <span className="text-sm font-bold text-foreground">$19.99</span>
             </div>
             <button
               data-tally-open="81JRrr"
