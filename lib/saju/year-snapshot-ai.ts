@@ -40,12 +40,17 @@ GOAL: make it specific, vivid and a little bold, so it feels written for this on
 
 DATA RULES
 - Use ONLY the facts given. Never compute pillars, ten gods, relations or luck cycles yourself.
-- Months: use only months from the given month lists, as YYYY-MM. Years: only the focus year and the previous year.
-- Explain chart terms in plain English first with the term in parentheses, one term per sentence at most.
+- Months: use only months from the given month lists. In the "month" / "months" fields write YYYY-MM. Inside any sentence write the month name only ("February"), never "2027-02".
+- Years: mention only the focus year and the previous year. Never mention any other year (not the next year, not a luck-cycle year).
+
+PLAIN LANGUAGE (very important)
+- Write for a 25-35 year old who has never studied Saju. Lead with the feeling or the real-life meaning.
+- At most ONE romanized chart term per field (e.g. "your peer star (Bi-gyeon)"), always after its plain meaning. Never stack terms like "Gap-Gi Hap" and "Direct Officer (Jeong-gwan)" in one sentence. Prefer no term at all.
+- keywords: warm, everyday words someone would put on a vision board ("Quiet Power", "Your Own Lane", "Cool Head"), never corporate jargon ("Operational Grounding").
 - Do not write scores, birth years, zodiac birth years or the color name as numbers or lists; the app shows those. You may name the lucky and caution animals.
 
 TONE AND SAFETY
-- Warm, confident, encouraging. Use "tends to", "a strong window for", "there is a good chance"; never "will definitely".
+- Warm, confident, encouraging. Use "tends to", "a strong window for", "there is a good chance"; never "will definitely" or "you will feel".
 - No medical, legal or investment advice. Never predict illness, death, accidents, divorce, pregnancy or a lawsuit.
 - No endearments ("dear", "sweetheart"). Use the first name at most twice in the whole snapshot.
 
@@ -61,12 +66,18 @@ RELATIONSHIP WINDOW depends on relationship status:
 
 WATCH OUT: one sentence about the caution animal in business or daily life. If isOwnZodiac is true, add one short sentence: the friction comes from their Day Branch (inner self), not from their birth-year animal, so it can be someone their own age.`
 
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+/** "2027-02" inside prose -> "February" (or "February 2026" for another year). Month fields keep YYYY-MM. */
+const proseMonths = (t: string, focusYear: number) =>
+  t.replace(/\b(20\d{2})-(0[1-9]|1[0-2])\b/g, (_m, y: string, mm: string) => `${MONTH_NAMES[Number(mm) - 1]}${Number(y) === focusYear ? '' : ` ${y}`}`)
+
 const firstBold = (t: string | null | undefined) => (String(t ?? '').match(/\*\*([^*]+)\*\*/)?.[1] ?? '').trim().slice(0, 400)
 
-function deepSanitize<T>(v: T): T {
-  if (typeof v === 'string') return sanitizeAnswer(v) as any
-  if (Array.isArray(v)) return v.map(deepSanitize) as any
-  if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, deepSanitize(x)])) as any
+const MONTH_KEYS = new Set(['month', 'months'])
+function deepSanitize<T>(v: T, focusYear: number, key = ''): T {
+  if (typeof v === 'string') return (MONTH_KEYS.has(key) ? sanitizeAnswer(v) : proseMonths(sanitizeAnswer(v), focusYear)) as any
+  if (Array.isArray(v)) return v.map((x) => deepSanitize(x, focusYear, key)) as any
+  if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, deepSanitize(x, focusYear, k)])) as any
   return v
 }
 
@@ -148,7 +159,7 @@ Write the Year Snapshot.`
     }
     if (!text) return fail('model returned nothing')
 
-    const t = deepSanitize(text)
+    const t = deepSanitize(text, focusYear)
     const okMonth = (m?: string) => Boolean(m && allowedMonths.has(m))
     const snapshot = {
       version: 1,
