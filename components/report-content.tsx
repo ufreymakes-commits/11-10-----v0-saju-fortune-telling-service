@@ -398,11 +398,11 @@ export function ReportContent({ submission, cachedSections = {} }: ReportContent
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full border border-blue-500/30">Coming Soon</span>
               </div>
-              <h4 className="text-sm font-semibold text-white mb-1">2027 New Year Monthly Career / Love (Coming soon)</h4>
-              <p className="text-xs text-white/60 mb-2">Monthly personalized fortune readings based on your Saju chart.</p>
+              <h4 className="text-sm font-semibold text-white mb-1">My 100-Year Golden Luck Timeline + 2027 Monthly Calendar (Coming soon)</h4>
+              <p className="text-xs text-white/60 mb-2">Your 10-year luck cycles from birth to age 100, plus a month-by-month 2027 calendar for love, money and energy.</p>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-blue-300">Delivered monthly</span>
-                <span className="text-sm font-bold text-white/50">$3.99/mo</span>
+                <span className="text-xs text-blue-300">Life map + 12-month calendar</span>
+                <span className="text-sm font-bold text-white/50">$19.99</span>
               </div>
             </div>
           </div>

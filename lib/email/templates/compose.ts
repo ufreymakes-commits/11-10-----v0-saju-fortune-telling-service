@@ -223,7 +223,7 @@ export function composeEmail(key: CrmTemplateKey, data: TemplateData): ComposedE
         pieces: [
           paragraph('Hi there,'),
           paragraph(
-            "Thanks for joining the waitlist for the 2027 New Year Monthly Career & Love reading. We'll email you once when it launches, by the end of 2026.",
+            "Thanks for joining the waitlist for My 100-Year Golden Luck Timeline + 2027 Monthly Calendar. We'll email you once when it launches, by the end of 2026.",
           ),
         ],
       }
