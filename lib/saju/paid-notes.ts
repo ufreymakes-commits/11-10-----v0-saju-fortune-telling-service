@@ -114,6 +114,9 @@ export function buildRequiredSentences(finalFacts: any, reportYear: number) {
   return [
     `- "The main theme of your ${focusYearFor()} is ___." (name ONE opportunity and ONE thing to watch, grounded in ${focusYearFor()}'s year pillar ten gods and the luck cycle active in ${focusYearFor()}; this is the year the free page shows)`,
     love ? `- "${love}" (keep the years exactly; write the [bracketed] parts yourself; use the wording "the chance of a meaningful connection is highest", never "you will meet your spouse")` : `- A love-timing sentence using the most positive year in romanceFacts.yearLuck and ONE reason.`,
+    finalFacts?.luckCycles?.changesInYear
+      ? `- "The career field where you shine and build wealth is ___. Your career makes its biggest shift around ${finalFacts.luckCycles.changesInYear}, when ___." (name one field from your career map; ${finalFacts.luckCycles.changesInYear} is when the current luck cycle hands over to the next one: explain the shift from the current to the next cycle in work terms. Keep the year exactly.)`
+      : `- "The career field where you shine and build wealth is ___." (name one field from your career map)`,
     `- A sentence about the strongest money stretch, in your own natural words: it must name finalFacts.wealthWindow (years) with its score label, and how wealth enters according to FINAL FACTS. For example "Your strongest money stretch is <window>, and it works best through <how wealth enters>." Do not reuse a stock template; if the next cycle is Low, call it a time of consolidating, not expanding.`,
   ].join('\n')
 }
