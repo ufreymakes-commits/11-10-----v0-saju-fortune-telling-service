@@ -499,6 +499,25 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
         </div>
       </div>
 
+      {/* Peek inside the paid report */}
+      <div className="mb-6 text-center">
+        <p className="text-sm font-semibold text-foreground">Peek inside the full report</p>
+        <p className="mb-3 text-[11px] text-muted-foreground">A real sample · 9 sections · 99 facts</p>
+        <div className="mx-auto w-[210px] overflow-hidden rounded-[22px] border-4 border-foreground/10 bg-black shadow-lg shadow-primary/10">
+          <video
+            src="/media/paid-report-peek.mp4"
+            poster="/media/paid-report-peek.jpg"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            className="block h-auto w-full"
+            aria-label="Scrolling through a sample 99 Facts report"
+          />
+        </div>
+      </div>
+
       {/* CTA intro text - outside the card */}
       <div className="text-center mb-4">
         <p className="text-sm text-foreground/80 leading-relaxed text-balance">
@@ -573,6 +592,24 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
         <NoPayPalAccountNote className="mx-auto mt-2 max-w-xs" />
       </div>
       
+      {/* Price comparison */}
+      <div className="mt-6 overflow-hidden rounded-xl border border-border bg-card text-xs">
+        <div className="grid grid-cols-2">
+          <div className="bg-muted/60 p-3 text-center font-semibold text-foreground/70">Bazi master reading in Singapore</div>
+          <div className="bg-primary/15 p-3 text-center font-semibold text-foreground">Sajume Korean Saju report</div>
+          {[
+            ['S$188+', `US$${PRICE_USD} (about S$26)`],
+            ["One master's view", '6,000+ reading patterns + Myungri principles'],
+            ['Book a slot and wait', 'Ready in minutes'],
+          ].map(([left, right]) => (
+            <div key={left} className="contents">
+              <div className="border-t border-border p-3 text-center text-muted-foreground">{left}</div>
+              <div className="border-t border-border bg-primary/5 p-3 text-center font-semibold text-foreground">{right}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Social Proof */}
       <div className="mt-6 text-center">
         <div className="flex justify-center gap-0.5 mb-1">
