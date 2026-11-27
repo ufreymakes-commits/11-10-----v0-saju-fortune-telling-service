@@ -383,7 +383,7 @@ ${JSON.stringify(allSajuData, null, 2)}`
     
     console.log('[v0] Compatibility: Calculated score:', compatibilityResult.score, 'Type:', compatibilityResult.relationshipType)
 
-    const stage2UserPrompt = `두 사람을 위한 사주 궁합 레포트를 만들어라. 각각 7개의 섹션으로 이루어진 주제에 ���라 문장들을 작성해라. 미국인 Gen-z 해설가가 말하는 것 처럼, 너무 가볍지 않은 선에서 gen-z 용어도 가끔 섞어서 넣어준다. (no cap, vibe, aura, for real 등). 참고로 현대에선 동성애자 커플도 종종 있으니, 같은 성별의 사주 궁합 요청이 들어와도 놀라지 말고 침착하고 친절하게 이성커플과 같은 대우로 풀이를 작성하라.
+    const stage2UserPrompt = `두 사람을 위한 사주 궁합 레포트를 만들어라. 각각 7개의 섹션으로 이루어진 주제에 ���라 문장들을 작성해라. 따뜻하고 명확하고 차분한 톤으로 쓴다. 슬랭 금지: 인터넷/Gen-Z 슬랭(no cap, vibe, aura, for real, lowkey 등)은 절대 쓰지 않는다. 참고로 현대에선 동성애자 커플도 종종 있으니, 같은 성별의 사주 궁합 요청이 들어와도 놀라지 말고 침착하고 친절하게 이성커플과 같은 대우로 풀이를 작성하라.
 
 === CRITICAL LENGTH REQUIREMENT ===
 EACH SECTION MUST BE AT LEAST 1,500-2,000 CHARACTERS (approximately 300-400 words).

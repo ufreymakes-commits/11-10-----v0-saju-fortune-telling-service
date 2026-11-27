@@ -10,6 +10,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { CheckIcon, ShieldCheckIcon } from 'lucide-react'
 import { PRICE_USD } from '@/lib/payments/prices'
 import { eventIdFor, ttTrack } from '@/lib/analytics/tiktok'
+import { NoPayPalAccountNote } from '@/components/card-payment-help'
 
 interface CheckoutContentProps {
   submissionId: string
@@ -321,10 +322,8 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
 
       <ReportGuarantee tone="light" className="mt-3" />
 
-      {/* Credit card notice */}
-      <p className="text-center text-xs text-muted-foreground mt-3">
-        You can use your credit card — no PayPal account needed
-      </p>
+      {/* Credit card notice (same box style as the guarantee) */}
+      <NoPayPalAccountNote className="mt-2" />
       <div className="flex justify-center mt-2">
         <Image
           src="/images/credit-cards.png"
