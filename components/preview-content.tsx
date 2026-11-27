@@ -597,14 +597,17 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
       </div>
       
       {/* Price comparison */}
-      <div className="mt-6 overflow-hidden rounded-xl border border-border bg-card text-xs">
+      <div className="relative mt-6 overflow-hidden rounded-xl border border-border bg-card text-xs">
+        <span className="absolute left-1/2 top-2.5 z-10 flex h-7 w-7 -translate-x-1/2 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-fuchsia-500 text-[10px] font-extrabold text-white shadow">
+          VS
+        </span>
         <div className="grid grid-cols-2">
-          <div className="bg-muted/60 p-3 text-center font-semibold text-foreground/70">Bazi master reading in Singapore</div>
-          <div className="bg-primary/15 p-3 text-center font-semibold text-foreground">Sajume Korean Saju report</div>
+          <div className="bg-muted/60 p-3 pr-5 text-center font-semibold text-foreground/70">Bazi master reading in Singapore</div>
+          <div className="bg-primary/15 p-3 pl-5 text-center font-semibold text-foreground">Sajume Korean Saju report</div>
           {[
-            ['S$188+', `US$${PRICE_USD} (about S$26)`],
-            ["One master's view", '6,000+ reading patterns + Myungri principles'],
-            ['Book a slot and wait', 'Ready in minutes'],
+            ['SGD 188+', `💰 US$${PRICE_USD} (about SGD 26)`],
+            ["One master's view", '✅ 6,000+ reading patterns + Myungri principles'],
+            ['Book a slot and wait', '🚀 Ready in minutes'],
           ].map(([left, right]) => (
             <div key={left} className="contents">
               <div className="border-t border-border p-3 text-center text-muted-foreground">{left}</div>
