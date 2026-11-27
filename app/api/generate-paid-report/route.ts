@@ -19,6 +19,7 @@ import {
   buildCardUserPrompt,
   withRequiredSentences,
 } from '@/lib/saju/paid-notes'
+import { focusYearFor } from '@/lib/report-year'
 
 // Vercel Hobby 플랜 최대 60초
 export const maxDuration = 300
@@ -1070,6 +1071,24 @@ export async function POST(request: Request) {
       console.error('[v0] buildPaidContext failed (falling back to raw saju_data):', e)
     }
 
+    // 커리어 전환 해: 관성(직장·직위) 또는 재성(돈·성과)이 유리하게 들어오는 가장 가까운 해 (decadeFortune.careerYears).
+    // 없으면 대운 교체 해(changesInYear)로 대신한다. 무료 페이지 💼 문장의 "20xx"를 채우는 값.
+    if (finalFacts) {
+      try {
+        const decades: any[] = sajuForPrompt?.decadeFortune?.decades ?? submission.saju_data?.decadeFortune?.decades ?? []
+        const upcoming = decades
+          .flatMap((d) => d?.careerYears ?? [])
+          .filter((y: any) => Number(y?.year) >= reportYear)
+          .sort((a: any, b: any) => a.year - b.year)
+        // 8년 안의 유리한 해가 있으면 그 해, 없으면 가장 가까운 커리어 해(부담이 오는 해도 변화의 해다)
+        const pick = upcoming.find((y: any) => y.polarity === 'favorable' && y.year <= reportYear + 8) ?? upcoming[0]
+        if (pick) finalFacts.careerShiftYear = { year: pick.year, age: pick.age, basis: 'career-year', polarity: pick.polarity, reason: pick.reason }
+        else if (finalFacts.luckCycles?.changesInYear) finalFacts.careerShiftYear = { year: finalFacts.luckCycles.changesInYear, basis: 'luck-cycle-change' }
+      } catch (e) {
+        console.error('[v0] careerShiftYear failed (continuing without):', e)
+      }
+    }
+
     const lovePeakData = finalFacts?.lovePeak
     const lovePeakTeaserYear: number | string =
       lovePeakData?.peak && (lovePeakData.peak.status === 'future' || lovePeakData.peak.status === 'this year')
@@ -1198,7 +1217,7 @@ Example: the first card starts with "Hey ${displayName}," and the last card star
 
 04. Career Motion: The Specialist vs. The Visionary 
 (Structural suitability for careers and specific fields where talent explodes. Forecast the previous 10 years and the next 10 years by calculating the Daewoon and specific years.)
-* Focus: Structural suitability and professional categories based on [Step 1-9]. You MUST include two distinct aspects: 'Structural Fit' (ideal working conditions/environment) and 'Talent Prominence' (where their natural abilities shine). You must also provide a total of at least two specific career fields as examples. Every sentence must maintain the razor-sharp precision and profound depth of the deep analysis report. 
+* Focus: Structural suitability and professional categories based on [Step 1-9]. MUST COVER (the free page promises "Jobs where I'll shine and build wealth"): give a wide, concrete map so the reader recognises their own path: name 4-6 specific fields or roles in total, grouped into 2-3 clusters that follow from the chart (e.g. "systems and planning: operations, project management, data", "care and teaching: counselling, education, HR"). Spread them across the cards rather than listing them all in one card. Then say which cluster is the stronger path for building money, consistent with the Money Flow section. You MUST include two distinct aspects: 'Structural Fit' (ideal working conditions/environment) and 'Talent Prominence' (where their natural abilities shine). You must also provide a total of at least two specific career fields as examples. Every sentence must maintain the razor-sharp precision and profound depth of the deep analysis report. 
 * Data: Month Branch Hidden Stems (Base DNA) + Independence Index (A vs. B) + Industrial Elements + Special Stars (Yeokma, Dohwa, etc.).
 * Fact Logic: Prove with data whether "living as a cog in a machine" is soul-crushing or if they must become a "Power Player" within a system.
 * FINAL FACTS rules: Mention a star (Sinsal) only if it appears in \`finalFacts.sinsalByPillar\`; never invent one. Take month-branch support (Deuk-ryeong), the current luck cycle, and the Gyo-un-gi (cycle change) from \`finalFacts.strength.gotMonthSupport\` and \`finalFacts.luckCycles\`; never work them out from age yourself.
@@ -1207,12 +1226,22 @@ Example: the first card starts with "Hey ${displayName}," and the last card star
 05. Money Flow: From 'Hustle' to 'Wealth Manifesting'
 (Channels of wealth luck and specific behavioral guidelines for attracting money, as well as things that are good to manage or turn into habits.) It is best to connect this naturally while having already well-understood and grasped the career section in part 4.
 * Focus: Presence of Wealth Stars (Jae-seong) and whether Output (Sik-sang) generates Wealth.
+* MUST COVER (the free page promises "My strongest money years"): one card must name the strongest money window with its years and ages exactly as in FINAL FACTS wealthWindow. If wealthWindow is missing, name the most supportive upcoming luck cycle from finalFacts.luckCycles with its years instead. Never invent years.
+* MUST COVER (how money most likely grows for THIS chart): one card must describe, as a likely pattern ("you have most likely been...", "money tends to grow for you through..."), the main way this person makes and grows money, read from the chart structure. Pick the 1-2 patterns that the chart actually supports and make it concrete enough to feel personal:
+  - Output feeding Wealth (Sik-sin/Sang-gwan producing Jae-seong): money from what they make, sell or create. E.g. "Of the projects or side businesses you have tried, one is likely to catch on and grow your income."
+  - Strong Officer (Gwan-seong) with Wealth: steady career money. E.g. "Your money most likely grows through a stable job and promotions first, then side income or investing on top."
+  - Indirect Wealth (Pyeon-jae) prominent: irregular, larger, deal-based money (sales, business, investment, commissions), with ups and downs to manage.
+  - Direct Wealth (Jeong-jae) prominent: steady, saved, built-up money (salary, savings, property over time).
+  - Strong Resource (In-seong): money through expertise, credentials, teaching or a trusted professional title.
+  - Strong Peer/Rob Wealth (Bi-gyeon/Geop-jae): money through partnerships, teams or competition, with a warning about shared money or lending.
+  Ground the choice in finalFacts and the ten gods; never promise amounts, never give specific investment advice (no stocks, coins or products).
 * Data: Intensity of Wealth Stars + Presence of a "Wealth Vault" (Jae-go) + Timing of wealth luck entry in the Daewoon. Analyze the form of a "Money Pipeline" rather than just simple effort.
 * FINAL FACTS rules: Mention a star (Sinsal) only if it appears in \`finalFacts.sinsalByPillar\`. Mention the Wealth Vault (Jae-go) only if "Jaegogwiin" (Wealth Vault) appears in \`finalFacts.sinsalByPillar\`. Take month-branch support (Deuk-ryeong), the current luck cycle, and the Gyo-un-gi (cycle change) from \`finalFacts.strength.gotMonthSupport\` and \`finalFacts.luckCycles\`; never work them out from age yourself.
 
 06. Love & Endgame: Your Relationship Dynamics 
 (Dating style, attractive energy, and clear hints about the future spouse. If there are specific years to note, capture the characteristics and inform them. For example, appearance, personality, job, synergy, harmony, etc.)
 * Focus: Spouse type and relationship dynamics.
+* MUST COVER (the free page promises "When and how I'll meet my person"): one analysis card (Cards 1-7) must describe HOW and in what kind of setting this person is most likely to meet a significant partner, as a tendency ("may", "tends to"), grounded in the chart: where the spouse star sits (year pillar: through family, old friends or a wider network; month pillar: through work, study or a shared workplace; hour pillar: later in life, through projects, juniors or a new chapter), plus Yeokma (travel, abroad, moving) or Dohwa (social settings) only if they appear in finalFacts.sinsalByPillar. The WHEN comes only from finalFacts.lovePeak per the rules below. Never invent a name, a job title or an exact place.
 * Data: Visibility of the Spouse Star (Wealth/Authority) via Stems, Branches, or Hidden Stems + Interactions (Hap, Chung, Wonjin) with the Day Branch (Spouse Palace) + Ten Gods of the spouse + the pre-computed \`romanceFacts\` block above and \`finalFacts.lovePeak\` inside FINAL FACTS.
 * Fact Logic: Go beyond simple "Dating (Dohwa/Siksang)" and analyze the stability of "Marriage (Spouse Star/Palace)" and the specific vibe of the partner (Elemental characteristics).
 * - Do not give generic marriage advice to a student, and do not treat a 40-year-old's relationship as a "first crush." Always consider the customer's age and Daewoon all together.
@@ -1248,9 +1277,10 @@ Example: the first card starts with "Hey ${displayName}," and the last card star
 (Confidence regarding the future peak period and the great changes ahead.)
 *Also carefully include some cards about individual and hyper-personalized advice to solve his or her own concern that may have been occured for a long time and why, of course based on their own saju-chart.this accurate advice will make his or her life better from ${reportYear} and also their future. They will be really encouraged and motivated so that they love this reading because they will be heart-touched genuinely. like... (one of random examples. 'How fiercely you’ve fought through life?', or 'how lonely you must have been? I know it all. In ${reportYear}, it is perfectly okay to rest a little when you feel like resting. You don't have to plan everything with such urgency. I truly mean it. You are definitely going to be okay and you will truly bloom')
 
-And please, you need to include these 3 sentences for 'everyone'. Because we masked this and showed on the free report page to persuade customers to pay for the paid report. Fill in the blank (*** or ** or *********** this mark), matching to this customer's saju data and context. You can put these sentences anywhere among the 96 cards, considering the context.
-- The main theme of your ${reportYear} is *** . (Ground *** in finalFacts: this year's stem/branch ten gods + the current luck cycle in FINAL FACTS.luckCycles.current. Name ONE opportunity and ONE thing to be careful about.)
+And please, you need to include these 4 sentences for 'everyone'. Because we masked this and showed on the free report page to persuade customers to pay for the paid report. Fill in the blank (*** or ** or *********** this mark), matching to this customer's saju data and context. You can put these sentences anywhere among the 96 cards, considering the context.
+- The main theme of your ${focusYearFor()} is *** . (Write exactly this year, ${focusYearFor()}: it is the year the free page shows. Ground *** in the ${focusYearFor()} year pillar's stem/branch ten gods from the yearly data + the luck cycle active in ${focusYearFor()} in FINAL FACTS.luckCycles. Name ONE opportunity and ONE thing to be careful about.)
 - Your love luck peaks around ${lovePeakTeaserYear}. The reason is [exactly ONE concrete reason]. Your partner tends to feel like [energy type]. (The free page blurs only ${lovePeakTeaserYear}; in the paid report follow the LOVE PEAK RULE below, including the two-year wording when peak.status is "past".)
+- The career field where you shine and build wealth is [one field from your Career Motion map]. Your career makes its biggest shift around [FINAL FACTS.careerShiftYear.year], when [why, in work terms: if basis is career-year, the Officer (job, title) or Wealth (money, results) energy arriving that year, as an opening if polarity is favorable or as pressure that pushes a change if polarity is caution; if basis is luck-cycle-change, the move into the next 10-year cycle]. (Use the year exactly; if careerShiftYear is missing, drop the second sentence.)
 - Your strongest money stretch is [finalFacts.wealthWindow years and its score label], and it works best through [how wealth enters per FINAL FACTS]. (Phrase it naturally in your own words, not as a fixed template; the money window and its score label must appear. Give a specific year range and a specific talent.)
 - Wealth-timing sentence: place the strongest money window inside a luck cycle whose score in finalFacts.luckCycles is Medium or High (current or previous). If the next cycle is Low, say that cycle is for consolidating what was built, not for expansion. Never call a Low cycle a period of big opportunities.
 

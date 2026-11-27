@@ -1008,13 +1008,14 @@ The goal is to sound true.
 IMPORTANT: Use the customer's name (${name}) ONLY in the FIRST sentence (id: 1) and the LAST sentence (id: 3) to make it personal. Do NOT use the name in the middle sentence (id: 2).
 Example: "Hey ${name}, ..." for the first fact, and "${name}, remember that..." for the last fact.
 
-테마: 성격(Personality) / 직업(Career Path) / 인생 터닝포인트(Life Turning Points)
+테마: 성격(Personality) / 일하는 구조(Career Structure) / 지금까지 반복된 삶의 패턴(Life Pattern so far)
+원칙: 성격과 과거는 무료로 정확하게 주고, 커리어·연애·돈의 '언제·어떻게·누구·무슨 분야'는 절대 주지 않는다(유료에서 공개).
 인생을 살면서 늘 궁금해하거나 고민하는 삶의 현상으로 보이는 현실에 대한 3가지 팩트이자 위로와 공감이어야 한다. 글을 읽자마자 이렇게 느껴야 한다. '뭐야? 나에 대해서 어떻게 알았지? 이거 뭐야 완전 eerie 하네. 근데 또 엄청 위로가 되고 내 지난 날의 괴로움과 고통에 대해서 누구보다 정확하게 어루만져줘서 눈물이 나려하네. 응원을 받았어. 이 서비스 정말 감동적이다.'
 
 [🚫 절대 주의사항 (결제 전환율을 위한 필수 제약)]
 - 현재의 구체적 상황(예: 너 지금 솔로지?)이나 미래에 대한 구체적 예언을 절대 하지 말 것. 틀리면 고객이 즉각 이탈함. 철저히 '행동 패턴'과 '심리 기질'에만 집중할 것.
-- 2번(Career Path): 직업명(예: Project Manager, Doctor 등)은 아직 언급하지 말되, 잘 어울리는 산업 분야에 대해서는 언급 해도 됨!(예시: Education, Medical, Food, UX, Tech, Contents, Consulting 등등..) 고객이 어떤 '업무 환경(구조적 적합성)'에서 스트레스를 받고, 어떤 '일하는 방식과 분야(재능적 두각)'에서 가장 빛나는지 그 패턴을 이 사람의 사주 해설지를 확인한 후 구체적이고 사실적으로 묘사할 것.
-- 3번(Life Turning소 Points): 어떤 종류의 터닝포인트인지는 구체적으로 얘기해주되, 구체적인 연도나 나이를 절대로 스포일러 하지 말 것! (예: 2026년에 조심해라, 38살에 만난다 등 금지).대신 예를 들어 "몇년 안에 ~ 이런 터닝포인트가 다가오고 있고, ~이런 문제를 해결하게 된다."등의 강력한 호기심(Curiosity Gap)만 유발하여 유료 결제를 유도할 것.
+- 2번(Career Structure): 어떤 '업무 구조/환경'에서 강하고 어떤 구조에서 지치는지만 말할 것 (예: 혼자 설계하고 결정할 때, 규칙이 명확한 팀 안에서, 사람을 돌보는 역할 등). 직업명은 물론 산업 분야(Tech, Education, Medical, Real estate 등)도 절대 언급하지 말 것. 마지막에 "가장 잘 맞는 분야와 커리어가 크게 바뀌는 해는 전체 레포트에 있다"는 식의 호기심만 남길 것.
+- 3번(Life Pattern so far): 지금까지 살면서 반복되어 온 패턴(관계, 감정, 선택 방식 등)을 과거형으로 구체적으로 짚어줄 것. "어떻게 알았지?" 싶을 만큼 이 사주에서만 나오는 내용이어야 함. 구체적인 연도나 나이는 쓰지 말 것. 마지막 문장은 따뜻한 위로와 함께, 이 패턴이 앞으로 언제 어떻게 바뀌는지는 전체 레포트에 있다는 호기심(Curiosity Gap)만 남길 것. 미래 예언 금지.
 
 === 심화 분석 보고서 ===
 ${JSON.stringify(deepAnalysis, null, 2)}
@@ -1026,8 +1027,8 @@ OUTPUT FORMAT (JSON ONLY):
 {
   "facts": [
     {"id": 1, "title": "[Personality/Energy]", "content": "[2 sentences]"},
-    {"id": 2, "title": "[Career Path]", "content": "[2 sentences: 구조적 적합성 + 재능적 두각]"},
-    {"id": 3, "title": "[Life Turning Points]", "content": "[2 sentences: 강력한 Curiosity Gap + 위로와 응원]"}
+    {"id": 2, "title": "[Career Structure]", "content": "[2 sentences: 강한 구조 + 지치는 구조, 분야/직업명 금지]"},
+    {"id": 3, "title": "[Life Pattern]", "content": "[2 sentences: 과거에 반복된 패턴 + 위로와 Curiosity Gap]"}
   ]
 }
 \`\`\`

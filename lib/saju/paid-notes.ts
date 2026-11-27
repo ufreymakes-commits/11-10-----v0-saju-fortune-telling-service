@@ -1,3 +1,4 @@
+import { focusYearFor } from '@/lib/report-year'
 // v26a: two-stage paid report. Stage 1 = reading notes (this file), Stage 2 = cards (slim prompt below).
 // Everything here is English-only. Facts come from buildPaidContext / buildRomanceFacts / gumiho-context helpers.
 import { checkGuards } from './ten-god-guards'
@@ -111,8 +112,11 @@ export function buildLovePeakSentence(lp: any): string | null {
 export function buildRequiredSentences(finalFacts: any, reportYear: number) {
   const love = buildLovePeakSentence(finalFacts?.lovePeak)
   return [
-    `- "The main theme of your ${reportYear} is ___." (name ONE opportunity and ONE thing to watch, grounded in this year's ten gods and the current cycle in the notes)`,
+    `- "The main theme of your ${focusYearFor()} is ___." (name ONE opportunity and ONE thing to watch, grounded in ${focusYearFor()}'s year pillar ten gods and the luck cycle active in ${focusYearFor()}; this is the year the free page shows)`,
     love ? `- "${love}" (keep the years exactly; write the [bracketed] parts yourself; use the wording "the chance of a meaningful connection is highest", never "you will meet your spouse")` : `- A love-timing sentence using the most positive year in romanceFacts.yearLuck and ONE reason.`,
+    finalFacts?.careerShiftYear?.year
+      ? `- "The career field where you shine and build wealth is ___. Your career makes its biggest shift around ${finalFacts.careerShiftYear.year}, when ___." (name one field from your career map; keep the year exactly; explain why in work terms: ${finalFacts.careerShiftYear.basis === 'career-year' ? (finalFacts.careerShiftYear.polarity === 'favorable' ? 'that year brings supportive Officer (job, title) or Wealth (money, results) energy, an opening' : 'that year brings heavy Officer (job, title) or Wealth (money, results) energy, pressure that pushes a change; frame it as a turning point to prepare for, never as a disaster') : 'that is when the current 10-year luck cycle hands over to the next'})`
+      : `- "The career field where you shine and build wealth is ___." (name one field from your career map)`,
     `- A sentence about the strongest money stretch, in your own natural words: it must name finalFacts.wealthWindow (years) with its score label, and how wealth enters according to FINAL FACTS. For example "Your strongest money stretch is <window>, and it works best through <how wealth enters>." Do not reuse a stock template; if the next cycle is Low, call it a time of consolidating, not expanding.`,
   ].join('\n')
 }

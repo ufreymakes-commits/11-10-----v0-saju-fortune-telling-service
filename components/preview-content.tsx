@@ -6,15 +6,16 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ReportGuarantee } from '@/components/report-guarantee'
 import { CardHelpModal, NoPayPalAccountNote } from '@/components/card-payment-help'
+import { GumihoLockedModal } from '@/components/gumiho-locked-modal'
 import { TypingUserCount } from '@/components/typing-user-count'
 import { LoadingVideoScreen } from '@/components/loading-video-screen'
 import { Marquee } from '@/components/marquee'
-import { NewYear2027ProductCard } from '@/components/new-year-2027-product-card'
 import { DayMasterCard } from '@/components/day-master-card'
 import { CardActions } from '@/components/tarot-frame'
 import type { Fact, SajuData } from '@/lib/types'
 import { LockIcon, Share2Icon, CheckIcon } from 'lucide-react'
 import { PRICE_USD } from '@/lib/payments/prices'
+import { focusYearFor } from '@/lib/report-year'
 import { eventIdFor, fireOnce, ttTrack, ttIdentifySubmission } from '@/lib/analytics/tiktok'
 
 
@@ -178,6 +179,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
   const [error, setError] = useState<string | null>(null)
   const [limitMessage, setLimitMessage] = useState<string | null>(null)
   const [cardHelpOpen, setCardHelpOpen] = useState(false)
+  const [gumihoLockedOpen, setGumihoLockedOpen] = useState(false)
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0)
 
   const loadingMessages = [
@@ -443,25 +445,22 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
 
       {/* Teaser Facts 10, 11, 12 with blur */}
       <div className="mb-6">
-        <p className="text-xs text-left mb-2 bg-gradient-to-r from-purple-500 to-fuchsia-500 bg-clip-text text-transparent font-medium">
-          From your ideal career path to when your love luck peaks!
-        </p>
         <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
           <span className="bg-gradient-to-r from-purple-500 to-fuchsia-500 bg-clip-text text-transparent text-xl">Hidden VIP Insights</span>
           <LockIcon className="w-3 h-3 text-purple-400" />
         </h2>
         
         <div className="space-y-2">
-          {/* Fact 4 */}
+          {/* Fact 4: career (the free fact 2 only gives the work structure) */}
           <div className="relative bg-muted border border-border rounded-lg p-3 overflow-hidden">
             <div className="flex gap-2">
               <span className="text-muted-foreground font-bold text-sm">4</span>
               <p className="text-foreground/90 text-xs leading-relaxed font-bold">
-                🚨 {submission.name}, Congratulations! The main theme of your 2026 is &quot;<span className="blur-[5px] select-none bg-primary/20 px-2">hidden content</span>&quot;. Hmm.. But be careful of <span className="blur-[5px] select-none bg-primary/20 px-2">something</span>, as <span className="blur-[5px] select-none bg-primary/20 px-2">reason here</span> doesn&apos;t fit well with your lifestyle.
+                💼 The career field where you shine and build wealth is <span className="blur-[5px] select-none bg-primary/20 px-2">hidden field</span>. Your career makes its biggest shift around 20<span className="blur-[5px] select-none bg-primary/20 px-1">xx</span>, when <span className="blur-[5px] select-none bg-primary/20 px-2">reason here</span>.
               </p>
             </div>
           </div>
-          
+
           {/* Fact 5 */}
           <div className="relative bg-muted border border-border rounded-lg p-3 overflow-hidden">
             <div className="flex gap-2">
@@ -471,21 +470,50 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
               </p>
             </div>
           </div>
-          
+
           {/* Fact 6 */}
           <div className="relative bg-muted border border-border rounded-lg p-3 overflow-hidden">
             <div className="flex gap-2">
               <span className="text-muted-foreground font-bold text-sm">6</span>
               <p className="text-foreground/90 text-xs leading-relaxed font-bold">
-                💰 Hey, {submission.name}! Your wealth flow timing and secret talents are already mapped out like <span className="blur-[5px] select-none bg-primary/20 px-3">여기 블러 처리</span> Ready to see your future from this angle?
+                💰 Your strongest money years are <span className="blur-[5px] select-none bg-primary/20 px-2">year range</span>, and the way money comes to you is <span className="blur-[5px] select-none bg-primary/20 px-2">hidden pattern</span>.
               </p>
             </div>
           </div>
-          
+
+          {/* Fact 7 */}
+          <div className="relative bg-muted border border-border rounded-lg p-3 overflow-hidden">
+            <div className="flex gap-2">
+              <span className="text-muted-foreground font-bold text-sm">7</span>
+              <p className="text-foreground/90 text-xs leading-relaxed font-bold">
+                🚨 {submission.name}, the main theme of your {focusYearFor()} is &quot;<span className="blur-[5px] select-none bg-primary/20 px-2">hidden content</span>&quot;. But be careful of <span className="blur-[5px] select-none bg-primary/20 px-2">something</span>, as it doesn&apos;t fit your chart.
+              </p>
+            </div>
+          </div>
+
           {/* ...99 facts indicator */}
           <div className="text-center py-3">
             <span className="text-muted-foreground text-sm tracking-widest">. . . 99 hidden gems</span>
           </div>
+        </div>
+      </div>
+
+      {/* Peek inside the paid report */}
+      <div className="mb-6 text-center">
+        <p className="text-sm font-semibold text-foreground">Peek inside the full report</p>
+        <p className="mb-3 text-[11px] text-muted-foreground">A real sample · 9 sections · 99 facts</p>
+        <div className="mx-auto w-[210px] overflow-hidden rounded-[22px] border-4 border-foreground/10 bg-black shadow-lg shadow-primary/10">
+          <video
+            src="/media/paid-report-peek.mp4"
+            poster="/media/paid-report-peek.jpg"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            className="block h-auto w-full"
+            aria-label="Scrolling through a sample 99 Facts report"
+          />
         </div>
       </div>
 
@@ -510,18 +538,28 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
         <h3 className="text-2xl font-bold text-gradient mb-0">
           Unlock 99 Secret Facts!
         </h3>
-        <p className="text-sm font-bold text-foreground/80 mb-2">
-          Full Report · 9 Sections Included
+        <p className="text-sm font-bold text-foreground/80 mb-3">
+          Full Report · 99 Facts · 9 Sections
         </p>
 
-        <p className="text-xs text-muted-foreground/70 leading-relaxed mb-3 px-2 text-balance">
-          Core Aura · Inner Child Era · Present Energy · Career Motion · Money Flow · Love &amp; Endgame · Future Self Sneak Peek · Lucky Environment · The Next Chapter
-        </p>
+        <ul className="mx-auto mb-3 max-w-xs space-y-1.5 text-left text-sm text-foreground/90">
+          {[
+            'Jobs where I\'ll shine and build wealth',
+            'When and how I\'ll meet my person',
+            'My strongest money years',
+            'My strengths, life roadmap, health, lucky elements & more',
+          ].map((item) => (
+            <li key={item} className="flex gap-2">
+              <span aria-hidden>✅</span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
         
         <div className="flex items-center justify-center gap-2 mb-3">
-          <span className="text-muted-foreground line-through text-xs">$39.99</span>
-          <span className="text-xl font-bold bg-gradient-to-r from-purple-500 to-fuchsia-500 bg-clip-text text-transparent">$19.99</span>
-          <span className="text-[10px] font-bold bg-red-500 text-white px-1.5 py-0.5 rounded-full">50% HOT</span>
+          <span className="text-muted-foreground line-through decoration-red-500 text-xs">$39.99</span>
+          <span className="text-xl font-bold bg-gradient-to-r from-purple-500 to-fuchsia-500 bg-clip-text text-transparent">Now ${PRICE_USD}</span>
+          <span className="text-[10px] font-bold bg-red-500 text-white px-1.5 py-0.5 rounded-full">50% OFF</span>
         </div>
         
         <Link href={`/checkout/${submissionId}`}>
@@ -541,6 +579,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
         </Button>
         
         <CardHelpModal open={cardHelpOpen} onClose={() => setCardHelpOpen(false)} checkoutHref={`/checkout/${submissionId}`} />
+        <GumihoLockedModal open={gumihoLockedOpen} onClose={() => setGumihoLockedOpen(false)} ctaHref={`/checkout/${submissionId}`} />
         <div className="flex justify-center mt-2">
           <Image
             src="/images/credit-cards.png"
@@ -554,6 +593,27 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
         <NoPayPalAccountNote className="mx-auto mt-2 max-w-xs" />
       </div>
       
+      {/* Price comparison */}
+      <div className="relative mt-6 overflow-hidden rounded-xl border border-border bg-card text-xs">
+        <span className="absolute left-1/2 top-2.5 z-10 flex h-7 w-7 -translate-x-1/2 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-fuchsia-500 text-[10px] font-extrabold text-white shadow">
+          VS
+        </span>
+        <div className="grid grid-cols-2">
+          <div className="bg-muted/60 p-3 pr-5 text-center font-semibold text-foreground/70">Bazi master reading in Singapore</div>
+          <div className="bg-primary/15 p-3 pl-5 text-center font-semibold text-foreground">Sajume Korean Saju report</div>
+          {[
+            ['SGD 188+', `💰 US$${PRICE_USD} (about SGD 26)`],
+            ["One master's view", '✅ 6,000+ reading patterns + Myungri principles'],
+            ['Book a slot and wait', '🚀 Ready in minutes'],
+          ].map(([left, right]) => (
+            <div key={left} className="contents">
+              <div className="border-t border-border p-3 text-center text-muted-foreground">{left}</div>
+              <div className="border-t border-border bg-primary/5 p-3 text-center font-semibold text-foreground">{right}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Social Proof */}
       <div className="mt-6 text-center">
         <div className="flex justify-center gap-0.5 mb-1">
@@ -619,58 +679,15 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
         </div>
       </div>
 
-      {/* Personal Luck Bracelet Card */}
-      <div className="mt-8">
-        <p className="text-lg font-semibold text-foreground mb-2 text-center">
-          <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">&quot;Your wish is my command&quot;</span>
+      {/* How the reading is made */}
+      <div className="mt-8 rounded-xl border border-primary/30 bg-card p-5 text-center">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-primary">How your reading is made</p>
+        <h4 className="mt-2 text-base font-bold leading-snug text-foreground">Not a moody guru. Not a guessing GPT.<br />A refined, certified system.</h4>
+        <p className="mt-2 text-xs leading-relaxed text-foreground/80 text-balance">
+          Same four pillars as Bazi, read the Korean way: your five elements, turned into clear timing and next steps.
+          Every report is analysed by a system built on patterns from 6,000+ readings and the principles of
+          KPEI-certified Myungri Psychology Counselors (Level 1 &amp; 2).
         </p>
-        <p className="text-sm text-muted-foreground text-center mb-4 leading-relaxed">
-          {(() => {
-            // 용신은 사주 데이터에서 직접 계산된 값을 사용 (무료 fact가 3개로 줄어 fact 8이 없음)
-            const yongsin = submission.sajuData?.yongsin || submission.sajuData?.luckyElement || 'Water'
-            return (
-              <>
-                Did you know that among Fire, Water, Wood, Metal, and Earth,<br className="hidden md:inline" />
-                <span className="md:inline"> the closer you stay to <span className="font-semibold text-foreground">{yongsin}</span>, the luckier you become?</span>
-              </>
-            )
-          })()}
-        </p>
-        <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 border border-amber-500/30 rounded-xl p-5">
-          <div className="relative w-full mb-4 rounded-lg overflow-hidden bg-[#1a1a2e] flex items-center justify-center" style={{ aspectRatio: '796/531' }}>
-            <Image
-              src="/images/saju-bracelet-new.png"
-              alt="Signature Saju Elemental Bracelet"
-              width={796}
-              height={531}
-              className="w-full h-full object-cover object-center"
-            />
-          </div>
-          <h4 className="text-sm font-semibold text-white mb-1">Your Personal Lucky Element Bracelet</h4>
-          <p className="text-xs text-white/60 mb-3">A signature bracelet designed to fill the missing energies in your personal Saju chart and attract good fortune.</p>
-          <div className="flex items-end justify-between gap-3">
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-amber-300">Personalized to your Saju</span>
-                <span className="text-xs text-white/40 line-through">$50</span>
-                <span className="text-sm font-bold text-white">$38</span>
-              </div>
-              {/* Shopify badge */}
-              <div className="flex items-center gap-1.5">
-                <Image
-                  src="/images/shopify-logo.png"
-                  alt="Shopify"
-                  width={16}
-                  height={16}
-                  className="object-contain"
-                />
-                <span className="text-[11px] text-amber-300/80">Shop at Sajume Shopify</span>
-              </div>
-            </div>
-            {/* Shop Now button - bottom right */}
-            <a href="https://sajume.com/products/personal-luck-bracelet" target="_blank" rel="noopener noreferrer" className="shrink-0 text-center py-2 px-4 rounded-lg text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-black border border-amber-400 transition-all">Shop Now</a>
-          </div>
-        </div>
       </div>
 
       {/* Ask the Gumiho 1:1 Card */}
@@ -695,11 +712,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
               </div>
             </div>
             <button
-              onClick={() => {
-                if (typeof window !== 'undefined') {
-                  window.alert('This product is exclusively available to customers who have purchased the 99 Facts Report. Please purchase the 99 Facts Report first.')
-                }
-              }}
+              onClick={() => setGumihoLockedOpen(true)}
               className="shrink-0 text-center py-2 px-4 rounded-lg text-xs font-semibold bg-fuchsia-500 hover:bg-fuchsia-400 text-white border border-fuchsia-400 transition-all"
             >
               Ask Now (3 mins)
@@ -707,39 +720,6 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           </div>
         </div>
       </div>
-
-      {/* Saju Compatibility card */}
-      <div className="mt-6">
-        <div className="bg-gradient-to-br from-pink-900/40 to-rose-900/40 border border-pink-500/30 rounded-xl p-5">
-          <h4 className="text-sm font-semibold text-white mb-3">Saju Compatibility</h4>
-          <div className="relative w-full mb-3 rounded-lg overflow-hidden bg-[#1a1a2e]" style={{ aspectRatio: '1/1' }}>
-            <Image
-              src="/media/thumb-compatibility.webp" sizes="(min-width: 768px) 384px, 100vw"
-              alt="Relationship Compatibility"
-              fill
-              className="object-cover"
-            />
-          </div>
-          <p className="text-xs text-white/60 mb-3">Deep dive into your relationship dynamics and love compatibility based on both Saju charts.</p>
-          <div className="flex items-end justify-between gap-3">
-            <div className="flex flex-col gap-0.5">
-              <span className="text-xs text-pink-300">Compare two birth charts</span>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-white">$19.99</span>
-              </div>
-            </div>
-            <a
-              href="/compatibility"
-              className="shrink-0 text-center py-2 px-4 rounded-lg text-xs font-semibold bg-pink-500 hover:bg-pink-400 text-white border border-pink-400 transition-all"
-            >
-              Shop Now (3 mins)
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* 2027 New Year Monthly card */}
-      <NewYear2027ProductCard />
 
       {/* Footer */}
       <div className="mt-10 pt-6 border-t border-border text-center">

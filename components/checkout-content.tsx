@@ -296,6 +296,11 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
         <span className="mt-1 block text-sm leading-relaxed text-muted-foreground">
           You&apos;ll get your report first, then ask your 3 questions whenever you&apos;re ready.
         </span>
+        <span className="mt-1.5 block text-xs leading-relaxed text-muted-foreground">
+          <span className="font-semibold text-foreground/80">Example questions</span>
+          <span className="block">✅ Stable job: should I stay or quit?</span>
+          <span className="block">✅ Melbourne or London: where will I do better?</span>
+        </span>
         <span className="mt-1.5 block text-sm font-semibold leading-relaxed text-primary">
           You won&apos;t regret it 😎
         </span>
