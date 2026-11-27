@@ -38,6 +38,10 @@ export interface SettleResult {
   state: SettleState
   changed: boolean
   submissionId: string | null
+  /** PayPal order status when the order is not approved yet (e.g. CREATED, PAYER_ACTION_REQUIRED). */
+  orderStatus?: string
+  /** PayPal link the buyer must open to finish (e.g. card 3-D Secure) when orderStatus is PAYER_ACTION_REQUIRED. */
+  payerActionUrl?: string
 }
 
 type PayPalResponse = { status: number; body: any } | null // null = network error / timeout
@@ -315,7 +319,12 @@ export async function settlePayment(orderId: string, source: SettleSource): Prom
     } else if (ageMs > ORDER_NOT_APPROVED_FAIL_AFTER_MS) {
       return markFailed(`order-${String(order.body?.status ?? 'unknown').toLowerCase()}-expired`)
     } else {
-      return result('pending')
+      // Not approved yet: the buyer has not finished at PayPal (or needs a card verification step).
+      const orderStatus = String(order.body?.status ?? 'UNKNOWN')
+      const links: Array<{ rel?: string; href?: string }> = Array.isArray(order.body?.links) ? order.body.links : []
+      const payerActionUrl = links.find((l) => l.rel === 'payer-action')?.href
+      if (source === 'browser') log(orderId, source, 'pending', `order-status=${orderStatus}${payerActionUrl ? ' payer-action' : ''}`)
+      return { state: 'pending', changed: false, submissionId, orderStatus, payerActionUrl }
     }
   }
 
