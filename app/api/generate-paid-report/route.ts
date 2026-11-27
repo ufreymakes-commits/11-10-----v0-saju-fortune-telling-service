@@ -19,6 +19,7 @@ import {
   buildCardUserPrompt,
   withRequiredSentences,
 } from '@/lib/saju/paid-notes'
+import { focusYearFor } from '@/lib/report-year'
 
 // Vercel Hobby 플랜 최대 60초
 export const maxDuration = 300
@@ -1259,7 +1260,7 @@ Example: the first card starts with "Hey ${displayName}," and the last card star
 *Also carefully include some cards about individual and hyper-personalized advice to solve his or her own concern that may have been occured for a long time and why, of course based on their own saju-chart.this accurate advice will make his or her life better from ${reportYear} and also their future. They will be really encouraged and motivated so that they love this reading because they will be heart-touched genuinely. like... (one of random examples. 'How fiercely you’ve fought through life?', or 'how lonely you must have been? I know it all. In ${reportYear}, it is perfectly okay to rest a little when you feel like resting. You don't have to plan everything with such urgency. I truly mean it. You are definitely going to be okay and you will truly bloom')
 
 And please, you need to include these 3 sentences for 'everyone'. Because we masked this and showed on the free report page to persuade customers to pay for the paid report. Fill in the blank (*** or ** or *********** this mark), matching to this customer's saju data and context. You can put these sentences anywhere among the 96 cards, considering the context.
-- The main theme of your ${reportYear} is *** . (Ground *** in finalFacts: this year's stem/branch ten gods + the current luck cycle in FINAL FACTS.luckCycles.current. Name ONE opportunity and ONE thing to be careful about.)
+- The main theme of your ${focusYearFor()} is *** . (Write exactly this year, ${focusYearFor()}: it is the year the free page shows. Ground *** in the ${focusYearFor()} year pillar's stem/branch ten gods from the yearly data + the luck cycle active in ${focusYearFor()} in FINAL FACTS.luckCycles. Name ONE opportunity and ONE thing to be careful about.)
 - Your love luck peaks around ${lovePeakTeaserYear}. The reason is [exactly ONE concrete reason]. Your partner tends to feel like [energy type]. (The free page blurs only ${lovePeakTeaserYear}; in the paid report follow the LOVE PEAK RULE below, including the two-year wording when peak.status is "past".)
 - Your strongest money stretch is [finalFacts.wealthWindow years and its score label], and it works best through [how wealth enters per FINAL FACTS]. (Phrase it naturally in your own words, not as a fixed template; the money window and its score label must appear. Give a specific year range and a specific talent.)
 - Wealth-timing sentence: place the strongest money window inside a luck cycle whose score in finalFacts.luckCycles is Medium or High (current or previous). If the next cycle is Low, say that cycle is for consolidating what was built, not for expansion. Never call a Low cycle a period of big opportunities.

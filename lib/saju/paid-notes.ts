@@ -1,3 +1,4 @@
+import { focusYearFor } from '@/lib/report-year'
 // v26a: two-stage paid report. Stage 1 = reading notes (this file), Stage 2 = cards (slim prompt below).
 // Everything here is English-only. Facts come from buildPaidContext / buildRomanceFacts / gumiho-context helpers.
 import { checkGuards } from './ten-god-guards'
@@ -111,7 +112,7 @@ export function buildLovePeakSentence(lp: any): string | null {
 export function buildRequiredSentences(finalFacts: any, reportYear: number) {
   const love = buildLovePeakSentence(finalFacts?.lovePeak)
   return [
-    `- "The main theme of your ${reportYear} is ___." (name ONE opportunity and ONE thing to watch, grounded in this year's ten gods and the current cycle in the notes)`,
+    `- "The main theme of your ${focusYearFor()} is ___." (name ONE opportunity and ONE thing to watch, grounded in ${focusYearFor()}'s year pillar ten gods and the luck cycle active in ${focusYearFor()}; this is the year the free page shows)`,
     love ? `- "${love}" (keep the years exactly; write the [bracketed] parts yourself; use the wording "the chance of a meaningful connection is highest", never "you will meet your spouse")` : `- A love-timing sentence using the most positive year in romanceFacts.yearLuck and ONE reason.`,
     `- A sentence about the strongest money stretch, in your own natural words: it must name finalFacts.wealthWindow (years) with its score label, and how wealth enters according to FINAL FACTS. For example "Your strongest money stretch is <window>, and it works best through <how wealth enters>." Do not reuse a stock template; if the next cycle is Low, call it a time of consolidating, not expanding.`,
   ].join('\n')
