@@ -8,13 +8,16 @@ import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { GUMIHO_PRICE_USD } from '@/lib/payments/prices'
-import { eventIdFor, ttTrack } from '@/lib/analytics/tiktok'
+import { eventIdFor, ttTrack, ttIdentifySubmission } from '@/lib/analytics/tiktok'
 
 export default function AskGumihoCheckoutPage() {
   const params = useParams()
   const searchParams = useSearchParams()
   const router = useRouter()
   const submissionId = params.id as string
+  useEffect(() => {
+    void ttIdentifySubmission(submissionId)
+  }, [submissionId])
   const questionId = searchParams.get('questionId')
 
   const [loading, setLoading] = useState(true)

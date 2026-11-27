@@ -9,7 +9,7 @@ import { ReportGuarantee } from '@/components/report-guarantee'
 import { Spinner } from '@/components/ui/spinner'
 import { CheckIcon, ShieldCheckIcon } from 'lucide-react'
 import { PRICE_USD } from '@/lib/payments/prices'
-import { eventIdFor, ttTrack } from '@/lib/analytics/tiktok'
+import { eventIdFor, ttTrack, ttIdentifySubmission } from '@/lib/analytics/tiktok'
 import { NoPayPalAccountNote } from '@/components/card-payment-help'
 
 interface CheckoutContentProps {
@@ -18,6 +18,9 @@ interface CheckoutContentProps {
 }
 
 export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
+  useEffect(() => {
+    void ttIdentifySubmission(submissionId)
+  }, [submissionId])
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

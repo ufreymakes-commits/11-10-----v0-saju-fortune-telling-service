@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { ReportProgress, useReportGeneration } from '@/components/report-progress'
 import { CheckCircleIcon } from 'lucide-react'
 import { PRICE_USD } from '@/lib/payments/prices'
-import { eventIdFor, fireOnce, ttTrack } from '@/lib/analytics/tiktok'
+import { eventIdFor, fireOnce, ttTrack, ttIdentifySubmission } from '@/lib/analytics/tiktok'
 
 interface PaymentSuccessHandlerProps {
   submissionId: string
@@ -42,6 +42,9 @@ function trackPaymentCompleted(submissionId: string) {
 }
 
 export function PaymentSuccessHandler({ submissionId, orderId }: PaymentSuccessHandlerProps) {
+  useEffect(() => {
+    void ttIdentifySubmission(submissionId)
+  }, [submissionId])
   const router = useRouter()
   const [phase, setPhase] = useState<Phase>('processing')
   const [error, setError] = useState<string | null>(null)
