@@ -1071,6 +1071,24 @@ export async function POST(request: Request) {
       console.error('[v0] buildPaidContext failed (falling back to raw saju_data):', e)
     }
 
+    // 커리어 전환 해: 관성(직장·직위) 또는 재성(돈·성과)이 유리하게 들어오는 가장 가까운 해 (decadeFortune.careerYears).
+    // 없으면 대운 교체 해(changesInYear)로 대신한다. 무료 페이지 💼 문장의 "20xx"를 채우는 값.
+    if (finalFacts) {
+      try {
+        const decades: any[] = sajuForPrompt?.decadeFortune?.decades ?? submission.saju_data?.decadeFortune?.decades ?? []
+        const upcoming = decades
+          .flatMap((d) => d?.careerYears ?? [])
+          .filter((y: any) => Number(y?.year) >= reportYear)
+          .sort((a: any, b: any) => a.year - b.year)
+        // 8년 안의 유리한 해가 있으면 그 해, 없으면 가장 가까운 커리어 해(부담이 오는 해도 변화의 해다)
+        const pick = upcoming.find((y: any) => y.polarity === 'favorable' && y.year <= reportYear + 8) ?? upcoming[0]
+        if (pick) finalFacts.careerShiftYear = { year: pick.year, age: pick.age, basis: 'career-year', polarity: pick.polarity, reason: pick.reason }
+        else if (finalFacts.luckCycles?.changesInYear) finalFacts.careerShiftYear = { year: finalFacts.luckCycles.changesInYear, basis: 'luck-cycle-change' }
+      } catch (e) {
+        console.error('[v0] careerShiftYear failed (continuing without):', e)
+      }
+    }
+
     const lovePeakData = finalFacts?.lovePeak
     const lovePeakTeaserYear: number | string =
       lovePeakData?.peak && (lovePeakData.peak.status === 'future' || lovePeakData.peak.status === 'this year')
@@ -1262,7 +1280,7 @@ Example: the first card starts with "Hey ${displayName}," and the last card star
 And please, you need to include these 4 sentences for 'everyone'. Because we masked this and showed on the free report page to persuade customers to pay for the paid report. Fill in the blank (*** or ** or *********** this mark), matching to this customer's saju data and context. You can put these sentences anywhere among the 96 cards, considering the context.
 - The main theme of your ${focusYearFor()} is *** . (Write exactly this year, ${focusYearFor()}: it is the year the free page shows. Ground *** in the ${focusYearFor()} year pillar's stem/branch ten gods from the yearly data + the luck cycle active in ${focusYearFor()} in FINAL FACTS.luckCycles. Name ONE opportunity and ONE thing to be careful about.)
 - Your love luck peaks around ${lovePeakTeaserYear}. The reason is [exactly ONE concrete reason]. Your partner tends to feel like [energy type]. (The free page blurs only ${lovePeakTeaserYear}; in the paid report follow the LOVE PEAK RULE below, including the two-year wording when peak.status is "past".)
-- The career field where you shine and build wealth is [one field from your Career Motion map]. Your career makes its biggest shift around [FINAL FACTS.luckCycles.changesInYear], when [the move from the current to the next luck cycle, in work terms]. (Use changesInYear exactly; if it is missing, drop the second sentence.)
+- The career field where you shine and build wealth is [one field from your Career Motion map]. Your career makes its biggest shift around [FINAL FACTS.careerShiftYear.year], when [why, in work terms: if basis is career-year, the Officer (job, title) or Wealth (money, results) energy arriving that year, as an opening if polarity is favorable or as pressure that pushes a change if polarity is caution; if basis is luck-cycle-change, the move into the next 10-year cycle]. (Use the year exactly; if careerShiftYear is missing, drop the second sentence.)
 - Your strongest money stretch is [finalFacts.wealthWindow years and its score label], and it works best through [how wealth enters per FINAL FACTS]. (Phrase it naturally in your own words, not as a fixed template; the money window and its score label must appear. Give a specific year range and a specific talent.)
 - Wealth-timing sentence: place the strongest money window inside a luck cycle whose score in finalFacts.luckCycles is Medium or High (current or previous). If the next cycle is Low, say that cycle is for consolidating what was built, not for expansion. Never call a Low cycle a period of big opportunities.
 
