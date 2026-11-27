@@ -5,13 +5,16 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Loader2, CheckCircle } from 'lucide-react'
 import { GUMIHO_PRICE_USD } from '@/lib/payments/prices'
-import { eventIdFor, fireOnce, ttTrack } from '@/lib/analytics/tiktok'
+import { eventIdFor, fireOnce, ttTrack, ttIdentifySubmission } from '@/lib/analytics/tiktok'
 
 function SuccessContent() {
   const params = useParams()
   const searchParams = useSearchParams()
   const router = useRouter()
   const submissionId = params.id as string
+  useEffect(() => {
+    void ttIdentifySubmission(submissionId)
+  }, [submissionId])
   const questionId = searchParams.get('questionId')
   const token = searchParams.get('token') // PayPal order ID
   // Coupon and bundled (paid with the report) both skip the PayPal capture step.

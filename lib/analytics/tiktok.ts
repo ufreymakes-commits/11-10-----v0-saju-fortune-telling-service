@@ -58,6 +58,11 @@ export async function ttIdentifyEmail(email: string): Promise<void> {
       .map((byte) => byte.toString(16).padStart(2, '0'))
       .join('')
     ttq.identify({ email: hash })
+    try {
+      window.localStorage.setItem('tt_email_sha256', hash)
+    } catch {
+      // storage can be unavailable
+    }
   } catch {
     // tracking must never break the page
   }
@@ -79,6 +84,30 @@ export function fireOnce(key: string, run: () => void): void {
   }
   try {
     run()
+  } catch {
+    // tracking must never break the page
+  }
+}
+
+// Advanced matching for later pages (checkout, purchase). The TikTok in-app browser, Safari and the
+// PayPal return can each be a fresh session, so we ask the server for the hashed email of this
+// submission and identify before any event fires. Same events and event ids as before: this only
+// adds match keys, it does not change what is optimised.
+const identified = new Set<string>()
+
+export async function ttIdentifySubmission(submissionId: string): Promise<void> {
+  try {
+    if (!submissionId || identified.has(submissionId)) return
+    const ttq = getTtq()
+    if (!ttq?.identify || onExcludedPage()) return
+    identified.add(submissionId)
+    const res = await fetch(`/api/analytics/tt-identity?sid=${encodeURIComponent(submissionId)}`)
+    if (!res.ok) return
+    const data = (await res.json()) as { email?: string; external_id?: string }
+    const params: Record<string, string> = {}
+    if (data.email && /^[0-9a-f]{64}$/.test(data.email)) params.email = data.email
+    if (data.external_id && /^[0-9a-f]{64}$/.test(data.external_id)) params.external_id = data.external_id
+    if (Object.keys(params).length) ttq.identify(params)
   } catch {
     // tracking must never break the page
   }

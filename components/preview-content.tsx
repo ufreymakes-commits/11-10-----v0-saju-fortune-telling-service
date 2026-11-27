@@ -15,7 +15,7 @@ import { CardActions } from '@/components/tarot-frame'
 import type { Fact, SajuData } from '@/lib/types'
 import { LockIcon, Share2Icon, CheckIcon } from 'lucide-react'
 import { PRICE_USD } from '@/lib/payments/prices'
-import { eventIdFor, fireOnce, ttTrack } from '@/lib/analytics/tiktok'
+import { eventIdFor, fireOnce, ttTrack, ttIdentifySubmission } from '@/lib/analytics/tiktok'
 
 
 const FREE_FIRST_CARD_ID = 'free-four-pillars-card'
@@ -170,6 +170,9 @@ interface PreviewContentPropsWithCache {
 }
 
 export function PreviewContent({ submissionId, cachedData }: PreviewContentPropsWithCache) {
+  useEffect(() => {
+    void ttIdentifySubmission(submissionId)
+  }, [submissionId])
   const [data, setData] = useState<PreviewData | null>(cachedData || null)
   const [isLoading, setIsLoading] = useState(!cachedData)
   const [error, setError] = useState<string | null>(null)
