@@ -16,7 +16,7 @@ interface PaymentSuccessHandlerProps {
   orderId?: string
 }
 
-type Phase = 'processing' | 'confirming' | 'generating' | 'timeout' | 'error'
+type Phase = 'processing' | 'confirming' | 'generating' | 'timeout' | 'error' | 'not_approved'
 type PaymentState = 'completed' | 'pending' | 'failed' | 'none'
 
 const POLL_INTERVAL_MS = 3000
@@ -109,6 +109,15 @@ export function PaymentSuccessHandler({ submissionId, orderId }: PaymentSuccessH
         }
 
         const data = await res.json().catch(() => ({}))
+        if (data.state === 'action_required' && typeof data.url === 'string' && data.url.startsWith('https://')) {
+          // Finish the card verification at PayPal; PayPal sends the buyer back here afterwards.
+          window.location.href = data.url
+          return
+        }
+        if (res.status === 409 || data.state === 'not_approved') {
+          setPhase('not_approved')
+          return
+        }
         if (res.ok && data.success) {
           trackPaymentCompleted(submissionId)
           setPhase('generating')
@@ -180,6 +189,37 @@ export function PaymentSuccessHandler({ submissionId, orderId }: PaymentSuccessH
         <h2 className="text-2xl font-bold text-gradient mb-2">Payment Successful!</h2>
         <p className="text-foreground/70 mb-4">Thank you for your purchase</p>
         <p className="text-sm text-muted-foreground">Redirecting to your full report...</p>
+      </div>
+    )
+  }
+
+  if (phase === 'not_approved') {
+    return (
+      <div className="text-center max-w-md">
+        <div className="bg-card border border-border rounded-xl p-6 mb-4">
+          <h2 className="text-xl font-semibold mb-2">Your payment didn&apos;t go through</h2>
+          <p className="text-foreground/70 text-sm mb-3">
+            PayPal did not complete this payment, so <span className="font-semibold">you have not been charged</span>.
+          </p>
+          <ul className="text-left text-sm text-foreground/70 space-y-1 list-disc pl-5">
+            <li>Try again and choose &quot;Pay with Debit or Credit Card&quot;, or log in to PayPal.</li>
+            <li>If you opened this from TikTok or Instagram, open the page in Safari or Chrome and try again.</li>
+            <li>If your card asks for a verification code, keep the page open until it finishes.</li>
+          </ul>
+        </div>
+        <Button
+          onClick={() => router.push(`/checkout/${submissionId}`)}
+          className="bg-secondary text-secondary-foreground hover:bg-secondary/90"
+        >
+          Try Again
+        </Button>
+        <p className="text-foreground/50 text-xs mt-3">
+          Still stuck? Reach us on the{' '}
+          <Link href="/policies/customer-service" className="underline">
+            customer service page
+          </Link>
+          .
+        </p>
       </div>
     )
   }

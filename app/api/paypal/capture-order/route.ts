@@ -11,7 +11,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing order ID' }, { status: 400 })
     }
 
-    const result = await settlePayment(orderId, 'browser')
+    let result = await settlePayment(orderId, 'browser')
+
+    // The buyer came back from PayPal but the order is not approved. Give PayPal a moment, then check once more.
+    if (result.state === 'pending' && result.orderStatus && result.orderStatus !== 'APPROVED') {
+      await new Promise((r) => setTimeout(r, 3000))
+      result = await settlePayment(orderId, 'browser')
+    }
 
     if (result.state === 'completed' || result.state === 'duplicate') {
       return NextResponse.json({
@@ -20,6 +26,19 @@ export async function POST(request: Request) {
         duplicate: result.state === 'duplicate',
         submissionId: result.submissionId,
       })
+    }
+
+    if (result.state === 'pending' && result.orderStatus === 'PAYER_ACTION_REQUIRED' && result.payerActionUrl) {
+      // Card needs a verification step at PayPal (e.g. 3-D Secure): send the buyer there to finish.
+      return NextResponse.json({ state: 'action_required', url: result.payerActionUrl, submissionId: result.submissionId })
+    }
+
+    if (result.state === 'pending' && (result.orderStatus === 'CREATED' || result.orderStatus === 'PAYER_ACTION_REQUIRED')) {
+      // Never approved at PayPal, so nothing was charged. Tell the buyer instead of waiting forever.
+      return NextResponse.json(
+        { state: 'not_approved', submissionId: result.submissionId, error: 'PayPal did not complete this payment.' },
+        { status: 409 },
+      )
     }
 
     if (result.state === 'pending') {
