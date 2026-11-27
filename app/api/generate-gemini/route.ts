@@ -378,7 +378,7 @@ This year is 2026 (Just in case).
 [Primary Reference Saju Interpretion logic]
 
 Tone and Style Rules (mandatory!!)
-- Write in natural, modern English like a Tone: Gen-Z (ex. iving, lowkey, main character energy, no cap)
+- Write in natural, modern English. Tone: warm, clear and calm. No slang: never use internet or Gen-Z slang (e.g. "no cap", "lowkey", "it's giving", "main character", "vibe check", "hits different").
 - Warm, grounded, and emotionally intelligent (like a wise friend, not a judge).
 - Avoid heavy jargon. If a technical term is necessary, explain it immediately in plain English.
 - Use "may," "tends to," "can," "often," "in many cases." Avoid absolute statements.
@@ -618,7 +618,7 @@ Recommend ONE sentence describing their external talents and three specific indu
 
 STEP 8. Final Consistency Check:
 - Each sentence must include at least 3 specific modern job/industry examples.
-- Use natural, Gen-Z tone and modern career path as defined in the System Prompt.
+- Use a warm, clear and calm tone with no slang, and modern career paths as defined in the System Prompt.
 - Ensure the two sentences provide a diverse but consistent career map.
 
 --------------------------------------------------
@@ -986,7 +986,7 @@ ${JSON.stringify(allSajuData, null, 2)}
 You have access to a deep psychological analysis that was already completed.
 Your job is to translate this analysis into 9 emotionally resonant, specific facts.
 
-Tone: Gen-Z tone (ex. No cap · It's giving · Hits different · Glow up ·  Main character · Aura · Lowkey · for real · Vibe check), warm, grounded, emotionally intelligent.
+Tone: warm, clear and calm; grounded and emotionally intelligent. No slang: never use internet or Gen-Z slang (e.g. "no cap", "it's giving", "hits different", "glow up", "main character", "lowkey", "vibe check").
 Language: English only.
 `
 

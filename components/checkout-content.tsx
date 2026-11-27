@@ -322,12 +322,8 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
 
       <ReportGuarantee tone="light" className="mt-3" />
 
-      {/* Credit card notice */}
-      <NoPayPalAccountNote className="mt-3" />
-      <p className="text-center text-xs text-muted-foreground mt-1">
-        Choose &apos;Pay with a card&apos; in the PayPal window. If it fails several times, open this page in Safari or
-        Chrome (outside the TikTok app) and try again.
-      </p>
+      {/* Credit card notice (same box style as the guarantee) */}
+      <NoPayPalAccountNote className="mt-2" />
       <div className="flex justify-center mt-2">
         <Image
           src="/images/credit-cards.png"

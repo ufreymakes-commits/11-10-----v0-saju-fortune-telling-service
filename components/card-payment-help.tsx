@@ -3,13 +3,39 @@
 import Link from 'next/link'
 import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
+import { CreditCard } from 'lucide-react'
 
-/** Big, clear line under the PayPal buttons. */
-export function NoPayPalAccountNote({ className = '' }: { className?: string }) {
+const BOX_TONES = {
+  light: {
+    card: 'border-sky-300/80 bg-gradient-to-r from-sky-100 to-indigo-100',
+    icon: 'bg-white text-sky-600 ring-1 ring-sky-200',
+    title: 'text-slate-950',
+    body: 'text-slate-800/80',
+  },
+  dark: {
+    card: 'border-sky-300/30 bg-gradient-to-r from-sky-500/15 to-indigo-500/15',
+    icon: 'bg-sky-400/20 text-sky-200 ring-1 ring-sky-300/30',
+    title: 'text-white',
+    body: 'text-white/70',
+  },
+} as const
+
+/** Same box style as ReportGuarantee: card icon, bold title, short help text. */
+export function NoPayPalAccountNote({ className = '', tone = 'light' }: { className?: string; tone?: 'light' | 'dark' }) {
+  const t = BOX_TONES[tone]
   return (
-    <p className={`text-center text-base font-bold text-foreground ${className}`}>
-      No PayPal account needed. Pay with any card. 💳
-    </p>
+    <div className={`flex w-full items-center gap-3 rounded-xl border px-3.5 py-3 text-left shadow-sm ${t.card} ${className}`}>
+      <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${t.icon}`}>
+        <CreditCard className="h-5 w-5" aria-hidden="true" />
+      </span>
+      <div className="min-w-0">
+        <p className={`text-sm font-semibold leading-tight ${t.title}`}>No PayPal account needed. Pay with any card.</p>
+        <p className={`mt-0.5 text-xs leading-relaxed ${t.body}`}>
+          Choose &apos;Pay with a card&apos; in the PayPal window. If it fails several times, open this page in Safari or
+          Chrome (outside the TikTok app) and try again.
+        </p>
+      </div>
+    </div>
   )
 }
 

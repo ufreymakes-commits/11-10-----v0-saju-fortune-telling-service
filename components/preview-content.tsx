@@ -537,10 +537,6 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           Use Credit Card
         </Button>
         
-        <NoPayPalAccountNote className="mt-3" />
-        <p className="mt-1 text-[11px] text-foreground/60 leading-relaxed">
-          Select <span className="font-bold underline">&apos;Pay with a card&apos;</span> in the PayPal window.
-        </p>
         <CardHelpModal open={cardHelpOpen} onClose={() => setCardHelpOpen(false)} checkoutHref={`/checkout/${submissionId}`} />
         <div className="flex justify-center mt-2">
           <Image
@@ -552,6 +548,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           />
         </div>
         <ReportGuarantee tone="light" className="mx-auto mt-3 max-w-xs" />
+        <NoPayPalAccountNote className="mx-auto mt-2 max-w-xs" />
       </div>
       
       {/* Social Proof */}
