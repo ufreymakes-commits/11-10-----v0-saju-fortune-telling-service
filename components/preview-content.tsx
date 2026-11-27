@@ -550,6 +550,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
             'Jobs where I\'ll shine and build wealth',
             'When and how I\'ll meet my person',
             'My strongest money years',
+            'My strengths, life roadmap, health, lucky elements & more',
           ].map((item) => (
             <li key={item} className="flex gap-2">
               <span aria-hidden>✅</span>
@@ -681,7 +682,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
       {/* How the reading is made */}
       <div className="mt-8 rounded-xl border border-primary/30 bg-card p-5 text-center">
         <p className="text-[11px] font-semibold uppercase tracking-widest text-primary">How your reading is made</p>
-        <h4 className="mt-2 text-base font-bold text-foreground">Not one guru. A system.</h4>
+        <h4 className="mt-2 text-base font-bold leading-snug text-foreground">Not a moody guru. Not a guessing GPT.<br />A refined, certified system.</h4>
         <p className="mt-2 text-xs leading-relaxed text-foreground/80 text-balance">
           Same four pillars as Bazi, read the Korean way: your five elements, turned into clear timing and next steps.
           Every report is analysed by a system built on patterns from 6,000+ readings and the principles of
