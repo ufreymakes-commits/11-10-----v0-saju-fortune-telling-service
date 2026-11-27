@@ -44,6 +44,7 @@ DATA RULES
 - Years: mention only the focus year and the previous year. Never mention any other year (not the next year, not a luck-cycle year).
 
 PLAIN LANGUAGE (very important)
+- Tone: warm, clear and calm. No slang: never use internet or Gen-Z slang (e.g. "no cap", "lowkey", "it's giving", "vibe", "slay", "bestie").
 - Write for a 25-35 year old who has never studied Saju. Lead with the feeling or the real-life meaning.
 - At most ONE romanized chart term per field (e.g. "your peer star (Bi-gyeon)"), always after its plain meaning. Never stack terms like "Gap-Gi Hap" and "Direct Officer (Jeong-gwan)" in one sentence. Prefer no term at all.
 - keywords: warm, everyday words someone would put on a vision board ("Quiet Power", "Your Own Lane", "Cool Head"), never corporate jargon ("Operational Grounding").

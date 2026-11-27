@@ -57,7 +57,7 @@ RULES:
 4. "Conflict Prevention" - Before generating each fact, cross-check against the free 3 facts. If a new insight feels like it contradicts a previous one, pivot the perspective to explain the internal complexity of the Saju (e.g., 'While you show [Fact A] outwardly, your inner self struggles with [Fact B]').
 
 TONE AND STYLE (mandatory):
-- Write in natural, modern English like Gen-Z (lowkey, main character energy, no cap)But, Avoid appearing overly playful or flippant.No Korean or Chinese letters.
+- Write in warm, clear and calm natural English. No slang: never use internet or Gen-Z slang (e.g. "no cap", "lowkey", "it's giving", "main character energy", "vibe", "slay", "bestie"). No Korean or Chinese letters.
 - Warm, grounded, emotionally intelligent (like a wise friend)
 - Avoid heavy jargon - explain technical terms in plain English
 - Use "may," "tends to," "can," "often" - avoid absolute statements
@@ -72,7 +72,7 @@ MANDATORY REQUIREMENTS:
 - Each card's "content" field: Max 220 characters including spaces (the only exception is the Place card in section 08, which may use up to 300 characters)
 - Be compact but meaningful - core insight only
 - No need for title/theme per card
-- Maintain Gen-Z tone, warmth, and practical advice
+- Maintain a warm, clear and calm tone with practical advice. No slang.
 - After the 96 cards, also write one standalone "closingLetter" per the CLOSING LETTER rules below
 
 CONSISTENCY RULES (critical):
@@ -435,7 +435,7 @@ function findProblemCards(
 
 const REPAIR_SYSTEM_PROMPT = `You are an editor fixing specific cards of a Saju (Four Pillars) report written in English.
 Rules for every rewrite:
-- Keep the Gen-Z, warm, practical tone; hedge with "may", "tends to", "can". No guarantees, no fear-based language.
+- Keep the warm, clear, calm and practical tone (no slang); hedge with "may", "tends to", "can". No guarantees, no fear-based language.
 - 100% Latin script: never write Hangul or Hanja, never use ** markdown markers.
 - Quote stem-branch names in single quotes (e.g. 'Gyeong-In'); do not put ten gods or patterns in parentheses; never write strength as a percentage.
 - Use only facts, chart items, years and ages that appear in FINAL FACTS. Never invent a year, star, or relationship.
@@ -1169,7 +1169,7 @@ STYLE OF TERMS (strict, applies to all 96 cards and the closing letter):
 - When naming a luck cycle or Gyo-un-gi, cite the years from finalFacts.luckCycles (yearsActive, changesInYear). If you give ages, use internationalAges only.
 
 OUTPUT FORMAT:
-Key Point: You must embody a Gen-Z persona—playful and witty, yet brutally honest about the facts, ultimately delivering a core message of warmth, comfort, and practical solutions. Avoid appearing overly playful or flippant. Bridge the data with empathy.
+Key Point: Write as a warm, clear and calm wise friend who is honest about the facts, ultimately delivering a core message of warmth, comfort, and practical solutions. No slang: never use internet or Gen-Z slang (e.g. "no cap", "lowkey", "it's giving", "main character energy", "vibe", "slay", "bestie"). Bridge the data with empathy.
 
 IMPORTANT: Use the customer's name ${displayName} ONLY in Card 1, the final card, and the closing letter to make it personal. Do NOT use the name in any other card — except in Card 1, the final card, and the closing letter.
 Example: the first card starts with "Hey ${displayName}," and the last card starts with "${displayName}, remember that..."
@@ -1186,12 +1186,12 @@ Example: the first card starts with "Hey ${displayName}," and the last card star
   - Card 4 "How rare you are": use ONLY the numbers in finalFacts.orb.rarity: elementPattern.text and missingElement.text when they exist. Never say the Day Pillar is "1 in 60" (that is true for everyone). Copy the numbers exactly. Never invent any other statistic. Only describe a number as "rare" when it truly is rare: an element mix of 1 in 50 or rarer, or a missing element shared by 20% of charts or fewer. If a number is common (an element mix more common than 1 in 50, or a missing element in more than 20% of charts), state it neutrally and do NOT call it rare, special or unusual. If finalFacts.orb is null, write a normal analysis card instead.
   - Cards 5-10: normal accurate analysis of the chart.
 
-02. Inner Child Era: Your Early Vibes & Scars 
+02. Inner Child Era: Your Early Years & Scars 
 * Focus: Clashes in the Year Pillar and Month Pillar + Ten Gods.
 * Data: Pillar interactions (Hyung, Chung, Pa, Hae/Core Scars) + Initial Luck Cycles (1st & 2nd Daewoon). Analysis of unconscious voids originating from relationships with parents or siblings. Many people grow up happy, so do not force a "void" if none exists.
 (The appearance of childhood and the unconscious traumas/tendencies formed during that time.)
 
-03. Present Energy: The 'Main Character' Check-in 
+03. Present Energy: Your Check-in Now 
 (The current state of interacting with society as an adult and the psychological state.)
 * Focus: Persona Clash (Day Master vs. Month Branch) and the current Luck Cycle (Daewoon).
 * Data: Elemental Harmony/Conflict between Day Master (Self) vs. Month Branch (Social Environment) + Combination of Heavenly Stems and Earthly Branches in the current Daewoon. Derive the discrepancy between the "Social Mask" and the "Inner Soul."
@@ -1301,7 +1301,7 @@ real comfort or a real fix is what makes a paid report feel worth paying for.
   not a generic "but it's okay!" tack-on.
 - Same format as every other card: ONE paragraph, HARD MAX 220 characters including spaces (count
   before finalizing — if it runs long, cut words, don't add more). Follow the STYLE OF TERMS rules above for any
-  Saju term (plain words, no parentheses around ten gods or patterns), never a raw hanja/Hangul character. Same warm Gen-Z wise-friend voice as the rest of the report — the difference
+  Saju term (plain words, no parentheses around ten gods or patterns), never a raw hanja/Hangul character. Same warm, clear and calm wise-friend voice as the rest of the report — the difference
   from other cards is the precision of the observation, not the tone, and NEVER the presence of a raw
   Chinese/Korean character.
 - Do not contradict anything already stated elsewhere in that section or in the free 3 facts.
