@@ -10,6 +10,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { CheckIcon, ShieldCheckIcon } from 'lucide-react'
 import { PRICE_USD } from '@/lib/payments/prices'
 import { eventIdFor, ttTrack } from '@/lib/analytics/tiktok'
+import { NoPayPalAccountNote } from '@/components/card-payment-help'
 
 interface CheckoutContentProps {
   submissionId: string
@@ -322,8 +323,10 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
       <ReportGuarantee tone="light" className="mt-3" />
 
       {/* Credit card notice */}
-      <p className="text-center text-xs text-muted-foreground mt-3">
-        You can use your credit card — no PayPal account needed
+      <NoPayPalAccountNote className="mt-3" />
+      <p className="text-center text-xs text-muted-foreground mt-1">
+        Choose &apos;Pay with a card&apos; in the PayPal window. If it fails several times, open this page in Safari or
+        Chrome (outside the TikTok app) and try again.
       </p>
       <div className="flex justify-center mt-2">
         <Image

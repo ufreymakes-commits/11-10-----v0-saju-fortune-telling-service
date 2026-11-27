@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ReportGuarantee } from '@/components/report-guarantee'
+import { CardHelpModal, NoPayPalAccountNote } from '@/components/card-payment-help'
 import { TypingUserCount } from '@/components/typing-user-count'
 import { LoadingVideoScreen } from '@/components/loading-video-screen'
 import { Marquee } from '@/components/marquee'
@@ -173,6 +174,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
   const [isLoading, setIsLoading] = useState(!cachedData)
   const [error, setError] = useState<string | null>(null)
   const [limitMessage, setLimitMessage] = useState<string | null>(null)
+  const [cardHelpOpen, setCardHelpOpen] = useState(false)
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0)
 
   const loadingMessages = [
@@ -528,21 +530,18 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
           </Button>
         </Link>
 
-        <Button 
-          onClick={() => {
-            if (typeof window !== 'undefined') {
-              window.alert("You can use your credit card with 'Pay with a card' in the Paypal window. You do not need a Paypal account :)")
-            }
-          }}
+        <Button
+          onClick={() => setCardHelpOpen(true)}
           className="w-full max-w-xs bg-[#FFC439] text-black hover:bg-[#f5b830] h-11 text-sm font-semibold rounded-md shadow-lg mt-2"
         >
           Use Credit Card
         </Button>
         
-        <p className="mt-3 text-[11px] text-foreground/60 leading-relaxed">
-          <span className="font-semibold">Can I use credit card? I have no Paypal</span><br/>
-          : Yes, it&apos;s available. select <span className="font-bold underline">&apos;Pay with a card&apos;</span> in the Paypal window.
+        <NoPayPalAccountNote className="mt-3" />
+        <p className="mt-1 text-[11px] text-foreground/60 leading-relaxed">
+          Select <span className="font-bold underline">&apos;Pay with a card&apos;</span> in the PayPal window.
         </p>
+        <CardHelpModal open={cardHelpOpen} onClose={() => setCardHelpOpen(false)} checkoutHref={`/checkout/${submissionId}`} />
         <div className="flex justify-center mt-2">
           <Image
             src="/images/credit-cards.png"
