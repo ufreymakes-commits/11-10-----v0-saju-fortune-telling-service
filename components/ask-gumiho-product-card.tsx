@@ -1,8 +1,12 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
+import { GumihoLockedModal } from '@/components/gumiho-locked-modal'
 
 export function AskGumihoProductCard({ compact = false }: { compact?: boolean }) {
+  const [lockedOpen, setLockedOpen] = useState(false)
+  const modal = <GumihoLockedModal open={lockedOpen} onClose={() => setLockedOpen(false)} />
   if (compact) {
     return (
       <div className="group">
@@ -24,11 +28,12 @@ export function AskGumihoProductCard({ compact = false }: { compact?: boolean })
             <span className="text-base font-bold text-white">$9.99</span>
           </div>
           <button
-            onClick={() => alert('This product is exclusively available to customers who have purchased the 99 Facts Report. Please purchase the 99 Facts Report first.')}
+            onClick={() => setLockedOpen(true)}
             className="w-full text-center py-1.5 px-2 rounded-lg text-xs font-medium bg-fuchsia-500/20 hover:bg-fuchsia-500/30 text-fuchsia-200 border border-fuchsia-500/30 hover:border-fuchsia-400/50 transition-all"
           >
             Ask Now
           </button>
+          {modal}
         </div>
       </div>
     )
@@ -53,11 +58,12 @@ export function AskGumihoProductCard({ compact = false }: { compact?: boolean })
           <span className="text-lg font-bold text-white">$9.99</span>
         </div>
         <button
-          onClick={() => alert('This product is exclusively available to customers who have purchased the 99 Facts Report. Please purchase the 99 Facts Report first.')}
+          onClick={() => setLockedOpen(true)}
           className="w-full text-center py-2 px-4 rounded-lg text-sm font-medium bg-fuchsia-500/20 hover:bg-fuchsia-500/30 text-fuchsia-200 border border-fuchsia-500/30 hover:border-fuchsia-400/50 transition-all"
         >
           Ask Now
         </button>
+        {modal}
       </div>
     </div>
   )

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ReportGuarantee } from '@/components/report-guarantee'
 import { CardHelpModal, NoPayPalAccountNote } from '@/components/card-payment-help'
+import { GumihoLockedModal } from '@/components/gumiho-locked-modal'
 import { TypingUserCount } from '@/components/typing-user-count'
 import { LoadingVideoScreen } from '@/components/loading-video-screen'
 import { Marquee } from '@/components/marquee'
@@ -178,6 +179,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
   const [error, setError] = useState<string | null>(null)
   const [limitMessage, setLimitMessage] = useState<string | null>(null)
   const [cardHelpOpen, setCardHelpOpen] = useState(false)
+  const [gumihoLockedOpen, setGumihoLockedOpen] = useState(false)
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0)
 
   const loadingMessages = [
@@ -579,6 +581,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
         </Button>
         
         <CardHelpModal open={cardHelpOpen} onClose={() => setCardHelpOpen(false)} checkoutHref={`/checkout/${submissionId}`} />
+        <GumihoLockedModal open={gumihoLockedOpen} onClose={() => setGumihoLockedOpen(false)} ctaHref={`/checkout/${submissionId}`} />
         <div className="flex justify-center mt-2">
           <Image
             src="/images/credit-cards.png"
@@ -708,11 +711,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
               </div>
             </div>
             <button
-              onClick={() => {
-                if (typeof window !== 'undefined') {
-                  window.alert('This product is exclusively available to customers who have purchased the 99 Facts Report. Please purchase the 99 Facts Report first.')
-                }
-              }}
+              onClick={() => setGumihoLockedOpen(true)}
               className="shrink-0 text-center py-2 px-4 rounded-lg text-xs font-semibold bg-fuchsia-500 hover:bg-fuchsia-400 text-white border border-fuchsia-400 transition-all"
             >
               Ask Now (3 mins)

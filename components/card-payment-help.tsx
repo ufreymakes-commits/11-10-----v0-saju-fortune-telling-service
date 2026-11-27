@@ -40,7 +40,7 @@ export function NoPayPalAccountNote({ className = '', tone = 'light' }: { classN
 }
 
 /** In-page popup shown when the buyer taps "Use Credit Card" (replaces the old browser alert). */
-export function CardHelpModal({ open, onClose, checkoutHref }: { open: boolean; onClose: () => void; checkoutHref: string }) {
+export function CardHelpModal({ open, onClose, checkoutHref }: { open: boolean; onClose: () => void; checkoutHref?: string }) {
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
@@ -72,11 +72,17 @@ export function CardHelpModal({ open, onClose, checkoutHref }: { open: boolean; 
           </li>
         </ul>
         <div className="flex flex-col gap-2">
-          <Link href={checkoutHref}>
-            <Button className="h-11 w-full bg-[#FFC439] text-sm font-semibold text-black hover:bg-[#f5b830]">
-              Continue to payment
+          {checkoutHref ? (
+            <Link href={checkoutHref}>
+              <Button className="h-11 w-full bg-[#FFC439] text-sm font-semibold text-black hover:bg-[#f5b830]">
+                Continue to payment
+              </Button>
+            </Link>
+          ) : (
+            <Button onClick={onClose} className="h-11 w-full bg-[#FFC439] text-sm font-semibold text-black hover:bg-[#f5b830]">
+              Got it
             </Button>
-          </Link>
+          )}
           <button type="button" onClick={onClose} className="text-sm text-muted-foreground hover:text-foreground">
             Close
           </button>

@@ -8,6 +8,7 @@ import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { GUMIHO_PRICE_USD } from '@/lib/payments/prices'
+import { CardHelpModal } from '@/components/card-payment-help'
 import { eventIdFor, ttTrack, ttIdentifySubmission } from '@/lib/analytics/tiktok'
 
 export default function AskGumihoCheckoutPage() {
@@ -15,6 +16,7 @@ export default function AskGumihoCheckoutPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const submissionId = params.id as string
+  const [cardHelpOpen, setCardHelpOpen] = useState(false)
   useEffect(() => {
     void ttIdentifySubmission(submissionId)
   }, [submissionId])
@@ -207,15 +209,12 @@ export default function AskGumihoCheckoutPage() {
 
         {/* Use Credit Card Button */}
         <Button 
-          onClick={() => {
-            if (typeof window !== 'undefined') {
-              window.alert("You can use your credit card with 'Pay with a card' in the PayPal window. You do not need a PayPal account :)")
-            }
-          }}
+          onClick={() => setCardHelpOpen(true)}
           className="w-full max-w-xs mx-auto bg-[#FFC439] text-black hover:bg-[#f5b830] h-11 text-sm font-semibold rounded-md shadow-lg mt-3 flex"
         >
           Use Credit Card
         </Button>
+        <CardHelpModal open={cardHelpOpen} onClose={() => setCardHelpOpen(false)} />
 
         {/* Credit Card Logos */}
         <div className="flex justify-center mt-3">
