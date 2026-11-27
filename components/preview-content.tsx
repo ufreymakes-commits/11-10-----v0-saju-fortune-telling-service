@@ -527,8 +527,6 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
         <ul className="mx-auto mb-3 max-w-xs space-y-1.5 text-left text-sm text-foreground/90">
           {[
             'Jobs where I\'ll shine and build wealth',
-            'Stable job: should I stay or quit?',
-            'My best years to change jobs',
             'When and how I\'ll meet my person',
             'My strongest money years',
           ].map((item) => (
@@ -645,7 +643,7 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
         <p className="text-[11px] font-semibold uppercase tracking-widest text-primary">How your reading is made</p>
         <h4 className="mt-2 text-base font-bold text-foreground">Not one guru. A system.</h4>
         <p className="mt-2 text-xs leading-relaxed text-foreground/80 text-balance">
-          Same four pillars as Bazi, read the Korean way: less about your five elements, more about you and your timing.
+          Same four pillars as Bazi, read the Korean way: your five elements, turned into clear timing and next steps.
           Every report is analysed by a system built on patterns from 6,000+ readings and the principles of
           KPEI-certified Myungri Psychology Counselors (Level 1 &amp; 2).
         </p>
