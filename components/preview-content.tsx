@@ -560,9 +560,8 @@ export function PreviewContent({ submissionId, cachedData }: PreviewContentProps
         </ul>
         
         <div className="flex items-center justify-center gap-2 mb-3">
-          <span className="text-xl font-bold text-muted-foreground line-through decoration-red-500 decoration-2">$39.99</span>
-          <span className="text-xl font-bold text-foreground">Only</span>
-          <span className="text-xl font-bold bg-gradient-to-r from-purple-500 to-fuchsia-500 bg-clip-text text-transparent">${PRICE_USD}</span>
+          <span className="text-muted-foreground line-through decoration-red-500 text-xs">$39.99</span>
+          <span className="text-xl font-bold bg-gradient-to-r from-purple-500 to-fuchsia-500 bg-clip-text text-transparent">Now ${PRICE_USD}</span>
           <span className="text-[10px] font-bold bg-red-500 text-white px-1.5 py-0.5 rounded-full">50% HOT</span>
         </div>
         
