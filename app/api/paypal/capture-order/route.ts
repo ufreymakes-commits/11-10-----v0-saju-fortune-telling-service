@@ -36,7 +36,12 @@ export async function POST(request: Request) {
     if (result.state === 'pending' && (result.orderStatus === 'CREATED' || result.orderStatus === 'PAYER_ACTION_REQUIRED')) {
       // Never approved at PayPal, so nothing was charged. Tell the buyer instead of waiting forever.
       return NextResponse.json(
-        { state: 'not_approved', submissionId: result.submissionId, error: 'PayPal did not complete this payment.' },
+        {
+          state: 'not_approved',
+          submissionId: result.submissionId,
+          orderStatus: result.orderStatus,
+          error: 'PayPal did not complete this payment.',
+        },
         { status: 409 },
       )
     }

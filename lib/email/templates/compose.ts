@@ -114,18 +114,29 @@ export function composeEmail(key: CrmTemplateKey, data: TemplateData): ComposedE
 
     case 'B1':
       return {
-        subject: 'You left your report at checkout',
+        // Sent 30 minutes after a checkout that did not finish: a short personal note that helps them pay, not an ad.
+        subject: 'Did your payment go through?',
         category: 'marketing',
         pieces: [
           hi,
+          paragraph(
+            "I noticed you tried to unlock your 99 Facts report, but the payment didn't finish. Don't worry, no money was taken.",
+          ),
+          paragraph(
+            'This sometimes happens inside the TikTok app, or when PayPal turns down a card. Two things usually fix it:',
+          ),
+          bulletList([
+            'Open the link below in Safari or Chrome (not inside TikTok).',
+            "In the PayPal window, choose 'Pay with a card'. You don't need a PayPal account.",
+          ]),
           linkSentence({
-            before: 'Your full 99 Facts report is still waiting for you. ',
-            label: 'Pick up right where you left off',
+            before: '',
+            label: 'Finish your order here',
             after: '.',
             url: checkoutUrl(data.submissionId),
             templateKey: key,
           }),
-          paragraph('If your report ever fails to generate, you get a full refund.'),
+          paragraph("If it still doesn't work, just reply to this email and I'll help you myself."),
         ],
       }
 

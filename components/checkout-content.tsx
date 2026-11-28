@@ -10,7 +10,8 @@ import { Spinner } from '@/components/ui/spinner'
 import { CheckIcon, ShieldCheckIcon } from 'lucide-react'
 import { PRICE_USD } from '@/lib/payments/prices'
 import { eventIdFor, ttTrack, ttIdentifySubmission } from '@/lib/analytics/tiktok'
-import { NoPayPalAccountNote } from '@/components/card-payment-help'
+import { NoPayPalAccountNote, PaymentRetryBanner } from '@/components/card-payment-help'
+import { hadCheckoutAttempt, markCheckoutAttempt, trackCheckoutIssue } from '@/lib/payments/checkout-issue'
 
 // Where the buyer came from (free page PayPal button vs card button) and which browser, for payment logs only.
 function checkoutContext(): { via?: string; browser?: string } {
@@ -42,6 +43,8 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
   const [couponLoading, setCouponLoading] = useState(false)
   const [couponError, setCouponError] = useState<string | null>(null)
   const [includeGumiho, setIncludeGumiho] = useState(false)
+  // True when this buyer already tried to pay in this tab and is back here without a finished payment.
+  const [showRetry, setShowRetry] = useState(false)
   const couponMode = couponCode.trim().length > 0
   const gumihoSelected = includeGumiho && !couponMode
   const totalLabel = gumihoSelected ? '$27.98' : '$19.99'
@@ -86,6 +89,18 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
       const data = await response.json()
 
       if (!response.ok || !data.success) {
+        // Buyer came back to this page from PayPal without paying (cancel link, or PayPal declined the card).
+        trackCheckoutIssue(response.status === 409 ? 'cancel_return' : 'capture_error', {
+          submissionId,
+          orderId: token,
+          orderStatus: typeof data.orderStatus === 'string' ? data.orderStatus : data.state,
+          error: data.error,
+        })
+        if (response.status === 409 || data.state === 'not_approved') {
+          setShowRetry(true)
+          setIsLoading(false)
+          return
+        }
         throw new Error(data.error || 'Payment capture failed')
       }
 
@@ -93,6 +108,7 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
       router.push(`/report/${data.submissionId}/paid`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Payment verification failed')
+      setShowRetry(true)
       setIsLoading(false)
     }
   }
@@ -128,6 +144,7 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
       
       // Store orderId in session for callback
       sessionStorage.setItem('paypal_order_id', data.id)
+      markCheckoutAttempt(submissionId)
       
       // Redirect to PayPal
       if (data.approvalUrl) {
@@ -148,6 +165,7 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Something went wrong'
       console.error('[v0] PayPal checkout error:', errorMsg, err)
+      trackCheckoutIssue('create_error', { submissionId, error: errorMsg })
       setError(errorMsg)
       setIsLoading(false)
     }
@@ -160,6 +178,9 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
     
     if (token) {
       handlePayPalCallback(token)
+    } else if (hadCheckoutAttempt(submissionId)) {
+      // Pressed back from PayPal (no token): they tried and did not finish.
+      setShowRetry(true)
     }
   }, [])
 
@@ -189,6 +210,8 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
           {name}, your complete 99 facts await
         </p>
       </div>
+
+      {showRetry && <PaymentRetryBanner submissionId={submissionId} />}
 
       {/* Order Summary */}
       <div className="bg-card border border-border rounded-xl p-5 mb-6 shadow-lg shadow-primary/5">

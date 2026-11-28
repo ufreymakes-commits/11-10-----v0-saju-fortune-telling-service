@@ -88,7 +88,7 @@ export async function enqueueFreeReportSequence(submissionId: string): Promise<v
 
 const ABANDON_SUPPRESS_WINDOW_MS = 7 * DAY
 
-// B1 (+1h) and B2 (+24h) after a 99 Facts order is created. Only one abandon sequence per contact per week, so
+// B1 (+30 min, payment help) and B2 (+24h) after a 99 Facts order is created. Only one abandon sequence per contact per week, so
 // retrying checkout several times does not send the same reminder repeatedly.
 export async function enqueueCheckoutAbandon(paymentId: string): Promise<void> {
   try {
@@ -115,7 +115,7 @@ export async function enqueueCheckoutAbandon(paymentId: string): Promise<void> {
     const suppressed = Boolean(recent && recent.length > 0)
     const options: EnqueueOptions = suppressed ? { status: 'skipped', skipReason: 'duplicate-abandon' } : {}
 
-    await enqueue(found.contact.id, 'B1', paymentId, plus(base, 1 * HOUR), 'marketing', options)
+    await enqueue(found.contact.id, 'B1', paymentId, plus(base, 30 * 60_000), 'marketing', options)
     await enqueue(found.contact.id, 'B2', paymentId, plus(base, 24 * HOUR), 'marketing', options)
   } catch (e) {
     console.error('[v0] crm: enqueueCheckoutAbandon error:', e instanceof Error ? e.message : 'unknown')
