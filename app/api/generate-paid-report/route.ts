@@ -85,7 +85,7 @@ CONSISTENCY RULES (critical):
 - Lucky-item element: call it "the element behind your lucky directions, colors and numbers". Never call it the "primary lucky element" or "primary Useful God" (the headline Useful God is yongsin.primary). Do not say two different elements are "primary".
 - Dates must be consistent between cards: the same cycle always has the same years and ages everywhere.
 - Money window: when you write about "your strongest money window / wealth flow timing", use exactly FINAL FACTS wealthWindow (years and ages). Never call a Low-scored cycle the strongest money window, and never contradict another card about the same cycle (e.g. one card says a cycle is the strongest money window while another card calls it Low and says protect assets).
-- Look-backs: past-year cards appear ONLY in 04 (career) and 06 (love), and only when the notes' LOOKING BACK gives one. No look-back cards anywhere else.
+- Look-backs: a past-year card appears ONLY in 04 (career), when the notes' LOOKING BACK gives one. Past love years appear only inside the love-peak sentence. No other look-back cards.
 - Years: any specific past or future year you mention must come from FINAL FACTS (reportYear, luckCycles, lovePeak, the yearly list in the saju data). Do not invent favorable/unfavorable years and do not copy years from the free report. Never call a year before the report year "is favorable" in present tense.
 - Repetition: one named chart item (for example Mi-Ja Wonjin, Rob Wealth Fighting Wealth, a cycle name, a twelve star) may appear in at most 3 cards of the whole report. Each of the 6 Truth Bomb cards must use a DIFFERENT chart item from the others.
 - Final card (96): warm, personal, ties to the report year and to one concrete thing from this chart (not a generic "you have inner resources").
@@ -1255,7 +1255,7 @@ Example: the first card starts with "Hey ${displayName}," and the last card star
 06. Love & Endgame: Your Relationship Dynamics 
 (Dating style, attractive energy, and clear hints about the future spouse. If there are specific years to note, capture the characteristics and inform them. For example, appearance, personality, job, synergy, harmony, etc.)
 * Focus: Spouse type and relationship dynamics.
-* LOOK-BACK (only if the notes' LOOKING BACK has love look-backs; if it says none, write no past-year card here): ONE card per love look-back (at most two), each "Around <year>, into early <year+1> (age <age>), there was most likely a turning point in love: a start, a deepening, or an ending", gentle, with the chart reason in plain words. Never more than two look-back cards in this section.
+* PAST LOVE YEARS: do not write separate love look-back cards. Past love years appear only inside the love-peak sentence (Card 7), from finalFacts.lovePeak.pastPeaks.
 * MUST COVER (the free page promises "When and how I'll meet my person"): one analysis card (Cards 1-7) must describe HOW and in what kind of setting this person is most likely to meet a significant partner, as a tendency ("may", "tends to"), grounded in the chart: where the spouse star sits (year pillar: through family, old friends or a wider network; month pillar: through work, study or a shared workplace; hour pillar: later in life, through projects, juniors or a new chapter), plus Yeokma (travel, abroad, moving) or Dohwa (social settings) only if they appear in finalFacts.sinsalByPillar. The WHEN comes only from finalFacts.lovePeak per the rules below. Never invent a name, a job title or an exact place.
 * Data: Visibility of the Spouse Star (Wealth/Authority) via Stems, Branches, or Hidden Stems + Interactions (Hap, Chung, Wonjin) with the Day Branch (Spouse Palace) + Ten Gods of the spouse + the pre-computed \`romanceFacts\` block above and \`finalFacts.lovePeak\` inside FINAL FACTS.
 * Fact Logic: Go beyond simple "Dating (Dohwa/Siksang)" and analyze the stability of "Marriage (Spouse Star/Palace)" and the specific vibe of the partner (Elemental characteristics).
@@ -1301,12 +1301,14 @@ And please, you need to include these 4 sentences for 'everyone'. Because we mas
 
 LOVE PEAK RULE (applies to the teaser sentence above and to Section 06 Card 7):
 finalFacts.lovePeak = { window, peak, upcomingPeak, pastPeaks }.
-- peak = the strongest love-signal year within the next 5 years (or the next 10 if none) (upcomingPeak); if there is none, the strongest past year.
-- If peak.status is "future" or "this year": "Your love luck peaks around {peak.year}." with ONE reason (the first item of its reasonsEn, in plain words), then: "{peak.year} is the year most likely to deepen your bond or bring a big change. If you're already married or settled, it can arrive as a new family member, a precious friend, or even a pet." Say this sentence once only (teaser sentence or Card 7, not both).
-- If peak.status is "past" (nothing strong ahead): "Your love luck peaked around {peak.year}, into early {peak.year+1} (age {peak.age})", then describe what is ahead as a quieter season to build yourself, with no other year.
-- Past high years (pastPeaks) are written ONLY as the love look-back card(s) from the notes' LOOKING BACK, not in this sentence.
+- pastPeaks = up to two past love years, strongest first (a span like 2014-2015 counts as one). upcomingPeak = the strongest year within the next 5 years (or 10 if none).
+- Write it in this order, as one card (Card 7 of section 06; the teaser sentence is the same text):
+  1. Past: "Your love luck peaked around {year} (age {age}): {kindEn}" for each pastPeak, in the order given, as a likely experience (never a certainty).
+  2. Next: "Your love luck peaks next around {upcomingPeak.year}" with ONE reason (the first item of its reasonsEn, in plain words) and the partner's energy.
+  3. Always: "{upcomingPeak.year} is the year most likely to deepen your bond or bring a big change. If you're already married or settled, it can arrive as a new family member, a precious friend, or even a pet."
+- If upcomingPeak is null: after the past part, say it is a quieter season for love to build yourself, and that if they are married or settled it is a time to deepen what they have with family, close friends or a pet. No other year.
 - Years always come from finalFacts.lovePeak. The model must not choose or alter them. Never invent a year. Do not output raw scores.
-- Say "love luck is strongest" / "the chance of a meaningful connection is highest". Never say "you will meet your spouse that year". Never guess the partner's job; describe the partner's energy (calm / bold / witty / steady) from romanceFacts.spouseStarElement and palace.tenGodEn.
+- Say "love luck is strongest" / "the chance of a meaningful connection is highest". Never say "you will meet your spouse that year". Never guess the partner's job.
 - If lovePeak is null, use the most positive-tone year in romanceFacts.yearLuck and one reason from it.
 
 ========================================

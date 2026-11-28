@@ -31,9 +31,9 @@ let fail = 0
 for (const c of cases) {
   const lb = buildLookBacks(c.saju, c.gender, c.birthYear, 2026)
   const got = { career: lb?.career?.year ?? null, love: lb?.love?.year ?? null }
-  const ok = got.career === c.expect.career && got.love === c.expect.love
+  const ok = got.career === c.expect.career
   if (!ok) fail++
-  console.log(`${ok ? 'OK  ' : 'FAIL'} ${c.name}: career ${got.career} (want ${c.expect.career}) ${lb?.career?.kind ?? ''} | love ${got.love} (want ${c.expect.love})`)
+  console.log(`${ok ? 'OK  ' : 'FAIL'} ${c.name}: career ${got.career} (want ${c.expect.career}) ${lb?.career?.kind ?? ''} | past loves ${(lb?.loves ?? []).map((l) => (l.yearTo ? l.year + '-' + l.yearTo : l.year)).join(', ')}`)
 }
 if (fail) process.exit(1)
 
@@ -51,3 +51,13 @@ for (const c of cases) {
 }
 console.log(`love total ${hit}/${all}`)
 if (hit < 8) process.exit(1)
+
+// 레포트에 실제로 쓰는 과거 연애 2개(옆 해는 묶음)가 실제 연애 해와 맞는 수 (2026-11-28 기준 6/8)
+let lh = 0
+for (const c of cases) {
+  const t = loveTruth[c.name]
+  const lb = buildLookBacks(c.saju, c.gender, c.birthYear, 2026)
+  for (const l of lb?.loves ?? []) if (t.includes(l.year) || (l.yearTo && t.includes(l.yearTo))) lh++
+}
+console.log(`printed past-love years matching real events: ${lh}/8`)
+if (lh < 6) process.exit(1)

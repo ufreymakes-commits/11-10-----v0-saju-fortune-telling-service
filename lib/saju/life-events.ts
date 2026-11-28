@@ -215,22 +215,46 @@ const KIND_EN: Record<string, string> = {
   'join-or-promotion': 'joining an organisation or stepping into a bigger role, with pressure attached',
   'school-or-path': 'a big decision about your studies or direction',
 }
-export interface LookBack { year: number; age: number; ganzi: string; score: number; kind?: string; kindEn?: string; reasonsEn: string[] }
+export interface LookBack { year: number; yearTo?: number; age: number; ganzi: string; score: number; kind?: string; kindEn?: string; reasonsEn: string[] }
 export interface LookBacks { career: LookBack | null; love: LookBack | null; loves: LookBack[]; note: string }
+
+// 과거 연애: 18세 이후 2점 이상 중 점수 높은 순 2개. 바로 옆 해(±1)는 같은 시기로 묶어 "2014-2015"처럼 쓴다.
+function pickLovePast(list: YearEvidence[]): Array<YearEvidence & { yearTo?: number }> {
+  const sorted = list.filter((y) => y.age >= 18 && y.score >= 2).sort((a, b) => b.score - a.score || b.year - a.year)
+  const picked: Array<YearEvidence & { yearTo?: number }> = []
+  for (const y of sorted) {
+    if (picked.length >= 2) break
+    const near = picked.find((p) => Math.abs(p.year - y.year) === 1 || (p.yearTo && Math.abs(p.yearTo - y.year) === 1))
+    if (near) {
+      if (!near.yearTo && y.year === near.year + 1) near.yearTo = y.year
+      continue
+    }
+    picked.push({ ...y })
+  }
+  return picked
+}
+// 그 해의 근거로 현상 한 줄 (확정이 아니라 가능성)
+function loveKindEn(y: YearEvidence): string {
+  const r = y.reasonsEn.join(' ')
+  if (/clash/.test(r)) return 'a big shift in a relationship: something began, changed or ended'
+  if (/strongest bonding|combination with your Spouse Palace|harmony group/.test(r)) return 'a strong bond formed or deepened'
+  if (/partner star/.test(r)) return 'someone meaningful came close, or a relationship reached a turning point'
+  return 'your heart opened to someone'
+}
 
 export function pickLookBacks(ev: LifeEvents, reportYear: number): LookBacks {
   const past = (l: YearEvidence[]) => l.filter((y) => y.year < reportYear)
   const best = (l: YearEvidence[]) => [...l].sort((a, b) => b.score - a.score || b.year - a.year)[0] ?? null
   const c = past(ev.career).filter((y) => y.score >= 4)
   const careerPick = best(c.filter((y) => y.age >= 22)) ?? best(c)
-  const loveHigh = [...past(ev.love).filter((y) => y.score >= 7 && y.age >= 18)].sort((a, b) => b.score - a.score || b.year - a.year).slice(0, 2)
+  const loveHigh = pickLovePast(past(ev.love))
   const lovePick = loveHigh[0] ?? null
   const toLB = (y: YearEvidence | null): LookBack | null =>
     y ? { year: y.year, age: y.age, ganzi: y.ganzi, score: y.score, kind: y.kind, kindEn: y.kind ? KIND_EN[y.kind] : undefined, reasonsEn: y.reasonsEn } : null
   return {
     career: toLB(careerPick),
     love: toLB(lovePick),
-    loves: loveHigh.map((y) => toLB(y)!).sort((a, b) => a.year - b.year),
+    loves: loveHigh.map((y) => ({ ...toLB(y)!, yearTo: y.yearTo, kindEn: loveKindEn(y) })),
     note: 'Saju years start around 4 February, so write each year as "around <year>, into early <year+1>".',
   }
 }
@@ -261,14 +285,14 @@ export function buildLovePeakV2(saju: any, gender: 'male' | 'female', reportYear
   const byScore = (a: YearEvidence, b: YearEvidence) => b.score - a.score || a.year - b.year
   const ahead = (n: number) => ev.love.filter((y) => y.year >= reportYear && y.year <= reportYear + n && y.score >= 3).sort(byScore)[0] ?? null
   const future = ahead(LOVE_WINDOW_V2.aheadYears) ?? ahead(LOVE_WINDOW_V2.maxAheadYears)
-  const pastHigh = ev.love.filter((y) => y.year < reportYear && y.age >= 18 && y.score >= 7).sort(byScore).slice(0, 2)
+  const pastHigh = pickLovePast(ev.love.filter((y) => y.year < reportYear))
   const peak = future ?? pastHigh[0] ?? null
   if (!peak) return null
   return {
     window: { fromYear: reportYear, toYear, fromAge: reportYear - birthYear, toAge: toYear - birthYear },
     peak: mk(peak),
     upcomingPeak: mk(future),
-    pastPeaks: pastHigh.map((y) => mk(y)).sort((a: any, b: any) => a.year - b.year),
+    pastPeaks: pastHigh.map((y) => ({ ...mk(y)!, yearTo: y.yearTo, kindEn: loveKindEn(y) })),
     note: 'Evidence score (partner star in the 10-year cycle and the year, Spouse Palace combinations and clashes). Use as "strongest signal in the chart", never as a prediction.',
   }
 }
