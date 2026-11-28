@@ -12,6 +12,18 @@ import { PRICE_USD } from '@/lib/payments/prices'
 import { eventIdFor, ttTrack, ttIdentifySubmission } from '@/lib/analytics/tiktok'
 import { NoPayPalAccountNote } from '@/components/card-payment-help'
 
+// Where the buyer came from (free page PayPal button vs card button) and which browser, for payment logs only.
+function checkoutContext(): { via?: string; browser?: string } {
+  try {
+    const via = new URLSearchParams(window.location.search).get('via') || undefined
+    const ua = navigator.userAgent || ''
+    const browser = /musical_ly|TikTok|Bytedance|trill/i.test(ua) ? 'tiktok-inapp' : /Instagram/i.test(ua) ? 'instagram-inapp' : /FBAN|FBAV/i.test(ua) ? 'facebook-inapp' : /CriOS|Chrome/i.test(ua) ? 'chrome' : /Safari/i.test(ua) ? 'safari' : 'other'
+    return { via: via && /^(paypal|card)$/.test(via) ? via : undefined, browser }
+  } catch {
+    return {}
+  }
+}
+
 interface CheckoutContentProps {
   submissionId: string
   name: string
@@ -94,7 +106,7 @@ export function CheckoutContent({ submissionId, name }: CheckoutContentProps) {
       const response = await fetch('/api/paypal/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ submissionId, includeGumiho: gumihoSelected })
+        body: JSON.stringify({ submissionId, includeGumiho: gumihoSelected, ...checkoutContext() })
       })
       
       const data = await response.json()
