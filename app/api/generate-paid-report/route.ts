@@ -18,9 +18,9 @@ import {
   checkNotes,
   buildCardUserPrompt,
   withRequiredSentences,
-  buildPastNotableYears,
 } from '@/lib/saju/paid-notes'
 import { focusYearFor } from '@/lib/report-year'
+import { buildLookBacks } from '@/lib/saju/life-events'
 
 // Vercel Hobby 플랜 최대 60초
 export const maxDuration = 300
@@ -85,7 +85,7 @@ CONSISTENCY RULES (critical):
 - Lucky-item element: call it "the element behind your lucky directions, colors and numbers". Never call it the "primary lucky element" or "primary Useful God" (the headline Useful God is yongsin.primary). Do not say two different elements are "primary".
 - Dates must be consistent between cards: the same cycle always has the same years and ages everywhere.
 - Money window: when you write about "your strongest money window / wealth flow timing", use exactly FINAL FACTS wealthWindow (years and ages). Never call a Low-scored cycle the strongest money window, and never contradict another card about the same cycle (e.g. one card says a cycle is the strongest money window while another card calls it Low and says protect assets).
-- Look-backs: past-year cards appear ONLY where a section asks for one (one in 04, one in 06, at most one in 02/03). No look-back cards in 05, 07, 08 or 09.
+- Look-backs: past-year cards appear ONLY in 04 (career) and 06 (love), and only when the notes' LOOKING BACK gives one. No look-back cards anywhere else.
 - Years: any specific past or future year you mention must come from FINAL FACTS (reportYear, luckCycles, lovePeak, the yearly list in the saju data). Do not invent favorable/unfavorable years and do not copy years from the free report. Never call a year before the report year "is favorable" in present tense.
 - Repetition: one named chart item (for example Mi-Ja Wonjin, Rob Wealth Fighting Wealth, a cycle name, a twelve star) may appear in at most 3 cards of the whole report. Each of the 6 Truth Bomb cards must use a DIFFERENT chart item from the others.
 - Final card (96): warm, personal, ties to the report year and to one concrete thing from this chart (not a generic "you have inner resources").
@@ -830,6 +830,7 @@ async function runNotesStage(a: {
 }): Promise<NotesStageResult> {
   let inputs: ReturnType<typeof buildGumihoInputs>
   let decadeSummary: unknown
+  let lookBacks: ReturnType<typeof buildLookBacks> = null
   try {
     inputs = buildGumihoInputs({
       sajuForPrompt: a.sajuForPrompt,
@@ -841,6 +842,12 @@ async function runNotesStage(a: {
       birthYear: a.birthYear,
     })
     decadeSummary = stripCjkDeep(buildDecadeSummary(a.sajuData?.decadeFortune, a.finalFacts?.luckCycles, a.reportYear, a.birthYear))
+    try {
+      lookBacks = buildLookBacks(a.sajuData, a.gender, a.birthYear, a.reportYear)
+    } catch (e) {
+      console.error('[v0] lookBacks failed (continuing without):', e)
+      lookBacks = null
+    }
   } catch (e) {
     return { ok: false, reason: `inputs failed: ${e instanceof Error ? e.message : String(e)}` }
   }
@@ -861,12 +868,13 @@ async function runNotesStage(a: {
     freeFacts: freeFactsForPrompt,
     freeInterpretation: stripCjkDeep(a.freeInterpretation),
     guardBlock: buildGuardBlock(inputs.finalFacts),
+    lookBacks,
   })
 
   const checkCtx = {
     allowedYears: new Set<number>([
       ...inputs.allowedYears,
-      ...buildPastNotableYears(a.sajuData?.decadeFortune, a.reportYear, a.birthYear).map((y) => y.year),
+      ...[lookBacks?.career?.year, lookBacks?.love?.year].flatMap((y) => (y ? [y, y + 1] : [])),
     ]),
     strengthGrade: a.finalFacts?.strength?.grade,
     birthYear: a.birthYear,
@@ -1214,18 +1222,16 @@ Example: the first card starts with "Hey ${displayName}," and the last card star
 * Focus: Clashes in the Year Pillar and Month Pillar + Ten Gods.
 * Data: Pillar interactions (Hyung, Chung, Pa, Hae/Core Scars) + Initial Luck Cycles (1st & 2nd Daewoon). Analysis of unconscious voids originating from relationships with parents or siblings. Many people grow up happy, so do not force a "void" if none exists.
 (The appearance of childhood and the unconscious traumas/tendencies formed during that time.)
-* OPTIONAL LOOK-BACK: if the notes' LOOKING BACK has a year from the teens (age 15-19), you may use it here as ONE card, past tense, as a likely experience. Use at most one look-back in sections 02 and 03 combined.
 
 03. Present Energy: Your Check-in Now 
 (The current state of interacting with society as an adult and the psychological state.)
 * Focus: Persona Clash (Day Master vs. Month Branch) and the current Luck Cycle (Daewoon).
-* OPTIONAL LOOK-BACK (only if section 02 did not use one): ONE card on when the current luck cycle began (its first year from finalFacts.luckCycles.current) or a past year from the notes' LOOKING BACK near it: what likely shifted then, and why the years since have felt the way they have. Make it comforting: it explains, it does not blame.
 * Data: Elemental Harmony/Conflict between Day Master (Self) vs. Month Branch (Social Environment) + Combination of Heavenly Stems and Earthly Branches in the current Daewoon. Derive the discrepancy between the "Social Mask" and the "Inner Soul."
 
 04. Career Motion: The Specialist vs. The Visionary 
 (Structural suitability for careers and specific fields where talent explodes. Forecast the previous 10 years and the next 10 years by calculating the Daewoon and specific years.)
 * Focus: Structural suitability and professional categories based on [Step 1-9]. MUST COVER (the free page promises "Jobs where I'll shine and build wealth"): give a wide, concrete map so the reader recognises their own path: name 4-6 specific fields or roles in total, grouped into 2-3 clusters that follow from the chart (e.g. "systems and planning: operations, project management, data", "care and teaching: counselling, education, HR"). Spread them across the cards rather than listing them all in one card. Then say which cluster is the stronger path for building money, consistent with the Money Flow section. You MUST include two distinct aspects: 'Structural Fit' (ideal working conditions/environment) and 'Talent Prominence' (where their natural abilities shine). You must also provide a total of at least two specific career fields as examples. Every sentence must maintain the razor-sharp precision and profound depth of the deep analysis report. 
-* MUST COVER (LOOK-BACK, exactly ONE card): the career look-back from the notes' LOOKING BACK: "Around <year> (age <age>), you most likely ..." in the past tense, as a likely experience with the chart reason. Only that year and age, exactly. Then let the next card connect it to what is coming.
+* LOOK-BACK (only if the notes' LOOKING BACK has a career look-back; if it says none, write no past-year card here): exactly ONE card, "Around <year>, into early <year+1> (age <age>), you most likely ..." in the past tense, as a likely experience with the chart reason in plain words. Only that year and age, exactly. Then let the next card connect it to what is coming.
 * Data: Month Branch Hidden Stems (Base DNA) + Independence Index (A vs. B) + Industrial Elements + Special Stars (Yeokma, Dohwa, etc.).
 * Fact Logic: Prove with data whether "living as a cog in a machine" is soul-crushing or if they must become a "Power Player" within a system.
 * FINAL FACTS rules: Mention a star (Sinsal) only if it appears in \`finalFacts.sinsalByPillar\`; never invent one. Take month-branch support (Deuk-ryeong), the current luck cycle, and the Gyo-un-gi (cycle change) from \`finalFacts.strength.gotMonthSupport\` and \`finalFacts.luckCycles\`; never work them out from age yourself.
@@ -1249,7 +1255,7 @@ Example: the first card starts with "Hey ${displayName}," and the last card star
 06. Love & Endgame: Your Relationship Dynamics 
 (Dating style, attractive energy, and clear hints about the future spouse. If there are specific years to note, capture the characteristics and inform them. For example, appearance, personality, job, synergy, harmony, etc.)
 * Focus: Spouse type and relationship dynamics.
-* MUST COVER (LOOK-BACK, exactly ONE card): the love look-back from the notes' LOOKING BACK (a past romance or relationship year): "Around <year> (age <age>), there was most likely ..." in the past tense, gentle, as a likely experience. If there is no past love year, use the previous lovePeak only if its status is past. Never more than one look-back card in this section.
+* LOOK-BACK (only if the notes' LOOKING BACK has a love look-back; if it says none, write no past-year card here): exactly ONE card, "Around <year>, into early <year+1> (age <age>), there was most likely a turning point in love: a start, a deepening, or an ending", gentle, with the chart reason in plain words. Never more than one look-back card in this section.
 * MUST COVER (the free page promises "When and how I'll meet my person"): one analysis card (Cards 1-7) must describe HOW and in what kind of setting this person is most likely to meet a significant partner, as a tendency ("may", "tends to"), grounded in the chart: where the spouse star sits (year pillar: through family, old friends or a wider network; month pillar: through work, study or a shared workplace; hour pillar: later in life, through projects, juniors or a new chapter), plus Yeokma (travel, abroad, moving) or Dohwa (social settings) only if they appear in finalFacts.sinsalByPillar. The WHEN comes only from finalFacts.lovePeak per the rules below. Never invent a name, a job title or an exact place.
 * Data: Visibility of the Spouse Star (Wealth/Authority) via Stems, Branches, or Hidden Stems + Interactions (Hap, Chung, Wonjin) with the Day Branch (Spouse Palace) + Ten Gods of the spouse + the pre-computed \`romanceFacts\` block above and \`finalFacts.lovePeak\` inside FINAL FACTS.
 * Fact Logic: Go beyond simple "Dating (Dohwa/Siksang)" and analyze the stability of "Marriage (Spouse Star/Palace)" and the specific vibe of the partner (Elemental characteristics).

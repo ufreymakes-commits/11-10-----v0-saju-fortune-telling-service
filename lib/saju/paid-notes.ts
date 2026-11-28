@@ -18,7 +18,7 @@ Write these parts:
 3. THE 3 UNCOMFORTABLE TRUTHS: specific things about how this person gets in their own way and how it lands on other people, each tied to a chart item and grounded in the chart, never in generic psychology. After each, add one plain, compassionate line: what it feels like from the inside and what it protects them from.
 4. BY AREA, 2-3 sentences each, specific (what to do, what to avoid, which structure fits): (a) childhood, family and parents, (b) the present: social mask vs inner self and the current cycle, (c) career and working conditions with at least two concrete fields, (d) money: how it comes, how it leaks, which vehicles suit them, (e) love: spouse palace, partner type, patterns, (f) people around them, (g) environment: Useful God, health and energy tendencies, and the kind of place that suits the Useful God and climate element (for example coastal or waterside when it is Water), with the direction; when the birth country is known, name two real places there and one abroad, (h) the next chapter (current and next cycle only) and the long-held worry this person likely carries.
 5. TIMING: using only the cycles, years and months present in the facts: what the report year, the next 3-5 years and the next cycle change are for, with the concrete traps and windows (clashes, combinations, penalties).
-5b. LOOKING BACK (this is what makes readers say "how did you know?"): from DECADE SUMMARY lookingBack, pick the 3-4 most telling past years (age 15 or older) and for each write 1-2 sentences in the past tense, as a likely experience, not a certainty: "Around 2019 (age 23), there was most likely a big change in work or in a close relationship, because ...". Tie each to its topic (career, romance, relationship, caution) and the chart reason. Mark which ONE is the best career look-back and which ONE is the best love look-back, and if one fits childhood/teens or the start of the current cycle, mark it too. Use only these years and ages, exactly. Be gentle with hard years: name the strain, then what it built in them.
+5b. LOOKING BACK (this is what makes readers say "how did you know?"): use ONLY the LOOK-BACKS block, never other past years. For the career look-back (if not null) write 2 sentences in the past tense, as a likely experience, not a certainty: "Around <year>, into early <year+1> (age <age>), you most likely ..." describing kindEn in this person's terms, with the chart reason from reasonsEn in plain words. For the love look-back (if not null) do the same as "a turning point in love: a start, a deepening, or an ending" (gentle, never naming which). If a look-back is null, write "none" for it. Keep the years and ages exactly.
 6. ONE-PARAGRAPH SUMMARY of the story the whole report should tell, so every section agrees with every other (for example, if partnerships are risky for money, never advise a joint venture elsewhere). State in warm words how this chart succeeds, as a strength, not a rule (for example "she does best when she builds things that are fully hers"), so the reader finishes thinking "I can be happy and successful in my own way".
 Money words: Direct Wealth (Jeongjae) is steady earned income, salary, saving and reliability: never call it windfall, lucky, speculative or gambling money. Windfall, irregular or opportunity money belongs to Indirect Wealth only, and only when Indirect Wealth is in the facts.
 Rules: stay consistent with the free facts and the free interpretation the customer already saw. Use the strength rule and the Useful God order given in the facts. Keep every fact, including uncomfortable ones. No promises; describe tendencies.`
@@ -26,7 +26,7 @@ Rules: stay consistent with the free facts and the free interpretation the custo
 export function buildNotesUserPrompt(a: {
   displayName: string; gender: string; birthDate: string; birthCountry: string; reportYear: number; todayISO: string
   englishChart: unknown; finalFacts: unknown; romanceFacts: unknown; decadeSummary: unknown; monthlyWindows: unknown
-  freeFacts: unknown; freeInterpretation: string; guardBlock?: string
+  freeFacts: unknown; freeInterpretation: string; guardBlock?: string; lookBacks?: unknown
 }) {
   return `${a.guardBlock ? a.guardBlock + '\n\n' : ''}=== CUSTOMER ===
 Name: ${a.displayName}
@@ -47,6 +47,9 @@ ${JSON.stringify(a.romanceFacts, null, 1)}
 === DECADE SUMMARY (scores and notable years) ===
 ${JSON.stringify(a.decadeSummary, null, 1)}
 
+=== LOOK-BACKS (code-computed past years; use only these, exactly) ===
+${JSON.stringify(a.lookBacks ?? { career: null, love: null }, null, 1)}
+
 === NEXT 12 MONTHS ===
 ${JSON.stringify(a.monthlyWindows, null, 1)}
 
@@ -57,23 +60,6 @@ ${JSON.stringify(a.freeFacts, null, 1)}
 ${(a.freeInterpretation || '').slice(0, 2500)}
 
 Write the reading notes now.`
-}
-
-/** Past notable years (age 15+ and before the report year), per topic, for the LOOKING BACK part. */
-export function buildPastNotableYears(decadeFortune: any, reportYear: number, birthYear?: number) {
-  const lists = ['careerYears', 'relationshipYears', 'romanceYears', 'healthYears', 'cautionYears'] as const
-  const out: Array<{ year: number; age: number; topic: string; tone: string }> = []
-  for (const d of decadeFortune?.decades ?? []) {
-    for (const k of lists) {
-      for (const y of d?.[k] ?? []) {
-        const year = Number(y?.year)
-        const age = birthYear ? year - birthYear : Number(y?.age)
-        if (!year || year >= reportYear || !(age >= 15)) continue
-        out.push({ year, age, topic: k.replace('Years', ''), tone: y.polarity })
-      }
-    }
-  }
-  return out.sort((a, b) => a.year - b.year)
 }
 
 /** Compact, English-only view of decadeFortune: years that are flagged per topic. No Korean text. */
@@ -90,7 +76,7 @@ export function buildDecadeSummary(decadeFortune: any, luckCycles: any, reportYe
       lists.map((k) => [k.replace('Years', ''), (d[k] ?? []).filter((y: any) => y.year >= reportYear).map((y: any) => ({ year: y.year, tone: y.polarity }))]).filter(([, v]: any) => v.length),
     ),
   }))
-  return { ahead, lookingBack: buildPastNotableYears(decadeFortune, reportYear, birthYear) }
+  return ahead
 }
 
 /** Checks on the notes before they are used. Returns a list of issues (empty = ok). */
