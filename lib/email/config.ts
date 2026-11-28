@@ -3,8 +3,8 @@ export const CRM_START_AT = '2026-11-18T07:15:00.000Z'
 
 export const CRM_SITE_URL = 'https://my.sajume.com'
 export const CRM_REPLY_TO = 'hello@sajume.com'
-// CRM mail comes from a person so it reads like a note, not an ad. Replies still go to hello@ (CRM_REPLY_TO).
-export const CRM_FROM = 'Yuri from SAJUME <yuri@sajume.com>'
+// CRM mail shows a person's name so it reads like a note, not an ad. Sent from and replied to hello@.
+export const CRM_FROM = 'Yuri from SAJUME <hello@sajume.com>'
 
 // Checkout-help emails go out first and never wait behind the daily marketing cap.
 export const PRIORITY_TEMPLATE_KEYS = ['B1', 'B2']
