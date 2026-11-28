@@ -83,6 +83,8 @@ export async function POST(request: Request) {
       application_context: {
         brand_name: 'Sajume',
         landing_page: 'NO_PREFERENCE',
+        // Digital report: no shipping address step in the PayPal / guest card form.
+        shipping_preference: 'NO_SHIPPING',
         user_action: 'PAY_NOW',
         return_url: `${baseUrl}/compatibility/checkout/${submissionId}/success`,
         cancel_url: `${baseUrl}/compatibility/checkout/${submissionId}${offerQuery}`
