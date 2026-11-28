@@ -10,6 +10,7 @@ import { ReportProgress, useReportGeneration } from '@/components/report-progres
 import { CheckCircleIcon } from 'lucide-react'
 import { PRICE_USD } from '@/lib/payments/prices'
 import { eventIdFor, fireOnce, ttTrack, ttIdentifySubmission } from '@/lib/analytics/tiktok'
+import { trackCheckoutIssue } from '@/lib/payments/checkout-issue'
 
 interface PaymentSuccessHandlerProps {
   submissionId: string
@@ -114,10 +115,17 @@ export function PaymentSuccessHandler({ submissionId, orderId }: PaymentSuccessH
         const data = await res.json().catch(() => ({}))
         if (data.state === 'action_required' && typeof data.url === 'string' && data.url.startsWith('https://')) {
           // Finish the card verification at PayPal; PayPal sends the buyer back here afterwards.
+          trackCheckoutIssue('action_required', { submissionId, orderId, orderStatus: 'PAYER_ACTION_REQUIRED' })
           window.location.href = data.url
           return
         }
         if (res.status === 409 || data.state === 'not_approved') {
+          trackCheckoutIssue('success_return_unpaid', {
+            submissionId,
+            orderId,
+            orderStatus: typeof data.orderStatus === 'string' ? data.orderStatus : null,
+            error: data.error,
+          })
           setPhase('not_approved')
           return
         }
@@ -127,6 +135,7 @@ export function PaymentSuccessHandler({ submissionId, orderId }: PaymentSuccessH
           return
         }
 
+        trackCheckoutIssue('capture_error', { submissionId, orderId, error: data.error ?? `http ${res.status}` })
         setError(data.error || 'We could not confirm this payment.')
         setPhase('error')
       } catch {

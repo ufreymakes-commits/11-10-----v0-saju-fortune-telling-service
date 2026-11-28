@@ -6,6 +6,7 @@ import {
   DISPATCH_BATCH_SIZE,
   DISPATCH_SEND_GAP_MS,
   MAX_SEND_ATTEMPTS,
+  PRIORITY_TEMPLATE_KEYS,
   SENDING_CLAIM_TIMEOUT_MS,
   getDailyMarketingCap,
 } from '@/lib/email/config'
@@ -50,6 +51,7 @@ async function marketingSentLast24h(admin: ReturnType<typeof createAdminClient>)
     .select('id', { count: 'exact', head: true })
     .eq('status', 'sent')
     .eq('category', 'marketing')
+    .not('template_key', 'in', `(${PRIORITY_TEMPLATE_KEYS.join(',')})`)
     .gte('sent_at', since)
   if (error) {
     console.error('[v0] email dispatch: daily cap lookup failed', error.message)
@@ -143,12 +145,30 @@ export async function runEmailDispatch(): Promise<DispatchSummary> {
     const alreadySent = await marketingSentLast24h(admin)
     let marketingRemaining = Math.max(0, cap - alreadySent)
 
+    const nowIso = new Date().toISOString()
+    const priorityKeys = PRIORITY_TEMPLATE_KEYS.filter((key) => registeredTemplateKeys().includes(key))
+    const isPriority = (send: EmailSend) => priorityKeys.includes(send.template_key)
+
+    // Checkout-help mail first, outside the daily cap: it is time-sensitive and only goes to people who tried to pay.
+    const { data: priorityRows, error: priorityError } = await admin
+      .from('email_sends')
+      .select(SEND_COLUMNS)
+      .eq('status', 'scheduled')
+      .lte('scheduled_at', nowIso)
+      .in('template_key', priorityKeys)
+      .order('scheduled_at', { ascending: true })
+      .limit(DISPATCH_BATCH_SIZE)
+    if (priorityError) console.error('[v0] email dispatch: priority query failed', priorityError.message)
+
     let dueQuery = admin
       .from('email_sends')
       .select(SEND_COLUMNS)
       .eq('status', 'scheduled')
-      .lte('scheduled_at', new Date().toISOString())
-      .in('template_key', registeredTemplateKeys())
+      .lte('scheduled_at', nowIso)
+      .in(
+        'template_key',
+        registeredTemplateKeys().filter((key) => !priorityKeys.includes(key)),
+      )
       .order('scheduled_at', { ascending: true })
       .limit(DISPATCH_BATCH_SIZE)
     // When the daily cap is used up, marketing rows stay queued and must not starve transactional ones.
@@ -156,7 +176,7 @@ export async function runEmailDispatch(): Promise<DispatchSummary> {
 
     const { data: dueRows, error: dueError } = await dueQuery
     if (dueError) console.error('[v0] email dispatch: due query failed', dueError.message)
-    const due = (dueRows ?? []) as EmailSend[]
+    const due = [...((priorityRows ?? []) as EmailSend[]), ...((dueRows ?? []) as EmailSend[])]
 
     const contactIds = [...new Set(due.map((row) => row.contact_id))]
     const contactsById = new Map<string, EmailContact>()
@@ -169,7 +189,7 @@ export async function runEmailDispatch(): Promise<DispatchSummary> {
       const contact = contactsById.get(send.contact_id)
       if (!contact) continue
 
-      if (send.category === 'marketing' && marketingRemaining <= 0) {
+      if (send.category === 'marketing' && !isPriority(send) && marketingRemaining <= 0) {
         summary.deferred += 1
         continue
       }
@@ -212,7 +232,7 @@ export async function runEmailDispatch(): Promise<DispatchSummary> {
             error: null,
           })
           summary.sent += 1
-          if (send.category === 'marketing') marketingRemaining -= 1
+          if (send.category === 'marketing' && !isPriority(send)) marketingRemaining -= 1
           await sleep(DISPATCH_SEND_GAP_MS)
         } else if (result.status === 'not-configured') {
           await release({ status: 'scheduled', sent_at: null })

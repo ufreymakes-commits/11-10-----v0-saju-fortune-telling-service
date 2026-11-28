@@ -1,4 +1,4 @@
-import { CRM_REPLY_TO } from '@/lib/email/config'
+import { CRM_FROM, CRM_REPLY_TO } from '@/lib/email/config'
 import { unsubscribeApiUrl } from '@/lib/email/templates/layout'
 
 export type SendEmailResult = 'sent' | 'skipped' | 'failed'
@@ -19,8 +19,8 @@ export async function sendCrmEmail(params: {
   unsubscribeToken: string
 }): Promise<CrmSendResult> {
   const apiKey = process.env.RESEND_API_KEY
-  const from = process.env.EMAIL_FROM
-  if (!apiKey || !from) return { status: 'not-configured' }
+  if (!apiKey || !process.env.EMAIL_FROM) return { status: 'not-configured' }
+  const from = CRM_FROM
 
   const headers: Record<string, string> =
     params.category === 'marketing'
