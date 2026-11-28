@@ -874,7 +874,7 @@ async function runNotesStage(a: {
   const checkCtx = {
     allowedYears: new Set<number>([
       ...inputs.allowedYears,
-      ...[lookBacks?.career?.year, lookBacks?.love?.year].flatMap((y) => (y ? [y, y + 1] : [])),
+      ...[lookBacks?.career?.year, ...(lookBacks?.loves ?? []).map((l) => l.year)].flatMap((y) => (y ? [y, y + 1] : [])),
     ]),
     strengthGrade: a.finalFacts?.strength?.grade,
     birthYear: a.birthYear,
@@ -1255,7 +1255,7 @@ Example: the first card starts with "Hey ${displayName}," and the last card star
 06. Love & Endgame: Your Relationship Dynamics 
 (Dating style, attractive energy, and clear hints about the future spouse. If there are specific years to note, capture the characteristics and inform them. For example, appearance, personality, job, synergy, harmony, etc.)
 * Focus: Spouse type and relationship dynamics.
-* LOOK-BACK (only if the notes' LOOKING BACK has a love look-back; if it says none, write no past-year card here): exactly ONE card, "Around <year>, into early <year+1> (age <age>), there was most likely a turning point in love: a start, a deepening, or an ending", gentle, with the chart reason in plain words. Never more than one look-back card in this section.
+* LOOK-BACK (only if the notes' LOOKING BACK has love look-backs; if it says none, write no past-year card here): ONE card per love look-back (at most two), each "Around <year>, into early <year+1> (age <age>), there was most likely a turning point in love: a start, a deepening, or an ending", gentle, with the chart reason in plain words. Never more than two look-back cards in this section.
 * MUST COVER (the free page promises "When and how I'll meet my person"): one analysis card (Cards 1-7) must describe HOW and in what kind of setting this person is most likely to meet a significant partner, as a tendency ("may", "tends to"), grounded in the chart: where the spouse star sits (year pillar: through family, old friends or a wider network; month pillar: through work, study or a shared workplace; hour pillar: later in life, through projects, juniors or a new chapter), plus Yeokma (travel, abroad, moving) or Dohwa (social settings) only if they appear in finalFacts.sinsalByPillar. The WHEN comes only from finalFacts.lovePeak per the rules below. Never invent a name, a job title or an exact place.
 * Data: Visibility of the Spouse Star (Wealth/Authority) via Stems, Branches, or Hidden Stems + Interactions (Hap, Chung, Wonjin) with the Day Branch (Spouse Palace) + Ten Gods of the spouse + the pre-computed \`romanceFacts\` block above and \`finalFacts.lovePeak\` inside FINAL FACTS.
 * Fact Logic: Go beyond simple "Dating (Dohwa/Siksang)" and analyze the stability of "Marriage (Spouse Star/Palace)" and the specific vibe of the partner (Elemental characteristics).
@@ -1294,20 +1294,19 @@ Example: the first card starts with "Hey ${displayName}," and the last card star
 
 And please, you need to include these 4 sentences for 'everyone'. Because we masked this and showed on the free report page to persuade customers to pay for the paid report. Fill in the blank (*** or ** or *********** this mark), matching to this customer's saju data and context. You can put these sentences anywhere among the 96 cards, considering the context.
 - The main theme of your ${focusYearFor()} is *** . (Write exactly this year, ${focusYearFor()}: it is the year the free page shows. Ground *** in the ${focusYearFor()} year pillar's stem/branch ten gods from the yearly data + the luck cycle active in ${focusYearFor()} in FINAL FACTS.luckCycles. Name ONE opportunity and ONE thing to be careful about.)
-- Your love luck peaks around ${lovePeakTeaserYear}. The reason is [exactly ONE concrete reason]. Your partner tends to feel like [energy type]. (The free page blurs only ${lovePeakTeaserYear}; in the paid report follow the LOVE PEAK RULE below, including the two-year wording when peak.status is "past".)
+- Your love luck peaks around ${lovePeakTeaserYear}. The reason is [exactly ONE concrete reason]. Your partner tends to feel like [energy type]. (The free page blurs only ${lovePeakTeaserYear}; in the paid report follow the LOVE PEAK RULE below, including the married/settled sentence.)
 - The career field where you shine and build wealth is [one field from your Career Motion map]. Your career makes its biggest shift around [FINAL FACTS.careerShiftYear.year], when [why, in work terms: if basis is career-year, the Officer (job, title) or Wealth (money, results) energy arriving that year, as an opening if polarity is favorable or as pressure that pushes a change if polarity is caution; if basis is luck-cycle-change, the move into the next 10-year cycle]. (Use the year exactly; if careerShiftYear is missing, drop the second sentence.)
 - Your strongest money stretch is [finalFacts.wealthWindow years and its score label], and it works best through [how wealth enters per FINAL FACTS]. (Phrase it naturally in your own words, not as a fixed template; the money window and its score label must appear. Give a specific year range and a specific talent.)
 - Wealth-timing sentence: place the strongest money window inside a luck cycle whose score in finalFacts.luckCycles is Medium or High (current or previous). If the next cycle is Low, say that cycle is for consolidating what was built, not for expansion. Never call a Low cycle a period of big opportunities.
 
 LOVE PEAK RULE (applies to the teaser sentence above and to Section 06 Card 7):
-finalFacts.lovePeak = { window, peak, upcomingPeak }.
-- peak = the strongest love-signal year between age 19 and 39. upcomingPeak = the strongest one still ahead.
-- If peak.status is "future" or "this year": write only peak.year, with ONE reason.
-- If peak.status is "past": write both years in the paid report sentence: "Your love luck peaked around {peak.year} (age {peak.age}), and your next strongest window is around {upcomingPeak.year} (age {upcomingPeak.age})." Give ONE reason for each year (the first item of each year's reasonsEn). Write the past year with warmth, as something the customer likely remembers ("a year when something important may have settled into place"), never as a claim about a specific event.
-- Years always come from finalFacts.lovePeak. The model must not choose or alter them. Never invent a year.
-- Each reason is the first item of that year's reasonsEn, in plain language (e.g. "because the year's Direct Officer combines with your Day Master"). Do not list several reasons per year, and do not output raw scores.
+finalFacts.lovePeak = { window, peak, upcomingPeak, pastPeaks }.
+- peak = the strongest love-signal year from this year up to age 45 (upcomingPeak); if there is none, the strongest past year.
+- If peak.status is "future" or "this year": "Your love luck peaks around {peak.year}." with ONE reason (the first item of its reasonsEn, in plain words), then: "If you're already married or settled, {peak.year} is the year most likely to deepen your bond or bring a big change; if it isn't a partner, it can arrive as a new family member, a precious friend, or even a pet." Say this married/settled sentence once only (teaser sentence or Card 7, not both).
+- If peak.status is "past" (nothing strong ahead): "Your love luck peaked around {peak.year}, into early {peak.year+1} (age {peak.age})", then describe what is ahead as a quieter season to build yourself, with no other year.
+- Past high years (pastPeaks) are written ONLY as the love look-back card(s) from the notes' LOOKING BACK, not in this sentence.
+- Years always come from finalFacts.lovePeak. The model must not choose or alter them. Never invent a year. Do not output raw scores.
 - Say "love luck is strongest" / "the chance of a meaningful connection is highest". Never say "you will meet your spouse that year". Never guess the partner's job; describe the partner's energy (calm / bold / witty / steady) from romanceFacts.spouseStarElement and palace.tenGodEn.
-- Add ONE warm sentence, once only (teaser sentence or Card 7, not both): "If it isn't a romantic partner, this can also arrive as a new family member, a precious friend, or even a pet that changes your days."
 - If lovePeak is null, use the most positive-tone year in romanceFacts.yearLuck and one reason from it.
 
 ========================================

@@ -35,4 +35,19 @@ for (const c of cases) {
   if (!ok) fail++
   console.log(`${ok ? 'OK  ' : 'FAIL'} ${c.name}: career ${got.career} (want ${c.expect.career}) ${lb?.career?.kind ?? ''} | love ${got.love} (want ${c.expect.love})`)
 }
-process.exit(fail ? 1 : 0)
+if (fail) process.exit(1)
+
+// 연애 정답지: 실제 연애 사건(만남·깊어짐·결혼·이별). 정답 수 + 1 개의 상위 해 안에 몇 개 들어오는지 (2026-11-28 기준 8/10)
+import { scoreLifeEvents, lifeEventInputFromSaju } from '../lib/saju/life-events'
+const loveTruth: Record<string, number[]> = { 'Yuri 1996 F': [2014, 2023, 2024], 'Min Jung 1995 F': [2023, 2025], 'Yu Jin 1993 F': [2018, 2020], 'Yong Jin 1988 M': [2007, 2019, 2020] }
+let hit = 0, all = 0
+for (const c of cases) {
+  const t = loveTruth[c.name]
+  const ev = scoreLifeEvents(lifeEventInputFromSaju(c.saju, c.gender, c.birthYear, 2025)!)
+  const top = ev.love.filter((y) => y.age >= 18).sort((a, b) => b.score - a.score || b.year - a.year).slice(0, t.length + 1).map((y) => y.year)
+  const h = top.filter((y) => t.includes(y)).length
+  hit += h; all += t.length
+  console.log(`love ${c.name}: ${h}/${t.length} top ${top.join(',')}`)
+}
+console.log(`love total ${hit}/${all}`)
+if (hit < 8) process.exit(1)

@@ -216,19 +216,21 @@ const KIND_EN: Record<string, string> = {
   'school-or-path': 'a big decision about your studies or direction',
 }
 export interface LookBack { year: number; age: number; ganzi: string; score: number; kind?: string; kindEn?: string; reasonsEn: string[] }
-export interface LookBacks { career: LookBack | null; love: LookBack | null; note: string }
+export interface LookBacks { career: LookBack | null; love: LookBack | null; loves: LookBack[]; note: string }
 
 export function pickLookBacks(ev: LifeEvents, reportYear: number): LookBacks {
   const past = (l: YearEvidence[]) => l.filter((y) => y.year < reportYear)
   const best = (l: YearEvidence[]) => [...l].sort((a, b) => b.score - a.score || b.year - a.year)[0] ?? null
   const c = past(ev.career).filter((y) => y.score >= 4)
   const careerPick = best(c.filter((y) => y.age >= 22)) ?? best(c)
-  const lovePick = best(past(ev.love).filter((y) => y.score >= 7 && y.age >= 18))
+  const loveHigh = [...past(ev.love).filter((y) => y.score >= 7 && y.age >= 18)].sort((a, b) => b.score - a.score || b.year - a.year).slice(0, 2)
+  const lovePick = loveHigh[0] ?? null
   const toLB = (y: YearEvidence | null): LookBack | null =>
     y ? { year: y.year, age: y.age, ganzi: y.ganzi, score: y.score, kind: y.kind, kindEn: y.kind ? KIND_EN[y.kind] : undefined, reasonsEn: y.reasonsEn } : null
   return {
     career: toLB(careerPick),
     love: toLB(lovePick),
+    loves: loveHigh.map((y) => toLB(y)!).sort((a, b) => a.year - b.year),
     note: 'Saju years start around 4 February, so write each year as "around <year>, into early <year+1>".',
   }
 }
@@ -238,4 +240,34 @@ export function buildLookBacks(saju: any, gender: 'male' | 'female', birthYear: 
   const input = lifeEventInputFromSaju(saju, gender, birthYear, reportYear - 1)
   if (!input) return null
   return pickLookBacks(scoreLifeEvents(input), reportYear)
+}
+
+// ---------------------------------------------------------------------------------------------
+// 연애운 정점 (유료 레포트 lovePeak 와 무료 페이지 20xx). 4명 정답지 10개 중 8개 적중한 근거 점수(위 love)를 쓴다.
+//  - peak: 올해~45세 중 최고점(3점 이상). 없으면 과거 7점 이상 최고점. 둘 다 없으면 null.
+//  - upcomingPeak: 위 미래 최고점 (없으면 null)
+//  - pastPeaks: 18세 이후 과거 7점 이상 최대 2개 (되돌아보기 카드와 같은 값)
+// 모양은 romance.ts buildLovePeak 와 같게 유지해서 기존 사용처가 그대로 동작한다.
+// ---------------------------------------------------------------------------------------------
+export const LOVE_WINDOW_V2 = { fromAge: 18, toAge: 45 }
+export function buildLovePeakV2(saju: any, gender: 'male' | 'female', reportYear: number, birthYear?: number) {
+  if (!birthYear) return null
+  const toYear = birthYear + LOVE_WINDOW_V2.toAge
+  const input = lifeEventInputFromSaju(saju, gender, birthYear, Math.max(toYear, reportYear))
+  if (!input) return null
+  const ev = scoreLifeEvents(input)
+  const mk = (y: YearEvidence | undefined | null) =>
+    y && { year: y.year, age: y.age, ganziEn: y.ganzi, score: y.score, status: y.year < reportYear ? 'past' : y.year === reportYear ? 'this year' : 'future', reasonsEn: y.reasonsEn.slice(0, 2), cautionsEn: [] as string[] }
+  const byScore = (a: YearEvidence, b: YearEvidence) => b.score - a.score || a.year - b.year
+  const future = ev.love.filter((y) => y.year >= reportYear && y.year <= toYear && y.score >= 3).sort(byScore)[0] ?? null
+  const pastHigh = ev.love.filter((y) => y.year < reportYear && y.age >= 18 && y.score >= 7).sort(byScore).slice(0, 2)
+  const peak = future ?? pastHigh[0] ?? null
+  if (!peak) return null
+  return {
+    window: { fromYear: birthYear + LOVE_WINDOW_V2.fromAge, toYear, fromAge: LOVE_WINDOW_V2.fromAge, toAge: LOVE_WINDOW_V2.toAge },
+    peak: mk(peak),
+    upcomingPeak: mk(future),
+    pastPeaks: pastHigh.map((y) => mk(y)).sort((a: any, b: any) => a.year - b.year),
+    note: 'Evidence score (partner star in the 10-year cycle and the year, Spouse Palace combinations and clashes). Use as "strongest signal in the chart", never as a prediction.',
+  }
 }

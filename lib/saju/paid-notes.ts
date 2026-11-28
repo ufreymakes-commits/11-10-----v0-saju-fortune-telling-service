@@ -18,7 +18,7 @@ Write these parts:
 3. THE 3 UNCOMFORTABLE TRUTHS: specific things about how this person gets in their own way and how it lands on other people, each tied to a chart item and grounded in the chart, never in generic psychology. After each, add one plain, compassionate line: what it feels like from the inside and what it protects them from.
 4. BY AREA, 2-3 sentences each, specific (what to do, what to avoid, which structure fits): (a) childhood, family and parents, (b) the present: social mask vs inner self and the current cycle, (c) career and working conditions with at least two concrete fields, (d) money: how it comes, how it leaks, which vehicles suit them, (e) love: spouse palace, partner type, patterns, (f) people around them, (g) environment: Useful God, health and energy tendencies, and the kind of place that suits the Useful God and climate element (for example coastal or waterside when it is Water), with the direction; when the birth country is known, name two real places there and one abroad, (h) the next chapter (current and next cycle only) and the long-held worry this person likely carries.
 5. TIMING: using only the cycles, years and months present in the facts: what the report year, the next 3-5 years and the next cycle change are for, with the concrete traps and windows (clashes, combinations, penalties).
-5b. LOOKING BACK (this is what makes readers say "how did you know?"): use ONLY the LOOK-BACKS block, never other past years. For the career look-back (if not null) write 2 sentences in the past tense, as a likely experience, not a certainty: "Around <year>, into early <year+1> (age <age>), you most likely ..." describing kindEn in this person's terms, with the chart reason from reasonsEn in plain words. For the love look-back (if not null) do the same as "a turning point in love: a start, a deepening, or an ending" (gentle, never naming which). If a look-back is null, write "none" for it. Keep the years and ages exactly.
+5b. LOOKING BACK (this is what makes readers say "how did you know?"): use ONLY the LOOK-BACKS block, never other past years. For the career look-back (if not null) write 2 sentences in the past tense, as a likely experience, not a certainty: "Around <year>, into early <year+1> (age <age>), you most likely ..." describing kindEn in this person's terms, with the chart reason from reasonsEn in plain words. For each love look-back in "loves" (one or two) do the same as "a turning point in love: a start, a deepening, or an ending" (gentle, never naming which). If a look-back is null, write "none" for it. Keep the years and ages exactly.
 6. ONE-PARAGRAPH SUMMARY of the story the whole report should tell, so every section agrees with every other (for example, if partnerships are risky for money, never advise a joint venture elsewhere). State in warm words how this chart succeeds, as a strength, not a rule (for example "she does best when she builds things that are fully hers"), so the reader finishes thinking "I can be happy and successful in my own way".
 Money words: Direct Wealth (Jeongjae) is steady earned income, salary, saving and reliability: never call it windfall, lucky, speculative or gambling money. Windfall, irregular or opportunity money belongs to Indirect Wealth only, and only when Indirect Wealth is in the facts.
 Rules: stay consistent with the free facts and the free interpretation the customer already saw. Use the strength rule and the Useful God order given in the facts. Keep every fact, including uncomfortable ones. No promises; describe tendencies.`
@@ -102,16 +102,12 @@ export function checkNotes(text: string, ctx: { allowedYears: Set<number>; stren
 export function buildLovePeakSentence(lp: any): string | null {
   if (!lp?.peak) return null
   const first = (y: any) => (y?.reasonsEn?.[0] ? String(y.reasonsEn[0]) : null)
-  const p = lp.peak, u = lp.upcomingPeak
+  const p = lp.peak
   if (p.status === 'future' || p.status === 'this year') {
     const r = first(p)
-    return `Your love luck peaks around ${p.year}. The reason is ${r ? 'that ' + r : '[one concrete reason from the notes]'}. Your partner tends to feel like [a one-phrase energy type from romanceFacts.spouseStarElement and palace.tenGodEn].`
+    return `Your love luck peaks around ${p.year}. The reason is ${r ? 'that ' + r : '[one concrete reason from the notes]'}. Your partner tends to feel like [a one-phrase energy type from romanceFacts.spouseStarElement and palace.tenGodEn]. If you're already married or settled, ${p.year} is the year most likely to deepen your bond or bring a big change; if it isn't a partner, it can arrive as a new family member, a precious friend, or even a pet.`
   }
-  if (u?.year) {
-    const r1 = first(p), r2 = first(u)
-    return `Your love luck peaked around ${p.year} (age ${p.age}), and your next strongest window is around ${u.year} (age ${u.age}). ${r1 ? `The earlier peak: ${r1}. ` : ''}${r2 ? `The next one: ${r2}. ` : ''}Your partner tends to feel like [a one-phrase energy type].`
-  }
-  return `Your love luck peaked around ${p.year} (age ${p.age}).`
+  return `Your love luck peaked around ${p.year}, into early ${p.year + 1} (age ${p.age}). After that, it is a quieter season for love: build yourself first.`
 }
 
 export function buildRequiredSentences(finalFacts: any, reportYear: number) {
