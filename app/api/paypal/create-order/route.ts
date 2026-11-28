@@ -19,7 +19,9 @@ export const maxDuration = 60
 
 export async function POST(request: Request) {
   try {
-    const { submissionId, includeGumiho } = await request.json()
+    const { submissionId, includeGumiho, via, browser } = await request.json()
+    const entryVia = typeof via === 'string' && /^(paypal|card)$/.test(via) ? via : 'direct'
+    const entryBrowser = typeof browser === 'string' && /^[a-z-]{2,20}$/.test(browser) ? browser : 'unknown'
 
     if (!submissionId) {
       return NextResponse.json({ error: 'Missing submission ID' }, { status: 400 })
@@ -154,7 +156,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid response from PayPal' }, { status: 500 })
     }
 
-    console.log('[v0] payments: order created', orderData.id)
+    console.log('[v0] payments: order created', orderData.id, `via=${entryVia} browser=${entryBrowser}`)
+    // Record only (never blocks the order). Ignored if the columns do not exist yet.
+    try {
+      await admin.from('payments').update({ checkout_via: entryVia, checkout_browser: entryBrowser }).eq('paypal_order_id', orderData.id)
+    } catch {
+      // logging only
+    }
     return NextResponse.json({ id: orderData.id, approvalUrl, success: true })
   } catch (error) {
     console.error('[v0] payments: create order error:', error instanceof Error ? error.message : 'unknown')
