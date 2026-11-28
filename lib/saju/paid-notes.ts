@@ -105,7 +105,7 @@ export function buildLovePeakSentence(lp: any): string | null {
   const p = lp.peak
   if (p.status === 'future' || p.status === 'this year') {
     const r = first(p)
-    return `Your love luck peaks around ${p.year}. The reason is ${r ? 'that ' + r : '[one concrete reason from the notes]'}. Your partner tends to feel like [a one-phrase energy type from romanceFacts.spouseStarElement and palace.tenGodEn]. If you're already married or settled, ${p.year} is the year most likely to deepen your bond or bring a big change; if it isn't a partner, it can arrive as a new family member, a precious friend, or even a pet.`
+    return `Your love luck peaks around ${p.year}. The reason is ${r ? 'that ' + r : '[one concrete reason from the notes]'}. Your partner tends to feel like [a one-phrase energy type from romanceFacts.spouseStarElement and palace.tenGodEn]. ${p.year} is the year most likely to deepen your bond or bring a big change. If you're already married or settled, it can arrive as a new family member, a precious friend, or even a pet.`
   }
   return `Your love luck peaked around ${p.year}, into early ${p.year + 1} (age ${p.age}). After that, it is a quieter season for love: build yourself first.`
 }

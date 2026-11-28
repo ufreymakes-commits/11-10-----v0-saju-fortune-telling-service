@@ -1301,8 +1301,8 @@ And please, you need to include these 4 sentences for 'everyone'. Because we mas
 
 LOVE PEAK RULE (applies to the teaser sentence above and to Section 06 Card 7):
 finalFacts.lovePeak = { window, peak, upcomingPeak, pastPeaks }.
-- peak = the strongest love-signal year from this year up to age 45 (upcomingPeak); if there is none, the strongest past year.
-- If peak.status is "future" or "this year": "Your love luck peaks around {peak.year}." with ONE reason (the first item of its reasonsEn, in plain words), then: "If you're already married or settled, {peak.year} is the year most likely to deepen your bond or bring a big change; if it isn't a partner, it can arrive as a new family member, a precious friend, or even a pet." Say this married/settled sentence once only (teaser sentence or Card 7, not both).
+- peak = the strongest love-signal year within the next 5 years (or the next 10 if none) (upcomingPeak); if there is none, the strongest past year.
+- If peak.status is "future" or "this year": "Your love luck peaks around {peak.year}." with ONE reason (the first item of its reasonsEn, in plain words), then: "{peak.year} is the year most likely to deepen your bond or bring a big change. If you're already married or settled, it can arrive as a new family member, a precious friend, or even a pet." Say this sentence once only (teaser sentence or Card 7, not both).
 - If peak.status is "past" (nothing strong ahead): "Your love luck peaked around {peak.year}, into early {peak.year+1} (age {peak.age})", then describe what is ahead as a quieter season to build yourself, with no other year.
 - Past high years (pastPeaks) are written ONLY as the love look-back card(s) from the notes' LOOKING BACK, not in this sentence.
 - Years always come from finalFacts.lovePeak. The model must not choose or alter them. Never invent a year. Do not output raw scores.

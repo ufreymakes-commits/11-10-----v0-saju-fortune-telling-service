@@ -244,27 +244,28 @@ export function buildLookBacks(saju: any, gender: 'male' | 'female', birthYear: 
 
 // ---------------------------------------------------------------------------------------------
 // 연애운 정점 (유료 레포트 lovePeak 와 무료 페이지 20xx). 4명 정답지 10개 중 8개 적중한 근거 점수(위 love)를 쓴다.
-//  - peak: 올해~45세 중 최고점(3점 이상). 없으면 과거 7점 이상 최고점. 둘 다 없으면 null.
+//  - peak: 올해~5년 안 최고점(3점 이상), 없으면 10년 안. 그것도 없으면 과거 7점 이상 최고점. 다 없으면 null.
 //  - upcomingPeak: 위 미래 최고점 (없으면 null)
 //  - pastPeaks: 18세 이후 과거 7점 이상 최대 2개 (되돌아보기 카드와 같은 값)
 // 모양은 romance.ts buildLovePeak 와 같게 유지해서 기존 사용처가 그대로 동작한다.
 // ---------------------------------------------------------------------------------------------
-export const LOVE_WINDOW_V2 = { fromAge: 18, toAge: 45 }
+export const LOVE_WINDOW_V2 = { aheadYears: 5, maxAheadYears: 10 }
 export function buildLovePeakV2(saju: any, gender: 'male' | 'female', reportYear: number, birthYear?: number) {
   if (!birthYear) return null
-  const toYear = birthYear + LOVE_WINDOW_V2.toAge
+  const toYear = reportYear + LOVE_WINDOW_V2.maxAheadYears
   const input = lifeEventInputFromSaju(saju, gender, birthYear, Math.max(toYear, reportYear))
   if (!input) return null
   const ev = scoreLifeEvents(input)
   const mk = (y: YearEvidence | undefined | null) =>
     y && { year: y.year, age: y.age, ganziEn: y.ganzi, score: y.score, status: y.year < reportYear ? 'past' : y.year === reportYear ? 'this year' : 'future', reasonsEn: y.reasonsEn.slice(0, 2), cautionsEn: [] as string[] }
   const byScore = (a: YearEvidence, b: YearEvidence) => b.score - a.score || a.year - b.year
-  const future = ev.love.filter((y) => y.year >= reportYear && y.year <= toYear && y.score >= 3).sort(byScore)[0] ?? null
+  const ahead = (n: number) => ev.love.filter((y) => y.year >= reportYear && y.year <= reportYear + n && y.score >= 3).sort(byScore)[0] ?? null
+  const future = ahead(LOVE_WINDOW_V2.aheadYears) ?? ahead(LOVE_WINDOW_V2.maxAheadYears)
   const pastHigh = ev.love.filter((y) => y.year < reportYear && y.age >= 18 && y.score >= 7).sort(byScore).slice(0, 2)
   const peak = future ?? pastHigh[0] ?? null
   if (!peak) return null
   return {
-    window: { fromYear: birthYear + LOVE_WINDOW_V2.fromAge, toYear, fromAge: LOVE_WINDOW_V2.fromAge, toAge: LOVE_WINDOW_V2.toAge },
+    window: { fromYear: reportYear, toYear, fromAge: reportYear - birthYear, toAge: toYear - birthYear },
     peak: mk(peak),
     upcomingPeak: mk(future),
     pastPeaks: pastHigh.map((y) => mk(y)).sort((a: any, b: any) => a.year - b.year),
