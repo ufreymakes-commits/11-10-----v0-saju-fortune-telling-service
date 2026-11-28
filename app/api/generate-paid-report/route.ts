@@ -20,6 +20,7 @@ import {
   withRequiredSentences,
 } from '@/lib/saju/paid-notes'
 import { focusYearFor } from '@/lib/report-year'
+import { buildLookBacks } from '@/lib/saju/life-events'
 
 // Vercel Hobby 플랜 최대 60초
 export const maxDuration = 300
@@ -84,6 +85,7 @@ CONSISTENCY RULES (critical):
 - Lucky-item element: call it "the element behind your lucky directions, colors and numbers". Never call it the "primary lucky element" or "primary Useful God" (the headline Useful God is yongsin.primary). Do not say two different elements are "primary".
 - Dates must be consistent between cards: the same cycle always has the same years and ages everywhere.
 - Money window: when you write about "your strongest money window / wealth flow timing", use exactly FINAL FACTS wealthWindow (years and ages). Never call a Low-scored cycle the strongest money window, and never contradict another card about the same cycle (e.g. one card says a cycle is the strongest money window while another card calls it Low and says protect assets).
+- Look-backs: a past-year card appears ONLY in 04 (career), when the notes' LOOKING BACK gives one. Past love years appear only inside the love-peak sentence. No other look-back cards.
 - Years: any specific past or future year you mention must come from FINAL FACTS (reportYear, luckCycles, lovePeak, the yearly list in the saju data). Do not invent favorable/unfavorable years and do not copy years from the free report. Never call a year before the report year "is favorable" in present tense.
 - Repetition: one named chart item (for example Mi-Ja Wonjin, Rob Wealth Fighting Wealth, a cycle name, a twelve star) may appear in at most 3 cards of the whole report. Each of the 6 Truth Bomb cards must use a DIFFERENT chart item from the others.
 - Final card (96): warm, personal, ties to the report year and to one concrete thing from this chart (not a generic "you have inner resources").
@@ -828,6 +830,7 @@ async function runNotesStage(a: {
 }): Promise<NotesStageResult> {
   let inputs: ReturnType<typeof buildGumihoInputs>
   let decadeSummary: unknown
+  let lookBacks: ReturnType<typeof buildLookBacks> = null
   try {
     inputs = buildGumihoInputs({
       sajuForPrompt: a.sajuForPrompt,
@@ -838,7 +841,13 @@ async function runNotesStage(a: {
       nowYear: a.reportYear,
       birthYear: a.birthYear,
     })
-    decadeSummary = stripCjkDeep(buildDecadeSummary(a.sajuData?.decadeFortune, a.finalFacts?.luckCycles, a.reportYear))
+    decadeSummary = stripCjkDeep(buildDecadeSummary(a.sajuData?.decadeFortune, a.finalFacts?.luckCycles, a.reportYear, a.birthYear))
+    try {
+      lookBacks = buildLookBacks(a.sajuData, a.gender, a.birthYear, a.reportYear)
+    } catch (e) {
+      console.error('[v0] lookBacks failed (continuing without):', e)
+      lookBacks = null
+    }
   } catch (e) {
     return { ok: false, reason: `inputs failed: ${e instanceof Error ? e.message : String(e)}` }
   }
@@ -859,10 +868,14 @@ async function runNotesStage(a: {
     freeFacts: freeFactsForPrompt,
     freeInterpretation: stripCjkDeep(a.freeInterpretation),
     guardBlock: buildGuardBlock(inputs.finalFacts),
+    lookBacks,
   })
 
   const checkCtx = {
-    allowedYears: new Set<number>(inputs.allowedYears),
+    allowedYears: new Set<number>([
+      ...inputs.allowedYears,
+      ...[lookBacks?.career?.year, ...(lookBacks?.loves ?? []).map((l) => l.year)].flatMap((y) => (y ? [y, y + 1] : [])),
+    ]),
     strengthGrade: a.finalFacts?.strength?.grade,
     birthYear: a.birthYear,
   }
@@ -1218,6 +1231,7 @@ Example: the first card starts with "Hey ${displayName}," and the last card star
 04. Career Motion: The Specialist vs. The Visionary 
 (Structural suitability for careers and specific fields where talent explodes. Forecast the previous 10 years and the next 10 years by calculating the Daewoon and specific years.)
 * Focus: Structural suitability and professional categories based on [Step 1-9]. MUST COVER (the free page promises "Jobs where I'll shine and build wealth"): give a wide, concrete map so the reader recognises their own path: name 4-6 specific fields or roles in total, grouped into 2-3 clusters that follow from the chart (e.g. "systems and planning: operations, project management, data", "care and teaching: counselling, education, HR"). Spread them across the cards rather than listing them all in one card. Then say which cluster is the stronger path for building money, consistent with the Money Flow section. You MUST include two distinct aspects: 'Structural Fit' (ideal working conditions/environment) and 'Talent Prominence' (where their natural abilities shine). You must also provide a total of at least two specific career fields as examples. Every sentence must maintain the razor-sharp precision and profound depth of the deep analysis report. 
+* LOOK-BACK (only if the notes' LOOKING BACK has a career look-back; if it says none, write no past-year card here): exactly ONE card, "Around <year>, into early <year+1> (age <age>), you most likely ..." in the past tense, as a likely experience with the chart reason in plain words. Only that year and age, exactly. Then let the next card connect it to what is coming.
 * Data: Month Branch Hidden Stems (Base DNA) + Independence Index (A vs. B) + Industrial Elements + Special Stars (Yeokma, Dohwa, etc.).
 * Fact Logic: Prove with data whether "living as a cog in a machine" is soul-crushing or if they must become a "Power Player" within a system.
 * FINAL FACTS rules: Mention a star (Sinsal) only if it appears in \`finalFacts.sinsalByPillar\`; never invent one. Take month-branch support (Deuk-ryeong), the current luck cycle, and the Gyo-un-gi (cycle change) from \`finalFacts.strength.gotMonthSupport\` and \`finalFacts.luckCycles\`; never work them out from age yourself.
@@ -1241,6 +1255,7 @@ Example: the first card starts with "Hey ${displayName}," and the last card star
 06. Love & Endgame: Your Relationship Dynamics 
 (Dating style, attractive energy, and clear hints about the future spouse. If there are specific years to note, capture the characteristics and inform them. For example, appearance, personality, job, synergy, harmony, etc.)
 * Focus: Spouse type and relationship dynamics.
+* PAST LOVE YEARS: do not write separate love look-back cards. Past love years appear only inside the love-peak sentence (Card 7), from finalFacts.lovePeak.pastPeaks.
 * MUST COVER (the free page promises "When and how I'll meet my person"): one analysis card (Cards 1-7) must describe HOW and in what kind of setting this person is most likely to meet a significant partner, as a tendency ("may", "tends to"), grounded in the chart: where the spouse star sits (year pillar: through family, old friends or a wider network; month pillar: through work, study or a shared workplace; hour pillar: later in life, through projects, juniors or a new chapter), plus Yeokma (travel, abroad, moving) or Dohwa (social settings) only if they appear in finalFacts.sinsalByPillar. The WHEN comes only from finalFacts.lovePeak per the rules below. Never invent a name, a job title or an exact place.
 * Data: Visibility of the Spouse Star (Wealth/Authority) via Stems, Branches, or Hidden Stems + Interactions (Hap, Chung, Wonjin) with the Day Branch (Spouse Palace) + Ten Gods of the spouse + the pre-computed \`romanceFacts\` block above and \`finalFacts.lovePeak\` inside FINAL FACTS.
 * Fact Logic: Go beyond simple "Dating (Dohwa/Siksang)" and analyze the stability of "Marriage (Spouse Star/Palace)" and the specific vibe of the partner (Elemental characteristics).
@@ -1279,20 +1294,21 @@ Example: the first card starts with "Hey ${displayName}," and the last card star
 
 And please, you need to include these 4 sentences for 'everyone'. Because we masked this and showed on the free report page to persuade customers to pay for the paid report. Fill in the blank (*** or ** or *********** this mark), matching to this customer's saju data and context. You can put these sentences anywhere among the 96 cards, considering the context.
 - The main theme of your ${focusYearFor()} is *** . (Write exactly this year, ${focusYearFor()}: it is the year the free page shows. Ground *** in the ${focusYearFor()} year pillar's stem/branch ten gods from the yearly data + the luck cycle active in ${focusYearFor()} in FINAL FACTS.luckCycles. Name ONE opportunity and ONE thing to be careful about.)
-- Your love luck peaks around ${lovePeakTeaserYear}. The reason is [exactly ONE concrete reason]. Your partner tends to feel like [energy type]. (The free page blurs only ${lovePeakTeaserYear}; in the paid report follow the LOVE PEAK RULE below, including the two-year wording when peak.status is "past".)
+- Your love luck peaks around ${lovePeakTeaserYear}. The reason is [exactly ONE concrete reason]. Your partner tends to feel like [energy type]. (The free page blurs only ${lovePeakTeaserYear}; in the paid report follow the LOVE PEAK RULE below, including the married/settled sentence.)
 - The career field where you shine and build wealth is [one field from your Career Motion map]. Your career makes its biggest shift around [FINAL FACTS.careerShiftYear.year], when [why, in work terms: if basis is career-year, the Officer (job, title) or Wealth (money, results) energy arriving that year, as an opening if polarity is favorable or as pressure that pushes a change if polarity is caution; if basis is luck-cycle-change, the move into the next 10-year cycle]. (Use the year exactly; if careerShiftYear is missing, drop the second sentence.)
 - Your strongest money stretch is [finalFacts.wealthWindow years and its score label], and it works best through [how wealth enters per FINAL FACTS]. (Phrase it naturally in your own words, not as a fixed template; the money window and its score label must appear. Give a specific year range and a specific talent.)
 - Wealth-timing sentence: place the strongest money window inside a luck cycle whose score in finalFacts.luckCycles is Medium or High (current or previous). If the next cycle is Low, say that cycle is for consolidating what was built, not for expansion. Never call a Low cycle a period of big opportunities.
 
 LOVE PEAK RULE (applies to the teaser sentence above and to Section 06 Card 7):
-finalFacts.lovePeak = { window, peak, upcomingPeak }.
-- peak = the strongest love-signal year between age 19 and 39. upcomingPeak = the strongest one still ahead.
-- If peak.status is "future" or "this year": write only peak.year, with ONE reason.
-- If peak.status is "past": write both years in the paid report sentence: "Your love luck peaked around {peak.year} (age {peak.age}), and your next strongest window is around {upcomingPeak.year} (age {upcomingPeak.age})." Give ONE reason for each year (the first item of each year's reasonsEn). Write the past year with warmth, as something the customer likely remembers ("a year when something important may have settled into place"), never as a claim about a specific event.
-- Years always come from finalFacts.lovePeak. The model must not choose or alter them. Never invent a year.
-- Each reason is the first item of that year's reasonsEn, in plain language (e.g. "because the year's Direct Officer combines with your Day Master"). Do not list several reasons per year, and do not output raw scores.
-- Say "love luck is strongest" / "the chance of a meaningful connection is highest". Never say "you will meet your spouse that year". Never guess the partner's job; describe the partner's energy (calm / bold / witty / steady) from romanceFacts.spouseStarElement and palace.tenGodEn.
-- Add ONE warm sentence, once only (teaser sentence or Card 7, not both): "If it isn't a romantic partner, this can also arrive as a new family member, a precious friend, or even a pet that changes your days."
+finalFacts.lovePeak = { window, peak, upcomingPeak, pastPeaks }.
+- pastPeaks = up to two past love years, strongest first (a span like 2014-2015 counts as one). upcomingPeak = the strongest year within the next 5 years (or 10 if none).
+- Write it in this order, as one card (Card 7 of section 06; the teaser sentence is the same text):
+  1. Past: "Your love luck peaked around {year} (age {age}): {kindEn}" for each pastPeak, in the order given, as a likely experience (never a certainty).
+  2. Next: "Your love luck peaks next around {upcomingPeak.year}" with ONE reason (the first item of its reasonsEn, in plain words) and the partner's energy.
+  3. Always: "{upcomingPeak.year} is the year most likely to deepen your bond or bring a big change. If you're already married or settled, it can arrive as a new family member, a precious friend, or even a pet."
+- If upcomingPeak is null: after the past part, say it is a quieter season for love to build yourself, and that if they are married or settled it is a time to deepen what they have with family, close friends or a pet. No other year.
+- Years always come from finalFacts.lovePeak. The model must not choose or alter them. Never invent a year. Do not output raw scores.
+- Say "love luck is strongest" / "the chance of a meaningful connection is highest". Never say "you will meet your spouse that year". Never guess the partner's job.
 - If lovePeak is null, use the most positive-tone year in romanceFacts.yearLuck and one reason from it.
 
 ========================================

@@ -18,6 +18,7 @@ Write these parts:
 3. THE 3 UNCOMFORTABLE TRUTHS: specific things about how this person gets in their own way and how it lands on other people, each tied to a chart item and grounded in the chart, never in generic psychology. After each, add one plain, compassionate line: what it feels like from the inside and what it protects them from.
 4. BY AREA, 2-3 sentences each, specific (what to do, what to avoid, which structure fits): (a) childhood, family and parents, (b) the present: social mask vs inner self and the current cycle, (c) career and working conditions with at least two concrete fields, (d) money: how it comes, how it leaks, which vehicles suit them, (e) love: spouse palace, partner type, patterns, (f) people around them, (g) environment: Useful God, health and energy tendencies, and the kind of place that suits the Useful God and climate element (for example coastal or waterside when it is Water), with the direction; when the birth country is known, name two real places there and one abroad, (h) the next chapter (current and next cycle only) and the long-held worry this person likely carries.
 5. TIMING: using only the cycles, years and months present in the facts: what the report year, the next 3-5 years and the next cycle change are for, with the concrete traps and windows (clashes, combinations, penalties).
+5b. LOOKING BACK (this is what makes readers say "how did you know?"): use ONLY the LOOK-BACKS block, never other past years. For the career look-back (if not null) write 2 sentences in the past tense, as a likely experience, not a certainty: "Around <year>, into early <year+1> (age <age>), you most likely ..." describing kindEn in this person's terms, with the chart reason from reasonsEn in plain words. Love past years are handled by the love-peak sentence (finalFacts.lovePeak.pastPeaks), not here: write "love: see lovePeak". If a look-back is null, write "none" for it. Keep the years and ages exactly.
 6. ONE-PARAGRAPH SUMMARY of the story the whole report should tell, so every section agrees with every other (for example, if partnerships are risky for money, never advise a joint venture elsewhere). State in warm words how this chart succeeds, as a strength, not a rule (for example "she does best when she builds things that are fully hers"), so the reader finishes thinking "I can be happy and successful in my own way".
 Money words: Direct Wealth (Jeongjae) is steady earned income, salary, saving and reliability: never call it windfall, lucky, speculative or gambling money. Windfall, irregular or opportunity money belongs to Indirect Wealth only, and only when Indirect Wealth is in the facts.
 Rules: stay consistent with the free facts and the free interpretation the customer already saw. Use the strength rule and the Useful God order given in the facts. Keep every fact, including uncomfortable ones. No promises; describe tendencies.`
@@ -25,7 +26,7 @@ Rules: stay consistent with the free facts and the free interpretation the custo
 export function buildNotesUserPrompt(a: {
   displayName: string; gender: string; birthDate: string; birthCountry: string; reportYear: number; todayISO: string
   englishChart: unknown; finalFacts: unknown; romanceFacts: unknown; decadeSummary: unknown; monthlyWindows: unknown
-  freeFacts: unknown; freeInterpretation: string; guardBlock?: string
+  freeFacts: unknown; freeInterpretation: string; guardBlock?: string; lookBacks?: unknown
 }) {
   return `${a.guardBlock ? a.guardBlock + '\n\n' : ''}=== CUSTOMER ===
 Name: ${a.displayName}
@@ -46,6 +47,9 @@ ${JSON.stringify(a.romanceFacts, null, 1)}
 === DECADE SUMMARY (scores and notable years) ===
 ${JSON.stringify(a.decadeSummary, null, 1)}
 
+=== LOOK-BACKS (code-computed past years; use only these, exactly) ===
+${JSON.stringify(a.lookBacks ?? { career: null, love: null }, null, 1)}
+
 === NEXT 12 MONTHS ===
 ${JSON.stringify(a.monthlyWindows, null, 1)}
 
@@ -59,12 +63,12 @@ Write the reading notes now.`
 }
 
 /** Compact, English-only view of decadeFortune: years that are flagged per topic. No Korean text. */
-export function buildDecadeSummary(decadeFortune: any, luckCycles: any, reportYear: number) {
+export function buildDecadeSummary(decadeFortune: any, luckCycles: any, reportYear: number, birthYear?: number) {
   const scoreEn: Record<string, string> = { 상: 'High', 중: 'Medium', 하: 'Low' }
   const decades: any[] = decadeFortune?.decades ?? []
   const keep = decades.filter((d) => d.endYear >= reportYear && d.startYear <= reportYear + 12)
   const lists = ['careerYears', 'relationshipYears', 'romanceYears', 'healthYears', 'cautionYears'] as const
-  return keep.map((d) => ({
+  const ahead = keep.map((d) => ({
     score: scoreEn[d.score] ?? d.score,
     yearsApprox: `${d.startYear}-${d.endYear - 1}`,
     note: 'Use luckCycles for the official cycle names, years and ages. The lists below are notable single years.',
@@ -72,6 +76,7 @@ export function buildDecadeSummary(decadeFortune: any, luckCycles: any, reportYe
       lists.map((k) => [k.replace('Years', ''), (d[k] ?? []).filter((y: any) => y.year >= reportYear).map((y: any) => ({ year: y.year, tone: y.polarity }))]).filter(([, v]: any) => v.length),
     ),
   }))
+  return ahead
 }
 
 /** Checks on the notes before they are used. Returns a list of issues (empty = ok). */
@@ -97,16 +102,17 @@ export function checkNotes(text: string, ctx: { allowedYears: Set<number>; stren
 export function buildLovePeakSentence(lp: any): string | null {
   if (!lp?.peak) return null
   const first = (y: any) => (y?.reasonsEn?.[0] ? String(y.reasonsEn[0]) : null)
-  const p = lp.peak, u = lp.upcomingPeak
-  if (p.status === 'future' || p.status === 'this year') {
-    const r = first(p)
-    return `Your love luck peaks around ${p.year}. The reason is ${r ? 'that ' + r : '[one concrete reason from the notes]'}. Your partner tends to feel like [a one-phrase energy type from romanceFacts.spouseStarElement and palace.tenGodEn].`
-  }
+  const span = (y: any) => (y.yearTo ? `${y.year}-${y.yearTo}` : `${y.year}`)
+  const pasts: any[] = (lp.pastPeaks ?? []).slice(0, 2)
+  const pastPart = pasts.length
+    ? `Your love luck peaked around ${pasts.map((y) => `${span(y)} (age ${y.age}: ${y.kindEn ?? 'a turning point in love'})`).join(' and ')}. `
+    : ''
+  const u = lp.upcomingPeak
   if (u?.year) {
-    const r1 = first(p), r2 = first(u)
-    return `Your love luck peaked around ${p.year} (age ${p.age}), and your next strongest window is around ${u.year} (age ${u.age}). ${r1 ? `The earlier peak: ${r1}. ` : ''}${r2 ? `The next one: ${r2}. ` : ''}Your partner tends to feel like [a one-phrase energy type].`
+    const r = first(u)
+    return `${pastPart}Your love luck peaks next around ${u.year}. The reason is ${r ? 'that ' + r : '[one concrete reason from the notes]'}. Your partner tends to feel like [a one-phrase energy type from romanceFacts.spouseStarElement and palace.tenGodEn]. ${u.year} is the year most likely to deepen your bond or bring a big change. If you're already married or settled, it can arrive as a new family member, a precious friend, or even a pet.`
   }
-  return `Your love luck peaked around ${p.year} (age ${p.age}).`
+  return `${pastPart || `Your love luck peaked around ${lp.peak.year}. `}After that, it is a quieter season for love: build yourself first. If you're already married or settled, this is a time to deepen what you have, with family, close friends, or even a pet.`
 }
 
 export function buildRequiredSentences(finalFacts: any, reportYear: number) {
