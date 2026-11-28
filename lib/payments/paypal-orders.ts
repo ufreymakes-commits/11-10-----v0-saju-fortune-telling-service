@@ -139,6 +139,18 @@ function runAfter(task: () => Promise<unknown>) {
   }
 }
 
+// How the buyer paid, from PayPal's payment_source: "card:VISA", "paypal:VERIFIED" (PayPal account),
+// "paypal:UNVERIFIED" (usually a guest paying by card inside the PayPal window), etc.
+export function paymentMethodOf(body: any): string | null {
+  const ps = body?.payment_source
+  if (!ps || typeof ps !== 'object') return null
+  const kind = Object.keys(ps)[0]
+  if (!kind) return null
+  const v = ps[kind] ?? {}
+  const detail = kind === 'card' ? v.brand ?? v.type : kind === 'paypal' ? v.account_status : undefined
+  return detail ? `${kind}:${String(detail)}` : kind
+}
+
 function extractCapture(order: any) {
   const captures: any[] = order?.purchase_units?.[0]?.payments?.captures ?? []
   return captures.find((c) => c?.status === 'COMPLETED') ?? captures[0] ?? null
@@ -293,6 +305,7 @@ export async function settlePayment(orderId: string, source: SettleSource): Prom
   if (order.body?.status === 'VOIDED') return markFailed('order-voided')
 
   let capture = extractCapture(order.body)
+  let sourceBody: any = order.body // the body we read payment_source from (capture response when we capture)
 
   if (!capture) {
     if (order.body?.status === 'APPROVED') {
@@ -301,12 +314,14 @@ export async function settlePayment(orderId: string, source: SettleSource): Prom
 
       if (cap.status >= 200 && cap.status < 300) {
         capture = extractCapture(cap.body)
+        sourceBody = cap.body
       } else {
         const issues = issuesOf(cap.body)
         if (issues.includes('ORDER_ALREADY_CAPTURED') || issues.includes('ORDER_ALREADY_COMPLETED')) {
           const again = await getOrder(orderId, token)
           if (!again || again.status >= 400) return result('pending')
           capture = extractCapture(again.body)
+          sourceBody = again.body
         } else if (issues.includes('INSTRUMENT_DECLINED')) {
           return markFailed('instrument-declined')
         } else if (issues.includes('ORDER_NOT_APPROVED') && ageMs > ORDER_NOT_APPROVED_FAIL_AFTER_MS) {
@@ -323,7 +338,7 @@ export async function settlePayment(orderId: string, source: SettleSource): Prom
       const orderStatus = String(order.body?.status ?? 'UNKNOWN')
       const links: Array<{ rel?: string; href?: string }> = Array.isArray(order.body?.links) ? order.body.links : []
       const payerActionUrl = links.find((l) => l.rel === 'payer-action')?.href
-      if (source === 'browser') log(orderId, source, 'pending', `order-status=${orderStatus}${payerActionUrl ? ' payer-action' : ''}`)
+      if (source === 'browser') log(orderId, source, 'pending', `order-status=${orderStatus}${payerActionUrl ? ' payer-action' : ''} method=${paymentMethodOf(order.body) ?? 'none'}`)
       return { state: 'pending', changed: false, submissionId, orderStatus, payerActionUrl }
     }
   }
@@ -406,7 +421,13 @@ export async function settlePayment(orderId: string, source: SettleSource): Prom
     return result('completed')
   }
 
-  log(orderId, source, 'completed', 'changed=true')
+  const paymentMethod = paymentMethodOf(sourceBody) ?? paymentMethodOf(order.body)
+  log(orderId, source, 'completed', `changed=true method=${paymentMethod ?? 'unknown'}`)
+  // Record only; never affects the payment. Ignored if the column does not exist yet.
+  if (paymentMethod) {
+    const pm = await admin.from('payments').update({ payment_method: paymentMethod }).eq('id', row.id)
+    if (pm.error && !isMissingColumn(pm.error)) console.error(`[v0] payments: payment_method update failed order=${orderId} msg=${pm.error.message}`)
+  }
 
   // A failure here never undoes the paid report; the next settle / report page view repairs it.
   if (row.gumiho_addon) await ensureGumihoEntitlement(orderId, submissionId)
